@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DA-1 Interactive Study Hub 🎓</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  /* ── Theme Variables ── */
+  :root {
+    --background: #0f1117;
+    --card: #1a1d27;
+    --sidebar: #13151f;
+    --foreground: #e8eaf0;
+    --muted-foreground: #8b90a7;
+    --border: #2a2d3e;
+    --primary: #6c63ff;
+    --primary-foreground: #ffffff;
+    --secondary: #252838;
+    --accent: #ff6584;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--background); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Gradient hero text ── */
+  .hero-gradient {
+    background: linear-gradient(135deg, #6c63ff 0%, #ff6584 50%, #ffd166 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Progress Ring ── */
+  .ring-container { position: relative; width: 160px; height: 160px; }
+  .ring-container svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 10; }
+  .ring-progress {
+    fill: none;
+    stroke: url(#ringGrad);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 408.4; /* 2π × 65 */
+    stroke-dashoffset: 408.4;
+    transition: stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1);
+  }
+  .ring-label {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  /* ── Module Cards ── */
+  .module-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+  }
+  .module-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: 16px 0 0 16px;
+  }
+  .module-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,.45);
+    border-color: #3a3d55;
+  }
+
+  /* Border accent colours (cycling) */
+  .border-c1::before { background: #6c63ff; }
+  .border-c2::before { background: #06d6a0; }
+  .border-c3::before { background: #ffd166; }
+  .border-c4::before { background: #ef476f; }
+  .border-c5::before { background: #118ab2; }
+  .border-c6::before { background: #f78c6c; }
+  .border-c7::before { background: #c77dff; }
+  .border-c8::before { background: #4cc9f0; }
+
+  /* badge for module number */
+  .module-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: .15rem .65rem;
+    width: fit-content;
+  }
+
+  /* bullet topics */
+  .topic-list { list-style: none; padding: 0; }
+  .topic-list li {
+    font-size: .82rem;
+    color: var(--muted-foreground);
+    padding: .18rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: .4rem;
+  }
+  .topic-list li::before {
+    content: '›';
+    color: var(--primary);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: .02rem;
+  }
+
+  /* Start button */
+  .start-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .5rem 1.1rem;
+    border-radius: 8px;
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--primary), #9b88ff);
+    color: #fff;
+    transition: opacity .2s, transform .15s;
+    width: fit-content;
+    margin-top: auto;
+  }
+  .start-btn:hover { opacity: .88; transform: scale(1.03); }
+
+  /* ── Formula cards ── */
+  .formula-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+  .formula-display {
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffd166;
+    background: rgba(255,209,102,.08);
+    border-radius: 8px;
+    padding: .45rem .75rem;
+    border-left: 3px solid #ffd166;
+    letter-spacing: .02em;
+  }
+  .formula-desc {
+    font-size: .78rem;
+    color: var(--muted-foreground);
+  }
+
+  /* ── Study Tips collapsible ── */
+  .tips-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--foreground);
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    padding: .85rem 1.2rem;
+    font-size: .95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background .15s;
+  }
+  .tips-toggle:hover { background: var(--secondary); }
+  .tips-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height .4s ease;
+  }
+  .tips-body.open { max-height: 600px; }
+
+  /* Pomodoro tip cards */
+  .tip-card {
+    background: var(--secondary);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    font-size: .85rem;
+    color: var(--muted-foreground);
+    border-left: 3px solid var(--primary);
+  }
+
+  /* ── Section headings ── */
+  .section-label {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-bottom: .75rem;
+  }
+
+  /* ── Shimmer animation on hero sub ── */
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+
+  /* ── Stat chips ── */
+  .stat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: .3rem .85rem;
+    font-size: .78rem;
+    color: var(--muted-foreground);
+    font-weight: 500;
+  }
+
+  /* responsive grid */
+  @media (max-width: 900px) {
+    #module-grid { grid-template-columns: 1fr 1fr !important; }
+  }
+  @media (max-width: 580px) {
+    #module-grid { grid-template-columns: 1fr !important; }
+  }
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     TOP NAV BAR
+══════════════════════════════════════════ -->
+<nav style="
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(15,17,23,.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: .7rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+">
+  <div style="display:flex; align-items:center; gap:.65rem;">
+    <span style="font-size:1.3rem;">🎓</span>
+    <span style="font-weight:700; font-size:.95rem; letter-spacing:.01em;">DA-1 Study Hub</span>
+  </div>
+  <div style="display:flex; gap:.75rem; align-items:center;">
+    <span class="stat-chip">📚 8 Modules</span>
+    <span class="stat-chip">⏱ ~8 hrs total</span>
+    <span class="stat-chip" id="completedChip">✅ 0 / 8 done</span>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<header style="padding: 4rem 2rem 2.5rem; max-width: 1100px; margin: 0 auto; text-align: center;">
+  <div style="font-size:.8rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--primary); margin-bottom:1rem;">
+    ✦ University Data Analytics · Module Series ✦
+  </div>
+  <h1 style="font-size:clamp(2rem,5vw,3.2rem); font-weight:800; line-height:1.15; margin-bottom:1rem;">
+    <span class="hero-gradient">Data Analytics-I</span><br/>
+    Interactive Study Hub 🎓
+  </h1>
+  <p style="font-size:1.05rem; color:var(--muted-foreground); max-width:620px; margin:0 auto 1.5rem;">
+    Your <strong style="color:var(--foreground);">visual, bite-sized</strong> guide to DA-1.
+    Built for humans with short attention spans. 🧠⚡
+  </p>
+  <p style="font-size:.88rem; color:var(--muted-foreground); font-style:italic; margin-bottom:2rem;">
+    "One concept at a time. One card at a time. One ✅ at a time."
+  </p>
+
+  <!-- Stat row -->
+  <div style="display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap; margin-bottom:2.5rem;">
+    <span class="stat-chip">🎯 Card-based learning</span>
+    <span class="stat-chip">🍅 Pomodoro timers built-in</span>
+    <span class="stat-chip">🧩 Interactive visualizations</span>
+    <span class="stat-chip">🏆 Quizzes &amp; active recall</span>
+  </div>
+
+  <!-- Progress ring -->
+  <div style="display:flex; flex-direction:column; align-items:center; gap:.75rem;">
+    <div class="ring-container">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#6c63ff"/>
+            <stop offset="100%" style="stop-color:#ff6584"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="80" cy="80" r="65"/>
+        <circle class="ring-progress" id="ringProgress" cx="80" cy="80" r="65"/>
+      </svg>
+      <div class="ring-label">
+        <div style="font-size:2rem; font-weight:800; color:var(--foreground);" id="ringNum">0</div>
+        <div style="font-size:.72rem; color:var(--muted-foreground); font-weight:600;">of 8 done</div>
+      </div>
+    </div>
+    <p style="font-size:.8rem; color:var(--muted-foreground);">Overall Progress — complete modules to update 🎯</p>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════
+     MODULE GRID
+══════════════════════════════════════════ -->
+<section style="max-width:1100px; margin:0 auto; padding:0 2rem 3rem;">
+  <div class="section-label">📚 Course Modules</div>
+
+  <div id="module-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem;">
+
+    <!-- ── Card 1 ── -->
+    
+    <!-- Research Papers Banner -->
+    <div style="margin:0 0 2rem 0; padding:1.25rem 1.75rem; border-radius:1rem; background:linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15)); border:1px solid #6366f1; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+          <span style="background:#4338ca; color:#fff; font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:99px; text-transform:uppercase;">New · 35 Papers</span>
+          <h3 style="font-size:1.1rem; font-weight:800; color:var(--foreground); margin:0;">📑 Research Papers Interactive Study Suite</h3>
+        </div>
+        <p style="font-size:0.85rem; color:var(--muted-foreground); margin:0;">All 35 assigned research papers &amp; seminal readings broken down into individual interactive apps with algorithm simulators!</p>
+      </div>
+      <a href="../Research_Papers_Study/00_papers_home.html" style="background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:0.85rem; font-weight:700; padding:0.65rem 1.25rem; border-radius:0.75rem; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; box-shadow:0 4px 14px rgba(99,102,241,0.4);">
+        Open Research Papers Hub →
+      </a>
+    </div>
+
+    <div class="module-card border-c1">
+      <div class="module-badge">Module 01 · 🌍</div>
+      <div>
+        <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Introduction to Data Analytics</h2>
+        <span style="font-size:.75rem; color:#6c63ff; font-weight:600;">⏱ ~45 min</span>
+      </div>
+      <ul class="topic-list">
+        <li>DIKW Pyramid — Data → Wisdom</li>
+        <li>KDD Process &amp; its 9 steps</li>
+        <li>Data Mining Functionalities</li>
+        <li>Big Data Landscape &amp; Applications</li>
+      </ul>
+      <a href="01_intro.html" class="start-btn">Start → <span>🚀</span></a>
+    </div>
+
+    <!-- ── Card 2 ── -->
+    <div class="module-card border-c2">
+      <div class="module-badge">Module 02 · 📊</div>
+      <div>
+        <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Data Concepts &amp; Statistics</h2>
+        <span style="font-size:.75rem; color:#06d6a0; font-weight:600;">⏱ ~60 min</span>
+      </div>
+      <ul class="topic-list">
+        <li>Attribute Types (Nominal → Ratio)</li>
+        <li>The 5 Vs of Big Data</li>
+        <li>Central Tendency &amp; Spread</li>
+        <li>Correlation &amp; Data Visualization</li>
+      </ul>
+      <a href="02_data_concepts_stats.html" class="start-btn">Start → <span>🚀</span></a>
+    </div>
+
+    <!-- ── Card 3 ── -->
+    <div class="module-card border-c3">
+      <div class="module-badge">Module 03 · 🧹</div>
+      <div>
+        <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Data Preprocessing</h2>
+        <span style="font-size:.75rem; color:#ffd166; font-weight:600;">⏱ ~60 min</span>
+      </div>
+      <ul class="topic-list">
+        <li>Similarity &amp; Distance Measures</li>
+        <li>Data Cleaning &amp; Missing Values</li>
+        <li>Normalization Techniques</li>
+        <li>PCA &amp; Dimensionality Reduction</li>
+      </ul>
+      <a href="03_preprocessing.html" class="start-btn">Start → <span>🚀</span></a>
+    </div>
+
+    <!-- ── Card 4 ── -->
+    <div class="module-card border-c4">
+      <div class="module-badge">Module 04 · 🏭</div>
+      <div>
+        <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Data Warehousing &amp; OLAP</h2>
+        <span style="font-size:.75rem; color:#ef476f; font-weight:600;">⏱ ~45 min</span>
+      </div>
+      <ul class="topic-list">
+        <li>Star &amp; Snowflake Schema</li>
+        <li>OLAP Operations (Roll-up, Drill-down…)</li>
+        <li>Data Cube Architecture</li>
+        <li>Attribute-Oriented Induction</li>
+      </ul>
+      <a href="04_warehousing_olap.html" class="start-btn">Start → <span>🚀</span></a>
+    </div>
+
+    <!-- ── Card 5 ── -->
+    <div class="module-card border-c5">
+      <div class="module-badge">Module 05 · 🧊</div>
+      <div>
+        <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Data Cube Algorithms</h2>
+        <span style="font-size:.75rem; color:#118ab2; font-weight:600;">⏱ ~50 min</span>
+      </div>
+      <ul class="topic-list">
+        <li>BUC &amp; MultiWay Array Algorithms</li>
+        <li>Apriori-based Pruning</li>
+        <li>Iceberg Cube &amp; min_sup threshold</li>
+        <li>Star-Cubing &amp; Shell Fragment</li>
+      </ul>
+      <a href="05_data_cube_algorithms.html" class="start-btn">Start → <span>🚀</span></a>
+    </div>
+
+    <!-- ── Card 6 ── -->
+    <div class="module-card border-c6">
+      <div class="module-badge">Module 06 · 🛒</div>
+      <div>
+        <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Association Rule Mining</h2>
+        <span style="font-size:.75rem; color:#f78c6c; font-weight:600;">⏱ ~60 min</span>
+      </div>
+      <ul class="topic-list">
+        <li>Support &amp; Confidence Thresholds</li>
+        <li>Apriori Algorithm step-by-step</li>
+        <li>FP-Tree &amp; FP-Growth</li>
+        <li>Lift, Kulczynski &amp; Pattern Evaluation</li>
+      </ul>
+      <a href="06_association_rules.html" class="start-btn">Start → <span>🚀</span></a>
+    </div>
+
+    <!-- ── Card 7 ── -->
+    <div class="module-card border-c7">
+      <div class="module-badge">Module 07 · 🔬</div>
+      <div>
+        <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Advanced Pattern Mining</h2>
+        <span style="font-size:.75rem; color:#c77dff; font-weight:600;">⏱ ~45 min</span>
+      </div>
+      <ul class="topic-list">
+        <li>Coverage &amp; Colossal Patterns</li>
+        <li>Multi-level &amp; Multi-dimensional Rules</li>
+        <li>High-Utility Itemset Mining</li>
+        <li>Constraint-Based Mining</li>
+      </ul>
+      <a href="07_advanced_patterns.html" class="start-btn">Start → <span>🚀</span></a>
+    </div>
+
+    <!-- ── Card 8 ── -->
+    <div class="module-card border-c8">
+      <div class="module-badge">Module 08 · 🏷️</div>
+      <div>
+        <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Classification</h2>
+        <span style="font-size:.75rem; color:#4cc9f0; font-weight:600;">⏱ ~90 min</span>
+      </div>
+      <ul class="topic-list">
+        <li>Decision Trees &amp; Gini/Entropy</li>
+        <li>Naive Bayes &amp; k-NN</li>
+        <li>Logistic Regression Basics</li>
+        <li>Ensemble Methods &amp; Evaluation Metrics</li>
+      </ul>
+      <a href="08_classification.html" class="start-btn">Start → <span>🚀</span></a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     KEY FORMULAS AT A GLANCE
+══════════════════════════════════════════ -->
+<section style="max-width:1100px; margin:0 auto; padding:0 2rem 3rem;">
+  <div class="section-label">⚡ Key Formulas at a Glance</div>
+  <p style="font-size:.85rem; color:var(--muted-foreground); margin-bottom:1.25rem;">
+    The most-tested formulas from the entire course — bookmark this page and revisit before exams.
+  </p>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1rem;">
+
+    <div class="formula-card">
+      <div style="font-size:.78rem; font-weight:700; color:var(--muted-foreground); letter-spacing:.05em; text-transform:uppercase; margin-bottom:.25rem;">📦 Support</div>
+      <div class="formula-display">support(A→B) = P(A∪B)</div>
+      <div class="formula-desc">Fraction of all transactions that contain <em>both</em> A and B. Measures how often the rule appears.</div>
+    </div>
+
+    <div class="formula-card">
+      <div style="font-size:.78rem; font-weight:700; color:var(--muted-foreground); letter-spacing:.05em; text-transform:uppercase; margin-bottom:.25rem;">🎯 Confidence</div>
+      <div class="formula-display">conf(A→B) = P(B|A) = sup(A∪B)/sup(A)</div>
+      <div class="formula-desc">Given A was bought, how likely is B also bought? Measures reliability of the rule.</div>
+    </div>
+
+    <div class="formula-card">
+      <div style="font-size:.78rem; font-weight:700; color:var(--muted-foreground); letter-spacing:.05em; text-transform:uppercase; margin-bottom:.25rem;">🌿 Gini Index</div>
+      <div class="formula-display">Gini = 1 − Σ pᵢ²</div>
+      <div class="formula-desc">Measures impurity in a node. 0 = perfectly pure node. Used in decision tree splits.</div>
+    </div>
+
+    <div class="formula-card">
+      <div style="font-size:.78rem; font-weight:700; color:var(--muted-foreground); letter-spacing:.05em; text-transform:uppercase; margin-bottom:.25rem;">📐 Entropy</div>
+      <div class="formula-display">H = − Σ pᵢ · log₂(pᵢ)</div>
+      <div class="formula-desc">Measures disorder/surprise in a dataset. 0 = all same class. Max when classes are equally likely.</div>
+    </div>
+
+    <div class="formula-card">
+      <div style="font-size:.78rem; font-weight:700; color:var(--muted-foreground); letter-spacing:.05em; text-transform:uppercase; margin-bottom:.25rem;">📏 Euclidean Distance</div>
+      <div class="formula-display">d(p,q) = √( Σ (pᵢ − qᵢ)² )</div>
+      <div class="formula-desc">Straight-line distance between two points in n-dimensional space. Used in k-NN &amp; clustering.</div>
+    </div>
+
+    <div class="formula-card">
+      <div style="font-size:.78rem; font-weight:700; color:var(--muted-foreground); letter-spacing:.05em; text-transform:uppercase; margin-bottom:.25rem;">📈 Lift</div>
+      <div class="formula-display">lift(A→B) = conf(A→B) / sup(B)</div>
+      <div class="formula-desc">lift > 1 → A and B are positively correlated. lift = 1 → independent. lift &lt; 1 → negatively correlated.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     STUDY TIPS (collapsible)
+══════════════════════════════════════════ -->
+<section style="max-width:1100px; margin:0 auto; padding:0 2rem 4rem;">
+  <div class="section-label">🍅 How to Use This Course</div>
+
+  <button class="tips-toggle" id="tipsBtn" onclick="toggleTips()">
+    <span>📖 Study guide + Pomodoro tips — click to expand</span>
+    <span id="tipsArrow" style="transition:transform .3s; display:inline-block;">▼</span>
+  </button>
+
+  <div class="tips-body" id="tipsBody" style="border:1px solid var(--border); border-top:none; border-radius:0 0 10px 10px; padding:0;">
+    <div style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+
+      <div class="tip-card">
+        <strong style="color:var(--foreground);">🍅 The Pomodoro Technique</strong><br/>
+        Each module has a built-in <strong>15-minute Pomodoro timer</strong>. When it rings, take a genuine
+        5-minute break — stand up, stretch, drink water. Your brain consolidates memory during breaks, not during studying.
+      </div>
+
+      <div class="tip-card">
+        <strong style="color:var(--foreground);">🃏 One Card at a Time</strong><br/>
+        Every module is broken into small "cards" of max ~200 words each. Don't skip ahead.
+        The <strong>flip-cards</strong> (active recall) are more valuable than re-reading — always try to answer before flipping.
+      </div>
+
+      <div class="tip-card">
+        <strong style="color:var(--foreground);">🎮 Interact with Visualizations</strong><br/>
+        Each module has at least 2 interactive visualizations. <em>Click, drag, and play</em> with them —
+        the goal is intuition, not memorization. If you understand <em>why</em> a concept works, you can reconstruct any formula.
+      </div>
+
+      <div class="tip-card">
+        <strong style="color:var(--foreground);">📝 End-of-Module Quiz</strong><br/>
+        Each module ends with a 5-question quiz. Score &lt; 3/5 → revisit the weak section.
+        Score 5/5 → you're ready to move on. No cheating — it only hurts you in the exam!
+      </div>
+
+      <div class="tip-card">
+        <strong style="color:var(--foreground);">📅 Suggested Study Order</strong><br/>
+        01 → 02 → 03 → 04 → 05 → 06 → 07 → 08. Each module builds on the previous.
+        Module 08 (Classification) is the longest — schedule it when you have 90 uninterrupted minutes.
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer style="
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 2rem;
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: .78rem;
+">
+  Built with ❤️ for DA-1 students · Interactive Study Suite · 2025
+  <br/>
+  <span style="font-size:.72rem; opacity:.6;">Open any module above to start learning. Good luck! 🍀</span>
+</footer>
+
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+/* ── Progress ring animation on load ── */
+(function() {
+  const TOTAL = 8;
+  const completed = parseInt(localStorage.getItem('da1_completed') || '0');
+  const circumference = 2 * Math.PI * 65; // 408.407
+  const ring = document.getElementById('ringProgress');
+  const label = document.getElementById('ringNum');
+  const chip  = document.getElementById('completedChip');
+
+  // update chip
+  chip.textContent = `✅ ${completed} / ${TOTAL} done`;
+  label.textContent = completed;
+
+  // animate ring after a short delay
+  setTimeout(() => {
+    const offset = circumference - (completed / TOTAL) * circumference;
+    ring.style.strokeDashoffset = offset;
+  }, 300);
+})();
+
+/* ── Study Tips toggle ── */
+function toggleTips() {
+  const body  = document.getElementById('tipsBody');
+  const arrow = document.getElementById('tipsArrow');
+  const isOpen = body.classList.toggle('open');
+  arrow.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+/* ── Mark module complete utility (called by individual module pages) ──
+   Stored in localStorage so this home page can read it.
+   Individual module pages can call: window.opener?.da1_markDone?.() or use localStorage directly.
+── */
+window.da1_updateProgress = function() {
+  const completed = parseInt(localStorage.getItem('da1_completed') || '0');
+  document.getElementById('ringNum').textContent = completed;
+  document.getElementById('completedChip').textContent = `✅ ${completed} / 8 done`;
+  const circumference = 2 * Math.PI * 65;
+  const offset = circumference - (completed / 8) * circumference;
+  document.getElementById('ringProgress').style.strokeDashoffset = offset;
+};
+
+/* ── Subtle card hover glow effect ── */
+document.querySelectorAll('.module-card').forEach((card, i) => {
+  const colors = ['#6c63ff','#06d6a0','#ffd166','#ef476f','#118ab2','#f78c6c','#c77dff','#4cc9f0'];
+  card.addEventListener('mouseenter', () => {
+    card.style.boxShadow = `0 8px 32px ${colors[i % colors.length]}28`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.boxShadow = '0 12px 40px rgba(0,0,0,.45)';
+  });
+});
+</script>
+
+</body>
+</html>

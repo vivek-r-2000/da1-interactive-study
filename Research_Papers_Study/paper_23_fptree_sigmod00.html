@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mining Frequent Patterns without Candidate Generation — Visual Tutorial</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #090d16;
+    --card: #131b2e;
+    --card-hover: #1a253e;
+    --sidebar: #090d16;
+    --foreground: #f8fafc;
+    --muted-foreground: #94a3b8;
+    --border: #22304d;
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --accent: #8b5cf6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  .interactive-box {
+    background: #0d1527;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+  }
+  .step-node.active {
+    background: rgba(99, 102, 241, 0.25);
+    border-color: var(--primary);
+    color: #fff;
+  }
+  .math-def {
+    background: #0a101f;
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+  .quiz-btn.correct {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: #10b981 !important;
+    color: #34d399 !important;
+  }
+  .quiz-btn.wrong {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: #ef4444 !important;
+    color: #f87171 !important;
+  }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (RESEARCH PAPERS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  body {
+    padding: 0.75rem 0.5rem !important;
+  }
+  header.sticky {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 1.25rem !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  header.sticky h1 {
+    font-size: 1.2rem !important;
+    line-height: 1.3 !important;
+  }
+  .grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5 {
+    grid-template-columns: 1fr !important;
+  }
+  .interactive-box {
+    padding: 1rem !important;
+    border-radius: 0.75rem !important;
+  }
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  .quiz-btn, button {
+    min-height: 42px !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body class="p-4 md:p-8 max-w-6xl mx-auto">
+
+  <!-- Sticky Navigation Header -->
+  <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md pb-4 pt-2 border-b border-[var(--border)] mb-8 flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-3">
+        <a href="00_papers_home.html" class="text-xs font-bold text-indigo-400 bg-indigo-950/60 hover:bg-indigo-900/60 px-3 py-1.5 rounded-lg border border-indigo-800/60 transition-all flex items-center gap-1">
+          ← Research Hub
+        </a>
+        <span class="text-xs text-[var(--muted-foreground)]">| In-Depth Tutorial</span>
+      </div>
+      <h1 class="text-xl md:text-2xl font-black text-white mt-2 leading-tight">Mining Frequent Patterns without Candidate Generation</h1>
+      <p class="text-xs text-indigo-300 font-medium">Jiawei Han, Jian Pei, Yiwen Yin (ACM SIGMOD 2000)</p>
+    </div>
+
+    <!-- Pomodoro Timer -->
+    <div class="flex items-center gap-2">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs font-mono font-bold text-amber-400">
+        <span>⏱️ Focus:</span>
+        <span id="timer-display">15:00</span>
+      </div>
+      <button onclick="toggleTimer()" class="text-xs bg-[var(--card)] hover:bg-[var(--border)] px-2.5 py-1.5 rounded-lg border border-[var(--border)]">⏯</button>
+    </div>
+  </header>
+
+  <!-- Main Tutorial Content Container -->
+  <main class="space-y-12">
+    
+    <!-- 1. The Core Bottleneck of Apriori -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 mb-3">
+        1. The Death of Candidate Generation
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">Why Apriori Chokes on Long Frequent Patterns</h2>
+      <p class="text-sm text-[var(--muted-foreground)] leading-relaxed mb-4">
+        If a database contains a frequent pattern of size 100 (e.g. 100 genes in bioinformatics), Apriori must generate &dollar;2^{100} - 1 \approx 10^{30}$ candidate itemsets level-by-level, scanning the database 100 times. Even on a supercomputer, Apriori will not finish before the sun explodes.
+      </p>
+      <div class="p-4 rounded-xl bg-indigo-950/30 border border-indigo-800/40 text-sm text-indigo-200 leading-relaxed mb-4">
+        <strong>🥨 The Beginner's Analogy:</strong> Apriori searches for words in a book by testing all 2-letter combos, then all 3-letter combos, reading the entire book every time. FP-Growth is like an English dictionary: it builds a <strong>prefix tree</strong> where common word beginnings share branches. You read the book only twice, compress it into an FP-tree, and mine patterns in memory without generating a single candidate!
+      </div>
+    </section>
+
+    <!-- 2. Interactive FP-Tree & Conditional Base Tracer -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20 mb-3">
+        2. Interactive FP-Tree Mining Engine
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">Interactive Conditional Pattern Base Miner</h2>
+      <p class="text-xs text-[var(--muted-foreground)] mb-6">
+        Select a target item from the bottom of the Header Table to trace its conditional pattern base and recursive conditional tree.
+      </p>
+
+      <div class="flex flex-wrap gap-2 mb-6">
+        <button onclick="traceFPTree('m')" id="fp-btn-m" class="px-3.5 py-1.5 rounded-xl border border-indigo-500 bg-indigo-950/40 text-indigo-300 font-mono text-xs font-bold">
+          Item 'm' (Count: 2)
+        </button>
+        <button onclick="traceFPTree('p')" id="fp-btn-p" class="px-3.5 py-1.5 rounded-xl border border-[var(--border)] bg-[#0d1527] text-slate-300 font-mono text-xs font-bold hover:border-indigo-500">
+          Item 'p' (Count: 3)
+        </button>
+        <button onclick="traceFPTree('c')" id="fp-btn-c" class="px-3.5 py-1.5 rounded-xl border border-[var(--border)] bg-[#0d1527] text-slate-300 font-mono text-xs font-bold hover:border-indigo-500">
+          Item 'c' (Count: 3)
+        </button>
+      </div>
+
+      <div class="interactive-box" id="fp-trace-display">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- 3. Core Theory -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 mb-3">
+        3. Theoretical Deep-Dive
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">The Divide-and-Conquer Magic: 3 Steps</h2>
+
+      <div class="space-y-4 text-xs text-[var(--muted-foreground)] leading-relaxed">
+        <div class="p-4 rounded-xl bg-[#0a101f] border border-[var(--border)]">
+          <h4 class="text-sm font-bold text-indigo-300 mb-1">Step 1: Prefix Path Collection (Conditional Pattern Base)</h4>
+          <p>For item $i$, traverse its side-links from the header table across the entire tree. For each node, follow its parent pointers up to the root, recording the prefix path and the node's count.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[#0a101f] border border-[var(--border)]">
+          <h4 class="text-sm font-bold text-indigo-300 mb-1">Step 2: Conditional FP-Tree Construction</h4>
+          <p>Treat the prefix paths as transaction logs and sum item counts. Filter infrequent items (&lt; minsup). Rebuild a small, local tree containing only frequent prefix items.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[#0a101f] border border-[var(--border)]">
+          <h4 class="text-sm font-bold text-indigo-300 mb-1">Step 3: Single-Path Optimization</h4>
+          <p>If a conditional FP-tree has only a single branch with $k$ items, you do NOT need recursion! Enumerate all &dollar;2^k - 1$ combinations directly in constant time.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Quiz -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20 mb-3">
+        4. Midsem Practice Quiz
+      </div>
+      <h2 class="text-2xl font-black text-white mb-6">Exam Retention Check</h2>
+
+      <div class="space-y-6">
+        <div>
+          <p class="text-sm font-bold text-white mb-3">Q1. How many complete database disk scans does the FP-Growth algorithm require?</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <button onclick="answerQuiz(this, false, 'exp_fp1')" class="quiz-btn p-3 text-xs text-left rounded-lg border border-[var(--border)] bg-[#0d1527] hover:bg-slate-800 transition-all">A. Exactly 1 scan</button>
+            <button onclick="answerQuiz(this, true, 'exp_fp1')" class="quiz-btn p-3 text-xs text-left rounded-lg border border-[var(--border)] bg-[#0d1527] hover:bg-slate-800 transition-all">B. Exactly 2 scans (Scan 1: count 1-items; Scan 2: construct FP-Tree)</button>
+            <button onclick="answerQuiz(this, false, 'exp_fp1')" class="quiz-btn p-3 text-xs text-left rounded-lg border border-[var(--border)] bg-[#0d1527] hover:bg-slate-800 transition-all">C. k scans, where k is the size of the longest pattern</button>
+            <button onclick="answerQuiz(this, false, 'exp_fp1')" class="quiz-btn p-3 text-xs text-left rounded-lg border border-[var(--border)] bg-[#0d1527] hover:bg-slate-800 transition-all">D. 2^k scans</button>
+          </div>
+          <div id="exp_fp1" class="hidden mt-2 p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-xs text-emerald-300">
+            <strong>Correct!</strong> FP-Growth scans the raw database exactly TWICE. After building the in-memory tree in Scan 2, all pattern extraction occurs in main memory without any further disk I/O.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Active Retention Quiz -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20 mb-3">
+        5. Active Retention Quiz
+      </div>
+      <h2 class="text-2xl font-black text-white mb-6">Test Your Understanding</h2>
+
+      <div class="space-y-6">
+        <!-- Q1 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">1. How many full database scans does FP-Growth perform?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Exactly 2 scans (Pass 1 finds frequent 1-items; Pass 2 constructs the FP-Tree).</button>
+            <button onclick="answerQuiz(this, false, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">K scans, where K is max itemset length.</button>
+            <button onclick="answerQuiz(this, false, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Zero scans.</button>
+          </div>
+          <div id="q1-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! After building the FP-Tree in 2 passes, all frequent patterns are mined directly from memory without ever touching the disk.
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">2. In what order must items within each transaction be inserted into an FP-Tree?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">In descending order of global item frequency (F-list order).</button>
+            <button onclick="answerQuiz(this, false, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">In alphabetical order.</button>
+            <button onclick="answerQuiz(this, false, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">In ascending order of transaction ID.</button>
+          </div>
+          <div id="q2-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! Sorting by descending frequency maximizes prefix sharing among transactions, compressing the tree.
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">3. What is a Conditional Pattern Base for item X?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">The set of all prefix paths in the FP-Tree leading to node X, along with their path counts.</button>
+            <button onclick="answerQuiz(this, false, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">A backup copy of the database.</button>
+            <button onclick="answerQuiz(this, false, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">A list of items that never co-occur with X.</button>
+          </div>
+          <div id="q3-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! The prefix paths leading to X represent the sub-database conditioned on the presence of item X.
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">4. What is the role of the Header Table in an FP-Tree?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">It maintains linked-list pointers to all node occurrences of each frequent item across the tree.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">It stores the database user password.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">It prints the column names.</button>
+          </div>
+          <div id="q4-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! The header side-links allow immediate traversal of all occurrences of an item without searching the entire tree.
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">5. What optimization applies when a conditional FP-Tree consists of a single linear path?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">All frequent patterns can be directly generated as all combinations of nodes on the path, with zero further tree construction.</button>
+            <button onclick="answerQuiz(this, false, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">The algorithm terminates and reports failure.</button>
+            <button onclick="answerQuiz(this, false, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">The path must be deleted.</button>
+          </div>
+          <div id="q5-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! A single branch allows direct combinatorial power-set enumeration.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="mt-16 pt-8 border-t border-[var(--border)] text-center text-xs text-[var(--muted-foreground)] pb-12">
+    <p>Data Analytics-I Academic Research Suite • Deep-Dive Series</p>
+    <p class="mt-1">Designed for university students learning foundational data science from first principles.</p>
+  </footer>
+
+  <script>
+    // Pomodoro Timer
+    let timeLeft = 15 * 60;
+    let timerRunning = true;
+    const timerDisplay = document.getElementById('timer-display');
+    setInterval(() => {
+      if (timerRunning && timeLeft > 0) {
+        timeLeft--;
+        const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+        const s = String(timeLeft % 60).padStart(2, '0');
+        timerDisplay.innerText = m + ':' + s;
+        if (timeLeft === 0) alert('⏰ 15-Minute Learning Sprint Finished! Stand up, stretch, and let your brain integrate.');
+      }
+    }, 1000);
+    function toggleTimer() { timerRunning = !timerRunning; }
+
+    // Quiz logic helper
+    function answerQuiz(btn, isCorrect, explanationId) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.quiz-btn').forEach(b => b.classList.remove('correct', 'wrong'));
+      if (isCorrect) {
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('wrong');
+      }
+      document.getElementById(explanationId).classList.remove('hidden');
+    }
+
+    
+  const fpData = {
+    m: {
+      name: "Item 'm' (minsup = 2)",
+      paths: [
+        "{f, c, a, m: 1}  →  Prefix path: (f, c, a): 1",
+        "{f, c, a, b, m: 1}  →  Prefix path: (f, c, a, b): 1"
+      ],
+      condBase: "Conditional Pattern Base for m = { (f: 2, c: 2, a: 2, b: 1) }",
+      condTree: "Frequent items in base: f:2, c:2, a:2 (b has count 1 < minsup 2 → dropped!). Conditional FP-Tree = <f:2 → c:2 → a:2> (Single Path!)",
+      patterns: "{m: 2}, {a, m: 2}, {c, m: 2}, {f, m: 2}, {a, c, m: 2}, {a, f, m: 2}, {c, f, m: 2}, {a, c, f, m: 2}"
+    },
+    p: {
+      name: "Item 'p' (minsup = 2)",
+      paths: [
+        "{f, c, a, m, p: 1}  →  Prefix path: (f, c, a, m): 1",
+        "{c, b, p: 1}  →  Prefix path: (c, b): 1",
+        "{f, c, p: 1}  →  Prefix path: (f, c): 1"
+      ],
+      condBase: "Conditional Pattern Base for p = { (f: 2, c: 3, a: 1, m: 1, b: 1) }",
+      condTree: "Frequent items in base: c:3, f:2 (a, m, b have count 1 → dropped!). Conditional Tree = <c:3 → f:2>",
+      patterns: "{p: 3}, {c, p: 3}, {f, p: 2}, {c, f, p: 2}"
+    },
+    c: {
+      name: "Item 'c' (minsup = 2)",
+      paths: [
+        "{f, c: 3}  →  Prefix path: (f): 3"
+      ],
+      condBase: "Conditional Pattern Base for c = { (f: 3) }",
+      condTree: "Conditional Tree = <f:3>",
+      patterns: "{c: 3}, {f, c: 3}"
+    }
+  };
+
+  function traceFPTree(itemKey) {
+    document.querySelectorAll('[id^="fp-btn-"]').forEach(b => {
+      b.classList.remove('border-indigo-500', 'bg-indigo-950/40', 'text-indigo-300');
+      b.classList.add('border-[var(--border)]', 'bg-[#0d1527]', 'text-slate-300');
+    });
+    const btn = document.getElementById('fp-btn-' + itemKey);
+    if (btn) {
+      btn.classList.add('border-indigo-500', 'bg-indigo-950/40', 'text-indigo-300');
+    }
+
+    const d = fpData[itemKey];
+    if (!d) return;
+    const pathsHtml = d.paths.map(p => '<div>' + p + '</div>').join('');
+    document.getElementById('fp-trace-display').innerHTML = `
+      <div class="space-y-4 text-xs font-mono">
+        <div class="text-sm font-bold text-white">${d.name}</div>
+        <div>
+          <span class="text-indigo-300 font-bold block mb-1">1. Prefix Paths from Side-Links:</span>
+          <div class="p-2.5 rounded bg-[#0a101f] border border-[var(--border)] text-slate-300 space-y-1">
+            ${pathsHtml}
+          </div>
+        </div>
+        <div>
+          <span class="text-amber-300 font-bold block mb-1">2. Conditional Pattern Base:</span>
+          <div class="p-2.5 rounded bg-[#0a101f] border border-[var(--border)] text-amber-200">${d.condBase}</div>
+        </div>
+        <div>
+          <span class="text-emerald-300 font-bold block mb-1">3. Conditional FP-Tree:</span>
+          <div class="p-2.5 rounded bg-[#0a101f] border border-emerald-800/40 text-emerald-200">${d.condTree}</div>
+        </div>
+        <div>
+          <span class="text-purple-300 font-bold block mb-1">4. Discovered Frequent Itemsets:</span>
+          <div class="p-2.5 rounded bg-[#0a101f] border border-purple-800/40 text-purple-200 font-bold">${d.patterns}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  traceFPTree('m');
+
+  </script>
+</body>
+</html>

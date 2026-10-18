@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 7: Advanced Pattern Mining | DA-I</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #0f172a;
+    --card: #1e293b;
+    --sidebar: #162032;
+    --foreground: #f1f5f9;
+    --muted-foreground: #94a3b8;
+    --border: #334155;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #0ea5e9;
+    --accent: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+  }
+  /* Scrollbars */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--background); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* TOP BAR */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 56px;
+    background: var(--sidebar);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 16px; z-index: 50;
+  }
+  #topbar .module-badge {
+    background: var(--primary); color: var(--primary-foreground);
+    font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px;
+    white-space: nowrap;
+  }
+  #topbar .title { font-size: 14px; font-weight: 600; white-space: nowrap; }
+  #progress-bar-wrap {
+    flex: 1; background: var(--border); border-radius: 99px; height: 6px; min-width: 60px;
+  }
+  #progress-bar { height: 6px; border-radius: 99px; background: var(--primary); transition: width 0.4s; }
+  #progress-label { font-size: 11px; color: var(--muted-foreground); white-space: nowrap; }
+  #timer-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--foreground); border-radius: 6px;
+    padding: 4px 10px; font-size: 13px; font-weight: 700; cursor: pointer;
+    white-space: nowrap;
+  }
+  #timer-btn.urgent { color: #f87171; border-color: #f87171; }
+  #home-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted-foreground); border-radius: 6px;
+    padding: 4px 10px; font-size: 11px; cursor: pointer; text-decoration: none;
+    white-space: nowrap;
+  }
+  #home-btn:hover { color: var(--foreground); border-color: var(--primary); }
+
+  /* SIDEBAR */
+  #sidebar {
+    position: fixed; top: 56px; left: 0; bottom: 0; width: 240px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; z-index: 40; padding: 12px 0;
+  }
+  .sidebar-section { padding: 6px 12px; }
+  .sidebar-section-title {
+    font-size: 10px; font-weight: 700; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;
+  }
+  .sidebar-item {
+    display: block; padding: 5px 8px; border-radius: 5px;
+    font-size: 11px; color: var(--muted-foreground);
+    cursor: pointer; transition: all 0.15s;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sidebar-item:hover { background: var(--card); color: var(--foreground); }
+  .sidebar-item.active { background: var(--primary); color: white; font-weight: 600; }
+
+  /* MAIN */
+  #main {
+    position: fixed; top: 56px; left: 240px; right: 0; bottom: 0;
+    overflow-y: auto; padding: 24px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  /* CARDS */
+  .card-slide { display: none; width: 100%; max-width: 800px; animation: fadeIn 0.3s ease; }
+  .card-slide.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 28px; margin-bottom: 16px;
+  }
+  .card-tag {
+    font-size: 10px; font-weight: 700; color: var(--muted-foreground);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+  .card-header {
+    font-size: 22px; font-weight: 800; margin-bottom: 14px; line-height: 1.2;
+  }
+  .card-body { font-size: 14px; line-height: 1.7; color: var(--foreground); }
+  .card-body p { margin-bottom: 10px; }
+  .card-body ul { padding-left: 18px; margin-bottom: 10px; }
+  .card-body li { margin-bottom: 5px; }
+
+  .callout {
+    border-radius: 8px; padding: 12px 16px; margin-top: 16px;
+    font-size: 13px; line-height: 1.6;
+  }
+  .callout-why { background: #1a2744; border-left: 3px solid var(--secondary); }
+  .callout-warn { background: #2a1a1a; border-left: 3px solid #f87171; }
+  .callout-formula { background: #2a2008; border-left: 3px solid var(--accent); }
+  .callout-tip { background: #0f2a1a; border-left: 3px solid #34d399; }
+
+  /* COLOR THEMES */
+  .theme-blue { border-top: 3px solid var(--secondary); }
+  .theme-green { border-top: 3px solid #34d399; }
+  .theme-yellow { border-top: 3px solid var(--accent); }
+  .theme-red { border-top: 3px solid #f87171; }
+  .theme-purple { border-top: 3px solid var(--primary); }
+
+  /* FLIP CARD */
+  .flip-container {
+    perspective: 1000px; height: 180px; cursor: pointer; margin-top: 16px;
+  }
+  .flip-inner {
+    position: relative; width: 100%; height: 100%;
+    transition: transform 0.5s; transform-style: preserve-3d;
+  }
+  .flip-container.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back {
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; text-align: center;
+  }
+  .flip-front {
+    background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+    color: white;
+  }
+  .flip-back {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white; transform: rotateY(180deg);
+  }
+  .flip-front p, .flip-back p { font-size: 14px; line-height: 1.6; }
+  .flip-hint { font-size: 10px; color: var(--muted-foreground); text-align: center; margin-top: 6px; }
+
+  /* NAV BUTTONS */
+  .nav-row {
+    display: flex; gap: 10px; justify-content: space-between;
+    width: 100%; max-width: 800px; margin-top: 4px; margin-bottom: 24px;
+  }
+  .btn {
+    padding: 9px 20px; border-radius: 8px; font-size: 13px;
+    font-weight: 600; cursor: pointer; border: none; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: #4f46e5; }
+  .btn-secondary {
+    background: var(--card); color: var(--foreground);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--primary); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* QUIZ */
+  .quiz-option {
+    display: block; padding: 10px 14px; border-radius: 8px;
+    border: 1px solid var(--border); margin-bottom: 8px;
+    cursor: pointer; font-size: 13px; transition: all 0.15s;
+    background: transparent; color: var(--foreground); text-align: left; width: 100%;
+  }
+  .quiz-option:hover:not(:disabled) { border-color: var(--primary); background: #1e2a4a; }
+  .quiz-option.correct { background: #0f3320; border-color: #34d399; color: #34d399; }
+  .quiz-option.wrong { background: #3a1010; border-color: #f87171; color: #f87171; }
+
+  /* POMODORO OVERLAY */
+  #pomo-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    z-index: 100; align-items: center; justify-content: center; flex-direction: column;
+    gap: 20px;
+  }
+  #pomo-overlay.show { display: flex; }
+  #pomo-overlay h2 { font-size: 28px; font-weight: 800; }
+  #pomo-overlay p { font-size: 16px; color: var(--muted-foreground); }
+
+  /* CANVAS / VIZ */
+  canvas { border-radius: 8px; }
+  .viz-controls {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+  }
+  .viz-btn {
+    padding: 5px 12px; border-radius: 6px; font-size: 12px;
+    cursor: pointer; border: 1px solid var(--border);
+    background: var(--background); color: var(--foreground);
+    transition: all 0.15s;
+  }
+  .viz-btn:hover, .viz-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+  .stat-box {
+    background: var(--background); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; font-size: 12px;
+    line-height: 1.8;
+  }
+  .highlight { color: var(--accent); font-weight: 700; }
+  .highlight-green { color: #34d399; font-weight: 700; }
+  .highlight-red { color: #f87171; font-weight: 700; }
+  .highlight-blue { color: var(--secondary); font-weight: 700; }
+
+  input[type="range"] { accent-color: var(--primary); }
+  select { 
+    background: var(--background); color: var(--foreground);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 8px; font-size: 12px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: var(--background); padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  tr:hover td { background: rgba(99,102,241,0.06); }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 99px;
+    font-size: 10px; font-weight: 700;
+  }
+  .badge-green { background: #0f3320; color: #34d399; }
+  .badge-yellow { background: #2a2008; color: var(--accent); }
+  .badge-red { background: #3a1010; color: #f87171; }
+  .badge-blue { background: #0a1e3a; color: var(--secondary); }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (PHONES & TABLETS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  #topbar {
+    padding: 0 10px !important;
+    gap: 6px !important;
+    height: 52px !important;
+    overflow-x: hidden !important;
+  }
+  #topbar .title, #topbar #module-title, #topbar #topbar-title, #topbar .module-title {
+    font-size: 11px !important;
+    max-width: 115px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  #topbar a, #topbar #home-btn {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+    white-space: nowrap !important;
+  }
+  #topbar #pomodoro {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+  }
+  #topbar #timer-display {
+    font-size: 12px !important;
+  }
+  #topbar #section-label, #topbar .sec-pill, #topbar .badge, #topbar #timer-btn-label {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: var(--card, #1e293b) !important;
+    border: 1px solid var(--border, #334155) !important;
+    color: var(--foreground, #f8fafc) !important;
+    padding: 5px 8px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+  }
+  #sidebar {
+    position: fixed !important;
+    top: 52px !important;
+    left: -320px !important;
+    width: 280px !important;
+    max-width: 82vw !important;
+    bottom: 0 !important;
+    height: calc(100vh - 52px) !important;
+    z-index: 9999 !important;
+    background: #0a0f1e !important;
+    border-right: 1px solid var(--border, #334155) !important;
+    box-shadow: 4px 0 25px rgba(0,0,0,0.7) !important;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #sidebar.mobile-open {
+    left: 0 !important;
+  }
+  #sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 52px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(3px);
+    z-index: 9998;
+  }
+  #sidebar-backdrop.active {
+    display: block !important;
+  }
+  #layout {
+    display: block !important;
+    margin-top: 52px !important;
+    height: calc(100vh - 52px) !important;
+    position: relative !important;
+    overflow-x: hidden !important;
+  }
+  #main, #card-container, .main-content, #content-area {
+    margin-left: 0 !important;
+    padding: 16px 12px 100px 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  .card, .card-screen, .card-box, .slide {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 12px !important;
+    margin-bottom: 16px !important;
+  }
+  h1 { font-size: 1.35rem !important; }
+  h2, .card-title { font-size: 1.15rem !important; }
+  h3 { font-size: 1.0rem !important; }
+  p, li, .card-body { font-size: 13.5px !important; line-height: 1.6 !important; }
+  #nav-bar, .bottom-nav, #navigation-bar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+    background: rgba(10, 15, 30, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 1px solid var(--border, #334155) !important;
+    z-index: 9000 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  .nav-btn, #prevBtn, #nextBtn {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    min-height: 42px !important;
+    flex: 1 !important;
+    max-width: 130px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  #cardIndicator, #card-counter, .card-counter {
+    font-size: 12px !important;
+    min-width: 65px !important;
+    text-align: center !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+}
+@media (min-width: 769px) {
+  .mobile-menu-btn, #sidebar-backdrop {
+    display: none !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation">☰ Menu</button>
+  <a href="00_home.html" id="home-btn">🏠 Home</a>
+  <span class="module-badge">MOD 7</span>
+  <span class="title">Advanced Pattern Mining</span>
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:4%"></div></div>
+  <span id="progress-label">Card 1 of 26</span>
+  <button id="timer-btn" onclick="toggleTimer()">⏱ 15:00</button>
+</div>
+
+<!-- POMODORO OVERLAY -->
+<div id="pomo-overlay">
+  <div style="font-size:48px">⏰</div>
+  <h2>Great work! You earned a break!</h2>
+  <p>Take 5 minutes away from the screen. Stretch, breathe, hydrate. 💧</p>
+  <button class="btn btn-primary" onclick="resumeTimer()">▶ Resume Study</button>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">📡 Module 7</div>
+    <span class="sidebar-item" onclick="goToCard(0)">§1 Coverage Patterns</span>
+    <span class="sidebar-item" onclick="goToCard(7)">§2 Multi-Level Rules</span>
+    <span class="sidebar-item" onclick="goToCard(13)">§3 Quantitative Rules</span>
+    <span class="sidebar-item" onclick="goToCard(18)">§4 High-Utility Mining</span>
+    <span class="sidebar-item" onclick="goToCard(23)">§5 Constraint-Based</span>
+    <span class="sidebar-item" onclick="goToCard(26)">🎯 End Quiz</span>
+    <span class="sidebar-item" onclick="goToCard(27)">📚 Appendix</span>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-title">Quick Jump</div>
+    <div id="sidebar-cards"></div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+<!-- ============================================================ -->
+<!-- SECTION 1: COVERAGE PATTERNS (Cards 0-6) -->
+<!-- ============================================================ -->
+
+<!-- Card 0: Analogy -->
+<div class="card-slide active" data-index="0">
+  <div class="card theme-green">
+    <div class="card-tag">🌐 Coverage Patterns • Card 1 of 7</div>
+    <div class="card-header">📰 The Newspaper Ad Analogy</div>
+    <div class="card-body">
+      <p>Imagine you're a newspaper publisher selling banner ad slots. An advertiser wants their ad seen by as many <strong>different visitors</strong> as possible.</p>
+      <p>They don't care if the same visitor sees it 100 times — they want <strong>broad COVERAGE</strong> across unique visitors.</p>
+      <p>Coverage patterns find the best combination of web pages to place banners for <strong>maximum reach</strong> — even if those pages don't all have high individual traffic.</p>
+    </div>
+    <div class="callout callout-why">
+      <strong>🤔 Why does this matter?</strong><br/>
+      Standard frequent patterns track how often items appear TOGETHER. Coverage patterns track how many UNIQUE users are reached by AT LEAST ONE item in a set. Completely different goal!
+    </div>
+  </div>
+</div>
+
+<!-- Card 1: Coverage vs Frequent -->
+<div class="card-slide" data-index="1">
+  <div class="card theme-blue">
+    <div class="card-tag">🌐 Coverage Patterns • Card 2 of 7</div>
+    <div class="card-header">🔄 Coverage Set vs Frequent Set</div>
+    <div class="card-body">
+      <p><strong>Frequent patterns:</strong> How often do users visit these pages <em>together</em> (same session)?</p>
+      <p><strong>Coverage patterns:</strong> How many <em>unique users</em> visit AT LEAST ONE of these pages?</p>
+      <table style="margin-top:12px">
+        <tr><th>Metric</th><th>Frequent Mining</th><th>Coverage Mining</th></tr>
+        <tr><td>Goal</td><td>Co-occurrence</td><td>Union coverage</td></tr>
+        <tr><td>Key operator</td><td>AND (intersection)</td><td>OR (union)</td></tr>
+        <tr><td>Monotonicity</td><td>Anti-monotonic ✅</td><td>NOT anti-monotonic ⚠️</td></tr>
+        <tr><td>Use case</td><td>Recommendation</td><td>Ad placement</td></tr>
+      </table>
+    </div>
+    <div class="callout callout-why">
+      <strong>💡 Key insight:</strong> Supersets in coverage patterns can INCREASE coverage (more pages → more unique users reached), so Apriori's pruning doesn't directly apply.
+    </div>
+  </div>
+</div>
+
+<!-- Card 2: Key Terms -->
+<div class="card-slide" data-index="2">
+  <div class="card theme-yellow">
+    <div class="card-tag">🌐 Coverage Patterns • Card 3 of 7</div>
+    <div class="card-header">📐 Key Terms: RF, CS, OR</div>
+    <div class="card-body">
+      <p>Three numbers define whether a set of pages is a good coverage pattern:</p>
+    </div>
+    <div class="callout callout-formula">
+      <strong>📏 Relative Frequency (RF):</strong> Fraction of sessions where a page appears.<br/>
+      <span style="font-family:monospace; color: var(--accent)">RF(page) = sessions with page / total sessions</span>
+    </div>
+    <div class="callout callout-formula" style="margin-top:8px">
+      <strong>📏 Coverage Support (CS):</strong> Fraction of users who visit AT LEAST ONE page in the pattern.<br/>
+      <span style="font-family:monospace; color: var(--accent)">CS(pattern) = |union of users across pages| / total users</span>
+    </div>
+    <div class="callout callout-formula" style="margin-top:8px">
+      <strong>📏 Overlap Ratio (OR):</strong> How much pages share their audience.<br/>
+      Low OR = diverse audience → great for ad coverage!
+    </div>
+  </div>
+</div>
+
+<!-- Card 3: VISUALIZATION - Coverage Pattern Simulator -->
+<div class="card-slide" data-index="3">
+  <div class="card theme-purple">
+    <div class="card-tag">🌐 Coverage Patterns • Card 4 of 7 — Interactive</div>
+    <div class="card-header">🎮 Coverage Pattern Simulator</div>
+    <div class="card-body">
+      <p>Select pages below to see their combined coverage. Toggle pages and watch metrics update!</p>
+      <div class="viz-controls" id="page-toggles"></div>
+      <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap">
+        <div style="flex:1; min-width:200px">
+          <canvas id="coverage-canvas" width="340" height="260" style="width:100%; border:1px solid var(--border)"></canvas>
+        </div>
+        <div style="flex:1; min-width:180px">
+          <div class="stat-box">
+            <div>Selected pages: <span class="highlight" id="cv-pages">None</span></div>
+            <div style="margin-top:6px">Total unique users covered:</div>
+            <div style="font-size:24px; font-weight:800; color: var(--primary); margin:4px 0" id="cv-covered">0</div>
+            <div>Coverage Support: <span class="highlight" id="cv-cs">0%</span></div>
+            <div>Overlap Ratio: <span class="highlight" id="cv-or">—</span></div>
+            <div style="margin-top:8px" id="cv-verdict"></div>
+          </div>
+          <div style="margin-top:10px; font-size:11px">
+            <div>Min RF: <input type="range" id="min-rf" min="0" max="50" value="10" style="width:100px"/> <span id="min-rf-val">10%</span></div>
+            <div>Min CS: <input type="range" id="min-cs" min="0" max="80" value="30" style="width:100px"/> <span id="min-cs-val">30%</span></div>
+            <div>Max OR: <input type="range" id="max-or" min="0" max="100" value="50" style="width:100px"/> <span id="max-or-val">50%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 4: Why Apriori Fails -->
+<div class="card-slide" data-index="4">
+  <div class="card theme-red">
+    <div class="card-tag">🌐 Coverage Patterns • Card 5 of 7</div>
+    <div class="card-header">⚠️ Why Standard Frequent Mining Fails Here</div>
+    <div class="card-body">
+      <p>Coverage support does <strong>NOT</strong> have the downward closure (anti-monotonic) property.</p>
+      <p>A pair of pages might have HIGH coverage even if individual pages are <strong>infrequent</strong>.</p>
+    </div>
+    <div class="callout callout-warn">
+      <strong>Example:</strong> Page A reaches users 1-100. Page B reaches users 101-200. Neither is frequent individually, but together they cover 200 unique users — high coverage! <br/><br/>
+      Apriori would prune {A, B} because A and B are individually infrequent. But that's the WRONG call for coverage mining.
+    </div>
+    <div class="callout callout-why" style="margin-top:8px">
+      <strong>💡 Consequence:</strong> We need a NEW algorithm that exploits different properties to avoid exponential search.
+    </div>
+  </div>
+</div>
+
+<!-- Card 5: CMine Algorithm -->
+<div class="card-slide" data-index="5">
+  <div class="card theme-purple">
+    <div class="card-tag">🌐 Coverage Patterns • Card 6 of 7</div>
+    <div class="card-header">⚙️ CMine Algorithm</div>
+    <div class="card-body">
+      <p>CMine is the key algorithm for coverage pattern mining. It exploits the <strong>sorted closure property</strong>.</p>
+      <ol style="padding-left:18px; line-height:2.2">
+        <li>Sort items by <strong>decreasing frequency</strong></li>
+        <li>Level-wise search (like Apriori in structure)</li>
+        <li>Prune using <strong>Non-Overlap Patterns (NOP)</strong></li>
+        <li>A pattern is a NOP if its overlap ratio is ≤ maxOR</li>
+        <li>Sorted closure: if a pattern is NOP, its super-patterns (in sorted order) are also NOP</li>
+      </ol>
+    </div>
+    <div class="callout callout-tip">
+      <strong>🌟 Insight:</strong> By sorting items in decreasing frequency order, we can prune huge parts of the search space when a pattern exceeds the overlap threshold.
+    </div>
+  </div>
+</div>
+
+<!-- Card 6: Flip - CMine sorting -->
+<div class="card-slide" data-index="6">
+  <div class="card theme-blue">
+    <div class="card-tag">🌐 Coverage Patterns • Card 7 of 7 — Active Recall</div>
+    <div class="card-header">🃏 Flip Card: CMine Sorting</div>
+    <div class="card-body">
+      <div class="flip-container" id="flip-0" onclick="flipCard('flip-0')">
+        <div class="flip-inner">
+          <div class="flip-front">
+            <p><strong>❓ Why does the CMine algorithm sort items in DECREASING order of frequency?</strong></p>
+          </div>
+          <div class="flip-back">
+            <p>The <strong>sorted closure property</strong>: if a pattern has low overlap (is a non-overlap pattern), then adding items in frequency order ensures sub-patterns are also non-overlap. This enables level-wise pruning to skip huge branches of the search tree. 🌳✂️</p>
+          </div>
+        </div>
+      </div>
+      <p class="flip-hint">👆 Click the card to reveal the answer</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: MULTI-LEVEL ASSOCIATION RULES (Cards 7-12) -->
+<!-- ============================================================ -->
+
+<!-- Card 7: Analogy -->
+<div class="card-slide" data-index="7">
+  <div class="card theme-green">
+    <div class="card-tag">🏪 Multi-Level Rules • Card 1 of 6</div>
+    <div class="card-header">🛒 The Grocery Store Zoom-Out Analogy</div>
+    <div class="card-body">
+      <p>Imagine finding patterns in grocery purchases. If you look at very specific items — <em>"Foremost 2% Milk"</em> — the support is tiny. Almost nobody buys the exact same brand.</p>
+      <p>But zoom out to <em>"milk"</em> and patterns are obvious: milk → bread appears constantly!</p>
+      <p>Multi-level mining lets you find rules at <strong>different levels of specificity simultaneously</strong>.</p>
+    </div>
+    <div class="callout callout-why">
+      <strong>🤔 Why does this matter?</strong><br/>
+      Real product databases have hierarchies: Brand A 2% Milk → Milk → Dairy → Food. Patterns at one level might not exist at another. We need mining that crosses these levels.
+    </div>
+  </div>
+</div>
+
+<!-- Card 8: The Problem -->
+<div class="card-slide" data-index="8">
+  <div class="card theme-red">
+    <div class="card-tag">🏪 Multi-Level Rules • Card 2 of 6</div>
+    <div class="card-header">⚠️ The Specificity Problem</div>
+    <div class="card-body">
+      <table>
+        <tr><th>Level</th><th>Item</th><th>Support</th><th>Useful?</th></tr>
+        <tr><td>L3 (brand)</td><td>Foremost 2% Milk</td><td class="highlight-red">0.01%</td><td>❌ Too low</td></tr>
+        <tr><td>L2 (type)</td><td>2% Milk</td><td class="highlight">0.06%</td><td>⚠️ Maybe</td></tr>
+        <tr><td>L1 (category)</td><td>Milk</td><td class="highlight-green">30%</td><td>✅ Great!</td></tr>
+      </table>
+      <p style="margin-top:12px">At the specific item level, support is too low to be meaningful. At the category level, support is rich. We want to find rules at <strong>multiple abstraction levels simultaneously</strong>.</p>
+    </div>
+    <div class="callout callout-warn">
+      Using a single min_support threshold for all levels forces a painful trade-off: too high → miss specific rules; too low → flood of trivial general rules.
+    </div>
+  </div>
+</div>
+
+<!-- Card 9: VISUALIZATION - Taxonomy Tree -->
+<div class="card-slide" data-index="9">
+  <div class="card theme-purple">
+    <div class="card-tag">🏪 Multi-Level Rules • Card 3 of 6 — Interactive</div>
+    <div class="card-header">🌳 Multi-Level Taxonomy Tree</div>
+    <div class="card-body">
+      <p>Click any node to see its support and the min_support threshold at that level. Watch how rules form at different levels!</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px">
+        <div style="flex:2; min-width:280px">
+          <svg id="taxonomy-svg" width="100%" height="320" style="border:1px solid var(--border); border-radius:8px; background: var(--background)"></svg>
+        </div>
+        <div style="flex:1; min-width:160px">
+          <div class="stat-box" id="taxonomy-info" style="min-height:120px">
+            <div style="color:var(--muted-foreground); font-style:italic">Click a node to explore</div>
+          </div>
+          <div style="margin-top:10px; font-size:11px">
+            <div>L1 min_support: <span class="highlight" id="l1-thresh">20%</span></div>
+            <div>L2 min_support: <span class="highlight" id="l2-thresh">10%</span></div>
+            <div>L3 min_support: <span class="highlight" id="l3-thresh">2%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 10: Ascending Min Support -->
+<div class="card-slide" data-index="10">
+  <div class="card theme-yellow">
+    <div class="card-tag">🏪 Multi-Level Rules • Card 4 of 6</div>
+    <div class="card-header">📐 Ascending Minimum Support</div>
+    <div class="card-body">
+      <p>The clever solution: use <strong>DIFFERENT min_support values at different levels</strong>.</p>
+    </div>
+    <div class="callout callout-formula">
+      <strong>Rule:</strong> Higher min_support at low-specificity levels (broad categories appear often).<br/>
+      Lower min_support at high-specificity levels (specific items are rarer).<br/><br/>
+      <span style="font-family:monospace; color:var(--accent)">min_support(L1) > min_support(L2) > min_support(L3)</span>
+    </div>
+    <div class="callout callout-tip" style="margin-top:8px">
+      <strong>🌟 Effect:</strong> This balances discovery across levels. You find meaningful patterns whether looking at broad categories or specific products without flooding the output.
+    </div>
+  </div>
+</div>
+
+<!-- Card 11: Redundancy Filtering -->
+<div class="card-slide" data-index="11">
+  <div class="card theme-blue">
+    <div class="card-tag">🏪 Multi-Level Rules • Card 5 of 6</div>
+    <div class="card-header">🗑️ Redundancy Filtering</div>
+    <div class="card-body">
+      <p>Multi-level mining can produce rules that are nearly identical across levels. We filter these as redundant.</p>
+      <div class="callout callout-warn">
+        <strong>Example:</strong><br/>
+        L2 rule: <em>milk → bread</em>, confidence = 60%<br/>
+        L3 rule: <em>2% milk → bread</em>, confidence = 61%<br/><br/>
+        The L3 rule adds only 1% more information! It's redundant. Why report both?
+      </div>
+      <p style="margin-top:12px">A rule at a specific level is redundant if its ancestor rule at a higher level has similar confidence. We use a <strong>redundancy ratio threshold</strong> to filter such cases.</p>
+    </div>
+    <div class="callout callout-tip">
+      <strong>💡 Outcome:</strong> Cleaner, more interpretable output without duplicating essentially the same insight at multiple levels.
+    </div>
+  </div>
+</div>
+
+<!-- Card 12: Flip - Min Support at Deeper Levels -->
+<div class="card-slide" data-index="12">
+  <div class="card theme-green">
+    <div class="card-tag">🏪 Multi-Level Rules • Card 6 of 6 — Active Recall</div>
+    <div class="card-header">🃏 Flip Card: Deeper = Lower Threshold</div>
+    <div class="card-body">
+      <div class="flip-container" id="flip-1" onclick="flipCard('flip-1')">
+        <div class="flip-inner">
+          <div class="flip-front">
+            <p><strong>❓ Why do we need LOWER min_support at deeper (more specific) levels of a concept hierarchy?</strong></p>
+          </div>
+          <div class="flip-back">
+            <p>Specific items appear in <strong>fewer transactions</strong>. "Brand A 2% Milk" is bought by far fewer people than "milk" in general. If we applied the same high threshold, we'd find NO patterns at the specific level — even meaningful ones would be filtered out. 🔍</p>
+          </div>
+        </div>
+      </div>
+      <p class="flip-hint">👆 Click the card to reveal the answer</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: QUANTITATIVE ASSOCIATION RULES (Cards 13-17) -->
+<!-- ============================================================ -->
+
+<!-- Card 13: Analogy -->
+<div class="card-slide" data-index="13">
+  <div class="card theme-green">
+    <div class="card-tag">📊 Quantitative Rules • Card 1 of 5</div>
+    <div class="card-header">🎯 The "Age Range Buys Sports Cars" Analogy</div>
+    <div class="card-body">
+      <p>Standard association rules work with <strong>yes/no</strong> items: bought milk? Yes or no.</p>
+      <p>But what about: <em>"People aged 25–35 with income &dollar;50k–&dollar;80k tend to buy sports cars"</em>?</p>
+      <p>This involves <strong>RANGES of numbers</strong> — quantitative attributes. We need to convert these ranges to yes/no first, which creates its own challenges.</p>
+    </div>
+    <div class="callout callout-why">
+      <strong>🤔 Why does this matter?</strong><br/>
+      Most real-world data has numeric columns (age, income, purchase amount). Ignoring them loses huge amounts of information. Quantitative rules let us find patterns that span continuous attributes.
+    </div>
+  </div>
+</div>
+
+<!-- Card 14: Discretization Problem -->
+<div class="card-slide" data-index="14">
+  <div class="card theme-red">
+    <div class="card-tag">📊 Quantitative Rules • Card 2 of 5</div>
+    <div class="card-header">⚠️ The Discretization Catch-22</div>
+    <div class="card-body">
+      <p>To use numeric values in association rules, we <strong>discretize</strong> them: convert continuous values into bins (intervals).</p>
+    </div>
+    <div class="callout callout-warn">
+      <strong>Too many small intervals:</strong><br/>
+      age=[25–26] appears in very few transactions → LOW support. Patterns get pruned before discovery.<br/><br/>
+      <strong>Too few large intervals:</strong><br/>
+      age=[0–100] covers everyone → HIGH support but USELESS. No real pattern captured.
+    </div>
+    <div class="callout callout-tip" style="margin-top:8px">
+      <strong>The sweet spot:</strong> We need intervals that are neither too narrow (low support) nor too wide (low confidence). This is the core challenge of quantitative rule mining.
+    </div>
+  </div>
+</div>
+
+<!-- Card 15: Dynamic Discretization -->
+<div class="card-slide" data-index="15">
+  <div class="card theme-blue">
+    <div class="card-tag">📊 Quantitative Rules • Card 3 of 5</div>
+    <div class="card-header">🔧 Dynamic Discretization — The Smart Solution</div>
+    <div class="card-body">
+      <p>Instead of fixing bins upfront, <strong>dynamic discretization</strong> finds them from the data:</p>
+      <ol style="padding-left:18px; line-height:2.2">
+        <li>Start with the smallest possible intervals (each unique value)</li>
+        <li>Merge adjacent intervals that are "similar" (e.g., close values)</li>
+        <li>Keep merging until minimum support is met</li>
+        <li>Stop when further merging would lose too much precision</li>
+      </ol>
+    </div>
+    <div class="callout callout-tip">
+      <strong>🌟 Benefit:</strong> Data-driven intervals — the bins adapt to where the data actually clusters, rather than using arbitrary cutoffs like "25, 35, 45...". More natural and more likely to find real patterns.
+    </div>
+  </div>
+</div>
+
+<!-- Card 16: Multi-Dimensional Rules -->
+<div class="card-slide" data-index="16">
+  <div class="card theme-purple">
+    <div class="card-tag">📊 Quantitative Rules • Card 4 of 5</div>
+    <div class="card-header">🗂️ Multi-Dimensional Rules</div>
+    <div class="card-body">
+      <table>
+        <tr><th>Type</th><th>Example</th></tr>
+        <tr><td><strong>Single-dim</strong></td><td>buys(milk) → buys(bread)</td></tr>
+        <tr><td><strong>Multi-dim</strong></td><td>age(25–34) AND income(50k–80k) → buys(sports_car)</td></tr>
+        <tr><td><strong>Hybrid</strong></td><td>age(25–34) AND buys(sports_car) → income(60k–90k)</td></tr>
+      </table>
+      <p style="margin-top:12px">Multi-dimensional rules span <strong>multiple columns</strong> of a relational table. They're much richer than single-column rules.</p>
+    </div>
+    <div class="callout callout-why">
+      <strong>💡 Real use:</strong> Customer segmentation, risk scoring, targeted marketing — any task that combines demographic data with behavioral data. This is the foundation of modern data-driven decisions.
+    </div>
+  </div>
+</div>
+
+<!-- Card 17: Flip - Catch-22 -->
+<div class="card-slide" data-index="17">
+  <div class="card theme-blue">
+    <div class="card-tag">📊 Quantitative Rules • Card 5 of 5 — Active Recall</div>
+    <div class="card-header">🃏 Flip Card: The Discretization Catch-22</div>
+    <div class="card-body">
+      <div class="flip-container" id="flip-2" onclick="flipCard('flip-2')">
+        <div class="flip-inner">
+          <div class="flip-front">
+            <p><strong>❓ What is the Catch-22 of static discretization for quantitative association rules?</strong></p>
+          </div>
+          <div class="flip-back">
+            <p>If intervals are <strong>too small</strong>: low support (few transactions share the same narrow range). If intervals are <strong>too large</strong>: low confidence (the range covers too many people to be informative). Neither extreme works — and any fixed split is arbitrary! 🎯</p>
+          </div>
+        </div>
+      </div>
+      <p class="flip-hint">👆 Click the card to reveal the answer</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: HIGH-UTILITY ITEMSET MINING (Cards 18-22) -->
+<!-- ============================================================ -->
+
+<!-- Card 18: Analogy -->
+<div class="card-slide" data-index="18">
+  <div class="card theme-green">
+    <div class="card-tag">💰 High-Utility Mining • Card 1 of 5</div>
+    <div class="card-header">🍫 The Truffle vs. Bread Analogy</div>
+    <div class="card-body">
+      <p>Frequent itemset mining counts how often items appear together. But what if some items are <strong>more valuable</strong>?</p>
+      <p>A store sells <strong>1,000 loaves of cheap bread</strong> and <strong>10 luxury truffles</strong>. Which generates more revenue?</p>
+      <p>If truffle profit is &dollar;50 each and bread profit is &dollar;0.50 each: <br/>Bread total = &dollar;500 | Truffles total = &dollar;500. <strong>Equal revenue, but totally different frequency!</strong></p>
+    </div>
+    <div class="callout callout-why">
+      <strong>🤔 Why does this matter?</strong><br/>
+      Frequent mining would rank bread patterns far above truffle patterns. But for maximizing revenue, truffle combos are equally important. High-utility mining focuses on VALUE, not just frequency.
+    </div>
+  </div>
+</div>
+
+<!-- Card 19: Utility = Quantity × Profit -->
+<div class="card-slide" data-index="19">
+  <div class="card theme-yellow">
+    <div class="card-tag">💰 High-Utility Mining • Card 2 of 5</div>
+    <div class="card-header">📐 Utility = Quantity × Profit</div>
+    <div class="card-body">
+      <div class="callout callout-formula">
+        <strong>External utility (profit per unit):</strong><br/>
+        Beer = &dollar;2 profit, Wine = &dollar;5 profit, Cheese = &dollar;3 profit<br/><br/>
+        <strong>Internal utility (quantity bought in each transaction):</strong><br/>
+        Transaction T1: Beer×3, Wine×1, Cheese×2<br/><br/>
+        <strong>Utility of {Beer, Wine} in T1:</strong><br/>
+        = (3×&dollar;2) + (1×&dollar;5) = &dollar;6 + &dollar;5 = <span style="color:var(--accent)">&dollar;11</span><br/><br/>
+        <strong>Total utility of {Beer, Wine}:</strong> sum across all transactions where both appear
+      </div>
+    </div>
+    <div class="callout callout-tip" style="margin-top:8px">
+      <strong>🌟 Goal:</strong> Find all itemsets whose total utility ≥ minUtility threshold.
+    </div>
+  </div>
+</div>
+
+<!-- Card 20: VISUALIZATION - Utility Calculator -->
+<div class="card-slide" data-index="20">
+  <div class="card theme-purple">
+    <div class="card-tag">💰 High-Utility Mining • Card 3 of 5 — Interactive</div>
+    <div class="card-header">🧮 Utility Calculator</div>
+    <div class="card-body">
+      <p>Select an itemset. See which transactions contain it and the total utility breakdown!</p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px" id="utility-toggles"></div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap">
+        <div style="flex:1.5; min-width:240px; overflow-x:auto">
+          <table id="utility-table">
+            <thead><tr><th>TID</th><th>Items (Qty)</th><th>Match?</th><th>Contribution</th></tr></thead>
+            <tbody id="utility-tbody"></tbody>
+          </table>
+        </div>
+        <div style="flex:1; min-width:150px">
+          <div class="stat-box">
+            <div>Itemset: <span class="highlight" id="util-itemset">{}</span></div>
+            <div style="margin-top:6px">Total Utility:</div>
+            <div style="font-size:28px; font-weight:800; color:var(--accent)" id="util-total">&dollar;0</div>
+            <div style="margin-top:6px">Transactions matched: <span class="highlight" id="util-matched">0</span></div>
+            <div style="margin-top:6px" id="util-verdict"></div>
+          </div>
+          <div style="margin-top:8px; font-size:11px">
+            Min Utility: $<input type="range" id="min-util" min="5" max="50" value="20" style="width:90px"/>
+            <span id="min-util-val">20</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 21: Two-Phase Algorithm -->
+<div class="card-slide" data-index="21">
+  <div class="card theme-blue">
+    <div class="card-tag">💰 High-Utility Mining • Card 4 of 5</div>
+    <div class="card-header">⚙️ Two-Phase Algorithm</div>
+    <div class="card-body">
+      <p>High-utility mining can't use Apriori directly because utility is NOT anti-monotonic. The two-phase approach solves this:</p>
+      <div class="callout callout-tip">
+        <strong>Phase 1 — Candidate Generation:</strong><br/>
+        Use <strong>Transaction-Weighted Utilization (TWU)</strong> as an OVER-ESTIMATE of utility. TWU IS anti-monotonic! Generate all candidates where TWU ≥ minUtility.
+      </div>
+      <div class="callout callout-why" style="margin-top:8px">
+        <strong>Phase 2 — Exact Computation:</strong><br/>
+        Scan the database once more to compute the EXACT utility of each candidate. Keep only those ≥ minUtility.
+      </div>
+    </div>
+    <div class="callout callout-formula" style="margin-top:8px">
+      <strong>TWU(itemset X)</strong> = sum of transaction utilities of ALL transactions containing X<br/>
+      (counts the whole transaction value, not just X's contribution → overestimate)
+    </div>
+  </div>
+</div>
+
+<!-- Card 22: Flip - Why Not Apriori -->
+<div class="card-slide" data-index="22">
+  <div class="card theme-red">
+    <div class="card-tag">💰 High-Utility Mining • Card 5 of 5 — Active Recall</div>
+    <div class="card-header">🃏 Flip Card: Why Can't We Use Apriori?</div>
+    <div class="card-body">
+      <div class="flip-container" id="flip-3" onclick="flipCard('flip-3')">
+        <div class="flip-inner">
+          <div class="flip-front">
+            <p><strong>❓ Why can we NOT directly apply Apriori to high-utility itemset mining?</strong></p>
+          </div>
+          <div class="flip-back">
+            <p>Utility is <strong>NOT anti-monotonic</strong>. Adding more items to an itemset can INCREASE its utility (because you're adding more valuable items). So if a subset has low utility, its supersets might still have high utility — we cannot safely prune. Apriori's core assumption is broken! ⚡</p>
+          </div>
+        </div>
+      </div>
+      <p class="flip-hint">👆 Click the card to reveal the answer</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: CONSTRAINT-BASED MINING (Cards 23-25) -->
+<!-- ============================================================ -->
+
+<!-- Card 23: Analogy -->
+<div class="card-slide" data-index="23">
+  <div class="card theme-green">
+    <div class="card-tag">🔒 Constraint-Based • Card 1 of 3</div>
+    <div class="card-header">🍽️ The Restaurant Search Analogy</div>
+    <div class="card-body">
+      <p>Mining ALL patterns in a database is like asking: <em>"Tell me everything interesting about this city."</em> Overwhelming and mostly useless.</p>
+      <p>Constraint-based mining is like asking: <em>"Find all affordable restaurants within 2km that have veggie options."</em> The constraints guide the search to only relevant patterns.</p>
+    </div>
+    <div class="callout callout-why">
+      <strong>🤔 Why does this matter?</strong><br/>
+      In practice, users always have domain knowledge. "I only care about items where total price ≤ &dollar;100" or "I want patterns involving only electronics." Encoding these as constraints eliminates huge portions of the search space before computation.
+    </div>
+  </div>
+</div>
+
+<!-- Card 24: Types of Constraints -->
+<div class="card-slide" data-index="24">
+  <div class="card theme-blue">
+    <div class="card-tag">🔒 Constraint-Based • Card 2 of 3</div>
+    <div class="card-header">📋 Four Types of Constraints</div>
+    <div class="card-body">
+      <table>
+        <tr><th>Type</th><th>Definition</th><th>Example</th><th>Action</th></tr>
+        <tr>
+          <td><span class="badge badge-red">Anti-monotonic</span></td>
+          <td>If violated, all supersets also violate</td>
+          <td>sum(price) ≤ &dollar;100</td>
+          <td>Prune supersets</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">Monotonic</span></td>
+          <td>If satisfied, all supersets also satisfy</td>
+          <td>contains(beer)</td>
+          <td>Skip re-checking</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">Succinct</span></td>
+          <td>Directly limits candidate items</td>
+          <td>items in Electronics</td>
+          <td>Reduce candidates</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-yellow">Convertible</span></td>
+          <td>Can become anti/monotonic with ordering</td>
+          <td>avg(price) ≥ &dollar;50</td>
+          <td>Sort then prune</td>
+        </tr>
+      </table>
+    </div>
+    <div class="callout callout-tip" style="margin-top:12px">
+      <strong>🌟 Strategy:</strong> Push anti-monotonic constraints DEEP into the search (prune early). Use monotonic constraints to skip redundant checks. Combine for maximum efficiency.
+    </div>
+  </div>
+</div>
+
+<!-- Card 25: Flip - Anti-monotonic example -->
+<div class="card-slide" data-index="25">
+  <div class="card theme-purple">
+    <div class="card-tag">🔒 Constraint-Based • Card 3 of 3 — Active Recall</div>
+    <div class="card-header">🃏 Flip Card: Anti-Monotonic Constraint</div>
+    <div class="card-body">
+      <div class="flip-container" id="flip-4" onclick="flipCard('flip-4')">
+        <div class="flip-inner">
+          <div class="flip-front">
+            <p><strong>❓ Give an example of an anti-monotonic constraint and explain WHY it is anti-monotonic.</strong></p>
+          </div>
+          <div class="flip-back">
+            <p><strong>sum(price) ≤ &dollar;100</strong><br/><br/>If a set of items already exceeds &dollar;100, adding MORE items (all with positive prices) can only increase the sum further. So ALL supersets also violate the constraint. We can safely prune the entire subtree! ✂️💸</p>
+          </div>
+        </div>
+      </div>
+      <p class="flip-hint">👆 Click the card to reveal the answer</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- END QUIZ (Card 26) -->
+<!-- ============================================================ -->
+<div class="card-slide" data-index="26">
+  <div class="card theme-purple">
+    <div class="card-tag">🎯 End-of-Module Quiz</div>
+    <div class="card-header">🏆 Final Quiz — 5 Questions</div>
+    <div class="card-body" id="quiz-body">
+      <div id="quiz-container"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- APPENDIX (Card 27) -->
+<!-- ============================================================ -->
+<div class="card-slide" data-index="27">
+  <div class="card theme-blue">
+    <div class="card-tag">📚 Appendix — First Principles</div>
+    <div class="card-header">📐 Advanced Formulas & Concepts</div>
+    <div class="card-body">
+      <details style="margin-bottom:12px">
+        <summary style="cursor:pointer; font-weight:700; color:var(--accent); padding:8px 0">📏 Diversity Rank (drank) Formula</summary>
+        <div class="callout callout-formula" style="margin-top:8px">
+          <strong>drank(P)</strong> measures how diverse a pattern's audience is.<br/>
+          <span style="font-family:monospace">drank(P) = |∪ users(p_i)| / Σ |users(p_i)|</span><br/><br/>
+          A drank of 1 means NO overlap (perfectly diverse). A drank of 1/|P| means complete overlap (all pages reach the same users).
+        </div>
+      </details>
+      <details style="margin-bottom:12px">
+        <summary style="cursor:pointer; font-weight:700; color:var(--accent); padding:8px 0">🔴 Negative Patterns & Null-Invariance</summary>
+        <div class="callout callout-formula" style="margin-top:8px">
+          <strong>Negative pattern:</strong> Items that rarely occur together despite high individual frequency.<br/><br/>
+          <strong>Null-invariant measures</strong> (e.g., Kulczynski, Cosine) don't change value when you add transactions with neither item. This is important because most transactions don't contain most items.
+        </div>
+      </details>
+      <details style="margin-bottom:12px">
+        <summary style="cursor:pointer; font-weight:700; color:var(--accent); padding:8px 0">🏆 Redundancy-Aware Top-k Patterns (MMS)</summary>
+        <div class="callout callout-formula" style="margin-top:8px">
+          <strong>MMS (Maximum Marginal Significance)</strong> selects top-k patterns that are both significant AND diverse.<br/>
+          Each new pattern in the top-k must add marginal value beyond what's already known. Inspired by MMR (Maximal Marginal Relevance) in information retrieval.
+        </div>
+      </details>
+      <details>
+        <summary style="cursor:pointer; font-weight:700; color:var(--accent); padding:8px 0">📈 Sequential Pattern Mining Overview</summary>
+        <div class="callout callout-formula" style="margin-top:8px">
+          <strong>Sequential patterns</strong> find ordered sequences of events. Example: "customers who buy camera → then buy memory card → then buy carrying case."<br/><br/>
+          Key algorithms: <strong>GSP</strong> (Generalized Sequential Patterns), <strong>PrefixSpan</strong> (prefix-projection), <strong>SPADE</strong> (vertical format).<br/>
+          Support: fraction of sequences containing the pattern (order matters!).
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- NAV ROW -->
+<div class="nav-row">
+  <button class="btn btn-secondary" id="btn-prev" onclick="prevCard()" disabled>← Previous</button>
+  <span id="nav-section-label" style="font-size:12px; color:var(--muted-foreground); align-self:center"></span>
+  <button class="btn btn-primary" id="btn-next" onclick="nextCard()">Next →</button>
+</div>
+
+</div><!-- end #main -->
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const TOTAL_CARDS = 28;
+const SECTION_MAP = [
+  {start:0,end:6,label:"§1 Coverage Patterns"},
+  {start:7,end:12,label:"§2 Multi-Level Rules"},
+  {start:13,end:17,label:"§3 Quantitative Rules"},
+  {start:18,end:22,label:"§4 High-Utility Mining"},
+  {start:23,end:25,label:"§5 Constraint-Based"},
+  {start:26,end:26,label:"🎯 End Quiz"},
+  {start:27,end:27,label:"📚 Appendix"},
+];
+
+let currentCard = 0;
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function goToCard(idx) {
+  idx = Math.max(0, Math.min(TOTAL_CARDS - 1, idx));
+  document.querySelectorAll('.card-slide').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.card-slide')[idx].classList.add('active');
+  currentCard = idx;
+  updateUI();
+  if (idx === 3) setTimeout(initCoverageViz, 50);
+  if (idx === 9) setTimeout(initTaxonomyViz, 50);
+  if (idx === 20) setTimeout(initUtilityViz, 50);
+  if (idx === 26) setTimeout(initQuiz, 50);
+  window.scrollTo(0,0);
+  document.getElementById('main').scrollTop = 0;
+}
+
+function nextCard() { goToCard(currentCard + 1); }
+function prevCard() { goToCard(currentCard - 1); }
+
+function updateUI() {
+  // Progress bar
+  const pct = ((currentCard + 1) / TOTAL_CARDS) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `Card ${currentCard + 1} of ${TOTAL_CARDS}`;
+
+  // Nav buttons
+  document.getElementById('btn-prev').disabled = currentCard === 0;
+  document.getElementById('btn-next').disabled = currentCard === TOTAL_CARDS - 1;
+
+  // Section label
+  const sec = SECTION_MAP.find(s => currentCard >= s.start && currentCard <= s.end);
+  document.getElementById('nav-section-label').textContent = sec ? sec.label : '';
+
+  // Sidebar highlight
+  document.querySelectorAll('.sidebar-item').forEach((el, i) => {
+    el.classList.toggle('active', i === currentCard);
+  });
+}
+
+// Build sidebar cards
+(function buildSidebar() {
+  const labels = [
+    "C1: Coverage Analogy","C2: Coverage vs Frequent","C3: RF / CS / OR","C4: Simulator 🎮",
+    "C5: Why Apriori Fails","C6: CMine Algorithm","C7: Flip – CMine Sort",
+    "C8: Multi-Level Analogy","C9: Specificity Problem","C10: Taxonomy Tree 🌳",
+    "C11: Ascending MinSup","C12: Redundancy Filter","C13: Flip – Deeper Levels",
+    "C14: Quant. Analogy","C15: Discretization","C16: Dynamic Discretiz.",
+    "C17: Multi-Dim Rules","C18: Flip – Catch-22",
+    "C19: Utility Analogy","C20: Utility Formula","C21: Utility Calc 🧮",
+    "C22: Two-Phase Algo","C23: Flip – No Apriori",
+    "C24: Constraint Analogy","C25: Four Types","C26: Flip – Anti-Mono",
+    "C27: 🎯 End Quiz","C28: 📚 Appendix"
+  ];
+  const container = document.getElementById('sidebar-cards');
+  labels.forEach((lbl, i) => {
+    const span = document.createElement('span');
+    span.className = 'sidebar-item';
+    span.textContent = lbl;
+    span.onclick = () => goToCard(i);
+    container.appendChild(span);
+  });
+})();
+
+// ============================================================
+// FLIP CARDS
+// ============================================================
+function flipCard(id) {
+  document.getElementById(id).classList.toggle('flipped');
+}
+
+// ============================================================
+// POMODORO TIMER
+// ============================================================
+let timerSeconds = 15 * 60;
+let timerRunning = true;
+let timerInterval = setInterval(tickTimer, 1000);
+
+function tickTimer() {
+  if (!timerRunning) return;
+  timerSeconds--;
+  if (timerSeconds <= 0) {
+    clearInterval(timerInterval);
+    document.getElementById('pomo-overlay').classList.add('show');
+    timerRunning = false;
+    return;
+  }
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds / 60).toString().padStart(2,'0');
+  const s = (timerSeconds % 60).toString().padStart(2,'0');
+  const btn = document.getElementById('timer-btn');
+  btn.textContent = `⏱ ${m}:${s}`;
+  btn.classList.toggle('urgent', timerSeconds < 120);
+}
+
+function toggleTimer() {
+  timerRunning = !timerRunning;
+  if (timerRunning && timerSeconds > 0) {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(tickTimer, 1000);
+  }
+}
+
+function resumeTimer() {
+  timerSeconds = 5 * 60; // 5 minute break
+  document.getElementById('pomo-overlay').classList.remove('show');
+  timerRunning = true;
+  clearInterval(timerInterval);
+  timerInterval = setInterval(tickTimer, 1000);
+}
+
+// ============================================================
+// VISUALIZATION 1: COVERAGE PATTERN SIMULATOR
+// ============================================================
+const PAGES = [
+  { name: "Homepage",  users: [1,2,3,4,5,6,7,8,9,10], rf: 0.40, color: '#6366f1' },
+  { name: "Sports",    users: [3,4,5,11,12,13,14,15], rf: 0.32, color: '#0ea5e9' },
+  { name: "Tech",      users: [1,6,7,16,17,18,19],    rf: 0.28, color: '#f59e0b' },
+  { name: "Politics",  users: [8,9,10,20,21,22,23],   rf: 0.22, color: '#f87171' },
+  { name: "Travel",    users: [11,14,18,24,25,26,27,28,29,30], rf: 0.30, color: '#34d399' },
+];
+const TOTAL_USERS = 30;
+let selectedPages = new Set();
+
+function initCoverageViz() {
+  const container = document.getElementById('page-toggles');
+  if (container.children.length > 0) return;
+  PAGES.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'viz-btn';
+    btn.textContent = `${p.name} (RF=${(p.rf*100).toFixed(0)}%)`;
+    btn.style.borderColor = p.color;
+    btn.onclick = () => {
+      if (selectedPages.has(i)) {
+        selectedPages.delete(i);
+        btn.classList.remove('selected');
+        btn.style.background = '';
+        btn.style.color = '';
+      } else {
+        selectedPages.add(i);
+        btn.classList.add('selected');
+        btn.style.background = p.color;
+        btn.style.color = 'white';
+      }
+      updateCoverageViz();
+    };
+    container.appendChild(btn);
+  });
+  // Sliders
+  ['min-rf','min-cs','max-or'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateCoverageViz);
+  });
+  updateCoverageViz();
+}
+
+function updateCoverageViz() {
+  const minRF = parseInt(document.getElementById('min-rf').value);
+  const minCS = parseInt(document.getElementById('min-cs').value);
+  const maxOR = parseInt(document.getElementById('max-or').value);
+  document.getElementById('min-rf-val').textContent = minRF + '%';
+  document.getElementById('min-cs-val').textContent = minCS + '%';
+  document.getElementById('max-or-val').textContent = maxOR + '%';
+
+  const canvas = document.getElementById('coverage-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw page circles (fixed positions)
+  const positions = [
+    {x:120,y:100},{x:220,y:90},{x:280,y:160},{x:190,y:210},{x:90,y:185}
+  ];
+  const radii = [70, 60, 55, 65, 58];
+
+  PAGES.forEach((p, i) => {
+    ctx.beginPath();
+    ctx.arc(positions[i].x, positions[i].y, radii[i], 0, Math.PI*2);
+    const alpha = selectedPages.has(i) ? 0.45 : 0.12;
+    ctx.fillStyle = hexToRgba(p.color, alpha);
+    ctx.fill();
+    ctx.strokeStyle = selectedPages.has(i) ? p.color : '#334155';
+    ctx.lineWidth = selectedPages.has(i) ? 2.5 : 1;
+    ctx.stroke();
+
+    ctx.fillStyle = selectedPages.has(i) ? 'white' : '#64748b';
+    ctx.font = `bold ${selectedPages.has(i) ? 11 : 10}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(p.name, positions[i].x, positions[i].y - 6);
+    ctx.font = `${selectedPages.has(i) ? 11 : 9}px sans-serif`;
+    ctx.fillText(`${p.users.length} users`, positions[i].x, positions[i].y + 10);
+  });
+
+  // Calculate metrics
+  if (selectedPages.size === 0) {
+    document.getElementById('cv-pages').textContent = 'None';
+    document.getElementById('cv-covered').textContent = '0';
+    document.getElementById('cv-cs').textContent = '0%';
+    document.getElementById('cv-or').textContent = '—';
+    document.getElementById('cv-verdict').innerHTML = '';
+    return;
+  }
+
+  const union = new Set();
+  let totalIndividual = 0;
+  const pageNames = [];
+  selectedPages.forEach(i => {
+    PAGES[i].users.forEach(u => union.add(u));
+    totalIndividual += PAGES[i].users.length;
+    pageNames.push(PAGES[i].name);
+  });
+
+  const covered = union.size;
+  const cs = ((covered / TOTAL_USERS) * 100).toFixed(1);
+  const or = selectedPages.size > 1 ? (((totalIndividual - covered) / (totalIndividual - covered/selectedPages.size)) * 100).toFixed(1) : '0.0';
+  const orNum = parseFloat(or);
+
+  document.getElementById('cv-pages').textContent = pageNames.join(', ');
+  document.getElementById('cv-covered').textContent = covered + ' / ' + TOTAL_USERS;
+  document.getElementById('cv-cs').textContent = cs + '%';
+  document.getElementById('cv-or').textContent = isNaN(orNum) ? '0%' : or + '%';
+
+  // Check if it's a coverage pattern
+  const allRFok = [...selectedPages].every(i => PAGES[i].rf * 100 >= minRF);
+  const csOk = parseFloat(cs) >= minCS;
+  const orOk = isNaN(orNum) || orNum <= maxOR;
+  const isCoverage = allRFok && csOk && orOk;
+
+  const verdictEl = document.getElementById('cv-verdict');
+  if (isCoverage) {
+    verdictEl.innerHTML = '<span class="badge badge-green" style="font-size:12px">✅ Coverage Pattern!</span>';
+  } else {
+    let reason = [];
+    if (!allRFok) reason.push('RF too low');
+    if (!csOk) reason.push(`CS < ${minCS}%`);
+    if (!orOk) reason.push(`OR > ${maxOR}%`);
+    verdictEl.innerHTML = `<span class="badge badge-red" style="font-size:12px">❌ Not a pattern: ${reason.join(', ')}</span>`;
+  }
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ============================================================
+// VISUALIZATION 2: TAXONOMY TREE (SVG)
+// ============================================================
+const TAXONOMY = {
+  id:'food', label:'Food 🍽️', level:0, support:0.85, children:[
+    { id:'dairy', label:'Dairy 🥛', level:1, support:0.52, children:[
+      { id:'milk', label:'Milk', level:2, support:0.38, children:[
+        { id:'brand_a_2p', label:'Brand A 2%', level:3, support:0.08 },
+        { id:'brand_a_wh', label:'Brand A Whole', level:3, support:0.05 },
+        { id:'brand_b_2p', label:'Brand B 2%', level:3, support:0.03 },
+      ]},
+      { id:'cheese', label:'Cheese 🧀', level:2, support:0.28, children:[
+        { id:'cheddar', label:'Cheddar', level:3, support:0.09 },
+        { id:'swiss', label:'Swiss', level:3, support:0.04 },
+      ]},
+    ]},
+    { id:'bread', label:'Bread 🍞', level:1, support:0.41, children:[
+      { id:'white', label:'White', level:2, support:0.25 },
+      { id:'whole', label:'Whole Wheat', level:2, support:0.18 },
+    ]},
+  ]
+};
+
+function initTaxonomyViz() {
+  const svg = document.getElementById('taxonomy-svg');
+  if (svg.children.length > 5) return;
+  svg.innerHTML = '';
+  const W = svg.clientWidth || 400;
+  const H = 320;
+  const nodes = [];
+  const edges = [];
+
+  // Layout tree
+  function layoutNode(node, x, y, span) {
+    node._x = x; node._y = y;
+    nodes.push(node);
+    if (node.children) {
+      const step = span / node.children.length;
+      node.children.forEach((child, i) => {
+        const cx = x - span/2 + step/2 + i * step;
+        edges.push({x1:x, y1:y, x2:cx, y2:y+68});
+        layoutNode(child, cx, y+68, step * 0.85);
+        child._parent = node;
+      });
+    }
+  }
+  layoutNode(TAXONOMY, W/2, 28, W * 0.9);
+
+  const ns = 'http://www.w3.org/2000/svg';
+
+  // Draw edges
+  edges.forEach(e => {
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', e.x1); line.setAttribute('y1', e.y1);
+    line.setAttribute('x2', e.x2); line.setAttribute('y2', e.y2);
+    line.setAttribute('stroke', '#334155'); line.setAttribute('stroke-width', '1.5');
+    svg.appendChild(line);
+  });
+
+  // Draw nodes
+  const thresholds = [0.20, 0.10, 0.02, 0.02];
+  const colors = ['#6366f1','#0ea5e9','#f59e0b','#34d399'];
+
+  nodes.forEach(node => {
+    const g = document.createElementNS(ns, 'g');
+    g.style.cursor = 'pointer';
+
+    const thresh = thresholds[node.level];
+    const passes = node.support >= thresh;
+
+    const rx = node.level === 0 ? 30 : node.level === 1 ? 25 : node.level === 2 ? 22 : 18;
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', node._x); circle.setAttribute('cy', node._y);
+    circle.setAttribute('r', rx);
+    circle.setAttribute('fill', passes ? hexToRgba(colors[node.level], 0.3) : '#1e293b');
+    circle.setAttribute('stroke', passes ? colors[node.level] : '#475569');
+    circle.setAttribute('stroke-width', passes ? '2.5' : '1.5');
+    g.appendChild(circle);
+
+    const text = document.createElementNS(ns, 'text');
+    text.setAttribute('x', node._x); text.setAttribute('y', node._y + 1);
+    text.setAttribute('text-anchor', 'middle'); text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('font-size', node.level < 2 ? '10' : '8');
+    text.setAttribute('font-weight', '700');
+    text.setAttribute('fill', passes ? 'white' : '#64748b');
+    text.textContent = node.label.length > 10 ? node.label.slice(0,10) : node.label;
+    g.appendChild(text);
+
+    g.addEventListener('click', () => showTaxonomyInfo(node, thresh, passes, colors[node.level]));
+    svg.appendChild(g);
+  });
+}
+
+function showTaxonomyInfo(node, thresh, passes, color) {
+  const info = document.getElementById('taxonomy-info');
+  const supportPct = (node.support * 100).toFixed(1);
+  const threshPct = (thresh * 100).toFixed(1);
+  const levelNames = ['L1 (Category)','L2 (Type)','L3 (Brand)','L4 (Variant)'];
+  info.innerHTML = `
+    <div style="font-weight:700; color:${color}">${node.label}</div>
+    <div style="font-size:11px; margin-top:4px">Level: ${levelNames[node.level] || 'L' + node.level}</div>
+    <div style="font-size:11px">Support: <strong>${supportPct}%</strong></div>
+    <div style="font-size:11px">Min support at this level: <strong>${threshPct}%</strong></div>
+    <div style="margin-top:8px">
+      ${passes 
+        ? `<span class="badge badge-green">✅ Passes threshold</span>` 
+        : `<span class="badge badge-red">❌ Below threshold</span>`}
+    </div>
+    ${node._parent ? `<div style="font-size:10px; color:var(--muted-foreground); margin-top:6px">Parent: ${node._parent.label} (${(node._parent.support*100).toFixed(1)}%)</div>` : ''}
+  `;
+}
+
+// ============================================================
+// VISUALIZATION 3: UTILITY CALCULATOR
+// ============================================================
+const UTILITY_ITEMS = {
+  Beer:   { profit: 2, color: '#f59e0b' },
+  Wine:   { profit: 5, color: '#a855f7' },
+  Cheese: { profit: 3, color: '#0ea5e9' },
+  Chips:  { profit: 1, color: '#34d399' },
+  Steak:  { profit: 8, color: '#f87171' },
+};
+const UTILITY_TRANSACTIONS = [
+  { tid:'T1', items:{ Beer:3, Wine:1, Cheese:2 } },
+  { tid:'T2', items:{ Beer:2, Chips:4, Steak:1 } },
+  { tid:'T3', items:{ Wine:2, Cheese:1, Steak:2 } },
+  { tid:'T4', items:{ Beer:1, Chips:3 } },
+  { tid:'T5', items:{ Wine:1, Cheese:3, Chips:2 } },
+  { tid:'T6', items:{ Beer:4, Wine:2, Steak:1 } },
+  { tid:'T7', items:{ Chips:5, Cheese:2 } },
+];
+let selectedUtilItems = new Set();
+
+function initUtilityViz() {
+  const toggles = document.getElementById('utility-toggles');
+  if (toggles.children.length > 0) return;
+
+  Object.entries(UTILITY_ITEMS).forEach(([name, info]) => {
+    const btn = document.createElement('button');
+    btn.className = 'viz-btn';
+    btn.textContent = `${name} ($${info.profit}/unit)`;
+    btn.style.borderColor = info.color;
+    btn.onclick = () => {
+      if (selectedUtilItems.has(name)) {
+        selectedUtilItems.delete(name);
+        btn.classList.remove('selected');
+        btn.style.background = '';
+        btn.style.color = '';
+      } else {
+        selectedUtilItems.add(name);
+        btn.classList.add('selected');
+        btn.style.background = info.color;
+        btn.style.color = '#000';
+      }
+      updateUtilityViz();
+    };
+    toggles.appendChild(btn);
+  });
+
+  document.getElementById('min-util').addEventListener('input', updateUtilityViz);
+  updateUtilityViz();
+}
+
+function updateUtilityViz() {
+  const minUtil = parseInt(document.getElementById('min-util').value);
+  document.getElementById('min-util-val').textContent = minUtil;
+
+  const tbody = document.getElementById('utility-tbody');
+  tbody.innerHTML = '';
+  let total = 0;
+  let matched = 0;
+
+  UTILITY_TRANSACTIONS.forEach(tx => {
+    const hasAll = [...selectedUtilItems].every(item => tx.items[item] !== undefined);
+    let txContrib = 0;
+    if (hasAll && selectedUtilItems.size > 0) {
+      selectedUtilItems.forEach(item => {
+        txContrib += tx.items[item] * UTILITY_ITEMS[item].profit;
+      });
+      total += txContrib;
+      matched++;
+    }
+
+    const itemStr = Object.entries(tx.items).map(([k,v]) => {
+      const isSelected = selectedUtilItems.has(k);
+      return `<span style="color:${isSelected ? UTILITY_ITEMS[k].color : '#64748b'}; font-weight:${isSelected?700:400}">${k}×${v}</span>`;
+    }).join(', ');
+
+    const tr = document.createElement('tr');
+    tr.style.background = hasAll && selectedUtilItems.size > 0 ? 'rgba(99,102,241,0.08)' : '';
+    tr.innerHTML = `
+      <td style="font-weight:700">${tx.tid}</td>
+      <td>${itemStr}</td>
+      <td>${hasAll && selectedUtilItems.size > 0 ? '<span class="badge badge-green">✅</span>' : '<span style="color:#475569">—</span>'}</td>
+      <td style="font-weight:${hasAll && selectedUtilItems.size > 0 ? 700 : 400}; color:${hasAll && selectedUtilItems.size > 0 ? 'var(--accent)' : 'var(--muted-foreground)'}">
+        ${hasAll && selectedUtilItems.size > 0 ? '$' + txContrib : '—'}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const itemsetName = selectedUtilItems.size === 0 ? '{}' : '{' + [...selectedUtilItems].join(', ') + '}';
+  document.getElementById('util-itemset').textContent = itemsetName;
+  document.getElementById('util-total').textContent = '$' + total;
+  document.getElementById('util-matched').textContent = matched;
+
+  const verdictEl = document.getElementById('util-verdict');
+  if (selectedUtilItems.size === 0) {
+    verdictEl.innerHTML = '<span style="color:var(--muted-foreground); font-size:11px">Select items above</span>';
+  } else if (total >= minUtil) {
+    verdictEl.innerHTML = `<span class="badge badge-green">✅ High-Utility! ($${total} ≥ $${minUtil})</span>`;
+  } else {
+    verdictEl.innerHTML = `<span class="badge badge-red">❌ Low utility ($${total} < $${minUtil})</span>`;
+  }
+}
+
+// ============================================================
+// END QUIZ
+// ============================================================
+const QUIZ_DATA = [
+  {
+    q: "What makes coverage patterns DIFFERENT from frequent patterns?",
+    options: [
+      "Coverage patterns require higher minimum support",
+      "Coverage patterns measure how many UNIQUE users visit AT LEAST ONE page (union/OR), while frequent patterns measure co-occurrence (AND)",
+      "Coverage patterns only work on clickstream data",
+      "Coverage patterns use the Apriori algorithm directly"
+    ],
+    correct: 1,
+    explain: "Coverage = union of users across pages. Frequent = intersection / co-occurrence."
+  },
+  {
+    q: "In multi-level mining, why use LOWER min_support at deeper (more specific) levels?",
+    options: [
+      "To find more rules overall",
+      "Because specific items appear in fewer transactions, so their support is naturally lower",
+      "Because deeper levels have more items to check",
+      "To compensate for redundancy filtering"
+    ],
+    correct: 1,
+    explain: "Specific items (e.g., a particular milk brand) appear in far fewer transactions than general categories (milk)."
+  },
+  {
+    q: "What is the Catch-22 of STATIC discretization for quantitative association rules?",
+    options: [
+      "Large intervals have low support; small intervals have low confidence",
+      "Small intervals have low support; large intervals have low confidence",
+      "Any interval size produces the same result",
+      "Discretization always increases support"
+    ],
+    correct: 1,
+    explain: "Small intervals → few transactions per bin → low support. Large intervals → too broad → no real pattern → low confidence."
+  },
+  {
+    q: "What does TWU stand for in high-utility mining, and why is it useful?",
+    options: [
+      "Total Weighted Utility — it gives the exact utility of each itemset",
+      "Transaction-Weighted Utilization — it is an anti-monotonic OVER-ESTIMATE of utility, allowing Apriori-style pruning",
+      "Threshold-Weighted Update — it adjusts support thresholds dynamically",
+      "Transaction-Wide Union — it counts unique users across transactions"
+    ],
+    correct: 1,
+    explain: "TWU sums the entire transaction utility (not just the itemset's share), making it an over-estimate. Critically, TWU IS anti-monotonic, so Apriori pruning applies."
+  },
+  {
+    q: "What makes a constraint ANTI-MONOTONIC?",
+    options: [
+      "If a set satisfies it, all supersets also satisfy it",
+      "If a set violates it, all supersets also violate it — so we can prune the entire subtree",
+      "It can only be applied to itemsets with positive values",
+      "It requires sorting items before evaluation"
+    ],
+    correct: 1,
+    explain: "Anti-monotonic: violation propagates UP. Adding more items cannot fix the violation. Example: sum(price) ≤ $100."
+  }
+];
+
+let quizState = { current: 0, score: 0, answered: false };
+
+function initQuiz() {
+  if (document.getElementById('q-block-0')) return;
+  quizState = { current: 0, score: 0, answered: false };
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = '';
+
+  if (quizState.current >= QUIZ_DATA.length) {
+    // Show score
+    const pct = Math.round((quizState.score / QUIZ_DATA.length) * 100);
+    const emoji = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '📚';
+    const msg = pct >= 80 ? 'Outstanding! You mastered Advanced Patterns!' : pct >= 60 ? 'Good work! Review the tricky parts.' : 'Keep reviewing — you\'ve got this!';
+    container.innerHTML = `
+      <div style="text-align:center; padding: 20px 0">
+        <div style="font-size:48px">${emoji}</div>
+        <div style="font-size:32px; font-weight:800; margin:12px 0">${quizState.score} / ${QUIZ_DATA.length}</div>
+        <div style="font-size:16px; color:var(--muted-foreground)">${msg}</div>
+        <div style="margin-top:8px; font-size:14px; color:var(--accent)">${pct}% correct</div>
+        <button class="btn btn-primary" style="margin-top:20px" onclick="retryQuiz()">🔄 Retry Quiz</button>
+      </div>
+    `;
+    return;
+  }
+
+  const q = QUIZ_DATA[quizState.current];
+  const div = document.createElement('div');
+  div.id = 'q-block-' + quizState.current;
+
+  div.innerHTML = `
+    <div style="font-size:13px; color:var(--muted-foreground); margin-bottom:8px">Question ${quizState.current + 1} of ${QUIZ_DATA.length}</div>
+    <div style="font-size:15px; font-weight:700; margin-bottom:14px; line-height:1.5">${q.q}</div>
+    <div id="options-wrap"></div>
+    <div id="explain-wrap"></div>
+  `;
+  container.appendChild(div);
+
+  const wrap = div.querySelector('#options-wrap');
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = `${String.fromCharCode(65+i)}. ${opt}`;
+    btn.onclick = () => selectAnswer(i, q, wrap, div.querySelector('#explain-wrap'), btn);
+    wrap.appendChild(btn);
+  });
+}
+
+function selectAnswer(chosen, q, wrap, explainWrap, btn) {
+  if (quizState.answered) return;
+  quizState.answered = true;
+
+  const correct = q.correct;
+  wrap.querySelectorAll('.quiz-option').forEach((b, i) => {
+    b.disabled = true;
+    if (i === correct) b.classList.add('correct');
+    else if (i === chosen) b.classList.add('wrong');
+  });
+
+  if (chosen === correct) quizState.score++;
+
+  const isRight = chosen === correct;
+  explainWrap.innerHTML = `
+    <div class="callout ${isRight ? 'callout-tip' : 'callout-warn'}" style="margin-top:12px">
+      <strong>${isRight ? '✅ Correct!' : '❌ Not quite.'}</strong> ${q.explain}
+    
+        <div class="mt-8 border-t border-[var(--border)] pt-6">
+          <h3 class="text-xl font-bold text-[#ec4899] mb-4">📚 Complete Research Paper Foundations</h3>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🏪 Multi-Level Rules: Encoded Tables &amp; Redundancy (Han &amp; Fu TKDE 1999)</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Encoded Transaction Tables ($T[1], T[2], \dots$):</strong> Item hierarchies are encoded directly into item codes (e.g. <code>112</code> = Food [1] → Milk [1] → 2% Foremost [2]). At level 1, transactions retain only the first digit; at level 2, the first two digits, etc.</p>
+              <p>• <strong>Level-by-Level Filtering:</strong> Items infrequent at level 1 are pruned from $T[2]$, dramatically reducing table size for deeper scans.</p>
+              <p>• <strong>Redundancy Filtering:</strong> If rule $R_1$: <code>milk → bread</code> has confidence 80%, and rule $R_2$: <code>2% milk → bread</code> has confidence 81%, $R_2$ is considered redundant and filtered out unless its confidence is significantly higher than expected.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🔢 Quantitative Rules: Catch-22 &amp; Dynamic Discretization (Srikant &amp; Agrawal SIGMOD 1996)</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>The Catch-22 Dilemma:</strong> Mapping quantitative attributes (Age, Income) to fixed intervals creates a conflict:<br/>
+              - <em>Intervals too narrow:</em> Support drops below minsup, and rules are missed.<br/>
+              - <em>Intervals too wide:</em> Information is lost and confidence drops below minconf.</p>
+              <p>• <strong>Dynamic Discretization:</strong> Combines adjacent quantitative intervals dynamically based on data distribution until minimum support is satisfied, and then prunes uninteresting or redundant wider intervals.</p>
+              <p>• <strong>Multi-Dimensional Associations:</strong> Extends beyond transaction itemsets to relational predicates (e.g. <code>age(X, "20..29") ∧ income(X, "40K..60K") ⇒ buys(X, "HDTV")</code>).</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🌿 Diverse Frequent Patterns: Concept Projections &amp; drank (IIIT-H Research)</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Motivation:</strong> Patterns with items spanning multiple distinct branches of a concept hierarchy (e.g., <code>{beer, diaper}</code>) are more diverse and interesting than patterns of items from the same category (e.g., <code>{bread, butter}</code>).</p>
+              <p>• <strong>Balanced vs Unbalanced Hierarchies:</strong> Balanced hierarchies have all leaf items at equal depth; unbalanced hierarchies handle categories of varying granularity.</p>
+              <p>• <strong>Diverse Rank ($drank$):</strong> Let $\pi(Y/C)$ be the minimal subtree projection covering all items in pattern $Y$, and $m(Y/C)$ be the maximal possible projection. Then: $\text{drank}(Y) = \frac{|\text{edges}(\pi(Y/C))|}{|\text{edges}(m(Y/C))|} \in [0, 1]$. Higher $drank$ signifies greater item diversity.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">💎 High-Utility Mining: TWU &amp; Two-Phase Algorithm (Liu et al. PAKDD 2005)</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Why Apriori Fails:</strong> Adding items to an itemset can INCREASE total profit, violating the anti-monotone property of support.</p>
+              <p>• <strong>Transaction-Weighted Utilization (TWU):</strong> For itemset $X$, $TWU(X)$ is the sum of total transaction utilities for all transactions containing $X$.</p>
+              <p>• <strong>TWDC Property:</strong> If $TWU(X) < \text{min\_util}$, no superset of $X$ can be high-utility. Because $TWU$ is anti-monotonic, Apriori pruning is restored!</p>
+              <p>• <strong>Two-Phase Algorithm:</strong><br/>
+              - <em>Phase 1:</em> Uses $TWU$ to generate a small set of candidate high-utility itemsets.<br/>
+              - <em>Phase 2:</em> Scans database once to calculate exact utilities and prune false positives.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🎯 Constraint-Based Frequent Pattern Mining (Anti-monotone, Monotone, Succinct, Convertible)</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Anti-Monotone Constraints:</strong> If violated, further mining of all supersets is terminated (e.g., $\text{sum}(\text{price}) \le 100$, $\min(\text{price}) \ge 20$).</p>
+              <p>• <strong>Monotone Constraints:</strong> If satisfied, all supersets also satisfy it (e.g., $\text{sum}(\text{price}) \ge 100$, $\max(\text{price}) \ge 50$).</p>
+              <p>• <strong>Succinct Constraints:</strong> All itemsets satisfying the constraint can be pre-generated directly without candidate testing (e.g., $\text{itemset} \subseteq \{\text{Dairy items}\}$).</p>
+              <p>• <strong>Convertible Constraints:</strong> Constraints on non-monotonic measures (like $\text{avg}(\text{price}) \le 50$) that become anti-monotonic when items are processed in sorted order of price.</p>
+            </div>
+          </details>
+        </div>
+</div>
+    <button class="btn btn-primary" style="margin-top:12px" onclick="nextQuestion()">
+      ${quizState.current + 1 < QUIZ_DATA.length ? 'Next Question →' : 'See Results 🏆'}
+    </button>
+  `;
+}
+
+function nextQuestion() {
+  quizState.current++;
+  quizState.answered = false;
+  renderQuiz();
+}
+
+function retryQuiz() {
+  quizState = { current: 0, score: 0, answered: false };
+  renderQuiz();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+updateUI();
+</script>
+<div id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+<script>
+function toggleMobileSidebar() {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('sidebar-backdrop');
+  if (sb) sb.classList.toggle('mobile-open');
+  if (bd) bd.classList.toggle('active');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const links = document.querySelectorAll('#sidebar a, #sidebar .sidebar-link, #sidebar button, [onclick*="jumpTo"], [onclick*="showCard"], [onclick*="goToCard"], [onclick*="gotoCard"]');
+  links.forEach(l => {
+    l.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        const sb = document.getElementById('sidebar');
+        const bd = document.getElementById('sidebar-backdrop');
+        if (sb) sb.classList.remove('mobile-open');
+        if (bd) bd.classList.remove('active');
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

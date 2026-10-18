@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mining Multi-Level Association Rules in Large Databases — Visual Tutorial</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #090d16;
+    --card: #131b2e;
+    --card-hover: #1a253e;
+    --sidebar: #090d16;
+    --foreground: #f8fafc;
+    --muted-foreground: #94a3b8;
+    --border: #22304d;
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --accent: #8b5cf6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  .interactive-box {
+    background: #0d1527;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+  }
+  .step-node.active {
+    background: rgba(99, 102, 241, 0.25);
+    border-color: var(--primary);
+    color: #fff;
+  }
+  .math-def {
+    background: #0a101f;
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+  .quiz-btn.correct {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: #10b981 !important;
+    color: #34d399 !important;
+  }
+  .quiz-btn.wrong {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: #ef4444 !important;
+    color: #f87171 !important;
+  }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (RESEARCH PAPERS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  body {
+    padding: 0.75rem 0.5rem !important;
+  }
+  header.sticky {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 1.25rem !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  header.sticky h1 {
+    font-size: 1.2rem !important;
+    line-height: 1.3 !important;
+  }
+  .grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5 {
+    grid-template-columns: 1fr !important;
+  }
+  .interactive-box {
+    padding: 1rem !important;
+    border-radius: 0.75rem !important;
+  }
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  .quiz-btn, button {
+    min-height: 42px !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body class="p-4 md:p-8 max-w-6xl mx-auto">
+
+  <!-- Sticky Navigation Header -->
+  <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md pb-4 pt-2 border-b border-[var(--border)] mb-8 flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-3">
+        <a href="00_papers_home.html" class="text-xs font-bold text-indigo-400 bg-indigo-950/60 hover:bg-indigo-900/60 px-3 py-1.5 rounded-lg border border-indigo-800/60 transition-all flex items-center gap-1">
+          ← Research Hub
+        </a>
+        <span class="text-xs text-[var(--muted-foreground)]">| In-Depth Tutorial</span>
+      </div>
+      <h1 class="text-xl md:text-2xl font-black text-white mt-2 leading-tight">Mining Multi-Level Association Rules in Large Databases</h1>
+      <p class="text-xs text-indigo-300 font-medium">Jiawei Han & Yongjian Fu (IEEE TKDE 1999)</p>
+    </div>
+
+    <!-- Pomodoro Timer -->
+    <div class="flex items-center gap-2">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs font-mono font-bold text-amber-400">
+        <span>⏱️ Focus:</span>
+        <span id="timer-display">15:00</span>
+      </div>
+      <button onclick="toggleTimer()" class="text-xs bg-[var(--card)] hover:bg-[var(--border)] px-2.5 py-1.5 rounded-lg border border-[var(--border)]">⏯</button>
+    </div>
+  </header>
+
+  <!-- Main Tutorial Content Container -->
+  <main class="space-y-12">
+    
+    <!-- 1. The Multi-Level Taxonomy Problem -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 mb-3">
+        1. The Retail Taxonomy Dilemma
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">Why Single-Level Association Mining Misses Real Patterns</h2>
+      <p class="text-sm text-[var(--muted-foreground)] leading-relaxed mb-4">
+        Real-world supermarket goods naturally form concept hierarchies: <code class="text-indigo-300">Food ➔ Dairy ➔ Milk ➔ 2% Low-Fat Darigold Milk</code>.
+      </p>
+      <div class="p-4 rounded-xl bg-indigo-950/30 border border-indigo-800/40 text-sm text-indigo-200 leading-relaxed mb-4">
+        <strong>⚠️ The Uniform Threshold Failure:</strong>
+        If you set a single minimum support threshold (say, 5%):
+        <br/>
+        1. <strong>At high concept levels (Milk, Bread):</strong> Support is high (30%), but rules are generic and obvious ("People who buy dairy buy food").
+        2. <strong>At low concept levels (Darigold 2% 1-Gallon):</strong> Support is 0.05%. With a 5% threshold, <em>every single specific product pattern is pruned away as infrequent</em>!
+        <br/><br/>
+        <strong>Jiawei Han and Yongjian Fu (IEEE TKDE 1999)</strong> solved this by inventing <strong>Multi-Level Association Rule Mining</strong> using <em>Reduced/Ascending Minimum Support</em> and <em>Encoded Transaction Tables ($T[1], T[2]$)</em>.
+      </div>
+    </section>
+
+    <!-- 2. Encoded Tables & Redundancy Filtering -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20 mb-3">
+        2. Theory & Encoding Architecture
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">Encoded Tables (T[1], T[2]) & Redundancy Filtering</h2>
+      <p class="text-sm text-[var(--muted-foreground)] leading-relaxed mb-4">
+        Rather than repeatedly looking up hierarchical trees, Han & Fu encode every item using taxonomic prefixes.
+      </p>
+
+      <div class="math-def mb-6 text-xs text-indigo-300">
+        Taxonomic Prefix Encoding:<br/>
+        • 111: Food ➔ Dairy ➔ Milk ➔ 2% Low-Fat<br/>
+        • 112: Food ➔ Dairy ➔ Cheese ➔ Cheddar<br/>
+        • 121: Food ➔ Bakery ➔ Bread ➔ Wheat<br/><br/>
+        Table Filtering Optimization:<br/>
+        • Level 1: Filter raw database to create T[1] keeping only items frequent at Level 1.<br/>
+        • Level 2: Scan ONLY T[1] to produce T[2], drastically shrinking the scan size for lower levels!
+      </div>
+
+      <div class="p-4 rounded-xl bg-[#0a101f] border border-[var(--border)] text-xs text-slate-300 leading-relaxed">
+        <strong>✂️ Redundancy Filtering Rule:</strong>
+        Suppose we discover Level 1 rule: <code class="text-emerald-400">Milk ➔ Bread (Confidence: 70%)</code>.
+        <br/>
+        Later at Level 2, we find: <code class="text-amber-400">2% Milk ➔ Wheat Bread (Confidence: 71%)</code>.
+        <br/>
+        Is the Level 2 rule useful? <strong>NO!</strong> It is almost identical in confidence to what the ancestor already established. The Level 2 rule is marked <em>redundant</em> and pruned unless its confidence differs significantly from the expected ancestor baseline!
+      </div>
+    </section>
+
+    <!-- 3. Interactive Multi-Level Taxonomy & Filter Workbench -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 mb-3">
+        3. Interactive Visual Simulation
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">Multi-Level Taxonomy & Redundancy Explorer</h2>
+      <p class="text-xs text-[var(--muted-foreground)] mb-6">
+        Switch between Uniform Support and Reduced Support to see how Han & Fu unlock specific product rules without drowning in high-level noise.
+      </p>
+
+      <div class="flex items-center gap-3 mb-6">
+        <button onclick="setMultiLevelMode('uniform')" id="btn-uni" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">
+          Uniform Minsup (Fixed 10%) ❌
+        </button>
+        <button onclick="setMultiLevelMode('reduced')" id="btn-red" class="px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white">
+          Reduced Minsup (L1: 15%, L2: 5%, L3: 1%) ✓
+        </button>
+      </div>
+
+      <div class="interactive-box" id="multilevel-display">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 4. Retention Quiz -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20 mb-3">
+        4. Active Retention Quiz
+      </div>
+      <h2 class="text-2xl font-black text-white mb-6">Test Your Understanding</h2>
+
+      <div class="space-y-6">
+        <!-- Q1 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">1. Why does uniform minimum support fail in multi-level association mining?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Specific leaf-level items naturally have much lower individual transaction counts, so a uniform high threshold prunes all leaf-level rules.</button>
+            <button onclick="answerQuiz(this, false, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Because trees cannot be represented in SQL databases.</button>
+            <button onclick="answerQuiz(this, false, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Because uniform support causes infinite loops.</button>
+          </div>
+          <div id="q1-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! General categories accumulate the transactions of all their children, so they need higher thresholds than specific leaf items.
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">2. What is an Encoded Transaction Table T[1] in Han & Fu's framework?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">A filtered, prefix-encoded version of the database containing only items that survived minimum support at Level 1.</button>
+            <button onclick="answerQuiz(this, false, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">An encryption key used for secure blockchain storage.</button>
+            <button onclick="answerQuiz(this, false, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">A table that replaces all numbers with random noise.</button>
+          </div>
+          <div id="q2-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! T[1] shrinks the database so that mining deeper level patterns does not require scanning the full raw dataset.
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">3. When is a lower-level rule considered REDUNDANT?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">When its confidence is approximately equal to its ancestor rule's confidence without offering new informational surprise.</button>
+            <button onclick="answerQuiz(this, false, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">When it has 100% confidence.</button>
+            <button onclick="answerQuiz(this, false, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">When it involves more than 2 items.</button>
+          </div>
+          <div id="q3-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! If Milk ➔ Bread has 70% confidence, learning that Darigold Milk ➔ Wheat Bread also has 70% confidence tells us nothing new.
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">4. Can an association rule cross different levels (e.g., specific item ➔ general category)?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Yes; cross-level association rules (e.g., Swiss Cheese ➔ Bread) are fully supported and often very valuable.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">No; rules must only contain items from identical tree depths.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Only if the tree has exactly 2 levels.</button>
+          </div>
+          <div id="q4-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! Cross-level mining connects specific niche items with general categories.
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">5. Why do we encode taxonomies with prefixes like '111', '112'?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Because matching common ancestors reduces to simple, ultra-fast bitwise or integer prefix checks.</button>
+            <button onclick="answerQuiz(this, false, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">To hide the identity of the products from customers.</button>
+            <button onclick="answerQuiz(this, false, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Because SQL does not support strings.</button>
+          </div>
+          <div id="q5-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! Checking if 111 and 112 share a category only requires checking if their first two digits match ('11').
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="mt-16 pt-8 border-t border-[var(--border)] text-center text-xs text-[var(--muted-foreground)] pb-12">
+    <p>Data Analytics-I Academic Research Suite • Deep-Dive Series</p>
+    <p class="mt-1">Designed for university students learning foundational data science from first principles.</p>
+  </footer>
+
+  <script>
+    // Pomodoro Timer
+    let timeLeft = 15 * 60;
+    let timerRunning = true;
+    const timerDisplay = document.getElementById('timer-display');
+    setInterval(() => {
+      if (timerRunning && timeLeft > 0) {
+        timeLeft--;
+        const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+        const s = String(timeLeft % 60).padStart(2, '0');
+        timerDisplay.innerText = m + ':' + s;
+        if (timeLeft === 0) alert('⏰ 15-Minute Learning Sprint Finished! Stand up, stretch, and let your brain integrate.');
+      }
+    }, 1000);
+    function toggleTimer() { timerRunning = !timerRunning; }
+
+    // Quiz logic helper
+    function answerQuiz(btn, isCorrect, explanationId) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.quiz-btn').forEach(b => b.classList.remove('correct', 'wrong'));
+      if (isCorrect) {
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('wrong');
+      }
+      document.getElementById(explanationId).classList.remove('hidden');
+    }
+
+    
+  function setMultiLevelMode(mode) {
+    const box = document.getElementById('multilevel-display');
+    const bU = document.getElementById('btn-uni');
+    const bR = document.getElementById('btn-red');
+    if (!box) return;
+
+    if (mode === 'uniform') {
+      bU.className = 'px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white';
+      bR.className = 'px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700';
+      box.innerHTML = `
+        <div class="space-y-3">
+          <div class="text-xs font-bold text-rose-400">Fixed Minsup = 10% Across All Levels:</div>
+          <div class="p-3 rounded-lg bg-[#0a101f] border border-[var(--border)] text-xs font-mono space-y-2">
+            <div class="text-emerald-400">Level 1 (Dairy ➔ Bakery): Support 28%, Conf 75% ➔ <span class="text-emerald-300 font-bold">✓ DISCOVERED</span> (Too broad!)</div>
+            <div class="text-rose-400">Level 2 (Milk ➔ Bread): Support 8% ➔ <span class="text-rose-300 font-bold">✂️ PRUNED</span> (Below 10% threshold!)</div>
+            <div class="text-rose-400">Level 3 (Darigold 2% ➔ Wonder Bread): Support 0.8% ➔ <span class="text-rose-300 font-bold">✂️ PRUNED</span> (Lost completely!)</div>
+          </div>
+          <p class="text-xs text-rose-300">Result: You only discover generic common-sense rules, while all actionable brand-level product patterns are killed!</p>
+        </div>
+      `;
+    } else {
+      bU.className = 'px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700';
+      bR.className = 'px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white';
+      box.innerHTML = `
+        <div class="space-y-3">
+          <div class="text-xs font-bold text-emerald-400">Han & Fu Reduced Minsup (L1: 15%, L2: 5%, L3: 0.5%):</div>
+          <div class="p-3 rounded-lg bg-[#0a101f] border border-[var(--border)] text-xs font-mono space-y-2">
+            <div class="text-emerald-400">Level 1 (Dairy ➔ Bakery): Support 28% (&ge;15%) ➔ <span class="text-emerald-300 font-bold">✓ DISCOVERED</span></div>
+            <div class="text-emerald-400">Level 2 (Milk ➔ Bread): Support 8% (&ge;5%) ➔ <span class="text-emerald-300 font-bold">✓ DISCOVERED</span></div>
+            <div class="text-emerald-400">Level 3 (Darigold 2% ➔ Wonder Bread): Support 0.8% (&ge;0.5%) ➔ <span class="text-emerald-300 font-bold">✓ DISCOVERED</span></div>
+            <div class="text-amber-400">Redundancy Check: Conf(Level 3) = 92% vs Conf(Level 2) = 65% ➔ <span class="text-indigo-300 font-bold">★ KEPT (Huge 27% Informational Gain!)</span></div>
+          </div>
+          <p class="text-xs text-emerald-300">Result: Balanced discovery! High-level patterns provide macro context, and actionable brand synergies are preserved!</p>
+        </div>
+      `;
+    }
+  }
+  setMultiLevelMode('reduced');
+
+  </script>
+</body>
+</html>

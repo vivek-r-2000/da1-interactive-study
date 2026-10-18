@@ -1,0 +1,2984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 3 — Data Preprocessing & Similarity Measures</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #0f172a;
+    --card: #1e293b;
+    --sidebar: #0f172a;
+    --foreground: #f1f5f9;
+    --muted-foreground: #94a3b8;
+    --border: #334155;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #22d3ee;
+    --accent: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* TOP BAR */
+  #topbar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+    z-index: 100;
+  }
+
+  #topbar-title { font-weight: 700; font-size: 14px; color: var(--primary); white-space: nowrap; }
+  #progress-info { font-size: 11px; color: var(--muted-foreground); white-space: nowrap; }
+  #progress-bar-wrap { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; min-width: 60px; }
+  #progress-bar-fill { height: 100%; background: var(--primary); border-radius: 99px; transition: width 0.4s ease; }
+  #timer-display {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+  }
+  #timer-display:hover { border-color: var(--secondary); }
+
+  /* LAYOUT */
+  #layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* SIDEBAR */
+  #sidebar {
+    width: 220px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding: 12px 0;
+  }
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .sidebar-module-name {
+    padding: 0 14px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .sidebar-home-link {
+    display: block;
+    padding: 7px 14px;
+    font-size: 12px;
+    color: var(--secondary);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .sidebar-home-link:hover { border-left-color: var(--secondary); background: rgba(34,211,238,0.06); }
+
+  .sidebar-section-label {
+    padding: 8px 14px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .sidebar-card-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 6px 14px 6px 20px;
+    font-size: 11px;
+    color: var(--muted-foreground);
+    background: none;
+    border: none;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+  .sidebar-card-btn:hover { color: var(--foreground); background: rgba(99,102,241,0.08); border-left-color: var(--primary); }
+  .sidebar-card-btn.active { color: var(--foreground); border-left-color: var(--primary); background: rgba(99,102,241,0.12); font-weight: 600; }
+
+  /* MAIN CONTENT */
+  #main { flex: 1; overflow: hidden; position: relative; display: flex; align-items: stretch; }
+
+  /* CARD CONTAINER */
+  #card-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #card-container::-webkit-scrollbar { width: 6px; }
+  #card-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .card {
+    display: none;
+    width: 100%;
+    max-width: 820px;
+    animation: fadeSlide 0.35s ease;
+  }
+  .card.active { display: block; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* CARD INNER */
+  .card-inner {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .card-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 10px 20px;
+    background: rgba(0,0,0,0.25);
+    color: var(--muted-foreground);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-body { padding: 24px 28px; }
+  .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .card-emoji { font-size: 36px; line-height: 1; }
+  .card-title { font-size: 20px; font-weight: 700; color: var(--foreground); }
+  .card-subtitle { font-size: 13px; color: var(--muted-foreground); margin-top: 2px; }
+
+  /* TYPE BADGES */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+  .badge-blue { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+  .badge-green { background: rgba(34,197,94,0.2); color: #86efac; }
+  .badge-yellow { background: rgba(245,158,11,0.2); color: #fcd34d; }
+  .badge-red { background: rgba(239,68,68,0.2); color: #fca5a5; }
+  .badge-purple { background: rgba(168,85,247,0.2); color: #d8b4fe; }
+  .badge-cyan { background: rgba(34,211,238,0.2); color: #67e8f9; }
+
+  /* CONTENT TYPOGRAPHY */
+  .content-text { font-size: 14px; line-height: 1.7; color: var(--foreground); margin-bottom: 12px; }
+  .content-text strong { color: var(--secondary); }
+  .content-text em { color: var(--accent); font-style: normal; }
+  .analogy-box {
+    background: rgba(34,197,94,0.08);
+    border-left: 4px solid #22c55e;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #86efac;
+  }
+  .why-box {
+    background: rgba(99,102,241,0.1);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: #c7d2fe;
+  }
+  .why-box strong { color: var(--primary); font-size: 11px; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.07em; }
+  .formula-box {
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 12px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    text-align: center;
+    color: #fcd34d;
+  }
+  .list-item { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px; font-size: 13px; line-height: 1.5; }
+  .list-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); margin-top: 6px; flex-shrink: 0; }
+  .highlight { background: rgba(99,102,241,0.15); border-radius: 4px; padding: 1px 5px; color: #a5b4fc; font-family: monospace; font-size: 13px; }
+
+  /* FLIP CARD */
+  .flip-card-wrap { perspective: 1000px; cursor: pointer; height: 180px; }
+  .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+  .flip-card-wrap.flipped .flip-card-inner { transform: rotateY(180deg); }
+  .flip-face {
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 20px; text-align: center;
+  }
+  .flip-front { background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.2)); border: 1px solid rgba(99,102,241,0.4); }
+  .flip-back { background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.2)); border: 1px solid rgba(34,197,94,0.4); transform: rotateY(180deg); }
+  .flip-q { font-size: 15px; font-weight: 600; color: var(--foreground); margin-bottom: 8px; }
+  .flip-hint { font-size: 11px; color: var(--muted-foreground); }
+  .flip-a { font-size: 15px; color: #86efac; font-weight: 600; }
+
+  /* NAV BUTTONS */
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-bottom: 8px; }
+  .nav-btn {
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--foreground);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-btn.primary { background: var(--primary); border-color: var(--primary); color: white; }
+  .nav-btn.primary:hover:not(:disabled) { opacity: 0.9; }
+  .micro-copy { font-size: 12px; color: var(--muted-foreground); }
+
+  /* QUIZ */
+  .quiz-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 11px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--foreground);
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+  }
+  .quiz-option:hover { border-color: var(--primary); background: rgba(99,102,241,0.08); }
+  .quiz-option.correct { border-color: #22c55e; background: rgba(34,197,94,0.12); color: #86efac; }
+  .quiz-option.wrong { border-color: #ef4444; background: rgba(239,68,68,0.1); color: #fca5a5; }
+  .quiz-feedback { font-size: 13px; margin-top: 8px; padding: 8px 12px; border-radius: 6px; }
+  .quiz-feedback.ok { background: rgba(34,197,94,0.1); color: #86efac; }
+  .quiz-feedback.err { background: rgba(239,68,68,0.1); color: #fca5a5; }
+
+  /* CANVAS */
+  canvas { border-radius: 8px; display: block; }
+
+  /* GRID */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* STAT CARD */
+  .stat-card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-val { font-size: 22px; font-weight: 700; color: var(--secondary); }
+  .stat-lbl { font-size: 11px; color: var(--muted-foreground); margin-top: 2px; }
+
+  /* BREAK OVERLAY */
+  #break-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  #break-overlay.show { display: flex; }
+  #break-overlay h2 { font-size: 32px; color: var(--foreground); }
+  #break-overlay p { font-size: 16px; color: var(--muted-foreground); }
+
+  /* INPUTS */
+  input[type=number], input[type=text] {
+    background: var(--background);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    width: 100%;
+  }
+  input[type=number]:focus, input[type=text]:focus { outline: none; border-color: var(--primary); }
+  label { font-size: 12px; color: var(--muted-foreground); display: block; margin-bottom: 3px; }
+  select {
+    background: var(--background);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  select:focus { outline: none; border-color: var(--primary); }
+
+  /* SMALL BTN */
+  .small-btn {
+    padding: 6px 14px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: rgba(99,102,241,0.15);
+    color: #a5b4fc;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .small-btn:hover { border-color: var(--primary); background: rgba(99,102,241,0.3); }
+  .small-btn.active-btn { background: var(--primary); color: white; border-color: var(--primary); }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: rgba(0,0,0,0.3); color: var(--muted-foreground); padding: 7px 10px; text-align: left; font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.07em; }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--foreground); }
+  td.missing { background: rgba(239,68,68,0.15); color: #fca5a5; font-style: italic; border: 1px dashed rgba(239,68,68,0.4); }
+  td.filled { background: rgba(34,197,94,0.12); color: #86efac; font-weight: 600; transition: all 0.4s; }
+  tr:hover td { background: rgba(99,102,241,0.04); }
+
+  /* APPENDIX */
+  .appendix-toggle {
+    width: 100%;
+    padding: 14px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+    transition: border-color 0.2s;
+  }
+  .appendix-toggle:hover { border-color: var(--primary); }
+  .appendix-body {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .appendix-body.open { display: block; }
+
+  /* SCORE */
+  .score-box { text-align: center; padding: 24px; }
+  .score-num { font-size: 56px; font-weight: 900; color: var(--primary); }
+  .score-msg { font-size: 18px; margin-top: 8px; }
+
+  /* Bar visualizer */
+  .dist-bar-wrap { margin: 6px 0; }
+  .dist-bar-label { font-size: 12px; color: var(--muted-foreground); margin-bottom: 3px; display: flex; justify-content: space-between; }
+  .dist-bar-track { background: var(--border); border-radius: 99px; height: 14px; overflow: hidden; }
+  .dist-bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+
+  /* Jaccard */
+  .set-item {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    margin: 3px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  /* Normalization bars */
+  .norm-bar-container { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
+  .norm-bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+  .norm-bar-label { width: 40px; text-align: right; color: var(--muted-foreground); }
+  .norm-bar-track { flex: 1; background: var(--border); border-radius: 4px; height: 16px; overflow: hidden; }
+  .norm-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+  .norm-bar-val { width: 45px; color: var(--secondary); font-size: 11px; }
+
+  /* PCA canvas legend */
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted-foreground); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Scrollbar for main */
+  #card-container::-webkit-scrollbar { width: 4px; }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (PHONES & TABLETS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  #topbar {
+    padding: 0 10px !important;
+    gap: 6px !important;
+    height: 52px !important;
+    overflow-x: hidden !important;
+  }
+  #topbar .title, #topbar #module-title, #topbar #topbar-title, #topbar .module-title {
+    font-size: 11px !important;
+    max-width: 115px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  #topbar a, #topbar #home-btn {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+    white-space: nowrap !important;
+  }
+  #topbar #pomodoro {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+  }
+  #topbar #timer-display {
+    font-size: 12px !important;
+  }
+  #topbar #section-label, #topbar .sec-pill, #topbar .badge, #topbar #timer-btn-label {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: var(--card, #1e293b) !important;
+    border: 1px solid var(--border, #334155) !important;
+    color: var(--foreground, #f8fafc) !important;
+    padding: 5px 8px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+  }
+  #sidebar {
+    position: fixed !important;
+    top: 52px !important;
+    left: -320px !important;
+    width: 280px !important;
+    max-width: 82vw !important;
+    bottom: 0 !important;
+    height: calc(100vh - 52px) !important;
+    z-index: 9999 !important;
+    background: #0a0f1e !important;
+    border-right: 1px solid var(--border, #334155) !important;
+    box-shadow: 4px 0 25px rgba(0,0,0,0.7) !important;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #sidebar.mobile-open {
+    left: 0 !important;
+  }
+  #sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 52px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(3px);
+    z-index: 9998;
+  }
+  #sidebar-backdrop.active {
+    display: block !important;
+  }
+  #layout {
+    display: block !important;
+    margin-top: 52px !important;
+    height: calc(100vh - 52px) !important;
+    position: relative !important;
+    overflow-x: hidden !important;
+  }
+  #main, #card-container, .main-content, #content-area {
+    margin-left: 0 !important;
+    padding: 16px 12px 100px 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  .card, .card-screen, .card-box, .slide {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 12px !important;
+    margin-bottom: 16px !important;
+  }
+  h1 { font-size: 1.35rem !important; }
+  h2, .card-title { font-size: 1.15rem !important; }
+  h3 { font-size: 1.0rem !important; }
+  p, li, .card-body { font-size: 13.5px !important; line-height: 1.6 !important; }
+  #nav-bar, .bottom-nav, #navigation-bar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+    background: rgba(10, 15, 30, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 1px solid var(--border, #334155) !important;
+    z-index: 9000 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  .nav-btn, #prevBtn, #nextBtn {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    min-height: 42px !important;
+    flex: 1 !important;
+    max-width: 130px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  #cardIndicator, #card-counter, .card-counter {
+    font-size: 12px !important;
+    min-width: 65px !important;
+    text-align: center !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+}
+@media (min-width: 769px) {
+  .mobile-menu-btn, #sidebar-backdrop {
+    display: none !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body>
+
+<!-- BREAK OVERLAY -->
+<div id="break-overlay">
+  <div style="font-size:56px">⏰</div>
+  <h2>Great work! Take a 5-minute break.</h2>
+  <p>Rest your eyes, stretch, grab some water.</p>
+  <button class="nav-btn primary" onclick="resumeTimer()">▶ Resume</button>
+</div>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation">☰ Menu</button>
+  <div id="topbar-title">📊 Module 3 — Preprocessing</div>
+  <div id="progress-info">Card 1 of 30 · Section 1 of 6</div>
+  <div id="progress-bar-wrap"><div id="progress-bar-fill" style="width:3.3%"></div></div>
+  <div id="timer-display" onclick="toggleTimer()" title="Click to pause/resume">🍅 15:00</div>
+</div>
+
+<!-- LAYOUT -->
+<div id="layout">
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-module-name">📊 Module 3</div>
+    <a href="00_home.html" class="sidebar-home-link">🏠 Back to Home</a>
+
+    <div class="sidebar-section-label">§1 Why Preprocess?</div>
+    <button class="sidebar-card-btn active" onclick="goToCard(0)">🍳 Analogy: Garbage In</button>
+    <button class="sidebar-card-btn" onclick="goToCard(1)">⚠️ 4 Data Problems</button>
+    <button class="sidebar-card-btn" onclick="goToCard(2)">🔧 4 Main Tasks</button>
+    <button class="sidebar-card-btn" onclick="goToCard(3)">🃏 Flip: Age=150?</button>
+
+    <div class="sidebar-section-label">§2 Similarity & Distance</div>
+    <button class="sidebar-card-btn" onclick="goToCard(4)">📏 Analogy: Measuring Difference</button>
+    <button class="sidebar-card-btn" onclick="goToCard(5)">📐 Euclidean Distance</button>
+    <button class="sidebar-card-btn" onclick="goToCard(6)">🏙️ Manhattan Distance</button>
+    <button class="sidebar-card-btn" onclick="goToCard(7)">🧮 Distance Calculator</button>
+    <button class="sidebar-card-btn" onclick="goToCard(8)">📄 Cosine Similarity</button>
+    <button class="sidebar-card-btn" onclick="goToCard(9)">🛒 Jaccard Similarity</button>
+    <button class="sidebar-card-btn" onclick="goToCard(10)">🔴 Jaccard Playground</button>
+    <button class="sidebar-card-btn" onclick="goToCard(11)">🏷️ Nominal Attributes</button>
+    <button class="sidebar-card-btn" onclick="goToCard(12)">📊 Ordinal Attributes</button>
+    <button class="sidebar-card-btn" onclick="goToCard(13)">🃏 Flip: Identical Docs</button>
+
+    <div class="sidebar-section-label">§3 Data Cleaning</div>
+    <button class="sidebar-card-btn" onclick="goToCard(14)">✏️ Analogy: Essay Editing</button>
+    <button class="sidebar-card-btn" onclick="goToCard(15)">❓ Handling Missing Values</button>
+    <button class="sidebar-card-btn" onclick="goToCard(16)">🧪 Imputation Demo</button>
+    <button class="sidebar-card-btn" onclick="goToCard(17)">📦 Binning: Noisy Data</button>
+    <button class="sidebar-card-btn" onclick="goToCard(18)">⚖️ Binning Types</button>
+    <button class="sidebar-card-btn" onclick="goToCard(19)">🃏 Flip: Binning Outliers</button>
+
+    <div class="sidebar-section-label">§4 Transformation</div>
+    <button class="sidebar-card-btn" onclick="goToCard(20)">💱 Analogy: Same Scale</button>
+    <button class="sidebar-card-btn" onclick="goToCard(21)">📏 Min-Max Normalization</button>
+    <button class="sidebar-card-btn" onclick="goToCard(22)">📊 Z-Score Normalization</button>
+    <button class="sidebar-card-btn" onclick="goToCard(23)">🎛️ Normalization Demo</button>
+    <button class="sidebar-card-btn" onclick="goToCard(24)">🃏 Flip: Min-Max Range</button>
+
+    <div class="sidebar-section-label">§5 Dim. Reduction</div>
+    <button class="sidebar-card-btn" onclick="goToCard(25)">🗜️ Analogy: PCA</button>
+    <button class="sidebar-card-btn" onclick="goToCard(26)">👹 Curse of Dimensionality</button>
+    <button class="sidebar-card-btn" onclick="goToCard(27)">🔭 PCA Intuition</button>
+    <button class="sidebar-card-btn" onclick="goToCard(28)">✂️ Attribute Selection</button>
+    <button class="sidebar-card-btn" onclick="goToCard(29)">🃏 Flip: PCA Variance</button>
+
+    <div class="sidebar-section-label">§6 End Quiz</div>
+    <button class="sidebar-card-btn" onclick="goToCard(30)">🏆 Final Quiz</button>
+  </nav>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="card-container">
+
+      <!-- ==================== SECTION 1 ==================== -->
+
+      <!-- CARD 0: Analogy -->
+      <div class="card active" data-section="1" data-section-total="6" data-card="1" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🍳 WHY PREPROCESS? • Card 1 of 30</span>
+            <span class="badge badge-green">ANALOGY</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🤖</div>
+              <div>
+                <div class="card-title">Garbage In, Garbage Out</div>
+                <div class="card-subtitle">The #1 rule of data quality</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              🍳 Imagine feeding a recipe to a robot chef — but the recipe has <strong>missing steps</strong>, <strong>wrong measurements</strong>, and some pages are <strong>duplicated</strong>. The robot will produce garbage food. Same with data — <em>garbage in, garbage out</em>. Preprocessing fixes the recipe.
+            </div>
+            <p class="content-text">Real-world data is <strong>messy</strong>. It comes from many sources, collected by different people, at different times, with different tools.</p>
+            <p class="content-text">Before we can mine patterns or build models, we must <strong>clean and prepare</strong> the data. This is called <em>data preprocessing</em> and takes up ~80% of a data scientist's time.</p>
+            <div class="why-box">
+              <strong>💡 Why This Matters</strong>
+              Even the best machine learning algorithm will fail if fed dirty data. Preprocessing is the single most impactful step in any data project.
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()" disabled>← Back</button>
+          <span class="micro-copy">Click a card in the sidebar to jump</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 1: 4 Problems -->
+      <div class="card" data-section="1" data-section-total="6" data-card="2" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>⚠️ WHY PREPROCESS? • Card 2 of 30</span>
+            <span class="badge badge-red">PROBLEMS</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">⚠️</div>
+              <div>
+                <div class="card-title">4 Main Data Problems</div>
+                <div class="card-subtitle">What goes wrong with real data?</div>
+              </div>
+            </div>
+            <div class="two-col" style="margin-bottom:14px">
+              <div class="stat-card" style="border-color:rgba(239,68,68,0.4)">
+                <div style="font-size:24px;margin-bottom:6px">🕳️</div>
+                <div style="font-weight:700;color:#fca5a5">Incomplete</div>
+                <div style="font-size:11px;color:var(--muted-foreground);margin-top:4px">Missing values, missing attributes. E.g., age field left blank.</div>
+              </div>
+              <div class="stat-card" style="border-color:rgba(245,158,11,0.4)">
+                <div style="font-size:24px;margin-bottom:6px">📡</div>
+                <div style="font-weight:700;color:#fcd34d">Noisy</div>
+                <div style="font-size:11px;color:var(--muted-foreground);margin-top:4px">Errors, outliers. E.g., age = 150, salary = -500.</div>
+              </div>
+              <div class="stat-card" style="border-color:rgba(168,85,247,0.4)">
+                <div style="font-size:24px;margin-bottom:6px">🔀</div>
+                <div style="font-weight:700;color:#d8b4fe">Inconsistent</div>
+                <div style="font-size:11px;color:var(--muted-foreground);margin-top:4px">Conflicting data. "M" vs "Male" vs "1" for gender.</div>
+              </div>
+              <div class="stat-card" style="border-color:rgba(34,211,238,0.4)">
+                <div style="font-size:24px;margin-bottom:6px">📋</div>
+                <div style="font-weight:700;color:#67e8f9">Duplicate</div>
+                <div style="font-size:11px;color:var(--muted-foreground);margin-top:4px">Same record entered multiple times with minor variations.</div>
+              </div>
+            </div>
+            <div class="why-box">
+              <strong>💡 Real Example</strong>
+              A hospital database might have patient age blank (incomplete), blood pressure recorded as 9999 (noisy), name as "John Smith" vs "J. Smith" (inconsistent), and the same visit recorded twice (duplicate).
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">You're doing great! 🚀</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 2: 4 Tasks -->
+      <div class="card" data-section="1" data-section-total="6" data-card="3" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🔧 WHY PREPROCESS? • Card 3 of 30</span>
+            <span class="badge badge-blue">CONCEPT</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🔧</div>
+              <div>
+                <div class="card-title">4 Main Preprocessing Tasks</div>
+                <div class="card-subtitle">The preprocessing pipeline</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+              <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(99,102,241,0.08);border-radius:8px;padding:12px">
+                <div style="font-size:24px">🧹</div>
+                <div><div style="font-weight:700;color:#a5b4fc">1. Data Cleaning</div><div style="font-size:12px;color:var(--muted-foreground)">Fill missing values, smooth noise, remove duplicates, resolve inconsistencies.</div></div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(34,211,238,0.08);border-radius:8px;padding:12px">
+                <div style="font-size:24px">🔗</div>
+                <div><div style="font-weight:700;color:#67e8f9">2. Integration</div><div style="font-size:12px;color:var(--muted-foreground)">Combine data from multiple sources (databases, files, APIs) into one consistent dataset.</div></div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(245,158,11,0.08);border-radius:8px;padding:12px">
+                <div style="font-size:24px">🗜️</div>
+                <div><div style="font-weight:700;color:#fcd34d">3. Reduction</div><div style="font-size:12px;color:var(--muted-foreground)">Reduce volume while keeping the important patterns. E.g., fewer attributes or records.</div></div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(34,197,94,0.08);border-radius:8px;padding:12px">
+                <div style="font-size:24px">🔄</div>
+                <div><div style="font-weight:700;color:#86efac">4. Transformation</div><div style="font-size:12px;color:var(--muted-foreground)">Scale, normalize, or encode data so algorithms can work with it effectively.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Almost through Section 1!</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 3: Flip -->
+      <div class="card" data-section="1" data-section-total="6" data-card="4" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🃏 WHY PREPROCESS? • Card 4 of 30</span>
+            <span class="badge badge-purple">ACTIVE RECALL</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🃏</div>
+              <div>
+                <div class="card-title">Active Recall Check</div>
+                <div class="card-subtitle">Click the card to reveal the answer</div>
+              </div>
+            </div>
+            <div class="flip-card-wrap" id="flip0" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-face flip-front">
+                  <div style="font-size:28px;margin-bottom:10px">🤔</div>
+                  <div class="flip-q">Your dataset has <span class="highlight">age = 150</span> for one person. What kind of data quality problem is this?</div>
+                  <div class="flip-hint">👆 Click to reveal answer</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div style="font-size:28px;margin-bottom:10px">✅</div>
+                  <div class="flip-a">Noisy Data — a likely recording error or outlier. No human lives to age 150, so this value is clearly wrong.</div>
+                  <div class="flip-hint" style="margin-top:8px">It could also indicate a default value (e.g., 999 entered when unknown)</div>
+                </div>
+              </div>
+            </div>
+            <div class="why-box" style="margin-top:14px">
+              <strong>💡 Trick</strong>
+              Noisy data = statistically impossible or unreasonable values. Incomplete data = values are simply absent. These are different problems with different solutions!
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Section 1 complete! 🎉</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- ==================== SECTION 2 ==================== -->
+
+      <!-- CARD 4: Analogy -->
+      <div class="card" data-section="2" data-section-total="6" data-card="5" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>📏 SIMILARITY & DISTANCE • Card 5 of 30</span>
+            <span class="badge badge-green">ANALOGY</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">📏</div>
+              <div>
+                <div class="card-title">Measuring Difference</div>
+                <div class="card-subtitle">Why do we need distance measures?</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              🎬 How different are two movies? 🗺️ How far apart are two cities? In data mining, we need to <strong>mathematically measure</strong> how similar or different two data points are. This is called a <em>dissimilarity measure</em> (or distance).
+            </div>
+            <p class="content-text">Algorithms like k-NN, k-Means clustering, and recommendation systems all rely on computing <strong>similarity</strong> between data points.</p>
+            <p class="content-text">The key insight: <em>similar things should have low distance; different things should have high distance.</em></p>
+            <div class="two-col" style="margin-top:14px">
+              <div class="stat-card">
+                <div style="font-size:20px;margin-bottom:4px">📐</div>
+                <div style="font-weight:700;font-size:13px">Distance</div>
+                <div style="font-size:11px;color:var(--muted-foreground)">0 = identical, bigger = more different</div>
+              </div>
+              <div class="stat-card">
+                <div style="font-size:20px;margin-bottom:4px">🤝</div>
+                <div style="font-weight:700;font-size:13px">Similarity</div>
+                <div style="font-size:11px;color:var(--muted-foreground)">1 = identical, 0 = completely different</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Section 2 of 6 🗺️</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 5: Euclidean -->
+      <div class="card" data-section="2" data-section-total="6" data-card="6" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>📐 SIMILARITY & DISTANCE • Card 6 of 30</span>
+            <span class="badge badge-yellow">FORMULA + VISUAL</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">📐</div>
+              <div>
+                <div class="card-title">Euclidean Distance</div>
+                <div class="card-subtitle">The straight-line distance</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              ✈️ Like the distance between two cities as the crow flies — a straight line through the air, ignoring roads or obstacles.
+            </div>
+            <div class="formula-box">d(A,B) = √((x₂−x₁)² + (y₂−y₁)²)</div>
+            <p class="content-text" style="margin-top:10px">In general (n dimensions): <span class="highlight">d = √(Σ(xᵢ−yᵢ)²)</span></p>
+            <p style="font-size:12px;color:var(--muted-foreground);margin-bottom:10px">🖱️ Drag the <span style="color:#f87171">red dot</span> below — the distance updates live!</p>
+            <canvas id="euclidCanvas" width="760" height="180" style="cursor:crosshair;max-width:100%"></canvas>
+            <div style="text-align:center;margin-top:8px;font-size:14px;color:var(--secondary);font-weight:700" id="euclidDist">Distance: —</div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Interactive! Try dragging 🎯</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 6: Manhattan -->
+      <div class="card" data-section="2" data-section-total="6" data-card="7" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🏙️ SIMILARITY & DISTANCE • Card 7 of 30</span>
+            <span class="badge badge-blue">CONCEPT + VISUAL</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🏙️</div>
+              <div>
+                <div class="card-title">Manhattan Distance</div>
+                <div class="card-subtitle">City block distance (L1 norm)</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              🚕 Navigating Manhattan's grid: you can only go horizontal or vertical — no diagonal shortcuts. The total blocks walked is your distance.
+            </div>
+            <div class="formula-box">d(A,B) = |x₂−x₁| + |y₂−y₁|</div>
+            <p class="content-text">Also called <strong>L1 distance</strong> or <em>taxicab distance</em>. Less sensitive to outliers than Euclidean distance.</p>
+            <canvas id="manhattanCanvas" width="760" height="180" style="max-width:100%"></canvas>
+            <div style="display:flex;justify-content:center;gap:20px;margin-top:8px">
+              <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div>Point A (fixed)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div>Point B (fixed)</div>
+              <div class="legend-item"><div style="width:24px;height:3px;background:#f59e0b"></div>Manhattan path</div>
+              <div class="legend-item"><div style="width:24px;height:2px;background:#a5b4fc;border-top:2px dashed #a5b4fc"></div>Euclidean</div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Keep going! 💪</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 7: Distance Calculator -->
+      <div class="card" data-section="2" data-section-total="6" data-card="8" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🧮 SIMILARITY & DISTANCE • Card 8 of 30</span>
+            <span class="badge badge-cyan">INTERACTIVE</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🧮</div>
+              <div>
+                <div class="card-title">Distance Calculator</div>
+                <div class="card-subtitle">Enter two 3D vectors and compare all distances</div>
+              </div>
+            </div>
+            <div class="two-col" style="margin-bottom:12px">
+              <div>
+                <div style="font-weight:700;color:#a5b4fc;margin-bottom:8px;font-size:13px">📍 Vector A (x, y, z)</div>
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1"><label>x₁</label><input type="number" id="ax" value="1" oninput="calcDists()"></div>
+                  <div style="flex:1"><label>y₁</label><input type="number" id="ay" value="2" oninput="calcDists()"></div>
+                  <div style="flex:1"><label>z₁</label><input type="number" id="az" value="3" oninput="calcDists()"></div>
+                </div>
+              </div>
+              <div>
+                <div style="font-weight:700;color:#f87171;margin-bottom:8px;font-size:13px">📍 Vector B (x, y, z)</div>
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1"><label>x₂</label><input type="number" id="bx" value="4" oninput="calcDists()"></div>
+                  <div style="flex:1"><label>y₂</label><input type="number" id="by" value="6" oninput="calcDists()"></div>
+                  <div style="flex:1"><label>z₂</label><input type="number" id="bz" value="3" oninput="calcDists()"></div>
+                </div>
+              </div>
+            </div>
+            <div id="dist-results">
+              <div class="dist-bar-wrap">
+                <div class="dist-bar-label"><span>📐 Euclidean (L2)</span><span id="euc-val" style="color:var(--secondary);font-weight:700">—</span></div>
+                <div class="dist-bar-track"><div class="dist-bar-fill" id="euc-bar" style="background:#6366f1;width:0%"></div></div>
+              </div>
+              <div class="dist-bar-wrap" style="margin-top:10px">
+                <div class="dist-bar-label"><span>🏙️ Manhattan (L1)</span><span id="man-val" style="color:var(--secondary);font-weight:700">—</span></div>
+                <div class="dist-bar-track"><div class="dist-bar-fill" id="man-bar" style="background:#f59e0b;width:0%"></div></div>
+              </div>
+              <div class="dist-bar-wrap" style="margin-top:10px">
+                <div class="dist-bar-label"><span>♾️ Supremum (L∞)</span><span id="sup-val" style="color:var(--secondary);font-weight:700">—</span></div>
+                <div class="dist-bar-track"><div class="dist-bar-fill" id="sup-bar" style="background:#22d3ee;width:0%"></div></div>
+              </div>
+            </div>
+            <div class="why-box" style="margin-top:12px">
+              <strong>💡 Supremum (L∞)</strong>
+              Max |xᵢ−yᵢ| across all dimensions. Used in chess king moves — the number of moves to reach another square.
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Try different values! 🔢</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 8: Cosine Similarity -->
+      <div class="card" data-section="2" data-section-total="6" data-card="9" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>📄 SIMILARITY & DISTANCE • Card 9 of 30</span>
+            <span class="badge badge-blue">CONCEPT</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">📄</div>
+              <div>
+                <div class="card-title">Cosine Similarity</div>
+                <div class="card-subtitle">Angle between vectors, not length</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              🧭 Two arrows pointing northeast are similar, even if one is twice as long. Cosine similarity measures the <strong>angle between them</strong>, not their length. Used heavily in text analysis.
+            </div>
+            <div class="formula-box">cos(θ) = (A · B) / (|A| × |B|)</div>
+            <p class="content-text"><strong>A · B</strong> is the dot product. <strong>|A|</strong> and <strong>|B|</strong> are the magnitudes (lengths).</p>
+            <p class="content-text">Range: <span class="highlight">[-1, 1]</span>. For text documents (non-negative counts), range is <span class="highlight">[0, 1]</span>.</p>
+            <canvas id="cosineCanvas" width="760" height="160" style="max-width:100%"></canvas>
+            <div style="display:flex;gap:20px;justify-content:center;margin-top:8px">
+              <div style="text-align:center"><div style="font-size:20px">📄</div><div style="font-size:11px;color:var(--muted-foreground)">Long doc</div></div>
+              <div style="text-align:center"><div style="font-size:20px">📝</div><div style="font-size:11px;color:var(--muted-foreground)">Short doc</div></div>
+              <div style="text-align:center"><div style="font-size:20px">≈ 1.0</div><div style="font-size:11px;color:#86efac">High similarity!</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Halfway through! 🎉</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 9: Jaccard -->
+      <div class="card" data-section="2" data-section-total="6" data-card="10" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🛒 SIMILARITY & DISTANCE • Card 10 of 30</span>
+            <span class="badge badge-blue">CONCEPT</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🛒</div>
+              <div>
+                <div class="card-title">Jaccard Similarity</div>
+                <div class="card-subtitle">For comparing sets</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              🛒 Two shopping baskets: what fraction of all items do they <strong>share</strong>? That's Jaccard similarity — shared items divided by all distinct items combined.
+            </div>
+            <div class="formula-box">J(A,B) = |A ∩ B| / |A ∪ B|</div>
+            <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:14px;margin:12px 0">
+              <div style="font-size:13px;margin-bottom:8px;color:var(--muted-foreground)">Example:</div>
+              <div style="font-size:13px;margin-bottom:6px"><strong style="color:#a5b4fc">Basket A:</strong> {milk, bread, eggs}</div>
+              <div style="font-size:13px;margin-bottom:6px"><strong style="color:#f87171">Basket B:</strong> {milk, bread, butter}</div>
+              <div style="font-size:13px;margin-bottom:6px"><strong style="color:#86efac">Shared (A∩B):</strong> {milk, bread} → <span class="highlight">|A∩B| = 2</span></div>
+              <div style="font-size:13px;margin-bottom:6px"><strong style="color:#fcd34d">Combined (A∪B):</strong> {milk, bread, eggs, butter} → <span class="highlight">|A∪B| = 4</span></div>
+              <div style="font-size:15px;font-weight:700;color:var(--secondary);margin-top:8px">J(A,B) = 2/4 = <span style="font-size:20px">0.5</span> (50% similar)</div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Next: try it yourself! 🎮</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 10: Jaccard Playground -->
+      <div class="card" data-section="2" data-section-total="6" data-card="11" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🔴 SIMILARITY & DISTANCE • Card 11 of 30</span>
+            <span class="badge badge-cyan">INTERACTIVE</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🎮</div>
+              <div>
+                <div class="card-title">Jaccard Playground</div>
+                <div class="card-subtitle">Click items to toggle them in/out of each set</div>
+              </div>
+            </div>
+            <div class="two-col" style="gap:20px;margin-bottom:12px">
+              <div>
+                <div style="font-weight:700;color:#a5b4fc;margin-bottom:8px;font-size:13px">Set A — click to toggle</div>
+                <div id="setA-items"></div>
+              </div>
+              <div>
+                <div style="font-weight:700;color:#f87171;margin-bottom:8px;font-size:13px">Set B — click to toggle</div>
+                <div id="setB-items"></div>
+              </div>
+            </div>
+            <canvas id="jaccardCanvas" width="760" height="110" style="max-width:100%;margin-bottom:10px"></canvas>
+            <div class="three-col" style="gap:10px">
+              <div class="stat-card">
+                <div class="stat-val" id="j-intersection">—</div>
+                <div class="stat-lbl">|A ∩ B| (shared)</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="j-union">—</div>
+                <div class="stat-lbl">|A ∪ B| (combined)</div>
+              </div>
+              <div class="stat-card" style="border-color:rgba(99,102,241,0.5)">
+                <div class="stat-val" id="j-jaccard" style="color:var(--primary)">—</div>
+                <div class="stat-lbl">Jaccard Similarity</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Toggle items to see Jaccard change! 🎯</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 11: Nominal -->
+      <div class="card" data-section="2" data-section-total="6" data-card="12" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🏷️ SIMILARITY & DISTANCE • Card 12 of 30</span>
+            <span class="badge badge-blue">CONCEPT</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🏷️</div>
+              <div>
+                <div class="card-title">Nominal Attributes</div>
+                <div class="card-subtitle">Categories without order</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              🎨 Color categories: red, blue, green. There's no "more" or "less" — they're just different. Nominal attributes are names/labels with no inherent ordering.
+            </div>
+            <p class="content-text">For <strong>nominal attributes</strong>, dissimilarity is binary:</p>
+            <div class="formula-box">d(A,B) = 0 if same value<br>d(A,B) = 1 if different value</div>
+            <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:14px;margin:12px 0">
+              <table>
+                <thead><tr><th>Person</th><th>Hair Color</th><th>Eye Color</th></tr></thead>
+                <tbody>
+                  <tr><td>Alice</td><td>Brown</td><td>Blue</td></tr>
+                  <tr><td>Bob</td><td>Black</td><td>Blue</td></tr>
+                  <tr><td colspan="3" style="color:var(--secondary);font-weight:600;text-align:center">d(Hair) = 1 (different) &nbsp;|&nbsp; d(Eye) = 0 (same)</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="content-text">Overall dissimilarity = <span class="highlight">(# mismatches) / (total attributes)</span> = 1/2 = 0.5</p>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Keep going! 🚀</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 12: Ordinal -->
+      <div class="card" data-section="2" data-section-total="6" data-card="13" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>📊 SIMILARITY & DISTANCE • Card 13 of 30</span>
+            <span class="badge badge-blue">CONCEPT</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">📊</div>
+              <div>
+                <div class="card-title">Ordinal Attributes</div>
+                <div class="card-subtitle">Categories WITH order</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              🏅 Gold, Silver, Bronze — these have an order! "Gold" is better than "Silver." Ordinal attributes have a meaningful sequence.
+            </div>
+            <p class="content-text">Examples: <span class="highlight">Small/Medium/Large</span>, <span class="highlight">Poor/Fair/Good/Excellent</span>, <span class="highlight">Freshman/Sophomore/Junior/Senior</span></p>
+            <p class="content-text"><strong>Method:</strong> Map ranks to [0,1] scale, then use numeric distance.</p>
+            <div class="formula-box">rᵢ = (rank − 1) / (M − 1)</div>
+            <p style="font-size:12px;color:var(--muted-foreground);text-align:center;margin-top:4px">where M = number of possible values</p>
+            <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:12px;margin-top:12px">
+              <div style="font-size:13px;color:var(--muted-foreground);margin-bottom:6px">Example: Size {Small=1, Medium=2, Large=3}, M=3</div>
+              <div style="font-size:13px">Small → <span class="highlight">(1−1)/(3−1) = 0.0</span></div>
+              <div style="font-size:13px">Medium → <span class="highlight">(2−1)/(3−1) = 0.5</span></div>
+              <div style="font-size:13px">Large → <span class="highlight">(3−1)/(3−1) = 1.0</span></div>
+              <div style="font-size:13px;margin-top:8px;color:var(--secondary)">d(Small, Large) = |0.0 − 1.0| = 1.0 (maximum)</div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Almost done with Section 2!</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 13: Flip -->
+      <div class="card" data-section="2" data-section-total="6" data-card="14" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🃏 SIMILARITY & DISTANCE • Card 14 of 30</span>
+            <span class="badge badge-purple">ACTIVE RECALL</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🃏</div>
+              <div>
+                <div class="card-title">Active Recall Check</div>
+                <div class="card-subtitle">Click the card to reveal the answer</div>
+              </div>
+            </div>
+            <div class="flip-card-wrap" id="flip1" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-face flip-front">
+                  <div style="font-size:28px;margin-bottom:10px">🤔</div>
+                  <div class="flip-q">Cosine similarity between two <strong>identical documents</strong> (same words, same counts) is...?</div>
+                  <div class="flip-hint">👆 Click to reveal answer</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div style="font-size:28px;margin-bottom:10px">✅</div>
+                  <div class="flip-a">1.0 — they point in exactly the same direction, angle = 0°, cos(0°) = 1</div>
+                  <div class="flip-hint" style="margin-top:8px">The magnitude cancels out — only direction matters!</div>
+                </div>
+              </div>
+            </div>
+            <div class="why-box" style="margin-top:14px">
+              <strong>💡 Key Insight</strong>
+              Cosine similarity = 1 means identical direction. 0 means perpendicular (no overlap). -1 means opposite direction. For text, you'll almost always see [0, 1].
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Section 2 done! 🎉</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- ==================== SECTION 3 ==================== -->
+
+      <!-- CARD 14: Analogy -->
+      <div class="card" data-section="3" data-section-total="6" data-card="15" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>✏️ DATA CLEANING • Card 15 of 30</span>
+            <span class="badge badge-green">ANALOGY</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">✏️</div>
+              <div>
+                <div class="card-title">Data Cleaning</div>
+                <div class="card-subtitle">Editing the draft essay</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              ✍️ Data cleaning is like editing a <strong>draft essay</strong>. Fix typos (errors), fill in missing sentences (missing values), remove repeated paragraphs (duplicates), correct facts that are wrong (inconsistencies).
+            </div>
+            <p class="content-text">Cleaning is the most time-consuming step — but also the most impactful. <strong>Unclean data leads to wrong conclusions</strong>.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+              <div class="stat-card" style="flex:1;min-width:120px">
+                <div style="font-size:20px">🔧</div>
+                <div style="font-size:12px;font-weight:700;margin-top:4px">Fix Errors</div>
+                <div style="font-size:10px;color:var(--muted-foreground)">Wrong/impossible values</div>
+              </div>
+              <div class="stat-card" style="flex:1;min-width:120px">
+                <div style="font-size:20px">🕳️</div>
+                <div style="font-size:12px;font-weight:700;margin-top:4px">Fill Gaps</div>
+                <div style="font-size:10px;color:var(--muted-foreground)">Missing values</div>
+              </div>
+              <div class="stat-card" style="flex:1;min-width:120px">
+                <div style="font-size:20px">🗑️</div>
+                <div style="font-size:12px;font-weight:700;margin-top:4px">Remove Dups</div>
+                <div style="font-size:10px;color:var(--muted-foreground)">Duplicate records</div>
+              </div>
+              <div class="stat-card" style="flex:1;min-width:120px">
+                <div style="font-size:20px">🔀</div>
+                <div style="font-size:12px;font-weight:700;margin-top:4px">Standardize</div>
+                <div style="font-size:10px;color:var(--muted-foreground)">Resolve inconsistencies</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Section 3: Data Cleaning 🧹</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 15: Missing Values -->
+      <div class="card" data-section="3" data-section-total="6" data-card="16" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>❓ DATA CLEANING • Card 16 of 30</span>
+            <span class="badge badge-blue">CONCEPT</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">❓</div>
+              <div>
+                <div class="card-title">Handling Missing Values</div>
+                <div class="card-subtitle">6 strategies, from simple to smart</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div class="list-item"><div class="list-dot"></div><div><strong>1. Ignore the row</strong> — skip records with missing values. Risky if many rows are missing.</div></div>
+              <div class="list-item"><div class="list-dot"></div><div><strong>2. Fill manually</strong> — look up the value. Accurate but slow and impossible at scale.</div></div>
+              <div class="list-item"><div class="list-dot"></div><div><strong>3. Global mean/median/mode</strong> — fill all blanks with the column average. Fast but ignores context.</div></div>
+              <div class="list-item"><div class="list-dot"></div><div><strong>4. Use a constant</strong> — fill with "Unknown" or 0. Simple but creates a new artificial category.</div></div>
+              <div class="list-item"><div class="list-dot"></div><div><strong>5. Class-specific mean</strong> — use the mean for that class only. E.g., average age for "students" vs "professors."</div></div>
+              <div class="list-item"><div class="list-dot"></div><div><strong>6. Predict with a model</strong> — use regression or k-NN to predict the missing value. Most accurate!</div></div>
+            </div>
+            <div class="why-box" style="margin-top:12px">
+              <strong>💡 Rule of Thumb</strong>
+              Methods 3, 5, and 6 are most common in practice. Method 6 is best but requires existing data to train on.
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Next: try the demo! 🔬</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 16: Imputation Demo -->
+      <div class="card" data-section="3" data-section-total="6" data-card="17" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🧪 DATA CLEANING • Card 17 of 30</span>
+            <span class="badge badge-cyan">INTERACTIVE DEMO</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🧪</div>
+              <div>
+                <div class="card-title">Missing Value Imputation Demo</div>
+                <div class="card-subtitle">Click a method to see what gets filled in</div>
+              </div>
+            </div>
+            <div style="overflow-x:auto;margin-bottom:12px">
+              <table id="impute-table">
+                <thead>
+                  <tr><th>Name</th><th>Age</th><th>Salary</th><th>Department</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Alice</td><td>30</td><td>50000</td><td>Engineering</td></tr>
+                  <tr><td>Bob</td><td id="bob-age" class="missing">?</td><td>62000</td><td>Engineering</td></tr>
+                  <tr><td>Carol</td><td>25</td><td id="carol-sal" class="missing">?</td><td>Marketing</td></tr>
+                  <tr><td>Dave</td><td>35</td><td>58000</td><td id="dave-dept" class="missing">?</td></tr>
+                  <tr><td>Eve</td><td>28</td><td>45000</td><td>Engineering</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+              <button class="small-btn" onclick="impute('ignore')">1️⃣ Ignore Row</button>
+              <button class="small-btn" onclick="impute('mean')">3️⃣ Global Mean</button>
+              <button class="small-btn" onclick="impute('constant')">4️⃣ Constant</button>
+              <button class="small-btn" onclick="impute('classmode')">5️⃣ Class Mode</button>
+              <button class="small-btn" onclick="impute('reset')">🔄 Reset</button>
+            </div>
+            <div id="impute-explanation" style="font-size:12px;color:var(--muted-foreground);min-height:36px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px">
+              Click a method above to see how missing values are filled ↑
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Explore the demo! 🔬</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 17: Binning -->
+      <div class="card" data-section="3" data-section-total="6" data-card="18" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>📦 DATA CLEANING • Card 18 of 30</span>
+            <span class="badge badge-blue">CONCEPT</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">📦</div>
+              <div>
+                <div class="card-title">Handling Noisy Data — Binning</div>
+                <div class="card-subtitle">Smoothing by grouping similar values</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              🛣️ Imagine a bumpy road. Instead of fixing every bump individually, you average out the bumps in each section to get a smooth road. That's binning — smooth local variations.
+            </div>
+            <p class="content-text"><strong>Binning</strong>: Divide sorted data into "bins" (buckets), then replace each value with a smoothed version.</p>
+            <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:14px;margin:12px 0">
+              <div style="font-size:13px;color:var(--muted-foreground);margin-bottom:8px">Original sorted prices: [4, 8, 9, 15, 21, 21, 24, 25, 26, 28, 29, 34]</div>
+              <div style="font-size:13px;margin-bottom:6px"><strong style="color:#a5b4fc">Bin 1:</strong> [4, 8, 9, 15] → Mean = 9 → Smoothed: [9, 9, 9, 9]</div>
+              <div style="font-size:13px;margin-bottom:6px"><strong style="color:#f87171">Bin 2:</strong> [21, 21, 24, 25] → Mean = 22.75 → Smoothed: [23, 23, 23, 23]</div>
+              <div style="font-size:13px"><strong style="color:#86efac">Bin 3:</strong> [26, 28, 29, 34] → Mean = 29.25 → Smoothed: [29, 29, 29, 29]</div>
+            </div>
+            <p class="content-text">You can smooth by: <strong>bin mean</strong>, <strong>bin median</strong>, or <strong>bin boundaries</strong> (snap to nearest edge).</p>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Almost done with Section 3!</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 18: Binning Types -->
+      <div class="card" data-section="3" data-section-total="6" data-card="19" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>⚖️ DATA CLEANING • Card 19 of 30</span>
+            <span class="badge badge-blue">CONCEPT</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">⚖️</div>
+              <div>
+                <div class="card-title">Equal-Width vs Equal-Depth Binning</div>
+                <div class="card-subtitle">Two different ways to create bins</div>
+              </div>
+            </div>
+            <div class="two-col" style="margin-bottom:14px">
+              <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.3);border-radius:10px;padding:14px">
+                <div style="font-weight:700;color:#a5b4fc;margin-bottom:8px">📏 Equal-Width</div>
+                <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:8px">Each bin covers the same VALUE RANGE</div>
+                <div style="font-size:12px">Ages 0-100 → 10 bins of 10 years each:<br><span class="highlight">[0-10], [10-20], ..., [90-100]</span></div>
+                <div style="font-size:11px;color:#fca5a5;margin-top:8px">⚠️ Sensitive to outliers — one extreme value stretches all bins</div>
+              </div>
+              <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:14px">
+                <div style="font-weight:700;color:#86efac;margin-bottom:8px">📊 Equal-Depth (Quantile)</div>
+                <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:8px">Each bin has the same NUMBER OF RECORDS</div>
+                <div style="font-size:12px">1000 people → 10 bins of 100 people each,<br>age ranges vary by data distribution</div>
+                <div style="font-size:11px;color:#86efac;margin-top:8px">✅ Robust to outliers — extreme values just go in the last bin</div>
+              </div>
+            </div>
+            <canvas id="binningCanvas" width="760" height="120" style="max-width:100%"></canvas>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Last card of Section 3!</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 19: Flip -->
+      <div class="card" data-section="3" data-section-total="6" data-card="20" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🃏 DATA CLEANING • Card 20 of 30</span>
+            <span class="badge badge-purple">ACTIVE RECALL</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🃏</div>
+              <div>
+                <div class="card-title">Active Recall Check</div>
+                <div class="card-subtitle">Think before you flip!</div>
+              </div>
+            </div>
+            <div class="flip-card-wrap" id="flip2" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-face flip-front">
+                  <div style="font-size:28px;margin-bottom:10px">🤔</div>
+                  <div class="flip-q">Which binning method is more sensitive to outliers — <strong>equal-width</strong> or <strong>equal-depth</strong>?</div>
+                  <div class="flip-hint">👆 Click to reveal answer</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div style="font-size:28px;margin-bottom:10px">✅</div>
+                  <div class="flip-a">Equal-Width — one extreme outlier stretches the entire bin range for all bins. Equal-Depth is more robust because extreme values just land in the edge bins.</div>
+                </div>
+              </div>
+            </div>
+            <div class="why-box" style="margin-top:14px">
+              <strong>💡 Why It Matters</strong>
+              If your data has salary outliers (e.g., one billionaire), equal-width binning will create one bin [0–1B] and one bin with everyone else. Equal-depth handles this gracefully.
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Section 3 complete! 🎉</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- ==================== SECTION 4 ==================== -->
+
+      <!-- CARD 20: Analogy -->
+      <div class="card" data-section="4" data-section-total="6" data-card="21" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>💱 TRANSFORMATION • Card 21 of 30</span>
+            <span class="badge badge-green">ANALOGY</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">💱</div>
+              <div>
+                <div class="card-title">Why Normalize?</div>
+                <div class="card-subtitle">Putting everything on the same scale</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              💰 Imagine comparing distances in miles vs meters. Or prices in dollars vs cents. If you don't convert them to the same unit, your analysis is dominated by the bigger numbers. Normalization is like converting to a common currency.
+            </div>
+            <p class="content-text">Problem: If age ranges 0–100 and salary ranges 0–100,000, then <strong>salary will dominate</strong> any distance calculation. A &dollar;10 salary difference will outweigh a 10-year age difference!</p>
+            <div class="two-col" style="margin-top:14px">
+              <div class="stat-card" style="border-color:rgba(239,68,68,0.4)">
+                <div style="font-size:20px">😱</div>
+                <div style="font-weight:700;font-size:13px;color:#fca5a5">Before</div>
+                <div style="font-size:11px;color:var(--muted-foreground);margin-top:4px">Age: 25, Salary: 50,000</div>
+                <div style="font-size:11px;color:var(--muted-foreground)">Salary dominates!</div>
+              </div>
+              <div class="stat-card" style="border-color:rgba(34,197,94,0.4)">
+                <div style="font-size:20px">✅</div>
+                <div style="font-weight:700;font-size:13px;color:#86efac">After</div>
+                <div style="font-size:11px;color:var(--muted-foreground);margin-top:4px">Age: 0.25, Salary: 0.50</div>
+                <div style="font-size:11px;color:var(--muted-foreground)">Fair comparison!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Section 4: Transformation 🔄</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 21: Min-Max -->
+      <div class="card" data-section="4" data-section-total="6" data-card="22" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>📏 TRANSFORMATION • Card 22 of 30</span>
+            <span class="badge badge-yellow">FORMULA + VISUAL</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">📏</div>
+              <div>
+                <div class="card-title">Min-Max Normalization</div>
+                <div class="card-subtitle">Squish everything into [0, 1]</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              📐 Imagine stretching or compressing a rubber band so it fits exactly between 0 and 1. The minimum value becomes 0, the maximum becomes 1, everything else scales proportionally.
+            </div>
+            <div class="formula-box">x_norm = (x − min) / (max − min)</div>
+            <p class="content-text">To map to a custom range [a, b]:</p>
+            <div class="formula-box" style="font-size:14px">x_new = (x − min) / (max − min) × (b − a) + a</div>
+            <div style="margin-top:14px">
+              <canvas id="minmaxCanvas" width="760" height="100" style="max-width:100%"></canvas>
+              <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:var(--muted-foreground)">
+                <span>Original: 10–50</span><span>Normalized: 0.0–1.0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Keep going! 💪</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 22: Z-score -->
+      <div class="card" data-section="4" data-section-total="6" data-card="23" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>📊 TRANSFORMATION • Card 23 of 30</span>
+            <span class="badge badge-yellow">FORMULA</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">📊</div>
+              <div>
+                <div class="card-title">Z-Score Normalization</div>
+                <div class="card-subtitle">Standardization (μ=0, σ=1)</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              📏 "How unusual is this value?" A z-score tells you how many standard deviations away from average you are. A test score with z=2 means you scored 2 standard deviations above the class average — impressive!
+            </div>
+            <div class="formula-box">z = (x − μ) / σ</div>
+            <p style="font-size:12px;color:var(--muted-foreground);text-align:center;margin-bottom:12px">μ = mean, σ = standard deviation</p>
+            <div class="two-col">
+              <div class="stat-card">
+                <div style="font-size:18px">✅</div>
+                <div style="font-weight:700;font-size:12px;margin-top:4px">Use When</div>
+                <div style="font-size:11px;color:var(--muted-foreground);margin-top:4px">Unknown min/max, or data follows a bell curve, or you want to detect outliers.</div>
+              </div>
+              <div class="stat-card" style="border-color:rgba(239,68,68,0.3)">
+                <div style="font-size:18px">❌</div>
+                <div style="font-weight:700;font-size:12px;margin-top:4px">Avoid When</div>
+                <div style="font-size:11px;color:var(--muted-foreground);margin-top:4px">You specifically need values in [0,1], or data has meaningful min/max (e.g., age, scores).</div>
+              </div>
+            </div>
+            <div class="why-box" style="margin-top:12px">
+              <strong>💡 Result</strong>
+              After z-score normalization: mean = 0, std deviation = 1. Values are usually between -3 and +3.
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Next: try the demo! 🎛️</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 23: Normalization Demo -->
+      <div class="card" data-section="4" data-section-total="6" data-card="24" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🎛️ TRANSFORMATION • Card 24 of 30</span>
+            <span class="badge badge-cyan">INTERACTIVE</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🎛️</div>
+              <div>
+                <div class="card-title">Normalization Demo</div>
+                <div class="card-subtitle">Enter numbers and watch them normalize</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-end">
+              <div style="flex:1">
+                <label>Enter numbers (comma-separated)</label>
+                <input type="text" id="norm-input" value="10, 20, 30, 40, 100" oninput="runNormDemo()">
+              </div>
+              <div>
+                <label>Method</label>
+                <select id="norm-method" onchange="runNormDemo()">
+                  <option value="minmax">Min-Max [0,1]</option>
+                  <option value="zscore">Z-Score</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:16px">
+              <div style="flex:1">
+                <div style="font-size:12px;font-weight:700;color:var(--muted-foreground);margin-bottom:8px">ORIGINAL</div>
+                <div class="norm-bar-container" id="norm-original"></div>
+              </div>
+              <div style="flex:1">
+                <div style="font-size:12px;font-weight:700;color:var(--secondary);margin-bottom:8px">NORMALIZED</div>
+                <div class="norm-bar-container" id="norm-result"></div>
+              </div>
+            </div>
+            <div id="norm-stats" style="display:flex;gap:10px;margin-top:12px"></div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Try different numbers! 🔢</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 24: Flip -->
+      <div class="card" data-section="4" data-section-total="6" data-card="25" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🃏 TRANSFORMATION • Card 25 of 30</span>
+            <span class="badge badge-purple">ACTIVE RECALL</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🃏</div>
+              <div>
+                <div class="card-title">Active Recall Check</div>
+                <div class="card-subtitle">Think before you flip!</div>
+              </div>
+            </div>
+            <div class="flip-card-wrap" id="flip3" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-face flip-front">
+                  <div style="font-size:28px;margin-bottom:10px">🤔</div>
+                  <div class="flip-q">After <strong>min-max normalization</strong>, what range do all values fall in?</div>
+                  <div class="flip-hint">👆 Click to reveal answer</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div style="font-size:28px;margin-bottom:10px">✅</div>
+                  <div class="flip-a">[0, 1] — The minimum value maps to 0, the maximum maps to 1, everything else is proportionally between them.</div>
+                  <div class="flip-hint" style="margin-top:8px">Unless you specify a custom range [a, b]!</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Section 4 done! 🎉</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- ==================== SECTION 5 ==================== -->
+
+      <!-- CARD 25: PCA Analogy -->
+      <div class="card" data-section="5" data-section-total="6" data-card="26" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🗜️ DIMENSIONALITY REDUCTION • Card 26 of 30</span>
+            <span class="badge badge-green">ANALOGY</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🗜️</div>
+              <div>
+                <div class="card-title">Dimensionality Reduction</div>
+                <div class="card-subtitle">Finding the essence</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              📸 Imagine taking a 3D sculpture and photographing it from the BEST angle to capture the most detail in a 2D photo. PCA finds the "best viewing angle" for your data — reducing dimensions while keeping the most information.
+            </div>
+            <p class="content-text">If you have <strong>100 measurements</strong> per customer, most are probably related (height and weight move together, salary and job title move together). PCA finds the most important directions.</p>
+            <div class="formula-box" style="font-size:14px">100 dimensions → 3-5 key dimensions<br>while keeping ~95% of the information</div>
+            <div class="why-box">
+              <strong>💡 Why Reduce Dimensions?</strong>
+              Faster algorithms, less storage, easier visualization (we can only see 2D/3D), and avoids the "curse of dimensionality."
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Section 5: Dim. Reduction 🗜️</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 26: Curse -->
+      <div class="card" data-section="5" data-section-total="6" data-card="27" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>👹 DIMENSIONALITY REDUCTION • Card 27 of 30</span>
+            <span class="badge badge-red">GOTCHA</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">👹</div>
+              <div>
+                <div class="card-title">Curse of Dimensionality</div>
+                <div class="card-subtitle">Why high dimensions are dangerous</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              🌌 In 1D, 10 people can cover a street well. In 2D, you need 100 people to cover a city block. In 3D, 1000 people to cover a building. In 100D, you need more people than atoms in the universe to cover the space! Data becomes incredibly sparse.
+            </div>
+            <p class="content-text">As dimensions increase, <strong>distances lose meaning</strong> — all points appear equally far from each other. Nearest neighbor algorithms break down.</p>
+            <div class="two-col" style="margin-top:12px">
+              <div class="stat-card">
+                <div class="stat-val" style="font-size:20px">📍 1D</div>
+                <div class="stat-lbl">10 points cover the space well</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" style="font-size:20px">📍 100D</div>
+                <div class="stat-lbl">Need 10¹⁰⁰ points to cover evenly!</div>
+              </div>
+            </div>
+            <div class="why-box" style="margin-top:12px">
+              <strong>💡 Solution</strong>
+              Dimensionality reduction (PCA, feature selection) helps escape this curse by keeping only the most informative dimensions.
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Next: PCA visualized! 🔭</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 27: PCA Visualization -->
+      <div class="card" data-section="5" data-section-total="6" data-card="28" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🔭 DIMENSIONALITY REDUCTION • Card 28 of 30</span>
+            <span class="badge badge-cyan">INTERACTIVE</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🔭</div>
+              <div>
+                <div class="card-title">PCA Intuition</div>
+                <div class="card-subtitle">Find the direction of maximum spread</div>
+              </div>
+            </div>
+            <canvas id="pcaCanvas" width="760" height="200" style="max-width:100%;cursor:default"></canvas>
+            <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap">
+              <button class="small-btn" id="pca-btn1" onclick="pcaStep(1)">1️⃣ Show PC1 (max variance direction)</button>
+              <button class="small-btn" id="pca-btn2" onclick="pcaStep(2)">2️⃣ Project onto PC1</button>
+              <button class="small-btn" onclick="pcaStep(0)">🔄 Reset</button>
+            </div>
+            <div id="pca-info" style="font-size:12px;color:var(--muted-foreground);text-align:center;margin-top:8px;min-height:20px">
+              Click "Show PC1" to see the first principal component →
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Click the buttons above! 🎯</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 28: Attribute Selection -->
+      <div class="card" data-section="5" data-section-total="6" data-card="29" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>✂️ DIMENSIONALITY REDUCTION • Card 29 of 30</span>
+            <span class="badge badge-blue">CONCEPT</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">✂️</div>
+              <div>
+                <div class="card-title">Attribute Subset Selection</div>
+                <div class="card-subtitle">The simpler alternative to PCA</div>
+              </div>
+            </div>
+            <div class="analogy-box">
+              🗑️ Instead of doing complex math, just throw away the columns you don't need! If you're predicting heart disease, the column "favorite color" is probably irrelevant.
+            </div>
+            <p class="content-text"><strong>Attribute Subset Selection</strong> removes irrelevant or redundant attributes to reduce dimensionality without the math of PCA.</p>
+            <div style="display:flex;flex-direction:column;gap:8px;margin:12px 0">
+              <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div><strong>Irrelevant attributes</strong>: No relationship with the target. E.g., patient ID for disease prediction.</div></div>
+              <div class="list-item"><div class="list-dot" style="background:#f59e0b"></div><div><strong>Redundant attributes</strong>: Carry the same info as another attribute. E.g., "Age" and "Birth Year" together.</div></div>
+              <div class="list-item"><div class="list-dot" style="background:#22c55e"></div><div><strong>Weakly relevant attributes</strong>: May help a little, but may also add noise.</div></div>
+            </div>
+            <div class="why-box">
+              <strong>💡 Methods</strong>
+              Forward selection (add attributes one by one), backward elimination (remove one by one), stepwise selection (combination of both).
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Last recall check coming up!</span>
+          <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+      <!-- CARD 29: Flip -->
+      <div class="card" data-section="5" data-section-total="6" data-card="30" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🃏 DIMENSIONALITY REDUCTION • Card 30 of 30</span>
+            <span class="badge badge-purple">ACTIVE RECALL</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🃏</div>
+              <div>
+                <div class="card-title">Active Recall Check</div>
+                <div class="card-subtitle">Last one! You got this 💪</div>
+              </div>
+            </div>
+            <div class="flip-card-wrap" id="flip4" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-face flip-front">
+                  <div style="font-size:28px;margin-bottom:10px">🤔</div>
+                  <div class="flip-q">PCA finds directions of maximum <strong>___</strong>.</div>
+                  <div class="flip-hint">👆 Click to reveal answer</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div style="font-size:28px;margin-bottom:10px">✅</div>
+                  <div class="flip-a">Variance — the directions where data spreads out the most. The first PC captures the most variance, the second PC captures the second most, and so on.</div>
+                </div>
+              </div>
+            </div>
+            <div class="why-box" style="margin-top:14px">
+              <strong>💡 Deep Insight</strong>
+              Variance = information spread. Maximum variance direction = direction where the data is most "interesting" and tells us the most about the differences between data points.
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Section 5 done! Now — the quiz! 🏆</span>
+          <button class="nav-btn primary" onclick="nextCard()">Take the Quiz →</button>
+        </div>
+      </div>
+
+      <!-- ==================== SECTION 6: QUIZ ==================== -->
+
+      <!-- CARD 30: Quiz -->
+      <div class="card" data-section="6" data-section-total="6" data-card="End" data-total="30">
+        <div class="card-inner">
+          <div class="card-tag">
+            <span>🏆 END OF MODULE QUIZ</span>
+            <span class="badge badge-yellow">5 QUESTIONS</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-emoji">🏆</div>
+              <div>
+                <div class="card-title">Final Quiz</div>
+                <div class="card-subtitle">Test what you've learned — no peeking!</div>
+              </div>
+            </div>
+
+            <div id="quiz-area">
+              <!-- Q1 -->
+              <div class="quiz-q" id="qq1">
+                <div style="font-weight:600;margin-bottom:8px;font-size:14px">1. Which distance measure is most <strong>affected by outliers</strong> in high-dimensional data?</div>
+                <button class="quiz-option" onclick="answerQ(1,'a')">a) Manhattan Distance (L1)</button>
+                <button class="quiz-option" onclick="answerQ(1,'b')">b) Euclidean Distance (L2) ← correct</button>
+                <button class="quiz-option" onclick="answerQ(1,'c')">c) Jaccard Similarity</button>
+                <div class="quiz-feedback" id="qf1"></div>
+              </div>
+
+              <!-- Q2 -->
+              <div class="quiz-q" id="qq2" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+                <div style="font-weight:600;margin-bottom:8px;font-size:14px">2. Jaccard similarity of {a,b,c} and {b,c,d} is?</div>
+                <button class="quiz-option" onclick="answerQ(2,'a')">a) 1/4 = 0.25</button>
+                <button class="quiz-option" onclick="answerQ(2,'b')">b) 2/4 = 0.5 ← correct</button>
+                <button class="quiz-option" onclick="answerQ(2,'c')">c) 3/4 = 0.75</button>
+                <div class="quiz-feedback" id="qf2"></div>
+              </div>
+
+              <!-- Q3 -->
+              <div class="quiz-q" id="qq3" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+                <div style="font-weight:600;margin-bottom:8px;font-size:14px">3. Which normalization method requires knowing the exact min and max of the data?</div>
+                <button class="quiz-option" onclick="answerQ(3,'a')">a) Z-Score Normalization</button>
+                <button class="quiz-option" onclick="answerQ(3,'b')">b) Min-Max Normalization ← correct</button>
+                <button class="quiz-option" onclick="answerQ(3,'c')">c) Both require min and max</button>
+                <div class="quiz-feedback" id="qf3"></div>
+              </div>
+
+              <!-- Q4 -->
+              <div class="quiz-q" id="qq4" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+                <div style="font-weight:600;margin-bottom:8px;font-size:14px">4. What does "noisy data" mean in data preprocessing?</div>
+                <button class="quiz-option" onclick="answerQ(4,'a')">a) Data that is simply missing or null</button>
+                <button class="quiz-option" onclick="answerQ(4,'b')">b) Data stored in multiple formats</button>
+                <button class="quiz-option" onclick="answerQ(4,'c')">c) Data with errors, outliers, or random distortions ← correct</button>
+                <div class="quiz-feedback" id="qf4"></div>
+              </div>
+
+              <!-- Q5 -->
+              <div class="quiz-q" id="qq5" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+                <div style="font-weight:600;margin-bottom:8px;font-size:14px">5. Which TWO of these are valid methods for handling missing values?</div>
+                <button class="quiz-option" onclick="answerQ(5,'a')">a) Delete the entire dataset</button>
+                <button class="quiz-option" onclick="answerQ(5,'b')">b) Fill with column mean AND use a predictive model ← correct</button>
+                <button class="quiz-option" onclick="answerQ(5,'c')">c) Replace with maximum value only</button>
+                <div class="quiz-feedback" id="qf5"></div>
+              </div>
+            </div>
+
+            <div id="quiz-score" style="display:none">
+              <div class="score-box">
+                <div class="score-num" id="score-num">0/5</div>
+                <div class="score-msg" id="score-msg"></div>
+                <div style="margin-top:16px;display:flex;gap:10px;justify-content:center">
+                  <button class="nav-btn primary" onclick="retryQuiz()">🔄 Retry Quiz</button>
+                  <button class="nav-btn" onclick="goToCard(0)">↩ Back to Start</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:14px">
+              <button class="nav-btn primary" onclick="submitQuiz()" id="submit-btn">Submit Answers →</button>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevCard()">← Back</button>
+          <span class="micro-copy">Module complete! 🎓</span>
+          <button class="nav-btn" onclick="showAppendix()">📚 Appendix</button>
+        </div>
+      </div>
+
+      <!-- APPENDIX -->
+      <div id="appendix-section" style="display:none;width:100%;max-width:820px;margin-top:16px">
+        <div style="font-size:16px;font-weight:700;color:var(--primary);margin-bottom:12px;padding:0 4px">📚 Appendix: First Principles</div>
+
+        <button class="appendix-toggle" onclick="toggleApp('app1')">
+          <span>Minkowski Distance (Generalizes Euclidean & Manhattan)</span>
+          <span id="app1-arr">▼</span>
+        </button>
+        <div class="appendix-body" id="app1">
+          <div class="formula-box">d(A,B) = (Σ |xᵢ − yᵢ|ᵖ)^(1/p)</div>
+          <div class="list-item"><div class="list-dot"></div><div>p = 1 → Manhattan Distance (L1)</div></div>
+          <div class="list-item"><div class="list-dot"></div><div>p = 2 → Euclidean Distance (L2)</div></div>
+          <div class="list-item"><div class="list-dot"></div><div>p → ∞ → Supremum Distance (L∞ = max |xᵢ−yᵢ|)</div></div>
+          <p class="content-text" style="margin-top:8px">The Minkowski family unifies all common distance measures. The choice of p affects sensitivity to large differences.</p>
+        </div>
+
+        <button class="appendix-toggle" onclick="toggleApp('app2')" style="margin-top:8px">
+          <span>KL Divergence (Kullback-Leibler)</span>
+          <span id="app2-arr">▼</span>
+        </button>
+        <div class="appendix-body" id="app2">
+          <div class="formula-box">KL(P||Q) = Σ P(x) · log(P(x)/Q(x))</div>
+          <p class="content-text">Measures how much probability distribution P differs from reference distribution Q. Not a true distance (asymmetric: KL(P||Q) ≠ KL(Q||P)). Used in information theory and machine learning loss functions.</p>
+        </div>
+
+        <button class="appendix-toggle" onclick="toggleApp('app3')" style="margin-top:8px">
+          <span>PCA: Mathematical Definition</span>
+          <span id="app3-arr">▼</span>
+        </button>
+        <div class="appendix-body" id="app3">
+          <p class="content-text"><strong>Step 1:</strong> Center data (subtract mean from each attribute).</p>
+          <p class="content-text"><strong>Step 2:</strong> Compute the covariance matrix Σ (n×n matrix where Σᵢⱼ = cov(Xᵢ, Xⱼ)).</p>
+          <div class="formula-box">Σ = (1/m) · Xᵀ · X</div>
+          <p class="content-text"><strong>Step 3:</strong> Find eigenvectors and eigenvalues of Σ.</p>
+          <p class="content-text"><strong>Step 4:</strong> Sort eigenvectors by eigenvalue (descending). The eigenvector with the largest eigenvalue = first principal component.</p>
+          <p class="content-text"><strong>Step 5:</strong> Project data onto top k eigenvectors. Each eigenvalue = variance explained by that PC.</p>
+        </div>
+
+        <button class="appendix-toggle" onclick="toggleApp('app4')" style="margin-top:8px">
+          <span>Pearson Correlation (Redundancy Detection)</span>
+          <span id="app4-arr">▼</span>
+        </button>
+        <div class="appendix-body" id="app4">
+          <div class="formula-box">r = Σ((xᵢ−x̄)(yᵢ−ȳ)) / (n·σₓ·σᵧ)</div>
+          <p class="content-text">Range: [-1, 1]. r ≈ 1 means strong positive correlation (redundant). r ≈ -1 means strong negative correlation. r ≈ 0 means no linear relationship.</p>
+          <p class="content-text">If two attributes have |r| &gt; 0.9, one is likely redundant and can be removed in attribute subset selection.</p>
+        </div>
+
+        <button class="appendix-toggle" onclick="toggleApp('app5')" style="margin-top:8px">
+          <span>🔍 Data Discrepancy Detection &amp; Potter's Wheel</span>
+          <span id="app5-arr">▼</span>
+        </button>
+        <div class="appendix-body" id="app5">
+          <p class="content-text"><strong>Data Cleaning as a Two-Step Process:</strong></p>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Uniqueness Rule:</strong> Each value of the key/attribute must be unique across all tuples.</div></div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Consecutive Rule:</strong> No missing sequence numbers between minimum and maximum (e.g., check numbers, transaction serials).</div></div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Null Rule:</strong> Identifying suspicious blanks, question marks, and null placeholders (e.g., '01/01/1900', '9999').</div></div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Field Overloading:</strong> Occurs when developers squeeze new attribute definitions into unused portions of existing schemas.</div></div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Commercial Tools:</strong> <em>Data Scrubbing</em> (using domain rules &amp; spell-checks) vs. <em>Data Auditing</em> (using correlation &amp; clustering to find violators).</div></div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Potter's Wheel (VLDB 2001):</strong> An interactive, extensible framework that integrates discrepancy detection and transformation through a visual, spreadsheet-like interface.</div></div>
+        </div>
+
+        <button class="appendix-toggle" onclick="toggleApp('app6')" style="margin-top:8px">
+          <span>📊 Three Binning Smoothing Methods (Means, Medians, Boundaries)</span>
+          <span id="app6-arr">▼</span>
+        </button>
+        <div class="appendix-body" id="app6">
+          <p class="content-text"><strong>Sorted Price Example: [4, 8, 9, 15, 21, 21, 24, 25, 26, 28, 29, 34]</strong></p>
+          <div class="formula-box">Equal-Frequency (Equi-Depth) Bins of size 4:
+Bin 1: [4, 8, 9, 15]  |  Bin 2: [21, 21, 24, 25]  |  Bin 3: [26, 28, 29, 34]</div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Smoothing by Bin Means:</strong> Replace each bin value with bin average → Bin 1: [9, 9, 9, 9], Bin 2: [23, 23, 23, 23], Bin 3: [29, 29, 29, 29].</div></div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Smoothing by Bin Medians:</strong> Replace each bin value with its median value.</div></div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Smoothing by Bin Boundaries:</strong> Replace each value with its closest bin boundary (min or max) → Bin 1: [4, 4, 4, 15], Bin 2: [21, 21, 25, 25], Bin 3: [26, 26, 26, 34].</div></div>
+        </div>
+
+        <button class="appendix-toggle" onclick="toggleApp('app7')" style="margin-top:8px">
+          <span>🧪 ChiMerge: Supervised χ²-Based Discretization</span>
+          <span id="app7-arr">▼</span>
+        </button>
+        <div class="appendix-body" id="app7">
+          <div class="formula-box">χ² = Σ Σ (Oᵢⱼ − Eᵢⱼ)² / Eᵢⱼ</div>
+          <p class="content-text"><strong>Algorithm Steps:</strong></p>
+          <div class="list-item"><div class="list-dot"></div><div>Sort numerical attribute values in ascending order and place each distinct value in its own interval.</div></div>
+          <div class="list-item"><div class="list-dot"></div><div>For every pair of adjacent intervals, compute the Pearson χ² statistic measuring independence between the interval pair and the class labels.</div></div>
+          <div class="list-item"><div class="list-dot"></div><div>Bottom-up merge the adjacent pair with the <strong>smallest χ² value</strong> (most similar class distributions).</div></div>
+          <div class="list-item"><div class="list-dot"></div><div>Repeat recursively until all adjacent pairs have χ² exceeding a predefined stopping threshold.</div></div>
+        </div>
+
+        <button class="appendix-toggle" onclick="toggleApp('app8')" style="margin-top:8px">
+          <span>🌊 Wavelet Transformation (DWT &amp; Haar Wavelets)</span>
+          <span id="app8-arr">▼</span>
+        </button>
+        <div class="appendix-body" id="app8">
+          <p class="content-text"><strong>Discrete Wavelet Transform (DWT):</strong></p>
+          <div class="formula-box">S = [2, 2, 0, 2, 3, 5, 4, 4]  →  Ŝ = [2¾, −1¼, ½, 0, 0, −1, −1, 0]</div>
+          <div class="list-item"><div class="list-dot"></div><div>Decomposes a signal/vector into multi-resolution frequency subbands using <strong>smoothing</strong> (averages) and <strong>difference</strong> (detail coefficients).</div></div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Lossless &amp; Lossy Compression:</strong> Small detail coefficients near 0 are discarded, retaining only significant coefficients.</div></div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Properties:</strong> Preserves relative distances at varying resolutions, robust to noise and input order, uses hat-shaped filters, linear computational complexity $O(N)$.</div></div>
+        </div>
+
+        <button class="appendix-toggle" onclick="toggleApp('app9')" style="margin-top:8px">
+          <span>📉 Numerosity Reduction: Parametric vs. Non-Parametric Models</span>
+          <span id="app9-arr">▼</span>
+        </button>
+        <div class="appendix-body" id="app9">
+          <p class="content-text"><strong>Parametric Methods (Fit parameters, discard data):</strong></p>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Linear &amp; Multiple Regression:</strong> $Y = wX + b$ or $Y = b_0 + b_1 X_1 + b_2 X_2$, parameters estimated by least squares.</div></div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Log-Linear Models:</strong> Approximates discrete multidimensional probability distributions in contingency tables based on smaller marginal subspaces.</div></div>
+          <p class="content-text" style="margin-top:8px"><strong>Non-Parametric Methods:</strong> Histograms (equal-width, equal-frequency), Clustering, Sampling (SRSWOR, SRSWR, Stratified), and Data Cube Aggregation.</p>
+        </div>
+
+        <button class="appendix-toggle" onclick="toggleApp('app10')" style="margin-top:8px">
+          <span>🌀 Nonlinear Dimensionality Reduction: Kernel PCA, SNE &amp; t-SNE</span>
+          <span id="app10-arr">▼</span>
+        </button>
+        <div class="appendix-body" id="app10">
+          <p class="content-text"><strong>When data is linearly inseparable:</strong></p>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Kernel PCA (KPCA):</strong> Maps input data into a high-dimensional feature space using nonlinear kernels (Polynomial $\kappa(x_i, x_j) = (1 + x_i \cdot x_j)^p$ or Gaussian RBF $\kappa(x_i, x_j) = e^{-\|x_i - x_j\|^2 / (2\sigma^2)}$) before performing PCA.</div></div>
+          <div class="list-item"><div class="list-dot"></div><div><strong>Stochastic Neighbor Embedding (SNE &amp; t-SNE):</strong> Converts pairwise Euclidean distances into conditional neighborhood probabilities $p_{j|i}$ and projects points into a low-dimensional space that minimizes the <strong>Kullback-Leibler (KL) divergence</strong> $\sum_i D_{KL}(P_i \parallel \hat{P}_i)$. t-SNE uses Student-t distribution in low-D space to prevent crowding.</div></div>
+        </div>
+
+      </div>
+
+    </div><!-- end card-container -->
+  </div><!-- end main -->
+</div><!-- end layout -->
+
+<script>
+// =========================================================
+// CORE STATE
+// =========================================================
+let currentCard = 0;
+const totalCards = 31; // 0..30
+
+// =========================================================
+// CARD NAVIGATION
+// =========================================================
+function goToCard(idx) {
+  const cards = document.querySelectorAll('.card');
+  cards[currentCard].classList.remove('active');
+  currentCard = Math.max(0, Math.min(idx, totalCards - 1));
+  cards[currentCard].classList.add('active');
+  updateUI();
+  // Scroll to top
+  document.getElementById('card-container').scrollTop = 0;
+  // Init any canvas on the newly shown card
+  initCanvasForCard(currentCard);
+}
+
+function nextCard() { if (currentCard < totalCards - 1) goToCard(currentCard + 1); }
+function prevCard() { if (currentCard > 0) goToCard(currentCard - 1); }
+
+function updateUI() {
+  const cards = document.querySelectorAll('.card');
+  const card = cards[currentCard];
+  const cn = card.dataset.card || (currentCard + 1);
+  const sn = card.dataset.section || '?';
+  const st = card.dataset.sectionTotal || '?';
+
+  // Progress bar (0..30 => 30 main + quiz = 31 total including quiz as 31st)
+  const pct = ((currentCard + 1) / totalCards * 100).toFixed(1);
+  document.getElementById('progress-bar-fill').style.width = pct + '%';
+  document.getElementById('progress-info').textContent = `Card ${currentCard + 1} of ${totalCards} · Section ${sn} of ${st}`;
+
+  // Sidebar active
+  document.querySelectorAll('.sidebar-card-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === currentCard);
+  });
+}
+
+// =========================================================
+// POMODORO TIMER
+// =========================================================
+let timerSeconds = 15 * 60;
+let timerRunning = true;
+let timerInterval = setInterval(tickTimer, 1000);
+
+function tickTimer() {
+  if (!timerRunning) return;
+  timerSeconds--;
+  if (timerSeconds <= 0) {
+    timerSeconds = 0;
+    timerRunning = false;
+    document.getElementById('break-overlay').classList.add('show');
+  }
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+  const s = (timerSeconds % 60).toString().padStart(2, '0');
+  document.getElementById('timer-display').textContent = `🍅 ${m}:${s}`;
+  document.getElementById('timer-display').style.color = timerSeconds < 120 ? '#f87171' : 'var(--secondary)';
+}
+
+function toggleTimer() {
+  timerRunning = !timerRunning;
+}
+
+function resumeTimer() {
+  document.getElementById('break-overlay').classList.remove('show');
+  timerSeconds = 15 * 60;
+  timerRunning = true;
+  updateTimerDisplay();
+}
+
+// =========================================================
+// EUCLIDEAN CANVAS (Card 5)
+// =========================================================
+let euclidDragging = false;
+let ptB = { x: 550, y: 130 };
+const ptA = { x: 150, y: 50 };
+
+function drawEuclid() {
+  const canvas = document.getElementById('euclidCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y <= H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  // Line between points
+  ctx.strokeStyle = '#6366f1';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(ptA.x, ptA.y);
+  ctx.lineTo(ptB.x, ptB.y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Distance label
+  const dx = ptB.x - ptA.x, dy = ptB.y - ptA.y;
+  const dist = Math.sqrt(dx*dx + dy*dy).toFixed(1);
+  const mx = (ptA.x + ptB.x) / 2, my = (ptA.y + ptB.y) / 2;
+  ctx.fillStyle = '#a5b4fc';
+  ctx.font = 'bold 13px Segoe UI';
+  ctx.fillText(`d = ${dist}px`, mx + 8, my - 8);
+
+  // Point A (blue, fixed)
+  ctx.fillStyle = '#60a5fa';
+  ctx.beginPath(); ctx.arc(ptA.x, ptA.y, 8, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px Segoe UI';
+  ctx.fillText('A', ptA.x - 4, ptA.y + 4);
+
+  // Point B (red, draggable)
+  ctx.fillStyle = '#f87171';
+  ctx.beginPath(); ctx.arc(ptB.x, ptB.y, 10, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.fillText('B', ptB.x - 4, ptB.y + 4);
+
+  document.getElementById('euclidDist').textContent = `Euclidean Distance: ${dist} pixels`;
+}
+
+function initEuclid() {
+  const canvas = document.getElementById('euclidCanvas');
+  if (!canvas) return;
+  drawEuclid();
+
+  canvas.addEventListener('mousedown', e => {
+    const r = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / r.width;
+    const scaleY = canvas.height / r.height;
+    const mx = (e.clientX - r.left) * scaleX;
+    const my = (e.clientY - r.top) * scaleY;
+    if (Math.hypot(mx - ptB.x, my - ptB.y) < 20) euclidDragging = true;
+  });
+  canvas.addEventListener('mousemove', e => {
+    if (!euclidDragging) return;
+    const r = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / r.width;
+    const scaleY = canvas.height / r.height;
+    ptB.x = Math.max(0, Math.min(canvas.width, (e.clientX - r.left) * scaleX));
+    ptB.y = Math.max(0, Math.min(canvas.height, (e.clientY - r.top) * scaleY));
+    drawEuclid();
+  });
+  canvas.addEventListener('mouseup', () => { euclidDragging = false; });
+  canvas.addEventListener('mouseleave', () => { euclidDragging = false; });
+}
+
+// =========================================================
+// MANHATTAN CANVAS (Card 6)
+// =========================================================
+function drawManhattan() {
+  const canvas = document.getElementById('manhattanCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  const A = { x: 120, y: 130 }, B = { x: 580, y: 40 };
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y <= H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  // Manhattan path
+  ctx.strokeStyle = '#f59e0b';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(A.x, A.y);
+  ctx.lineTo(B.x, A.y); // horizontal
+  ctx.lineTo(B.x, B.y); // vertical
+  ctx.stroke();
+
+  // Euclidean line (dashed)
+  ctx.strokeStyle = '#a5b4fc';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Labels
+  ctx.font = '12px Segoe UI'; ctx.fillStyle = '#fcd34d';
+  ctx.fillText(`|Δx| = ${Math.abs(B.x-A.x)}`, (A.x+B.x)/2, A.y + 16);
+  ctx.fillText(`|Δy| = ${Math.abs(B.y-A.y)}`, B.x + 8, (A.y+B.y)/2);
+  ctx.fillStyle = '#a5b4fc';
+  ctx.fillText(`Euclidean`, (A.x+B.x)/2 - 20, (A.y+B.y)/2 - 6);
+
+  const man = Math.abs(B.x-A.x)+Math.abs(B.y-A.y);
+  const euc = Math.hypot(B.x-A.x, B.y-A.y).toFixed(1);
+  ctx.fillStyle = '#f59e0b'; ctx.font = 'bold 13px Segoe UI';
+  ctx.fillText(`Manhattan = ${man}px`, 30, 25);
+  ctx.fillStyle = '#a5b4fc';
+  ctx.fillText(`Euclidean = ${euc}px`, 30, 44);
+
+  // Points
+  [A, B].forEach((p, i) => {
+    ctx.fillStyle = i === 0 ? '#f87171' : '#60a5fa';
+    ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px Segoe UI';
+    ctx.fillText(i === 0 ? 'A' : 'B', p.x - 4, p.y + 4);
+  });
+}
+
+// =========================================================
+// DISTANCE CALCULATOR (Card 7)
+// =========================================================
+function calcDists() {
+  const ax = +document.getElementById('ax').value || 0;
+  const ay = +document.getElementById('ay').value || 0;
+  const az = +document.getElementById('az').value || 0;
+  const bx = +document.getElementById('bx').value || 0;
+  const by = +document.getElementById('by').value || 0;
+  const bz = +document.getElementById('bz').value || 0;
+
+  const euc = Math.sqrt((ax-bx)**2 + (ay-by)**2 + (az-bz)**2);
+  const man = Math.abs(ax-bx) + Math.abs(ay-by) + Math.abs(az-bz);
+  const sup = Math.max(Math.abs(ax-bx), Math.abs(ay-by), Math.abs(az-bz));
+  const maxVal = Math.max(euc, man, sup, 1);
+
+  document.getElementById('euc-val').textContent = euc.toFixed(3);
+  document.getElementById('man-val').textContent = man.toFixed(3);
+  document.getElementById('sup-val').textContent = sup.toFixed(3);
+  document.getElementById('euc-bar').style.width = (euc/maxVal*100).toFixed(1) + '%';
+  document.getElementById('man-bar').style.width = (man/maxVal*100).toFixed(1) + '%';
+  document.getElementById('sup-bar').style.width = (sup/maxVal*100).toFixed(1) + '%';
+}
+
+// =========================================================
+// COSINE CANVAS (Card 8)
+// =========================================================
+function drawCosine() {
+  const canvas = document.getElementById('cosineCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  const cx = W/2, cy = H/2 + 20;
+
+  // Background
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.beginPath(); ctx.arc(cx, cy, 110, 0, Math.PI*2); ctx.fill();
+
+  // Arrows (two vectors)
+  const vecs = [
+    { angle: -45, len: 90, color: '#60a5fa', label: 'Doc A (long)' },
+    { angle: -35, len: 55, color: '#f87171', label: 'Doc B (short)' }
+  ];
+  vecs.forEach(v => {
+    const rad = v.angle * Math.PI / 180;
+    const ex = cx + Math.cos(rad) * v.len;
+    const ey = cy + Math.sin(rad) * v.len;
+    ctx.strokeStyle = v.color;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+    // Arrow head
+    const hLen = 10, hAng = 0.4;
+    ctx.fillStyle = v.color;
+    ctx.beginPath();
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - hLen*Math.cos(rad-hAng), ey - hLen*Math.sin(rad-hAng));
+    ctx.lineTo(ex - hLen*Math.cos(rad+hAng), ey - hLen*Math.sin(rad+hAng));
+    ctx.closePath(); ctx.fill();
+    // Label
+    ctx.font = '12px Segoe UI'; ctx.fillStyle = v.color;
+    ctx.fillText(v.label, ex + 8, ey);
+  });
+
+  // Angle arc
+  ctx.strokeStyle = '#fcd34d'; ctx.lineWidth = 1.5;
+  const a1 = -45*Math.PI/180, a2 = -35*Math.PI/180;
+  ctx.beginPath(); ctx.arc(cx, cy, 35, a1, a2); ctx.stroke();
+  ctx.fillStyle = '#fcd34d'; ctx.font = 'bold 12px Segoe UI';
+  ctx.fillText('θ = 10°', cx + 38, cy - 28);
+  ctx.fillStyle = '#86efac'; ctx.font = 'bold 13px Segoe UI';
+  ctx.fillText('cos(10°) ≈ 0.98 → Very Similar!', cx - 90, cy + 40);
+
+  // Origin dot
+  ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI*2); ctx.fill();
+}
+
+// =========================================================
+// JACCARD PLAYGROUND (Card 10)
+// =========================================================
+const ITEMS = ['🍎', '🍌', '🥦', '🍕', '🎵', '📱', '🐱', '🌙', '⭐', '🎮'];
+let setA = new Set([0, 1, 2, 3]);
+let setB = new Set([2, 3, 4, 5]);
+
+function initJaccard() {
+  const ca = document.getElementById('setA-items');
+  const cb = document.getElementById('setB-items');
+  if (!ca || !cb) return;
+  ca.innerHTML = '';
+  cb.innerHTML = '';
+
+  ITEMS.forEach((item, i) => {
+    const ba = document.createElement('span');
+    ba.className = 'set-item';
+    ba.textContent = item;
+    ba.title = 'Toggle in Set A';
+    ba.style.background = setA.has(i) ? 'rgba(99,102,241,0.3)' : 'transparent';
+    ba.style.borderColor = setA.has(i) ? '#a5b4fc' : 'var(--border)';
+    ba.onclick = () => {
+      if (setA.has(i)) setA.delete(i); else setA.add(i);
+      initJaccard(); drawJaccard(); updateJaccardStats();
+    };
+    ca.appendChild(ba);
+
+    const bb = document.createElement('span');
+    bb.className = 'set-item';
+    bb.textContent = item;
+    bb.title = 'Toggle in Set B';
+    bb.style.background = setB.has(i) ? 'rgba(248,113,113,0.3)' : 'transparent';
+    bb.style.borderColor = setB.has(i) ? '#f87171' : 'var(--border)';
+    bb.onclick = () => {
+      if (setB.has(i)) setB.delete(i); else setB.add(i);
+      initJaccard(); drawJaccard(); updateJaccardStats();
+    };
+    cb.appendChild(bb);
+  });
+
+  updateJaccardStats();
+}
+
+function updateJaccardStats() {
+  const inter = [...setA].filter(x => setB.has(x));
+  const union = new Set([...setA, ...setB]);
+  const j = union.size === 0 ? 0 : (inter.length / union.size);
+  document.getElementById('j-intersection').textContent = inter.length;
+  document.getElementById('j-union').textContent = union.size;
+  document.getElementById('j-jaccard').textContent = j.toFixed(3);
+  drawJaccard();
+}
+
+function drawJaccard() {
+  const canvas = document.getElementById('jaccardCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const inter = [...setA].filter(x => setB.has(x));
+  const union = new Set([...setA, ...setB]);
+  const j = union.size === 0 ? 0 : (inter.length / union.size);
+
+  // Two circles
+  const r = 40, cy = H/2;
+  const cx1 = W/2 - 60, cx2 = W/2 + 60;
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = '#6366f1';
+  ctx.beginPath(); ctx.arc(cx1, cy, r, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#f87171';
+  ctx.beginPath(); ctx.arc(cx2, cy, r, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Labels on circles
+  ctx.font = '11px Segoe UI'; ctx.fillStyle = '#a5b4fc'; ctx.textAlign = 'center';
+  ctx.fillText('Set A', cx1, cy - r - 6);
+  ctx.fillStyle = '#f87171';
+  ctx.fillText('Set B', cx2, cy - r - 6);
+  ctx.fillStyle = '#fcd34d';
+  ctx.fillText('∩', W/2, cy + 4);
+
+  // Jaccard bar
+  const barX = 50, barW = W - 100, barY = H - 24;
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  ctx.beginPath(); ctx.roundRect(barX, barY, barW, 14, 7); ctx.fill();
+  ctx.fillStyle = j > 0.66 ? '#22c55e' : j > 0.33 ? '#f59e0b' : '#f87171';
+  ctx.beginPath(); ctx.roundRect(barX, barY, barW * j, 14, 7); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px Segoe UI';
+  ctx.fillText(`Jaccard: ${(j*100).toFixed(0)}%`, W/2, barY - 4);
+  ctx.textAlign = 'left';
+}
+
+// =========================================================
+// IMPUTATION DEMO (Card 16)
+// =========================================================
+function impute(method) {
+  // Reset first
+  ['bob-age', 'carol-sal', 'dave-dept'].forEach(id => {
+    const el = document.getElementById(id);
+    el.className = 'missing';
+    el.textContent = '?';
+  });
+
+  const ex = document.getElementById('impute-explanation');
+  const ba = document.getElementById('bob-age');
+  const cs = document.getElementById('carol-sal');
+  const dd = document.getElementById('dave-dept');
+
+  if (method === 'reset') {
+    ex.textContent = 'Click a method above to see how missing values are filled ↑';
+    return;
+  }
+  if (method === 'ignore') {
+    // Rows with missing go grey strikethrough
+    ba.textContent = '(row ignored)';
+    ba.className = '';
+    ba.style.color = 'var(--muted-foreground)';
+    cs.textContent = '(row ignored)';
+    cs.className = '';
+    cs.style.color = 'var(--muted-foreground)';
+    dd.textContent = '(row ignored)';
+    dd.className = '';
+    dd.style.color = 'var(--muted-foreground)';
+    ex.textContent = 'Method 1 — Ignore: Rows with any missing value are skipped entirely. Simple, but wastes data!';
+    return;
+  }
+  if (method === 'mean') {
+    // Mean age: (30+25+35+28)/4 = 29.5 → round to 30
+    // Mean salary: (50000+62000+58000+45000)/4 = 53750
+    ba.textContent = '30'; ba.className = 'filled';
+    cs.textContent = '53,750'; cs.className = 'filled';
+    dd.textContent = 'Unknown'; dd.className = 'filled';
+    ex.textContent = 'Method 3 — Global Mean: Age filled with mean of [30,25,35,28]≈30. Salary filled with mean of [50k,62k,58k,45k]=$53,750. Dept filled with mode="Engineering".';
+    return;
+  }
+  if (method === 'constant') {
+    ba.textContent = '0'; ba.className = 'filled';
+    cs.textContent = '0'; cs.className = 'filled';
+    dd.textContent = 'Unknown'; dd.className = 'filled';
+    ex.textContent = 'Method 4 — Constant: Fill all missing values with a fixed constant (0 for numeric, "Unknown" for text). Simple but can distort statistics!';
+    return;
+  }
+  if (method === 'classmode') {
+    // Bob is Engineering dept, so mean engineering age = (30+28)/2=29
+    ba.textContent = '29'; ba.className = 'filled';
+    // Carol is Marketing, no other salary in Marketing, use global mean
+    cs.textContent = '53,750'; cs.className = 'filled';
+    dd.textContent = 'Engineering'; dd.className = 'filled';
+    ex.textContent = 'Method 5 — Class Mode/Mean: Bob\'s age uses Engineering dept mean=(30+28)/2=29. Dave\'s dept: Engineering appears most often (Alice, Bob, Eve) → "Engineering". More accurate than global mean!';
+    return;
+  }
+}
+
+// =========================================================
+// BINNING CANVAS (Card 18)
+// =========================================================
+function drawBinning() {
+  const canvas = document.getElementById('binningCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const data = [4, 8, 9, 15, 21, 21, 24, 25, 26, 28, 29, 34, 95]; // 95 is outlier
+  const minV = 0, maxV = 100;
+  const dotY = 55;
+
+  // Axis
+  ctx.strokeStyle = 'var(--border)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40, dotY); ctx.lineTo(W-40, dotY); ctx.stroke();
+
+  // Equal-width bins: 0-25, 25-50, 50-75, 75-100
+  const binColors = ['rgba(99,102,241,0.3)', 'rgba(34,211,238,0.3)', 'rgba(245,158,11,0.3)', 'rgba(34,197,94,0.3)'];
+  for (let i = 0; i < 4; i++) {
+    const x1 = 40 + (i*25/100)*(W-80), x2 = 40 + ((i+1)*25/100)*(W-80);
+    ctx.fillStyle = binColors[i];
+    ctx.fillRect(x1, dotY-20, x2-x1, 40);
+  }
+
+  ctx.font = '10px Segoe UI'; ctx.fillStyle = '#a5b4fc'; ctx.textAlign = 'center';
+  ctx.fillText('[0-25]', 40+(12.5/100)*(W-80), dotY+32);
+  ctx.fillText('[25-50]', 40+(37.5/100)*(W-80), dotY+32);
+  ctx.fillText('[50-75]', 40+(62.5/100)*(W-80), dotY+32);
+  ctx.fillText('[75-100]', 40+(87.5/100)*(W-80), dotY+32);
+
+  // Data points
+  data.forEach(v => {
+    const x = 40 + (v/maxV)*(W-80);
+    ctx.fillStyle = v === 95 ? '#f87171' : '#86efac';
+    ctx.beginPath(); ctx.arc(x, dotY, 5, 0, Math.PI*2); ctx.fill();
+  });
+
+  // Labels
+  ctx.fillStyle = 'var(--muted-foreground)'; ctx.textAlign = 'left';
+  ctx.fillText('0', 36, dotY - 22);
+  ctx.textAlign = 'right';
+  ctx.fillText('100', W-36, dotY - 22);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#f87171';
+  ctx.fillText('← outlier stretches this bin!', 40+(87.5/100)*(W-80), dotY - 26);
+
+  // Title
+  ctx.fillStyle = '#fcd34d'; ctx.font = 'bold 11px Segoe UI'; ctx.textAlign = 'left';
+  ctx.fillText('Equal-Width: bins [0-25][25-50][50-75][75-100]. Outlier (95) ok but stretches last bin interpretation.', 40, 14);
+}
+
+// =========================================================
+// MIN-MAX CANVAS (Card 21)
+// =========================================================
+function drawMinMax() {
+  const canvas = document.getElementById('minmaxCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const data = [10, 20, 30, 40, 50];
+  const minV = 10, maxV = 50;
+
+  // Draw two number lines
+  const ly1 = 28, ly2 = 76;
+  const lx1 = 60, lx2 = W - 60;
+
+  // Original axis
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(lx1, ly1); ctx.lineTo(lx2, ly1); ctx.stroke();
+  ctx.fillStyle = 'var(--muted-foreground)'; ctx.font = '11px Segoe UI'; ctx.textAlign = 'center';
+  ctx.fillText('10', lx1, ly1-8); ctx.fillText('50', lx2, ly1-8);
+  ctx.fillStyle = '#fcd34d'; ctx.fillText('Original [10–50]', W/2, ly1-18);
+
+  // Normalized axis
+  ctx.strokeStyle = 'rgba(34,211,238,0.5)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(lx1, ly2); ctx.lineTo(lx2, ly2); ctx.stroke();
+  ctx.fillStyle = 'var(--muted-foreground)';
+  ctx.fillText('0.0', lx1, ly2-8); ctx.fillText('1.0', lx2, ly2-8);
+  ctx.fillStyle = '#67e8f9'; ctx.fillText('Normalized [0–1]', W/2, ly2-18);
+
+  // Points
+  data.forEach((v, i) => {
+    const x1 = lx1 + ((v - minV)/(maxV - minV))*(lx2-lx1);
+    const normV = (v - minV)/(maxV - minV);
+    const x2 = lx1 + normV*(lx2-lx1);
+
+    ctx.fillStyle = ['#6366f1','#22d3ee','#f59e0b','#f87171','#86efac'][i];
+    ctx.beginPath(); ctx.arc(x1, ly1, 6, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x2, ly2, 6, 0, Math.PI*2); ctx.fill();
+
+    // Arrow
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(x1, ly1+7); ctx.lineTo(x2, ly2-7); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+}
+
+// =========================================================
+// PCA CANVAS (Card 27)
+// =========================================================
+let pcaStepNum = 0;
+let pcaPoints = [];
+
+function generatePCAData() {
+  // Generate ellipse of points (simulating correlated data)
+  pcaPoints = [];
+  for (let i = 0; i < 40; i++) {
+    const t = (i / 40) * Math.PI * 2;
+    const r = 80 + (Math.random()-0.5)*20;
+    const x = r * Math.cos(t) * 1.8;
+    const y = r * Math.sin(t) * 0.55;
+    // Rotate 35 degrees
+    const angle = 35 * Math.PI / 180;
+    pcaPoints.push({
+      x: x * Math.cos(angle) - y * Math.sin(angle),
+      y: x * Math.sin(angle) + y * Math.cos(angle)
+    });
+  }
+}
+
+function pcaStep(step) {
+  pcaStepNum = step;
+  drawPCA();
+  const info = document.getElementById('pca-info');
+  if (step === 0) info.textContent = 'Click "Show PC1" to see the first principal component →';
+  else if (step === 1) info.textContent = 'PC1 (orange arrow) = the direction where data SPREADS OUT THE MOST (max variance). This is the "best viewing angle."';
+  else if (step === 2) info.textContent = 'Each point is PROJECTED onto PC1 (shown as cyan dots on the line). We\'ve reduced 2D → 1D while keeping the most important pattern!';
+
+  document.getElementById('pca-btn1').className = 'small-btn' + (step === 1 ? ' active-btn' : '');
+  document.getElementById('pca-btn2').className = 'small-btn' + (step === 2 ? ' active-btn' : '');
+}
+
+function drawPCA() {
+  const canvas = document.getElementById('pcaCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  const cx = W/2, cy = H/2;
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  for (let x = 0; x <= W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y <= H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  // Axes
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+
+  // PC direction (35 degrees)
+  const pcAngle = 35 * Math.PI / 180;
+  const pcDx = Math.cos(pcAngle), pcDy = Math.sin(pcAngle);
+
+  // Project points if step 2
+  if (pcaStepNum === 2) {
+    pcaPoints.forEach(p => {
+      const dot = p.x * pcDx + p.y * pcDy;
+      const proj = { x: dot * pcDx, y: dot * pcDy };
+      // Line from point to projection
+      ctx.strokeStyle = 'rgba(99,102,241,0.3)'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx + p.x, cy - p.y);
+      ctx.lineTo(cx + proj.x, cy - proj.y);
+      ctx.stroke();
+      // Projected point
+      ctx.fillStyle = '#22d3ee';
+      ctx.beginPath(); ctx.arc(cx + proj.x, cy - proj.y, 4, 0, Math.PI*2); ctx.fill();
+    });
+  }
+
+  // Data points
+  pcaPoints.forEach(p => {
+    ctx.fillStyle = pcaStepNum === 2 ? 'rgba(148,163,184,0.5)' : '#94a3b8';
+    ctx.beginPath(); ctx.arc(cx + p.x, cy - p.y, 4, 0, Math.PI*2); ctx.fill();
+  });
+
+  // PC1 Arrow
+  if (pcaStepNum >= 1) {
+    const scale = 140;
+    ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cx - pcDx*scale, cy + pcDy*scale);
+    ctx.lineTo(cx + pcDx*scale, cy - pcDy*scale);
+    ctx.stroke();
+    // Arrowhead
+    const ex = cx + pcDx*scale, ey = cy - pcDy*scale;
+    ctx.fillStyle = '#f59e0b';
+    ctx.beginPath();
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - 12*Math.cos(pcAngle-0.35), ey + 12*Math.sin(pcAngle-0.35));
+    ctx.lineTo(ex - 12*Math.cos(pcAngle+0.35), ey + 12*Math.sin(pcAngle+0.35));
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fcd34d'; ctx.font = 'bold 13px Segoe UI';
+    ctx.fillText('PC1 (max variance)', cx + pcDx*scale - 160, cy - pcDy*scale - 10);
+  }
+}
+
+// =========================================================
+// NORMALIZATION DEMO (Card 23)
+// =========================================================
+function runNormDemo() {
+  const raw = document.getElementById('norm-input').value
+    .split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+  if (raw.length === 0) return;
+  const method = document.getElementById('norm-method').value;
+  const minV = Math.min(...raw), maxV = Math.max(...raw);
+  const mean = raw.reduce((a,b)=>a+b,0)/raw.length;
+  const std = Math.sqrt(raw.map(x=>(x-mean)**2).reduce((a,b)=>a+b,0)/raw.length) || 1;
+
+  let norm;
+  if (method === 'minmax') {
+    const range = maxV - minV || 1;
+    norm = raw.map(x => (x - minV)/range);
+  } else {
+    norm = raw.map(x => (x - mean)/std);
+  }
+
+  const normMin = Math.min(...norm), normMax = Math.max(...norm);
+  const normRange = normMax - normMin || 1;
+
+  function renderBars(container, vals, colors, refMin, refMax) {
+    container.innerHTML = '';
+    vals.forEach((v, i) => {
+      const row = document.createElement('div');
+      row.className = 'norm-bar-row';
+      const lbl = document.createElement('div'); lbl.className = 'norm-bar-label';
+      lbl.textContent = v.toFixed(2);
+      const track = document.createElement('div'); track.className = 'norm-bar-track';
+      const fill = document.createElement('div'); fill.className = 'norm-bar-fill';
+      const pct = Math.max(0, Math.min(100, ((v - refMin) / (refMax - refMin || 1)) * 100));
+      fill.style.width = pct + '%';
+      fill.style.background = colors[i % colors.length];
+      track.appendChild(fill);
+      row.appendChild(lbl); row.appendChild(track);
+      container.appendChild(row);
+    });
+  }
+
+  const palette = ['#6366f1','#22d3ee','#f59e0b','#f87171','#86efac','#a78bfa','#fb923c'];
+  renderBars(document.getElementById('norm-original'), raw, palette, minV, maxV);
+  renderBars(document.getElementById('norm-result'), norm, palette, normMin, normMax);
+
+  // Stats
+  const stats = document.getElementById('norm-stats');
+  stats.innerHTML = `
+    <div class="stat-card" style="flex:1"><div class="stat-val" style="font-size:16px">${minV}</div><div class="stat-lbl">Original Min</div></div>
+    <div class="stat-card" style="flex:1"><div class="stat-val" style="font-size:16px">${maxV}</div><div class="stat-lbl">Original Max</div></div>
+    <div class="stat-card" style="flex:1"><div class="stat-val" style="font-size:16px">${normMin.toFixed(2)}</div><div class="stat-lbl">Norm Min</div></div>
+    <div class="stat-card" style="flex:1"><div class="stat-val" style="font-size:16px">${normMax.toFixed(2)}</div><div class="stat-lbl">Norm Max</div></div>
+  `;
+}
+
+// =========================================================
+// QUIZ LOGIC
+// =========================================================
+const correctAnswers = { 1: 'b', 2: 'b', 3: 'b', 4: 'c', 5: 'b' };
+const userAnswers = {};
+const quizExplain = {
+  1: {
+    b: '✅ Correct! L2 (Euclidean) squares differences, making it very sensitive to large gaps. L1 (Manhattan) is more robust.',
+    wrong: '❌ Euclidean distance squares each dimension difference, amplifying outliers. Manhattan (L1) is more robust.'
+  },
+  2: {
+    b: '✅ Correct! |{b,c}| / |{a,b,c,d}| = 2/4 = 0.5',
+    wrong: '❌ Intersection = {b,c} (size 2). Union = {a,b,c,d} (size 4). Jaccard = 2/4 = 0.5'
+  },
+  3: {
+    b: '✅ Correct! Min-Max uses (x−min)/(max−min), so you must know min and max. Z-score only needs mean and std.',
+    wrong: '❌ Min-Max normalization formula = (x−min)/(max−min) — requires knowing both min AND max values.'
+  },
+  4: {
+    c: '✅ Correct! Noisy data contains errors, outliers, or random distortions — not just missing values.',
+    wrong: '❌ Noisy data = errors, outliers, random distortions. Missing data is a separate problem (incomplete data).'
+  },
+  5: {
+    b: '✅ Correct! Filling with column mean and using predictive models are both valid imputation strategies.',
+    wrong: '❌ Valid methods include: mean/median/mode imputation, predictive models, class-specific means, constants, or ignoring rows.'
+  }
+};
+
+function answerQ(qNum, choice) {
+  if (userAnswers[qNum]) return; // Already answered
+  userAnswers[qNum] = choice;
+  const correct = correctAnswers[qNum];
+  const btns = document.querySelectorAll(`#qq${qNum} .quiz-option`);
+  btns.forEach(b => b.disabled = true);
+  btns.forEach(b => {
+    if (b.textContent.startsWith(correct)) b.classList.add('correct');
+  });
+  if (choice !== correct) {
+    btns.forEach(b => { if (b.textContent.startsWith(choice)) b.classList.add('wrong'); });
+  }
+  const fb = document.getElementById('qf' + qNum);
+  const isCorrect = choice === correct;
+  fb.className = 'quiz-feedback ' + (isCorrect ? 'ok' : 'err');
+  fb.textContent = isCorrect ? quizExplain[qNum][choice] : quizExplain[qNum].wrong;
+}
+
+function submitQuiz() {
+  // Fill in any unanswered
+  for (let q = 1; q <= 5; q++) {
+    if (!userAnswers[q]) userAnswers[q] = '__';
+  }
+  const score = Object.keys(correctAnswers).filter(k => userAnswers[k] === correctAnswers[k]).length;
+  document.getElementById('quiz-area').style.opacity = '0.6';
+  document.getElementById('quiz-score').style.display = 'block';
+  document.getElementById('submit-btn').style.display = 'none';
+  document.getElementById('score-num').textContent = `${score}/5`;
+  const msgs = ['', 'Keep studying! Review the cards again. 💪', 'Good start! Review the tricky cards. 📚', 'Solid work! Almost there. 🌟', 'Great job! You know this material well. 🎉', 'Perfect score! You\'re a preprocessing expert! 🏆'];
+  document.getElementById('score-msg').textContent = msgs[score];
+}
+
+function retryQuiz() {
+  Object.keys(userAnswers).forEach(k => delete userAnswers[k]);
+  document.getElementById('quiz-area').style.opacity = '1';
+  document.getElementById('quiz-score').style.display = 'none';
+  document.getElementById('submit-btn').style.display = 'block';
+  // Reset all options
+  document.querySelectorAll('.quiz-option').forEach(b => {
+    b.classList.remove('correct', 'wrong');
+    b.disabled = false;
+  });
+  document.querySelectorAll('.quiz-feedback').forEach(f => {
+    f.textContent = ''; f.className = 'quiz-feedback';
+  });
+}
+
+// =========================================================
+// APPENDIX
+// =========================================================
+function toggleApp(id) {
+  const body = document.getElementById(id);
+  const arr = document.getElementById(id + '-arr');
+  body.classList.toggle('open');
+  arr.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function showAppendix() {
+  document.getElementById('appendix-section').style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('appendix-section').scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+}
+
+// =========================================================
+// CANVAS INIT PER CARD
+// =========================================================
+function initCanvasForCard(idx) {
+  // Small delay to ensure DOM is visible
+  setTimeout(() => {
+    if (idx === 5) initEuclid();
+    if (idx === 6) drawManhattan();
+    if (idx === 7) calcDists();
+    if (idx === 8) drawCosine();
+    if (idx === 10) { initJaccard(); drawJaccard(); }
+    if (idx === 16) { /* imputation table already rendered */ }
+    if (idx === 18) drawBinning();
+    if (idx === 21) drawMinMax();
+    if (idx === 23) runNormDemo();
+    if (idx === 27) { generatePCAData(); drawPCA(); }
+  }, 80);
+}
+
+// =========================================================
+// INIT
+// =========================================================
+window.addEventListener('load', () => {
+  updateUI();
+  updateTimerDisplay();
+  // Init card 0 (no canvas)
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextCard();
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevCard();
+});
+</script>
+<div id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+<script>
+function toggleMobileSidebar() {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('sidebar-backdrop');
+  if (sb) sb.classList.toggle('mobile-open');
+  if (bd) bd.classList.toggle('active');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const links = document.querySelectorAll('#sidebar a, #sidebar .sidebar-link, #sidebar button, [onclick*="jumpTo"], [onclick*="showCard"], [onclick*="goToCard"], [onclick*="gotoCard"]');
+  links.forEach(l => {
+    l.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        const sb = document.getElementById('sidebar');
+        const bd = document.getElementById('sidebar-backdrop');
+        if (sb) sb.classList.remove('mobile-open');
+        if (bd) bd.classList.remove('active');
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

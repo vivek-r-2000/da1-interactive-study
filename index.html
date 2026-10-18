@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Analytics I — Global Learning Hub 🎓</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<style>
+  :root {
+    --bg-main: #090d16;
+    --card-bg: #131b2e;
+    --card-hover: #1c2742;
+    --border: #22304d;
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --accent: #ec4899;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+  }
+  body {
+    background: var(--bg-main);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  .card-glow:hover {
+    box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.4);
+    border-color: #6366f1;
+    transform: translateY(-2px);
+  }
+  .badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+  }
+  /* Mobile touches */
+  @media (max-width: 640px) {
+    .hero-title { font-size: 1.75rem !important; }
+    .stat-box { padding: 0.75rem !important; }
+  }
+</style>
+</head>
+<body class="antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- TOP APP BAR -->
+  <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md border-b border-[var(--border)] px-4 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">🎓</span>
+        <div>
+          <span class="font-black text-sm md:text-base text-white tracking-tight">DA-1 Study Suite</span>
+          <span class="hidden md:inline-block ml-2 text-xs text-indigo-400 font-mono bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/50">Global Edition</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="Study_Material/00_home.html" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm">
+          <span>📘 Lectures</span>
+        </a>
+        <a href="Research_Papers_Study/00_papers_home.html" class="text-xs bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm">
+          <span>🔬 Papers</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="max-w-7xl mx-auto px-4 pt-8 pb-6">
+    <div class="bg-gradient-to-br from-[#12192c] via-[#0d1424] to-[#17142b] border border-[var(--border)] rounded-2xl p-6 md:p-10 relative overflow-hidden">
+      <div class="absolute -right-20 -top-20 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative z-10 max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-800/60 text-indigo-300 text-xs font-semibold mb-4">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Interactive Visual Learning Platform
+        </div>
+        <h1 class="hero-title text-3xl md:text-5xl font-black text-white tracking-tight mb-4 leading-tight">
+          Data Analytics-I <br/>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">
+            Interactive Learning & Research Hub
+          </span>
+        </h1>
+        <p class="text-sm md:text-base text-slate-300 leading-relaxed mb-6">
+          Bite-sized, ADHD-friendly, and mathematically rigorous. Designed from first principles with live visual algorithms, step-by-step simulations, formula translations, and retention quizzes.
+        </p>
+
+        <!-- STATS BAR -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="stat-box bg-[#090d16]/70 border border-[var(--border)] rounded-xl p-3 text-center">
+            <div class="text-xl md:text-2xl font-black text-indigo-400">8</div>
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Lecture Modules</div>
+          </div>
+          <div class="stat-box bg-[#090d16]/70 border border-[var(--border)] rounded-xl p-3 text-center">
+            <div class="text-xl md:text-2xl font-black text-purple-400">35</div>
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Research Papers</div>
+          </div>
+          <div class="stat-box bg-[#090d16]/70 border border-[var(--border)] rounded-xl p-3 text-center">
+            <div class="text-xl md:text-2xl font-black text-emerald-400">100%</div>
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Interactive & Tested</div>
+          </div>
+          <div class="stat-box bg-[#090d16]/70 border border-[var(--border)] rounded-xl p-3 text-center">
+            <div class="text-xl md:text-2xl font-black text-pink-400">📱</div>
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Mobile Perfect</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEARCH & FILTER BAR -->
+  <section class="max-w-7xl mx-auto px-4 mb-6">
+    <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+      <!-- Search Input -->
+      <div class="relative flex-1">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="Search any topic, paper, or algorithm (e.g., Apriori, BUC, Decision Tree, COVID, OLAP)..."
+          class="w-full bg-[#131b2e] border border-[var(--border)] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+          oninput="handleSearch()"
+        />
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none" id="filter-pills">
+        <button onclick="setFilter('all')" class="filter-pill active px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white border border-indigo-500" data-filter="all">All (43)</button>
+        <button onclick="setFilter('lecture')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-indigo-500" data-filter="lecture">Lectures (8)</button>
+        <button onclick="setFilter('paper')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-purple-500" data-filter="paper">Papers (35)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN LIST CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 pb-16">
+
+    <!-- SECTION: LECTURE MODULES -->
+    <div id="section-lectures" class="mb-12">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span>📘 Core Lecture Course Modules</span>
+            <span class="text-xs bg-indigo-950 text-indigo-300 font-mono px-2 py-0.5 rounded border border-indigo-800">8 Modules</span>
+          </h2>
+          <p class="text-xs text-slate-400">Structured card-by-card lessons with Pomodoro timers and interactive canvases.</p>
+        </div>
+        <a href="Study_Material/00_home.html" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+          Open Lecture Hub →
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="lecture-cards">
+
+        <!-- Mod 1 -->
+        <a href="Study_Material/01_intro.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Introduction to Data Analytics DIKW KDD Data Mining">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-blue-500/20 text-blue-300 border border-blue-500/30">Module 01</span>
+            <span class="text-xs text-slate-400 font-mono">~45 min</span>
+          </div>
+          <h3 class="font-bold text-white text-base group-hover:text-indigo-300 transition-colors mb-1.5">🌍 Intro to Data Analytics</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3">DIKW Pyramid, KDD 8-step pipeline, 6 data mining superpowers, and email classification.</p>
+          <div class="text-[11px] font-semibold text-indigo-400 flex items-center gap-1">
+            Start Lesson <span>→</span>
+          </div>
+        </a>
+
+        <!-- Mod 2 -->
+        <a href="Study_Material/02_data_concepts_stats.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Data Concepts Big Data 5Vs Statistics Mean Median Mode Normal Distribution Boxplot Scatter">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Module 02</span>
+            <span class="text-xs text-slate-400 font-mono">~60 min</span>
+          </div>
+          <h3 class="font-bold text-white text-base group-hover:text-emerald-300 transition-colors mb-1.5">📊 Data Concepts & Stats</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3">Nominal/Ordinal/Ratio attributes, 5 Vs of Big Data, Boxplots, and live Pearson Correlation.</p>
+          <div class="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
+            Start Lesson <span>→</span>
+          </div>
+        </a>
+
+        <!-- Mod 3 -->
+        <a href="Study_Material/03_preprocessing.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Data Preprocessing Euclidean Manhattan Cosine Jaccard Normalization Binning PCA">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-amber-500/20 text-amber-300 border border-amber-500/30">Module 03</span>
+            <span class="text-xs text-slate-400 font-mono">~60 min</span>
+          </div>
+          <h3 class="font-bold text-white text-base group-hover:text-amber-300 transition-colors mb-1.5">🧹 Data Preprocessing</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3">Euclidean vs Manhattan distance, Jaccard sets, Missing value imputation, and PCA vectors.</p>
+          <div class="text-[11px] font-semibold text-amber-400 flex items-center gap-1">
+            Start Lesson <span>→</span>
+          </div>
+        </a>
+
+        <!-- Mod 4 -->
+        <a href="Study_Material/04_warehousing_olap.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Data Warehousing OLAP Star Schema Snowflake Roll-up Drill-down Slice Dice Attribute Oriented Induction">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-purple-500/20 text-purple-300 border border-purple-500/30">Module 04</span>
+            <span class="text-xs text-slate-400 font-mono">~45 min</span>
+          </div>
+          <h3 class="font-bold text-white text-base group-hover:text-purple-300 transition-colors mb-1.5">🏭 Warehousing & OLAP</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3">Star vs Snowflake schema, 3D interactive cube (Roll-up, Drill-down, Slice, Dice), and AOI.</p>
+          <div class="text-[11px] font-semibold text-purple-400 flex items-center gap-1">
+            Start Lesson <span>→</span>
+          </div>
+        </a>
+
+        <!-- Mod 5 -->
+        <a href="Study_Material/05_data_cube_algorithms.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Data Cube Algorithms BUC Bottom Up MultiWay Array Chunking Star-Cubing Shell Fragments">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Module 05</span>
+            <span class="text-xs text-slate-400 font-mono">~50 min</span>
+          </div>
+          <h3 class="font-bold text-white text-base group-hover:text-cyan-300 transition-colors mb-1.5">🧊 Cube Algorithms</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3">Bottom-Up Computation (BUC) lattice pruning, MultiWay array chunking, and Star-Cubing.</p>
+          <div class="text-[11px] font-semibold text-cyan-400 flex items-center gap-1">
+            Start Lesson <span>→</span>
+          </div>
+        </a>
+
+        <!-- Mod 6 -->
+        <a href="Study_Material/06_association_rules.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Association Rule Mining Support Confidence Apriori FP-Tree FP-Growth Lift Kulczynski">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-pink-500/20 text-pink-300 border border-pink-500/30">Module 06</span>
+            <span class="text-xs text-slate-400 font-mono">~60 min</span>
+          </div>
+          <h3 class="font-bold text-white text-base group-hover:text-pink-300 transition-colors mb-1.5">🛒 Association Rules</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3">Support/Confidence, Apriori candidate join-prune, FP-Tree building, Lift & Kulczynski.</p>
+          <div class="text-[11px] font-semibold text-pink-400 flex items-center gap-1">
+            Start Lesson <span>→</span>
+          </div>
+        </a>
+
+        <!-- Mod 7 -->
+        <a href="Study_Material/07_advanced_patterns.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Advanced Pattern Mining Coverage Multi-level Quantitative High-Utility TWU Constraints">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-rose-500/20 text-rose-300 border border-rose-500/30">Module 07</span>
+            <span class="text-xs text-slate-400 font-mono">~45 min</span>
+          </div>
+          <h3 class="font-bold text-white text-base group-hover:text-rose-300 transition-colors mb-1.5">🔬 Advanced Patterns</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3">Coverage Patterns, Multi-level taxonomies, High-Utility mining with TWU, and constraints.</p>
+          <div class="text-[11px] font-semibold text-rose-400 flex items-center gap-1">
+            Start Lesson <span>→</span>
+          </div>
+        </a>
+
+        <!-- Mod 8 -->
+        <a href="Study_Material/08_classification.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Classification Decision Trees Entropy Information Gain Gini Naive Bayes k-NN Confusion Matrix ROC Ensemble Random Forest">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Module 08</span>
+            <span class="text-xs text-slate-400 font-mono">~90 min</span>
+          </div>
+          <h3 class="font-bold text-white text-base group-hover:text-indigo-300 transition-colors mb-1.5">🏷️ Classification</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3">Decision Trees (Entropy/Gini), Naive Bayes spam filter, k-NN scatter, ROC curves & Ensembles.</p>
+          <div class="text-[11px] font-semibold text-indigo-400 flex items-center gap-1">
+            Start Lesson <span>→</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- SECTION: RESEARCH PAPERS -->
+    <div id="section-papers">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span>🔬 35 Research Paper Visual Tutorials</span>
+            <span class="text-xs bg-purple-950 text-purple-300 font-mono px-2 py-0.5 rounded border border-purple-800">Papers 1–35</span>
+          </h2>
+          <p class="text-xs text-slate-400">Deep mathematical and algorithmic breakdowns with interactive simulators.</p>
+        </div>
+        <a href="Research_Papers_Study/00_papers_home.html" class="text-xs font-semibold text-purple-400 hover:text-purple-300 flex items-center gap-1">
+          Open Paper Hub →
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="paper-cards">
+
+        <!-- Papers dynamically loaded from JS for optimal rendering and clean maintenance -->
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-[var(--border)] py-8 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4">
+      <p class="mb-2">Data Analytics I — Full Interactive Course Suite & Research Library</p>
+      <p>Built for desktop and mobile browsers · KaTeX Math · Tailwind Engine · Vanilla Canvas JS</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPT: PAPERS REGISTRY & LIVE SEARCH -->
+  <script>
+    const papersData = [
+      { num: 1, file: 'paper_01_dikw_ackoff.html', title: 'From Data to Wisdom & DIKW', authors: 'Ackoff (1989); Bellinger et al.', cat: 'Foundations', tags: 'DIKW Wisdom Knowledge Information Data Understanding Epistemology' },
+      { num: 2, file: 'paper_02_data_science_ozsu.html', title: 'Data Science: Systematic Treatment', authors: 'M. Tamer Özsu (2023)', cat: 'Foundations', tags: 'Data Science Discipline Governance Lifecycle Pipelines Reproducibility' },
+      { num: 3, file: 'paper_03_kdd_theory_mannila.html', title: 'Theoretical Frameworks for KDD', authors: 'Heikki Mannila (2000)', cat: 'Foundations', tags: 'Inductive Database Mannila Language Logic Formalization Query Optimization' },
+      { num: 4, file: 'paper_04_data_science_cao.html', title: 'Data Science: Comprehensive Overview', authors: 'Longbing Cao (2017)', cat: 'Foundations', tags: 'Cao Descriptive Diagnostic Predictive Prescriptive Analytics Lifecycle' },
+      { num: 5, file: 'paper_05_theory_building_markus.html', title: 'Theory Building in Data Science', authors: 'Markus & Saunders (2007)', cat: 'Foundations', tags: 'Induction Deduction Abduction Spurious Correlations Epistemology' },
+      { num: 6, file: 'paper_06_covid_multimodal_fusion.html', title: 'Multimodal Fusion for COVID-19', authors: 'Santosh Kumar et al. (2022)', cat: 'Streaming & Fusion', tags: 'Multimodal Feature Fusion CNN MFCC Audio Acoustic COVID Classification' },
+      { num: 7, file: 'paper_07_streaming_domingos_hulten.html', title: 'Mining High-Speed Streams (VFDT)', authors: 'Domingos & Hulten (2000)', cat: 'Streaming & Fusion', tags: 'VFDT Streaming Hoeffding Bound Constant Memory Infinite Streams Tree Splitting' },
+      { num: 8, file: 'paper_08_visual_mining_survey.html', title: 'Visual Data Mining Survey', authors: 'Oliveira & Levkowitz (2003)', cat: 'Visualization', tags: 'Visual Mining Shneiderman Chernoff Parallel Coordinates Pixel-Oriented' },
+      { num: 9, file: 'paper_09_truth_discovery_yin_han.html', title: 'Truth Discovery with TruthFinder', authors: 'Yin, Han, & Yu (2007)', cat: 'Truth Discovery', tags: 'TruthFinder Bipartite Mutual Reinforcement Trustworthiness Conflicting Sources' },
+      { num: 10, file: 'paper_10_pest_dynamics_neuralnet.html', title: 'Pest Dynamics Neural Networks', authors: 'Agricultural AI Group', cat: 'Applications', tags: 'Neural Networks LSTM Pest Population Climate Forecasting Time Series' },
+      { num: 11, file: 'paper_11_data_curation_knowledge.html', title: 'Data Curation & Knowledge Graphs', authors: 'Curation Consortium', cat: 'Data Cleaning', tags: 'Curation Knowledge Graphs RDF Triples Disambiguation Entity Resolution' },
+      { num: 12, file: 'paper_12_similarity_joins_cleaning.html', title: 'Similarity Joins for Data Cleaning', authors: 'Join Optimization Group', cat: 'Data Cleaning', tags: 'Similarity Joins Jaccard Q-Grams Inverted Index Prefix Filtering Distance' },
+      { num: 13, file: 'paper_13_human_in_loop_integration.html', title: 'Human-in-the-Loop Integration', authors: 'Interactive DB Lab', cat: 'Data Cleaning', tags: 'Active Learning Human in Loop Crowdsourcing Uncertainty Sampling Entity Matching' },
+      { num: 14, file: 'paper_14_potters_wheel_cleaning.html', title: "Potter's Wheel Interactive Cleaning", authors: 'Raman & Hellerstein (2001)', cat: 'Data Cleaning', tags: "Potter's Wheel Discrepancy Detection Transform by Example Regular Expressions" },
+      { num: 15, file: 'paper_15_sequential_dependencies.html', title: 'Sequential Dependencies in Time Data', authors: 'Sequence Mining Lab', cat: 'Data Cleaning', tags: 'Sequential Dependencies Temporal Integrity Constraints Violations Log Auditing' },
+      { num: 16, file: 'paper_16_han_cai_aoi.html', title: 'Attribute-Oriented Induction (AOI)', authors: 'Jiawei Han, Yandong Cai et al. (1992)', cat: 'Warehousing & OLAP', tags: 'AOI Concept Hierarchy Attribute Removal Generalization Threshold DB Aggregation' },
+      { num: 17, file: 'paper_17_data_cube_jim_gray.html', title: 'The Data Cube Operator', authors: 'Jim Gray et al. (1997)', cat: 'Warehousing & OLAP', tags: 'Jim Gray CUBE Operator 2^N GROUP BY Distributive Algebraic Holistic Multidimensional' },
+      { num: 18, file: 'paper_18_multidim_aggregates_vldb96.html', title: 'Multidimensional Aggregates (VLDB 96)', authors: 'Agrawal, Gupta, Sarawagi (1996)', cat: 'Warehousing & OLAP', tags: 'Lattice of Cuboids Precomputation Query Answering Smallest Parent Greedy' },
+      { num: 19, file: 'paper_19_multiway_array_sigmod97.html', title: 'MultiWay Array Aggregation', authors: 'Zhao, Deshpande, Naughton (1997)', cat: 'Data Cube Algorithms', tags: 'MultiWay Array Aggregation MOLAP Chunking Cache Overlapped Single Pass' },
+      { num: 20, file: 'paper_20_buc_sigmod99.html', title: 'BUC: Bottom-Up Cube Computation', authors: 'Beyer & Ramakrishnan (1999)', cat: 'Data Cube Algorithms', tags: 'BUC Bottom-Up Iceberg Cube Apriori Pruning Counting Partitioning High Cardinality' },
+      { num: 21, file: 'paper_21_ais_sigmod93.html', title: 'AIS Association Rule Mining', authors: 'Agrawal, Imielinski, Swami (1993)', cat: 'Association Mining', tags: 'AIS First Association Algorithm Transaction Frontiers Candidate Generation' },
+      { num: 22, file: 'paper_22_apriori_vldb94.html', title: 'Fast Mining with Apriori (VLDB 94)', authors: 'Agrawal & Srikant (1994)', cat: 'Association Mining', tags: 'Apriori Join Step Prune Step Anti-monotone Property Itemset Lattice Hash Tree' },
+      { num: 23, file: 'paper_23_fptree_sigmod00.html', title: 'Mining FP-Tree without Candidates', authors: 'Jiawei Han, Jian Pei, Yiwen Yin (2000)', cat: 'Association Mining', tags: 'FP-Tree FP-Growth Conditional Pattern Base Header Table 2 DB Scans' },
+      { num: 24, file: 'paper_24_eclat_tkde00.html', title: 'ECLAT: Vertical Itemset Mining', authors: 'Mohammed J. Zaki (2000)', cat: 'Association Mining', tags: 'ECLAT Vertical Data Format TID Sets Intersection Diffsets Lattice Equivalence' },
+      { num: 25, file: 'paper_25_coverage_patterns_2012.html', title: 'Coverage Pattern Mining', authors: 'Reddy et al. (2012)', cat: 'Advanced Patterns', tags: 'Coverage Patterns Web Audience Reach Non-overlap Patterns CMine Overlap Ratio' },
+      { num: 26, file: 'paper_26_multilevel_mining_1999.html', title: 'Multi-Level Association Rules', authors: 'Han & Fu (1999)', cat: 'Advanced Patterns', tags: 'Multi-level Mining Concept Hierarchies Reduced Support Redundant Rules Filtering' },
+      { num: 27, file: 'paper_27_high_utility_pakdd05.html', title: 'High-Utility Itemset Mining', authors: 'Liu, Liao, Choudhary (2005)', cat: 'Advanced Patterns', tags: 'High-Utility TWU Transaction-Weighted Utilization Unit Profit Quantity Two-Phase' },
+      { num: 28, file: 'paper_28_quantitative_rules_sigmod96.html', title: 'Quantitative Association Rules', authors: 'Srikant & Agrawal (1996)', cat: 'Advanced Patterns', tags: 'Quantitative Numeric Ranges Discretization Partial Completeness Minimum Support' },
+      { num: 29, file: 'paper_29_diverse_patterns_2020.html', title: 'Diverse Frequent Pattern Mining', authors: 'Reddy et al. (2020)', cat: 'Advanced Patterns', tags: 'Diverse Patterns drank Diversity Ranking Top-K Redundancy Coverage Gain' },
+      { num: 30, file: 'paper_30_periodic_patterns_2019.html', title: 'Periodic Frequent Pattern Mining', authors: 'Periodic Mining Lab (2019)', cat: 'Advanced Patterns', tags: 'Periodic Patterns Regularity Max Periodicity Circular Repetition Time Shifts' },
+      { num: 31, file: 'paper_31_popular_paths_dapd21.html', title: 'Popular Path Trajectory Mining', authors: 'Spatial Mining Group (2021)', cat: 'Advanced Patterns', tags: 'Trajectory Mining GPS Trajectories Road Networks Line Simplification Frechet' },
+      { num: 32, file: 'paper_32_subgraph_coverage_jdsa21.html', title: 'Subgraph Coverage Patterns', authors: 'Srinivas & Reddy (2021)', cat: 'Advanced Patterns', tags: 'Subgraph Coverage Graph Databases Canonical DFS Codes Subgraph Isomorphism' },
+      { num: 33, file: 'paper_33_datacube_justice_2025.html', title: 'Data Cube for Justice Delivery', authors: 'Bondugula, Reddy et al. (2025)', cat: 'Applications', tags: 'High Court Case Pendency Data Cube Justice Delay Anomalies Legal OLAP' },
+      { num: 34, file: 'paper_34_top10_algorithms_2008.html', title: 'Top 10 Data Mining Algorithms', authors: 'Wu, Kumar et al. (2008)', cat: 'Surveys', tags: 'Top 10 Algorithms C4.5 k-Means SVM Apriori EM PageRank AdaBoost k-NN Bayes CART' },
+      { num: 35, file: 'paper_35_fifty_years_trees_2014.html', title: '50 Years of Decision Trees', authors: 'Wei-Yin Loh (2014)', cat: 'Surveys', tags: 'Loh Decision Trees AID CART QUEST GUIDE Variable Selection Bias Chi-Square' }
+    ];
+
+    let currentFilter = 'all';
+
+    function renderPaperCards(list) {
+      const container = document.getElementById('paper-cards');
+      container.innerHTML = list.map(p => `
+        <a href="Research_Papers_Study/${p.file}" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="paper" data-title="${p.title} ${p.authors} ${p.tags}">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-purple-500/20 text-purple-300 border border-purple-500/30">Paper ${p.num < 10 ? '0' + p.num : p.num}</span>
+            <span class="text-[11px] text-slate-400 font-mono">${p.cat}</span>
+          </div>
+          <h3 class="font-bold text-white text-sm group-hover:text-purple-300 transition-colors mb-1 leading-snug">${p.title}</h3>
+          <p class="text-[11px] text-indigo-300/80 mb-2 font-medium">${p.authors}</p>
+          <div class="text-[11px] font-semibold text-purple-400 flex items-center gap-1">
+            Read Tutorial <span>→</span>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    function setFilter(type) {
+      currentFilter = type;
+      document.querySelectorAll('.filter-pill').forEach(btn => {
+        if (btn.dataset.filter === type) {
+          btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
+          btn.classList.remove('bg-[#131b2e]', 'text-slate-300', 'border-[var(--border)]');
+        } else {
+          btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
+          btn.classList.add('bg-[#131b2e]', 'text-slate-300', 'border-[var(--border)]');
+        }
+      });
+
+      const secLectures = document.getElementById('section-lectures');
+      const secPapers = document.getElementById('section-papers');
+
+      if (type === 'lecture') {
+        secLectures.style.display = 'block';
+        secPapers.style.display = 'none';
+      } else if (type === 'paper') {
+        secLectures.style.display = 'none';
+        secPapers.style.display = 'block';
+      } else {
+        secLectures.style.display = 'block';
+        secPapers.style.display = 'block';
+      }
+      handleSearch();
+    }
+
+    function handleSearch() {
+      const q = document.getElementById('search-input').value.toLowerCase().trim();
+      const items = document.querySelectorAll('.module-item');
+
+      items.forEach(el => {
+        const type = el.dataset.type;
+        const text = (el.dataset.title || '').toLowerCase();
+        const matchesFilter = (currentFilter === 'all') || (currentFilter === type);
+        const matchesSearch = !q || text.includes(q);
+
+        if (matchesFilter && matchesSearch) {
+          el.style.display = 'block';
+        } else {
+          el.style.display = 'none';
+        }
+      });
+    }
+
+    // Initial render
+    renderPaperCards(papersData);
+  </script>
+</body>
+</html>

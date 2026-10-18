@@ -1,0 +1,2436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 2: Data Concepts, Big Data & Statistics</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #0f1117;
+    --card: #1a1d2e;
+    --sidebar: #12151f;
+    --foreground: #e2e8f0;
+    --muted-foreground: #94a3b8;
+    --border: #2d3748;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #1e293b;
+    --accent: #818cf8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    position: fixed; top: 0; left: 256px; right: 0; height: 56px;
+    background: var(--sidebar);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 20px; z-index: 50;
+  }
+  #progress-bar-wrap {
+    flex: 1; background: var(--secondary); height: 8px; border-radius: 4px; overflow: hidden;
+  }
+  #progress-bar { height: 100%; background: var(--primary); transition: width 0.4s ease; }
+  #progress-label { font-size: 12px; color: var(--muted-foreground); white-space: nowrap; }
+  #timer-display {
+    font-size: 14px; font-weight: 700; color: var(--accent);
+    background: var(--secondary); padding: 4px 12px; border-radius: 20px;
+    cursor: pointer; user-select: none; white-space: nowrap;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 256px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; z-index: 60;
+    display: flex; flex-direction: column;
+  }
+  #sidebar-header {
+    padding: 16px; border-bottom: 1px solid var(--border);
+    background: var(--card);
+  }
+  #sidebar-header h2 { font-size: 13px; font-weight: 700; color: var(--accent); line-height: 1.3; }
+  #sidebar-header p { font-size: 11px; color: var(--muted-foreground); margin-top: 4px; }
+  .sidebar-section { padding: 8px 0; }
+  .sidebar-section-label {
+    font-size: 10px; font-weight: 700; color: var(--muted-foreground);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 6px 16px 4px;
+  }
+  .sidebar-item {
+    display: block; width: 100%; text-align: left;
+    padding: 6px 16px; font-size: 12px; color: var(--muted-foreground);
+    background: none; border: none; cursor: pointer;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar-item:hover { background: var(--secondary); color: var(--foreground); }
+  .sidebar-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(99,102,241,0.08); }
+  .home-btn {
+    margin: 12px 16px;
+    padding: 8px 12px;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; text-align: center; text-decoration: none;
+    display: block; transition: all 0.15s;
+  }
+  .home-btn:hover { background: rgba(99,102,241,0.3); }
+
+  /* ── MAIN CONTENT ── */
+  #main {
+    margin-left: 256px; margin-top: 56px;
+    padding: 32px 24px; min-height: calc(100vh - 56px);
+  }
+
+  /* ── CARDS ── */
+  .card {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    max-width: 820px; margin: 0 auto;
+    animation: fadeIn 0.35s ease;
+  }
+  .card.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin-bottom: 14px;
+  }
+  .card-header {
+    font-size: 22px; font-weight: 800; color: var(--foreground);
+    margin-bottom: 16px; line-height: 1.3;
+  }
+  .card-body { font-size: 15px; color: var(--foreground); line-height: 1.7; }
+  .card-body p { margin-bottom: 10px; }
+
+  .why-box {
+    background: rgba(99,102,241,0.12);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px; margin-top: 18px;
+    font-size: 13px; color: var(--accent);
+  }
+  .why-box strong { display: block; margin-bottom: 4px; color: var(--foreground); }
+
+  /* card color variants */
+  .card-blue  { border-color: #3b82f6; }
+  .card-green { border-color: #10b981; }
+  .card-yellow{ border-color: #f59e0b; background: #1f1a0e; }
+  .card-red   { border-color: #ef4444; }
+  .card-purple{ border-color: #a855f7; }
+
+  /* ── FLIP CARD ── */
+  .flip-wrap {
+    perspective: 900px; width: 100%; margin-top: 20px;
+  }
+  .flip-inner {
+    position: relative; width: 100%; min-height: 140px;
+    transform-style: preserve-3d;
+    transition: transform 0.55s ease;
+    cursor: pointer;
+  }
+  .flip-inner.flipped { transform: rotateY(180deg); }
+  .flip-front, .flip-back {
+    position: absolute; width: 100%; min-height: 140px;
+    backface-visibility: hidden;
+    border-radius: 12px; padding: 20px 24px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .flip-front {
+    background: rgba(99,102,241,0.15); border: 2px solid var(--primary);
+  }
+  .flip-back {
+    background: rgba(16,185,129,0.15); border: 2px solid #10b981;
+    transform: rotateY(180deg);
+  }
+  .flip-front .question { font-size: 16px; font-weight: 700; color: var(--foreground); }
+  .flip-front .hint { font-size: 12px; color: var(--muted-foreground); margin-top: 8px; }
+  .flip-back .answer { font-size: 15px; color: #10b981; font-weight: 600; }
+
+  /* ── NAV BUTTONS ── */
+  .card-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 24px; max-width: 820px; margin-left: auto; margin-right: auto;
+  }
+  .nav-btn {
+    padding: 10px 24px; border-radius: 10px; border: none;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn-prev {
+    background: var(--secondary); color: var(--foreground);
+    border: 1px solid var(--border);
+  }
+  .nav-btn-prev:hover { background: var(--border); }
+  .nav-btn-next {
+    background: var(--primary); color: var(--primary-foreground);
+  }
+  .nav-btn-next:hover { opacity: 0.85; }
+  .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── QUIZ ── */
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    padding: 12px 16px; margin: 8px 0;
+    background: var(--secondary); border: 1px solid var(--border);
+    border-radius: 10px; font-size: 14px; color: var(--foreground);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .quiz-option:hover { border-color: var(--primary); background: rgba(99,102,241,0.1); }
+  .quiz-option.correct { background: rgba(16,185,129,0.2); border-color: #10b981; color: #10b981; }
+  .quiz-option.wrong   { background: rgba(239,68,68,0.2); border-color: #ef4444; color: #ef4444; }
+  .quiz-feedback { margin-top: 10px; font-size: 14px; font-weight: 600; min-height: 22px; }
+
+  /* ── INTERACTIVE CLASSIFIER ── */
+  .classify-item {
+    display: inline-block; padding: 8px 14px; margin: 6px;
+    background: var(--secondary); border: 1px solid var(--border);
+    border-radius: 8px; font-size: 13px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .classify-item:hover { border-color: var(--accent); }
+  .classify-item.correct-classify { background: rgba(16,185,129,0.2); border-color: #10b981; color: #10b981; }
+  .classify-item.wrong-classify   { background: rgba(239,68,68,0.2); border-color: #ef4444; color: #ef4444; }
+  .type-btn {
+    display: inline-block; padding: 6px 12px; margin: 4px;
+    border-radius: 6px; border: 1px solid var(--border);
+    font-size: 12px; cursor: pointer;
+    transition: all 0.15s; background: var(--secondary);
+    color: var(--foreground);
+  }
+  .type-btn:hover { border-color: var(--primary); }
+  .type-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+  /* ── BREAK OVERLAY ── */
+  #break-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85); z-index: 200;
+    align-items: center; justify-content: center; flex-direction: column;
+  }
+  #break-overlay.show { display: flex; }
+  #break-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 40px 48px; text-align: center; max-width: 400px;
+  }
+  #break-box h2 { font-size: 28px; margin-bottom: 12px; }
+  #break-box p { color: var(--muted-foreground); margin-bottom: 24px; }
+  #resume-btn {
+    padding: 12px 32px; background: var(--primary); color: white;
+    border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  #resume-btn:hover { opacity: 0.85; }
+
+  /* ── APPENDIX ── */
+  #appendix-toggle {
+    display: block; width: 100%; max-width: 820px;
+    margin: 24px auto; padding: 14px 20px;
+    background: var(--secondary); border: 1px solid var(--border);
+    border-radius: 12px; text-align: left;
+    color: var(--foreground); font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: background 0.2s;
+  }
+  #appendix-toggle:hover { background: var(--border); }
+  #appendix-body {
+    display: none; max-width: 820px; margin: 0 auto 32px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px 28px;
+  }
+  #appendix-body.open { display: block; }
+  .formula-block {
+    background: #1f1a0e; border: 1px solid #f59e0b;
+    border-radius: 8px; padding: 14px 18px; margin: 12px 0;
+    font-family: 'Courier New', monospace; font-size: 14px;
+    color: #fcd34d;
+  }
+  .formula-explain { font-size: 13px; color: var(--muted-foreground); margin: 6px 0 14px; }
+
+  canvas { display: block; }
+
+  /* ── SCORE DISPLAY ── */
+  #score-display {
+    display: none; text-align: center; padding: 20px;
+    background: rgba(99,102,241,0.1); border-radius: 12px; margin-top: 16px;
+  }
+  #score-display.show { display: block; }
+
+  /* ── SCATTER PLOT ── */
+  #scatter-canvas { cursor: crosshair; border-radius: 8px; }
+
+  /* ── BOXPLOT ── */
+  #boxplot-canvas { border-radius: 8px; }
+
+  /* Tree SVG */
+  #tree-svg .node-rect { cursor: pointer; transition: fill 0.2s; }
+  #tree-svg .node-rect:hover { fill: rgba(99,102,241,0.3) !important; }
+
+  /* Pentagon segments */
+  .pentagon-segment { cursor: pointer; transition: opacity 0.2s; }
+  .pentagon-segment:hover { opacity: 0.85; }
+
+  /* number line */
+  #numline-canvas { cursor: pointer; }
+
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .tag { padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+
+  .highlight-box {
+    background: rgba(16,185,129,0.1); border: 1px solid #10b981;
+    border-radius: 8px; padding: 12px 16px; margin: 10px 0;
+    font-size: 14px;
+  }
+  .alert-box {
+    background: rgba(239,68,68,0.1); border: 1px solid #ef4444;
+    border-radius: 8px; padding: 12px 16px; margin: 10px 0;
+    font-size: 14px; color: #fca5a5;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--background); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+
+  /* pentagon labels */
+  .penta-label {
+    font-size: 12px; font-weight: 700; fill: white;
+    pointer-events: none; text-anchor: middle;
+  }
+
+  /* quiz score animation */
+  @keyframes popIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  .pop-in { animation: popIn 0.4s ease; }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (PHONES & TABLETS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  #topbar {
+    padding: 0 10px !important;
+    gap: 6px !important;
+    height: 52px !important;
+    overflow-x: hidden !important;
+  }
+  #topbar .title, #topbar #module-title, #topbar #topbar-title, #topbar .module-title {
+    font-size: 11px !important;
+    max-width: 115px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  #topbar a, #topbar #home-btn {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+    white-space: nowrap !important;
+  }
+  #topbar #pomodoro {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+  }
+  #topbar #timer-display {
+    font-size: 12px !important;
+  }
+  #topbar #section-label, #topbar .sec-pill, #topbar .badge, #topbar #timer-btn-label {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: var(--card, #1e293b) !important;
+    border: 1px solid var(--border, #334155) !important;
+    color: var(--foreground, #f8fafc) !important;
+    padding: 5px 8px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+  }
+  #sidebar {
+    position: fixed !important;
+    top: 52px !important;
+    left: -320px !important;
+    width: 280px !important;
+    max-width: 82vw !important;
+    bottom: 0 !important;
+    height: calc(100vh - 52px) !important;
+    z-index: 9999 !important;
+    background: #0a0f1e !important;
+    border-right: 1px solid var(--border, #334155) !important;
+    box-shadow: 4px 0 25px rgba(0,0,0,0.7) !important;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #sidebar.mobile-open {
+    left: 0 !important;
+  }
+  #sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 52px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(3px);
+    z-index: 9998;
+  }
+  #sidebar-backdrop.active {
+    display: block !important;
+  }
+  #layout {
+    display: block !important;
+    margin-top: 52px !important;
+    height: calc(100vh - 52px) !important;
+    position: relative !important;
+    overflow-x: hidden !important;
+  }
+  #main, #card-container, .main-content, #content-area {
+    margin-left: 0 !important;
+    padding: 16px 12px 100px 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  .card, .card-screen, .card-box, .slide {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 12px !important;
+    margin-bottom: 16px !important;
+  }
+  h1 { font-size: 1.35rem !important; }
+  h2, .card-title { font-size: 1.15rem !important; }
+  h3 { font-size: 1.0rem !important; }
+  p, li, .card-body { font-size: 13.5px !important; line-height: 1.6 !important; }
+  #nav-bar, .bottom-nav, #navigation-bar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+    background: rgba(10, 15, 30, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 1px solid var(--border, #334155) !important;
+    z-index: 9000 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  .nav-btn, #prevBtn, #nextBtn {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    min-height: 42px !important;
+    flex: 1 !important;
+    max-width: 130px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  #cardIndicator, #card-counter, .card-counter {
+    font-size: 12px !important;
+    min-width: 65px !important;
+    text-align: center !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+}
+@media (min-width: 769px) {
+  .mobile-menu-btn, #sidebar-backdrop {
+    display: none !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body>
+
+<!-- ══ BREAK OVERLAY ══ -->
+<div id="break-overlay">
+  <div id="break-box">
+    <h2>⏰ Great work!</h2>
+    <p>You've been studying for 15 minutes. Take a 5-minute break — your brain will thank you!</p>
+    <button id="resume-btn" onclick="resumeTimer()">▶ Resume Studying</button>
+  </div>
+</div>
+
+<!-- ══ SIDEBAR ══ -->
+<aside id="sidebar">
+  <div id="sidebar-header">
+    <h2>📊 Module 2</h2>
+    <p>Data Concepts, Big Data &amp; Statistics</p>
+  </div>
+  <a class="home-btn" href="00_home.html">🏠 Back to Home</a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Section 1</div>
+    <button class="sidebar-item" onclick="jumpTo(0)">Intro: Data Flavors</button>
+    <button class="sidebar-item" onclick="jumpTo(1)">Attribute Type Tree</button>
+    <button class="sidebar-item" onclick="jumpTo(2)">Nominal Data</button>
+    <button class="sidebar-item" onclick="jumpTo(3)">Ordinal Data</button>
+    <button class="sidebar-item" onclick="jumpTo(4)">Interval Data</button>
+    <button class="sidebar-item" onclick="jumpTo(5)">Ratio Data</button>
+    <button class="sidebar-item" onclick="jumpTo(6)">Classify Challenge</button>
+    <button class="sidebar-item" onclick="jumpTo(7)">Flip: Mean of Ordinal?</button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Section 2</div>
+    <button class="sidebar-item" onclick="jumpTo(8)">Big Data Analogy</button>
+    <button class="sidebar-item" onclick="jumpTo(9)">5 Vs Pentagon</button>
+    <button class="sidebar-item" onclick="jumpTo(10)">Volume</button>
+    <button class="sidebar-item" onclick="jumpTo(11)">Variety</button>
+    <button class="sidebar-item" onclick="jumpTo(12)">Velocity, Veracity, Value</button>
+    <button class="sidebar-item" onclick="jumpTo(13)">Flip: Which V = Accuracy?</button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Section 3</div>
+    <button class="sidebar-item" onclick="jumpTo(14)">Stats Overview</button>
+    <button class="sidebar-item" onclick="jumpTo(15)">Mean / Median / Mode</button>
+    <button class="sidebar-item" onclick="jumpTo(16)">Interactive Number Line</button>
+    <button class="sidebar-item" onclick="jumpTo(17)">Spread: Range, Var, SD</button>
+    <button class="sidebar-item" onclick="jumpTo(18)">Boxplot Builder</button>
+    <button class="sidebar-item" onclick="jumpTo(19)">Normal Distribution</button>
+    <button class="sidebar-item" onclick="jumpTo(20)">Skewness</button>
+    <button class="sidebar-item" onclick="jumpTo(21)">Correlation</button>
+    <button class="sidebar-item" onclick="jumpTo(22)">Scatter Plot Explorer</button>
+    <button class="sidebar-item" onclick="jumpTo(23)">Flip: Mean/Median/Mode</button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Section 4</div>
+    <button class="sidebar-item" onclick="jumpTo(24)">Viz: Why Charts?</button>
+    <button class="sidebar-item" onclick="jumpTo(25)">Histograms vs Bar Charts</button>
+    <button class="sidebar-item" onclick="jumpTo(26)">Scatter, Parallel, Boxplot</button>
+    <button class="sidebar-item" onclick="jumpTo(27)">Creative Visualizations</button>
+    <button class="sidebar-item" onclick="jumpTo(28)">Flip: Distribution Chart?</button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">End Quiz</div>
+    <button class="sidebar-item" onclick="jumpTo(29)">📝 Final Quiz</button>
+  </div>
+</aside>
+
+<!-- ══ TOP BAR ══ -->
+<div id="topbar">
+  <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation">☰ Menu</button>
+  <div id="progress-bar-wrap">
+    <div id="progress-bar" style="width:3.3%"></div>
+  </div>
+  <span id="progress-label">Card 1 of 30</span>
+  <span id="timer-display" onclick="togglePause()" title="Click to pause/resume">⏱ 15:00</span>
+</div>
+
+<!-- ══ MAIN CONTENT ══ -->
+<main id="main">
+
+<!-- ═══════════ SECTION 1: TYPES OF DATA ═══════════ -->
+
+<!-- CARD 0 -->
+<div class="card active card-green" id="card-0">
+  <div class="card-tag">🍭 Types of Data & Attributes • Card 1 of 30</div>
+  <div class="card-header">📚 Data Comes in Many Flavors</div>
+  <div class="card-body">
+    <p>Think about how you'd describe students in a class:</p>
+    <div class="highlight-box">
+      🏷️ <strong>Name</strong> — "Priya" (a label, no math possible)<br>
+      🔢 <strong>Age</strong> — 20 years (a number, you can compute average)<br>
+      🏆 <strong>Rank</strong> — 3rd in class (ordered, but gaps may vary)<br>
+      🌡️ <strong>Temperature</strong> — 37.2°C (equal gaps, but 0°C ≠ no temperature)
+    </div>
+    <p>Each of these requires <strong>different</strong> statistical tools. Using the wrong tool is like using a ruler to measure color — it just doesn't make sense!</p>
+    <p>Data attributes fall into two big families: <strong>Qualitative</strong> (categories) and <strong>Quantitative</strong> (numbers). Each family has subtypes.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Choosing the wrong attribute type for analysis leads to meaningless results. Knowing your data type tells you exactly which operations and charts are valid.
+  </div>
+</div>
+
+<!-- CARD 1 - ATTRIBUTE TREE SVG -->
+<div class="card card-blue" id="card-1">
+  <div class="card-tag">🌲 Types of Data & Attributes • Card 2 of 30</div>
+  <div class="card-header">🗂️ The Attribute Type Tree</div>
+  <div class="card-body">
+    <p>Click any leaf node below to see examples and valid operations!</p>
+    <svg id="tree-svg" width="100%" height="340" viewBox="0 0 760 340">
+      <!-- Root -->
+      <rect x="310" y="8" width="140" height="38" rx="8" fill="rgba(99,102,241,0.3)" stroke="#6366f1" stroke-width="2"/>
+      <text x="380" y="32" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">Attribute</text>
+
+      <!-- L1 -->
+      <line x1="380" y1="46" x2="185" y2="100" stroke="#475569" stroke-width="1.5"/>
+      <line x1="380" y1="46" x2="575" y2="100" stroke="#475569" stroke-width="1.5"/>
+
+      <rect x="105" y="100" width="160" height="36" rx="8" fill="rgba(16,185,129,0.25)" stroke="#10b981" stroke-width="2"/>
+      <text x="185" y="123" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">Qualitative</text>
+
+      <rect x="495" y="100" width="160" height="36" rx="8" fill="rgba(59,130,246,0.25)" stroke="#3b82f6" stroke-width="2"/>
+      <text x="575" y="123" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">Quantitative</text>
+
+      <!-- L2 Qualitative -->
+      <line x1="185" y1="136" x2="60" y2="195" stroke="#475569" stroke-width="1.5"/>
+      <line x1="185" y1="136" x2="185" y2="195" stroke="#475569" stroke-width="1.5"/>
+      <line x1="185" y1="136" x2="310" y2="195" stroke="#475569" stroke-width="1.5"/>
+
+      <rect class="node-rect" id="nd-nominal" x="5" y="195" width="110" height="36" rx="8" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1.5" onclick="showNodeInfo('nominal')"/>
+      <text x="60" y="218" text-anchor="middle" fill="#e2e8f0" font-size="12" pointer-events="none">Nominal</text>
+
+      <rect class="node-rect" id="nd-binary" x="130" y="195" width="110" height="36" rx="8" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1.5" onclick="showNodeInfo('binary')"/>
+      <text x="185" y="218" text-anchor="middle" fill="#e2e8f0" font-size="12" pointer-events="none">Binary</text>
+
+      <rect class="node-rect" id="nd-ordinal" x="255" y="195" width="110" height="36" rx="8" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1.5" onclick="showNodeInfo('ordinal')"/>
+      <text x="310" y="218" text-anchor="middle" fill="#e2e8f0" font-size="12" pointer-events="none">Ordinal</text>
+
+      <!-- L2 Quantitative -->
+      <line x1="575" y1="136" x2="450" y2="195" stroke="#475569" stroke-width="1.5"/>
+      <line x1="575" y1="136" x2="535" y2="195" stroke="#475569" stroke-width="1.5"/>
+      <line x1="575" y1="136" x2="615" y2="195" stroke="#475569" stroke-width="1.5"/>
+      <line x1="575" y1="136" x2="700" y2="195" stroke="#475569" stroke-width="1.5"/>
+
+      <rect class="node-rect" id="nd-interval" x="395" y="195" width="110" height="36" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1.5" onclick="showNodeInfo('interval')"/>
+      <text x="450" y="218" text-anchor="middle" fill="#e2e8f0" font-size="12" pointer-events="none">Interval</text>
+
+      <rect class="node-rect" id="nd-ratio" x="480" y="195" width="110" height="36" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1.5" onclick="showNodeInfo('ratio')"/>
+      <text x="535" y="218" text-anchor="middle" fill="#e2e8f0" font-size="12" pointer-events="none">Ratio</text>
+
+      <rect class="node-rect" id="nd-discrete" x="565" y="195" width="110" height="36" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1.5" onclick="showNodeInfo('discrete')"/>
+      <text x="620" y="218" text-anchor="middle" fill="#e2e8f0" font-size="12" pointer-events="none">Discrete</text>
+
+      <rect class="node-rect" id="nd-continuous" x="645" y="195" width="110" height="36" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1.5" onclick="showNodeInfo('continuous')"/>
+      <text x="700" y="218" text-anchor="middle" fill="#e2e8f0" font-size="12" pointer-events="none">Continuous</text>
+    </svg>
+
+    <div id="node-info-box" style="display:none; background:rgba(99,102,241,0.12); border:1px solid var(--primary); border-radius:10px; padding:14px 18px; margin-top:4px; font-size:13px;">
+      <strong id="node-info-title" style="color:var(--accent); font-size:15px;"></strong>
+      <div id="node-info-content" style="margin-top:8px; line-height:1.6; color:var(--foreground);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CARD 2 - NOMINAL -->
+<div class="card card-blue" id="card-2">
+  <div class="card-tag">🏷️ Types of Data & Attributes • Card 3 of 30</div>
+  <div class="card-header">🎨 Nominal Data — Categories Without Order</div>
+  <div class="card-body">
+    <p>Imagine sorting crayons by <strong>color</strong>: red, blue, green, yellow. The colors are just labels — there's no "better" or "worse" color, no ranking.</p>
+    <div class="highlight-box">
+      ✅ <strong>You CAN:</strong> Say blue ≠ brown. Count how many people have blue eyes. Find the MODE (most common).<br>
+      ❌ <strong>You CANNOT:</strong> Say blue > brown. Compute a mean eye color. Subtract colors.
+    </div>
+    <p><strong>Examples:</strong> Eye color, blood type (A/B/O/AB), marital status, country of birth, movie genre.</p>
+    <p><strong>Special case — Binary:</strong> Only 2 values. Yes/No, True/False, Male/Female. Often encoded as 0 and 1 for computation.</p>
+    <p><strong>Valid operations:</strong> = and ≠ only. Mode is the only meaningful central tendency measure.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Machine learning algorithms need nominal variables encoded as numbers. But treating "1=Red, 2=Blue, 3=Green" as if 3>2>1 is a serious mistake — it implies an order that doesn't exist!
+  </div>
+</div>
+
+<!-- CARD 3 - ORDINAL -->
+<div class="card card-blue" id="card-3">
+  <div class="card-tag">📊 Types of Data & Attributes • Card 4 of 30</div>
+  <div class="card-header">🌟 Ordinal Data — Ordered but Unequal Gaps</div>
+  <div class="card-body">
+    <p>Think of a restaurant rating: ⭐, ⭐⭐, ⭐⭐⭐, ⭐⭐⭐⭐, ⭐⭐⭐⭐⭐. We know 5★ &gt; 4★ &gt; 3★. But is the gap between 1★ and 2★ the same as between 4★ and 5★? <strong>Not necessarily!</strong></p>
+    <div class="highlight-box">
+      ✅ <strong>You CAN:</strong> Rank order the values. Say A &gt; B. Find mode and <strong>median</strong>.<br>
+      ❌ <strong>You CANNOT:</strong> Say "4★ is exactly twice as good as 2★." Compute a meaningful mean.
+    </div>
+    <p><strong>More examples:</strong> Academic grades (A/B/C/D/F), Likert scale (Strongly Agree → Strongly Disagree), cancer stages (Stage I, II, III, IV), socioeconomic status (Low, Medium, High).</p>
+    <p><strong>Valid operations:</strong> =, ≠, &gt;, &lt;. Mode and Median are meaningful. Mean is questionable.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Survey data (like "rate your satisfaction 1–5") is ordinal. Reporting the average satisfaction score sounds clean, but it can be misleading. Use the median or frequency distribution instead.
+  </div>
+</div>
+
+<!-- CARD 4 - INTERVAL -->
+<div class="card card-blue" id="card-4">
+  <div class="card-tag">🌡️ Types of Data & Attributes • Card 5 of 30</div>
+  <div class="card-header">📏 Interval Data — Equal Gaps, No True Zero</div>
+  <div class="card-body">
+    <p>Temperature in Celsius is a perfect example. The gap between 20°C and 30°C is exactly the same as between 30°C and 40°C (equal gaps ✅). <strong>But</strong>: 0°C does NOT mean "no temperature." So we can't say 40°C is "twice as hot" as 20°C.</p>
+    <div class="alert-box">
+      ⚠️ <strong>Common mistake:</strong> Saying "It's twice as hot today (40°C) as yesterday (20°C)" — this is WRONG for Celsius! Use Kelvin for true ratios.
+    </div>
+    <div class="highlight-box">
+      ✅ <strong>You CAN:</strong> Subtract (30°C − 20°C = 10°). Add. Compute mean & median.<br>
+      ❌ <strong>You CANNOT:</strong> Say "30°C is 1.5× hotter than 20°C." Compute meaningful ratios.
+    </div>
+    <p><strong>Examples:</strong> Temperature (°C, °F), calendar years, IQ scores, pH levels.</p>
+    <p><strong>Valid operations:</strong> =, ≠, &gt;, &lt;, +, −. Mean, Median, Mode all valid.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    IQ scores are interval data. An IQ of 140 is NOT "twice as intelligent" as IQ 70. The zero on the IQ scale is arbitrary, not absolute.
+  </div>
+</div>
+
+<!-- CARD 5 - RATIO -->
+<div class="card card-blue" id="card-5">
+  <div class="card-tag">⚖️ Types of Data & Attributes • Card 6 of 30</div>
+  <div class="card-header">⚖️ Ratio Data — True Zero, Full Math Power</div>
+  <div class="card-body">
+    <p>Weight, height, salary, distance — these have a <strong>true zero</strong> meaning "none of that thing." 0 kg literally means no weight. This means ALL math operations are valid!</p>
+    <div class="highlight-box">
+      ✅ <strong>You CAN:</strong> Say 60 kg is twice 30 kg. Compute ratios. Add, subtract, multiply, divide. Mean, Median, Mode all valid. Also: Geometric mean makes sense!<br>
+      ❌ <strong>You CANNOT:</strong> Have negative values in most ratio scales (you can't weigh −5 kg).
+    </div>
+    <p><strong>Examples:</strong> Height (cm), weight (kg), salary (₹), distance (km), age, number of children, blood pressure.</p>
+    <p><strong>Temperature in Kelvin</strong> is ratio! 0K truly = no heat (absolute zero). 400K is twice as hot as 200K.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Financial data (revenue, profit) is ratio — you can legitimately say "Company A earns 3× more than Company B." This enables powerful comparative analysis.
+  </div>
+</div>
+
+<!-- CARD 6 - INTERACTIVE CLASSIFIER -->
+<div class="card card-purple" id="card-6">
+  <div class="card-tag">🎮 Types of Data & Attributes • Card 7 of 30</div>
+  <div class="card-header">🎮 Classify These Data Types!</div>
+  <div class="card-body">
+    <p>Click on an example below, then click a type button to classify it. Get instant feedback!</p>
+    <div id="classifier-items" style="margin:12px 0;">
+      <!-- generated by JS -->
+    </div>
+    <div id="selected-item-display" style="min-height:32px; font-size:14px; font-weight:700; color:var(--accent); margin:8px 0;"></div>
+    <div id="type-buttons" style="margin:8px 0; display:none;">
+      <button class="type-btn" onclick="classify('nominal')">Nominal</button>
+      <button class="type-btn" onclick="classify('ordinal')">Ordinal</button>
+      <button class="type-btn" onclick="classify('interval')">Interval</button>
+      <button class="type-btn" onclick="classify('ratio')">Ratio</button>
+    </div>
+    <div id="classify-feedback" style="font-size:14px; min-height:22px; margin-top:8px;"></div>
+    <div id="classify-score" style="margin-top:12px; font-size:13px; color:var(--muted-foreground);"></div>
+    <button onclick="resetClassifier()" style="margin-top:10px; padding:6px 14px; background:var(--secondary); border:1px solid var(--border); border-radius:8px; color:var(--foreground); font-size:12px; cursor:pointer;">🔄 Reset</button>
+  </div>
+</div>
+
+<!-- CARD 7 - FLIP -->
+<div class="card card-purple" id="card-7">
+  <div class="card-tag">🔄 Active Recall • Card 8 of 30</div>
+  <div class="card-header">🤔 Flip Card: Mean of Ordinal Data?</div>
+  <div class="card-body">
+    <p>Think about it — then flip the card for the answer!</p>
+    <div class="flip-wrap">
+      <div class="flip-inner" id="flip-1" onclick="this.classList.toggle('flipped')">
+        <div class="flip-front">
+          <div class="question">Can you compute the MEAN of ordinal data?<br><small style="color:#94a3b8">(e.g., average movie rating of 3.7 stars)</small></div>
+          <div class="hint">👆 Click to reveal answer</div>
+        </div>
+        <div class="flip-back">
+          <div class="answer">
+            ⚠️ <strong>Technically not meaningful!</strong><br><br>
+            Ordinal gaps are unequal — the difference between 1★ and 2★ may not equal the difference between 4★ and 5★.<br><br>
+            Use <strong>MEDIAN</strong> instead.<br>
+            (In practice, researchers sometimes do compute means on Likert scales — but acknowledge it as an approximation.)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Takeaway:</strong> Mode = any data type. Median = ordinal+. Mean = interval/ratio only (theoretically).
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 2: 5 Vs of BIG DATA ═══════════ -->
+
+<!-- CARD 8 - BIG DATA ANALOGY -->
+<div class="card card-green" id="card-8">
+  <div class="card-tag">🏥 5 Vs of Big Data • Card 9 of 30</div>
+  <div class="card-header">🌊 What Makes Data "Big"?</div>
+  <div class="card-body">
+    <p>Big Data isn't just about <em>how much</em> data there is. Think of a hospital during a pandemic — it faces 5 simultaneous challenges:</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0;">
+      <div class="highlight-box" style="margin:0;">📦 <strong>Volume</strong><br>Millions of patients, test results, records</div>
+      <div class="highlight-box" style="margin:0;">🎭 <strong>Variety</strong><br>Text notes, X-rays, sensor feeds, spreadsheets</div>
+      <div class="highlight-box" style="margin:0;">⚡ <strong>Velocity</strong><br>Real-time vitals updating every second</div>
+      <div class="highlight-box" style="margin:0;">🤔 <strong>Veracity</strong><br>Contradictory symptoms, incomplete forms</div>
+      <div class="highlight-box" style="margin:0; grid-column:span 2;">💎 <strong>Value</strong><br>All of this data can potentially save millions of lives</div>
+    </div>
+    <p>Regular databases can't handle these 5 challenges together. <strong>Big Data technologies</strong> (Hadoop, Spark) were built specifically for this.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    You need to diagnose which "V" is the problem before choosing a Big Data solution. Not all big datasets have all 5 Vs.
+  </div>
+</div>
+
+<!-- CARD 9 - PENTAGON VISUALIZATION -->
+<div class="card card-blue" id="card-9">
+  <div class="card-tag">⭐ 5 Vs of Big Data • Card 10 of 30</div>
+  <div class="card-header">⭐ The 5 Vs Pentagon — Click Each Point!</div>
+  <div class="card-body">
+    <p>Click on each point of the pentagon to explore that "V" in depth.</p>
+    <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+      <canvas id="pentagon-canvas" width="280" height="280" style="cursor:pointer; border-radius:12px; flex-shrink:0;"></canvas>
+      <div id="v-detail-box" style="flex:1; min-width:200px; background:rgba(99,102,241,0.1); border:1px solid var(--primary); border-radius:12px; padding:16px; min-height:200px;">
+        <p style="color:var(--muted-foreground); font-size:13px;">👆 Click a V to learn more...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CARD 10 - VOLUME -->
+<div class="card card-blue" id="card-10">
+  <div class="card-tag">📦 5 Vs of Big Data • Card 11 of 30</div>
+  <div class="card-header">📦 Volume — The Scale of Data</div>
+  <div class="card-body">
+    <p>Volume refers to the sheer <strong>quantity</strong> of data generated. This has grown exponentially with smartphones, IoT sensors, social media, and e-commerce.</p>
+    <div class="highlight-box">
+      🌐 <strong>Google</strong>: Processes ~20 petabytes of data per DAY<br>
+      📱 <strong>WhatsApp</strong>: ~100 billion messages sent daily<br>
+      📷 <strong>Instagram</strong>: ~100 million photos uploaded per day
+    </div>
+    <div style="background:var(--secondary); border-radius:8px; padding:12px 16px; margin:10px 0; font-size:13px;">
+      <strong>Data Scale Reference:</strong><br>
+      1 KB = 1,000 bytes (a short email)<br>
+      1 MB = 1,000 KB (a photo)<br>
+      1 GB = 1,000 MB (a movie)<br>
+      1 TB = 1,000 GB (a year of HD video)<br>
+      1 PB = 1,000 TB = <strong>1 million GB</strong><br>
+      1 EB = 1,000 PB (all internet traffic in a month)
+    </div>
+    <p>Traditional SQL databases can't hold or query petabyte-scale data efficiently. That's why Google built <strong>BigTable</strong> and why Hadoop/Spark exist.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Volume determines storage architecture. At petabyte scale, you distribute data across thousands of commodity servers rather than one giant expensive machine.
+  </div>
+</div>
+
+<!-- CARD 11 - VARIETY -->
+<div class="card card-blue" id="card-11">
+  <div class="card-tag">🎭 5 Vs of Big Data • Card 12 of 30</div>
+  <div class="card-header">🎭 Variety — Many Formats, One System</div>
+  <div class="card-body">
+    <p>Modern data isn't just neat tables in spreadsheets. Data comes in <strong>3 main structures</strong>:</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:12px 0;">
+      <div style="background:rgba(59,130,246,0.15); border:1px solid #3b82f6; border-radius:8px; padding:12px; text-align:center;">
+        <div style="font-size:22px; margin-bottom:6px;">📋</div>
+        <strong style="font-size:12px;">Structured</strong>
+        <p style="font-size:11px; color:var(--muted-foreground); margin-top:4px;">SQL tables, CSVs, Excel. Has rows, columns, fixed schema.</p>
+      </div>
+      <div style="background:rgba(245,158,11,0.15); border:1px solid #f59e0b; border-radius:8px; padding:12px; text-align:center;">
+        <div style="font-size:22px; margin-bottom:6px;">📄</div>
+        <strong style="font-size:12px;">Semi-structured</strong>
+        <p style="font-size:11px; color:var(--muted-foreground); margin-top:4px;">JSON, XML, HTML. Has some structure but flexible.</p>
+      </div>
+      <div style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; border-radius:8px; padding:12px; text-align:center;">
+        <div style="font-size:22px; margin-bottom:6px;">🎬</div>
+        <strong style="font-size:12px;">Unstructured</strong>
+        <p style="font-size:11px; color:var(--muted-foreground); margin-top:4px;">Text, images, audio, video, social media posts.</p>
+      </div>
+    </div>
+    <p><strong>~80% of all enterprise data is unstructured</strong> (emails, documents, social posts). Traditional databases can't handle this efficiently.</p>
+    <p>NoSQL databases (MongoDB, Cassandra) and data lakes (S3, HDFS) handle variety better than traditional SQL.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    A single hospital has all three types: structured patient records, semi-structured HL7 messages, unstructured doctor's notes and X-ray images.
+  </div>
+</div>
+
+<!-- CARD 12 - VELOCITY, VERACITY, VALUE -->
+<div class="card card-blue" id="card-12">
+  <div class="card-tag">⚡ 5 Vs of Big Data • Card 13 of 30</div>
+  <div class="card-header">⚡🤔💎 Velocity, Veracity & Value</div>
+  <div class="card-body">
+    <div class="highlight-box" style="margin-bottom:10px;">
+      ⚡ <strong>Velocity</strong> — Speed of data generation and processing<br>
+      <span style="font-size:13px; color:var(--muted-foreground);">Stock market: millions of trades per second. IoT sensors: readings every millisecond. Credit card fraud detection: must decide in &lt;100ms. Technologies: Kafka, Spark Streaming, Flink.</span>
+    </div>
+    <div class="highlight-box" style="margin-bottom:10px;">
+      🤔 <strong>Veracity</strong> — Trustworthiness and accuracy of data<br>
+      <span style="font-size:13px; color:var(--muted-foreground);">Social media: fake news, bots, contradictory accounts. Medical records: missing values, entry errors, conflicting diagnoses. "Garbage in, garbage out" — bad data = wrong decisions. Data quality is a massive problem.</span>
+    </div>
+    <div class="highlight-box">
+      💎 <strong>Value</strong> — Extracting meaningful insights from raw data<br>
+      <span style="font-size:13px; color:var(--muted-foreground);">Raw data has no value until analyzed. Netflix uses viewing history to save &dollar;1B/year in customer retention. Banks use transaction data to detect fraud in real time. Value is the ultimate goal of all data analytics.</span>
+    </div>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Many organizations collect lots of data (Volume ✅) but fail to extract Value because they ignored Veracity (bad data quality). Data cleaning can take 60–80% of a data scientist's time!
+  </div>
+</div>
+
+<!-- CARD 13 - FLIP -->
+<div class="card card-purple" id="card-13">
+  <div class="card-tag">🔄 Active Recall • Card 14 of 30</div>
+  <div class="card-header">🤔 Flip Card: Which V = Accuracy?</div>
+  <div class="card-body">
+    <p>Think about it — then flip to check!</p>
+    <div class="flip-wrap">
+      <div class="flip-inner" id="flip-2" onclick="this.classList.toggle('flipped')">
+        <div class="flip-front">
+          <div class="question">Which V of Big Data is about data accuracy, trustworthiness, and reliability?</div>
+          <div class="hint">👆 Click to reveal answer</div>
+        </div>
+        <div class="flip-back">
+          <div class="answer">
+            ✅ <strong>Veracity</strong><br><br>
+            Veracity = the quality and accuracy of data. Can you trust it?<br><br>
+            Examples: Fake reviews, sensor errors, duplicate records, missing values, contradictory data.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Bonus fact:</strong> Some frameworks add a 6th V: <strong>Variability</strong> (data meaning changes over time — e.g., "sick" means something different in a COVID dataset vs. a cancer dataset).
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 3: STATISTICAL DESCRIPTIONS ═══════════ -->
+
+<!-- CARD 14 - STATS OVERVIEW -->
+<div class="card card-green" id="card-14">
+  <div class="card-tag">📈 Statistical Descriptions • Card 15 of 30</div>
+  <div class="card-header">🌤️ Statistics = A Weather Forecast for Data</div>
+  <div class="card-body">
+    <p>A weather forecast doesn't show you every single atmospheric pressure reading across every square kilometer. It gives you the <strong>key summary</strong>: 28°C, 70% chance of rain.</p>
+    <p>Statistics does the same for data. Instead of looking at 10,000 individual rows, you get a few powerful numbers:</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0;">
+      <div class="highlight-box" style="margin:0;">🎯 <strong>Central Tendency</strong><br>Where is the "center" of the data? (Mean, Median, Mode)</div>
+      <div class="highlight-box" style="margin:0;">📐 <strong>Spread / Dispersion</strong><br>How spread out is the data? (Range, Variance, SD)</div>
+      <div class="highlight-box" style="margin:0;">📉 <strong>Shape</strong><br>Symmetric? Skewed left or right? (Skewness, Kurtosis)</div>
+      <div class="highlight-box" style="margin:0;">🔗 <strong>Relationship</strong><br>Do two variables move together? (Correlation)</div>
+    </div>
+    <p>These 4 categories of descriptive statistics give you a complete picture of any dataset.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Before building any ML model, data analysts spend hours computing these statistics to understand the data — this is called Exploratory Data Analysis (EDA).
+  </div>
+</div>
+
+<!-- CARD 15 - CENTRAL TENDENCY -->
+<div class="card card-blue" id="card-15">
+  <div class="card-tag">📊 Statistical Descriptions • Card 16 of 30</div>
+  <div class="card-header">🎯 Mean, Median & Mode — The Three Centers</div>
+  <div class="card-body">
+    <p><strong>The "Bill Gates walks into a bar" effect:</strong> Imagine 9 people earning ₹30,000/month average. Bill Gates walks in. Now the mean jumps to millions — but the median barely changes. Which tells the "true" story?</p>
+    <div style="background:var(--secondary); border-radius:8px; padding:14px; margin:12px 0; font-size:14px;">
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; text-align:center;">
+        <div>
+          <div style="font-size:24px;">➕</div>
+          <strong>Mean</strong>
+          <p style="font-size:12px; color:var(--muted-foreground); margin-top:4px;">Sum ÷ Count. Affected by outliers. Best for symmetric data.</p>
+        </div>
+        <div>
+          <div style="font-size:24px;">⬛</div>
+          <strong>Median</strong>
+          <p style="font-size:12px; color:var(--muted-foreground); margin-top:4px;">Middle value. Resistant to outliers. Best for skewed data.</p>
+        </div>
+        <div>
+          <div style="font-size:24px;">👑</div>
+          <strong>Mode</strong>
+          <p style="font-size:12px; color:var(--muted-foreground); margin-top:4px;">Most frequent value. Works for any data type including nominal!</p>
+        </div>
+      </div>
+    </div>
+    <p>For data [2, 3, 3, 5, 100]: Mean = <strong>22.6</strong> (distorted by 100). Median = <strong>3</strong> (much more representative!). Mode = <strong>3</strong>.</p>
+    <p>India's <strong>per capita income</strong> statistics: always check if they're reporting mean or median — they tell very different stories given income inequality.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Rule of thumb:</strong> Skewed data → use Median. Symmetric data → Mean ≈ Median, either works.
+  </div>
+</div>
+
+<!-- CARD 16 - INTERACTIVE NUMBER LINE -->
+<div class="card card-purple" id="card-16">
+  <div class="card-tag">🎮 Statistical Descriptions • Card 17 of 30</div>
+  <div class="card-header">🎮 Interactive: Build Your Own Distribution!</div>
+  <div class="card-body">
+    <p>Click on the number line to add data points. See Mean (blue), Median (green), and Mode (orange) update live!</p>
+    <canvas id="numline-canvas" width="720" height="200" style="width:100%; border-radius:8px; background:var(--secondary);"></canvas>
+    <div id="numline-stats" style="display:flex; gap:16px; margin-top:12px; font-size:14px; flex-wrap:wrap;">
+      <span>🔵 <strong>Mean:</strong> <span id="nl-mean">—</span></span>
+      <span>🟢 <strong>Median:</strong> <span id="nl-median">—</span></span>
+      <span>🟠 <strong>Mode:</strong> <span id="nl-mode">—</span></span>
+      <span style="color:var(--muted-foreground);">n = <span id="nl-n">0</span> points</span>
+    </div>
+    <button onclick="clearNumLine()" style="margin-top:10px; padding:6px 14px; background:var(--secondary); border:1px solid var(--border); border-radius:8px; color:var(--foreground); font-size:12px; cursor:pointer;">🗑️ Clear</button>
+    <p style="font-size:12px; color:var(--muted-foreground); margin-top:8px;">💡 Try adding many points near one end to create a skewed distribution — watch how mean and median diverge!</p>
+  </div>
+</div>
+
+<!-- CARD 17 - SPREAD -->
+<div class="card card-blue" id="card-17">
+  <div class="card-tag">📐 Statistical Descriptions • Card 18 of 30</div>
+  <div class="card-header">📐 Measures of Spread — How Scattered Is the Data?</div>
+  <div class="card-body">
+    <p>Two exam classes, same mean score of 70. But are they really the same?</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0;">
+      <div class="highlight-box" style="margin:0;">
+        🅰️ <strong>Class A</strong><br>Scores: 68, 69, 70, 71, 72<br>
+        Range: 4 | SD ≈ 1.4<br>
+        <em>Very consistent!</em>
+      </div>
+      <div class="alert-box" style="margin:0;">
+        🅱️ <strong>Class B</strong><br>Scores: 20, 35, 70, 95, 100<br>
+        Range: 80 | SD ≈ 30.4<br>
+        <em>Wildly unequal!</em>
+      </div>
+    </div>
+    <div style="background:var(--secondary); border-radius:8px; padding:12px; margin:8px 0; font-size:13px;">
+      📏 <strong>Range</strong> = Max − Min (simple but sensitive to outliers)<br>
+      📊 <strong>Variance</strong> = Average of squared deviations from mean (in squared units)<br>
+      📉 <strong>Standard Deviation (SD)</strong> = √Variance (back in original units, intuitive!)<br>
+      📦 <strong>IQR</strong> = Q3 − Q1 (middle 50% of data, robust to outliers)
+    </div>
+    <p>SD = 0 means all values are identical. A higher SD = more spread = less consistency.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    In finance, SD of stock returns = risk! Higher volatility (SD) means higher risk. The Sharpe Ratio uses SD to measure risk-adjusted returns.
+  </div>
+</div>
+
+<!-- CARD 18 - BOXPLOT BUILDER -->
+<div class="card card-purple" id="card-18">
+  <div class="card-tag">📦 Statistical Descriptions • Card 19 of 30</div>
+  <div class="card-header">📦 Boxplot Builder — Enter Your Numbers!</div>
+  <div class="card-body">
+    <p>Type a comma-separated list of numbers. The boxplot will be drawn showing the 5-number summary + outliers!</p>
+    <div style="display:flex; gap:10px; align-items:center; margin:12px 0; flex-wrap:wrap;">
+      <input id="boxplot-input" type="text" value="5, 7, 8, 9, 10, 12, 14, 15, 18, 45"
+        style="flex:1; min-width:200px; padding:10px 14px; background:var(--secondary); border:1px solid var(--border); border-radius:8px; color:var(--foreground); font-size:14px;"
+        placeholder="e.g. 2, 5, 7, 8, 9, 12, 15, 40"
+        onchange="drawBoxplot()" oninput="drawBoxplot()"/>
+      <button onclick="drawBoxplot()" style="padding:10px 16px; background:var(--primary); color:white; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer;">📊 Draw</button>
+    </div>
+    <canvas id="boxplot-canvas" width="700" height="160" style="width:100%; border-radius:8px; background:var(--secondary);"></canvas>
+    <div id="boxplot-stats" style="margin-top:12px; font-size:13px; display:flex; gap:16px; flex-wrap:wrap; color:var(--muted-foreground);">
+      <span>Min: <span id="bp-min" style="color:var(--foreground);">—</span></span>
+      <span>Q1: <span id="bp-q1" style="color:#3b82f6;">—</span></span>
+      <span>Median: <span id="bp-med" style="color:#10b981;">—</span></span>
+      <span>Q3: <span id="bp-q3" style="color:#f59e0b;">—</span></span>
+      <span>Max: <span id="bp-max" style="color:var(--foreground);">—</span></span>
+      <span>IQR: <span id="bp-iqr" style="color:#a855f7;">—</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- CARD 19 - NORMAL DISTRIBUTION -->
+<div class="card card-blue" id="card-19">
+  <div class="card-tag">🔔 Statistical Descriptions • Card 20 of 30</div>
+  <div class="card-header">🔔 The Normal Distribution (Bell Curve)</div>
+  <div class="card-body">
+    <p>Most measurements in nature cluster around an average, with fewer and fewer values as you move away. This creates a bell-shaped curve.</p>
+    <canvas id="normal-canvas" width="700" height="180" style="width:100%; border-radius:8px; background:var(--secondary); margin:10px 0;"></canvas>
+    <div style="background:var(--secondary); border-radius:8px; padding:12px; margin:8px 0; font-size:13px;">
+      🟦 <strong>68% of data</strong> falls within <strong>±1 SD</strong> of mean<br>
+      🟦🟦 <strong>95% of data</strong> falls within <strong>±2 SD</strong> of mean<br>
+      🟦🟦🟦 <strong>99.7% of data</strong> falls within <strong>±3 SD</strong> of mean<br>
+      <em style="color:var(--muted-foreground);">This is the famous "68-95-99.7 Rule" or Empirical Rule</em>
+    </div>
+    <p><strong>Examples:</strong> Heights of adults, measurement errors, IQ scores, manufacturing tolerances — all approximately normal.</p>
+    <p>If a score is more than 3 SDs from the mean, it's considered an extreme outlier (probability &lt;0.3%).</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Many ML algorithms assume normality. If your data isn't normal (skewed, heavy-tailed), you may need to transform it first using log or sqrt transformations.
+  </div>
+</div>
+
+<!-- CARD 20 - SKEWNESS -->
+<div class="card card-blue" id="card-20">
+  <div class="card-tag">↗️ Statistical Descriptions • Card 21 of 30</div>
+  <div class="card-header">↗️ Skewness — Which Way Does the Tail Point?</div>
+  <div class="card-body">
+    <p>When data isn't symmetric, one side has a longer "tail." The direction of the tail defines the skew.</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:12px 0; text-align:center;">
+      <div style="background:rgba(59,130,246,0.1); border:1px solid #3b82f6; border-radius:8px; padding:12px;">
+        <div style="font-size:20px;">◀</div>
+        <strong style="font-size:13px;">Negative Skew</strong>
+        <p style="font-size:11px; color:var(--muted-foreground); margin-top:4px;">Tail on LEFT<br>Mean &lt; Median<br>e.g., age at retirement</p>
+      </div>
+      <div style="background:rgba(16,185,129,0.1); border:1px solid #10b981; border-radius:8px; padding:12px;">
+        <div style="font-size:20px;">⬆️</div>
+        <strong style="font-size:13px;">Symmetric</strong>
+        <p style="font-size:11px; color:var(--muted-foreground); margin-top:4px;">No tail<br>Mean = Median<br>e.g., heights</p>
+      </div>
+      <div style="background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:8px; padding:12px;">
+        <div style="font-size:20px;">▶</div>
+        <strong style="font-size:13px;">Positive Skew</strong>
+        <p style="font-size:11px; color:var(--muted-foreground); margin-top:4px;">Tail on RIGHT<br>Mean &gt; Median<br>e.g., income, housing prices</p>
+      </div>
+    </div>
+    <div class="alert-box">
+      💡 <strong>Income is positively skewed</strong> — billionaires like Ambani create a long right tail that pulls the mean far above the median. That's why "median household income" is a fairer measure than "average income."
+    </div>
+    <p>A quick rule: <strong>If Mean &gt; Median → positive skew.</strong> If Mean &lt; Median → negative skew.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Skewed data violates normality assumptions of many statistical tests. You can fix skew using log transformation (common for income data), square root, or Box-Cox transformation.
+  </div>
+</div>
+
+<!-- CARD 21 - CORRELATION -->
+<div class="card card-blue" id="card-21">
+  <div class="card-tag">🔗 Statistical Descriptions • Card 22 of 30</div>
+  <div class="card-header">🔗 Correlation — Do Two Things Move Together?</div>
+  <div class="card-body">
+    <p>Correlation measures whether two variables tend to increase or decrease together. The Pearson r ranges from −1 to +1.</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:12px 0; text-align:center; font-size:13px;">
+      <div style="background:rgba(16,185,129,0.15); border:1px solid #10b981; border-radius:8px; padding:10px;">
+        <strong style="color:#10b981;">r ≈ +1</strong><br>Strong Positive<br>Both go up together<br><em>Height & Weight</em>
+      </div>
+      <div style="background:rgba(99,102,241,0.15); border:1px solid var(--primary); border-radius:8px; padding:10px;">
+        <strong style="color:var(--accent);">r ≈ 0</strong><br>No Correlation<br>No relationship<br><em>Shoe size & GPA</em>
+      </div>
+      <div style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; border-radius:8px; padding:10px;">
+        <strong style="color:#ef4444;">r ≈ −1</strong><br>Strong Negative<br>One up, other down<br><em>Exercise & Weight</em>
+      </div>
+    </div>
+    <div class="alert-box">
+      ⚠️ <strong>CORRELATION ≠ CAUSATION!</strong><br>
+      Ice cream sales and drowning deaths are both higher in summer → they're positively correlated. But eating ice cream doesn't cause drowning! The <strong>hidden cause</strong> is HOT WEATHER making people swim AND buy ice cream.
+    </div>
+    <p>This third variable causing both is called a <strong>confounding variable</strong> or <strong>lurking variable</strong>.</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Machine learning features with high correlation can cause multicollinearity issues. In causal analysis, you need randomized experiments to establish causation, not just correlation.
+  </div>
+</div>
+
+<!-- CARD 22 - SCATTER PLOT EXPLORER -->
+<div class="card card-purple" id="card-22">
+  <div class="card-tag">🎮 Statistical Descriptions • Card 23 of 30</div>
+  <div class="card-header">🎮 Scatter Plot Correlation Explorer</div>
+  <div class="card-body">
+    <p>Click anywhere on the canvas to add data points. The Pearson r is computed live!</p>
+    <canvas id="scatter-canvas" width="700" height="300" style="width:100%; border-radius:8px; background:#0d1117;"></canvas>
+    <div style="display:flex; gap:16px; align-items:center; margin-top:12px; flex-wrap:wrap;">
+      <div id="r-display" style="font-size:18px; font-weight:800; color:var(--accent);">r = —</div>
+      <div id="r-interpretation" style="font-size:14px; color:var(--muted-foreground);">Add points to calculate correlation</div>
+      <button onclick="clearScatter()" style="padding:6px 14px; background:var(--secondary); border:1px solid var(--border); border-radius:8px; color:var(--foreground); font-size:12px; cursor:pointer; margin-left:auto;">🗑️ Clear</button>
+    </div>
+    <div style="font-size:12px; color:var(--muted-foreground); margin-top:6px;">
+      🟢 r &gt; 0.5 (positive) | ⬜ r near 0 (none) | 🔴 r &lt; -0.5 (negative) | n = <span id="scatter-n">0</span> points
+    </div>
+  </div>
+</div>
+
+<!-- CARD 23 - FLIP -->
+<div class="card card-purple" id="card-23">
+  <div class="card-tag">🔄 Active Recall • Card 24 of 30</div>
+  <div class="card-header">🤔 Flip Card: Mean, Median, Mode</div>
+  <div class="card-body">
+    <p>Calculate these from memory, then flip to check!</p>
+    <div class="flip-wrap">
+      <div class="flip-inner" id="flip-3" onclick="this.classList.toggle('flipped')">
+        <div class="flip-front">
+          <div class="question">For the dataset [2, 3, 3, 5, 7]:<br>What are the mean, median, and mode?</div>
+          <div class="hint">👆 Work it out then click to check!</div>
+        </div>
+        <div class="flip-back">
+          <div class="answer">
+            ➕ <strong>Mean</strong> = (2+3+3+5+7)/5 = 20/5 = <strong>4</strong><br><br>
+            ⬛ <strong>Median</strong> = middle value of [2,3,<u>3</u>,5,7] = <strong>3</strong><br><br>
+            👑 <strong>Mode</strong> = most frequent = <strong>3</strong> (appears twice)<br><br>
+            Note: Mean (4) &gt; Median (3) → slight positive skew!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 4: DATA VISUALIZATION TYPES ═══════════ -->
+
+<!-- CARD 24 -->
+<div class="card card-green" id="card-24">
+  <div class="card-tag">📊 Data Visualization Types • Card 25 of 30</div>
+  <div class="card-header">🖼️ A Picture is Worth 1,000 Rows</div>
+  <div class="card-body">
+    <p>Raw numbers in a table are hard to interpret. The right chart can reveal patterns instantly — patterns that might take hours to find in raw data.</p>
+    <div class="highlight-box">
+      📈 <strong>Why visualize?</strong><br>
+      • Human brains process visuals 60,000× faster than text<br>
+      • Patterns (clusters, outliers, trends) are invisible in tables<br>
+      • Anscombe's Quartet: 4 datasets with identical mean, SD, and correlation — but completely different shapes!
+    </div>
+    <p>Different questions require different charts. Using the wrong chart is like answering "Where do you live?" with a pie chart of your daily activities.</p>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0; font-size:12px; text-align:center;">
+      <div style="background:var(--secondary); padding:8px; border-radius:8px;">📊 <br><strong>Comparison</strong><br>Bar chart</div>
+      <div style="background:var(--secondary); padding:8px; border-radius:8px;">📉 <br><strong>Trend over time</strong><br>Line chart</div>
+      <div style="background:var(--secondary); padding:8px; border-radius:8px;">🍰 <br><strong>Part of whole</strong><br>Pie chart</div>
+      <div style="background:var(--secondary); padding:8px; border-radius:8px;">📶 <br><strong>Distribution</strong><br>Histogram</div>
+      <div style="background:var(--secondary); padding:8px; border-radius:8px;">🔗 <br><strong>Relationship</strong><br>Scatter plot</div>
+      <div style="background:var(--secondary); padding:8px; border-radius:8px;">📦 <br><strong>Summary stats</strong><br>Boxplot</div>
+    </div>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Data analysts spend significant time choosing the right visualization. The wrong chart can mislead stakeholders — a truncated y-axis in a bar chart, for example, can make tiny differences look enormous.
+  </div>
+</div>
+
+<!-- CARD 25 -->
+<div class="card card-blue" id="card-25">
+  <div class="card-tag">📊 Data Visualization Types • Card 26 of 30</div>
+  <div class="card-header">📊 Histograms vs. Bar Charts — Know the Difference!</div>
+  <div class="card-body">
+    <div class="alert-box">
+      ⚠️ <strong>Common confusion!</strong> Histograms and bar charts look similar but serve completely different purposes.
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0;">
+      <div class="highlight-box" style="margin:0;">
+        <strong>📶 Histogram</strong><br>
+        For <strong>continuous/quantitative</strong> data<br>
+        Bars touch each other (no gaps!)<br>
+        X-axis = bins (ranges)<br>
+        Shows <strong>distribution/frequency</strong><br>
+        <em>Example: Distribution of student ages in buckets 18-20, 20-22, 22-24...</em>
+      </div>
+      <div class="highlight-box" style="margin:0;">
+        <strong>📊 Bar Chart</strong><br>
+        For <strong>categorical/discrete</strong> data<br>
+        Bars have gaps between them<br>
+        X-axis = categories<br>
+        Shows <strong>counts per category</strong><br>
+        <em>Example: Number of students with each hair color (Black, Brown, Blonde...)</em>
+      </div>
+    </div>
+    <p>The <strong>key difference</strong>: Histograms show data shape (normal? skewed?). Bar charts compare discrete groups.</p>
+    <p>You can reorder bars in a bar chart (no problem). You cannot reorder bins in a histogram — they follow the number line!</p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Exam tip:</strong> When asked "which chart for continuous variable distribution?" → Histogram. "Which for comparing categories?" → Bar chart.
+  </div>
+</div>
+
+<!-- CARD 26 -->
+<div class="card card-blue" id="card-26">
+  <div class="card-tag">🔵 Data Visualization Types • Card 27 of 30</div>
+  <div class="card-header">🔵 Scatter Plots, Parallel Coords & Boxplots</div>
+  <div class="card-body">
+    <div style="display:grid; grid-template-columns:1fr; gap:12px; margin:12px 0;">
+      <div class="highlight-box">
+        <strong>⬤ Scatter Plot</strong><br>
+        <em>Use: Show relationship between 2 continuous variables</em><br>
+        Each point = one data item (x, y). See clusters, outliers, linear/nonlinear relationships. Foundation of regression analysis.
+      </div>
+      <div class="highlight-box">
+        <strong>∥ Parallel Coordinates</strong><br>
+        <em>Use: Visualize multi-dimensional data (many attributes at once)</em><br>
+        Each vertical axis = one attribute. Each line = one data item crossing all axes. Great for finding clusters in high-dimensional data (e.g., wine quality with 13 chemical features).
+      </div>
+      <div class="highlight-box">
+        <strong>📦 Boxplot (Box-and-Whisker)</strong><br>
+        <em>Use: Show 5-number summary + outliers, compare groups</em><br>
+        Box = IQR (Q1 to Q3). Line inside = Median. Whiskers = ±1.5×IQR. Points beyond whiskers = outliers. Perfect for comparing distributions across categories.
+      </div>
+    </div>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Parallel coordinates are used in industrial quality control to monitor many sensors simultaneously. One "out of pattern" line instantly reveals a faulty machine.
+  </div>
+</div>
+
+<!-- CARD 27 -->
+<div class="card card-purple" id="card-27">
+  <div class="card-tag">🎨 Data Visualization Types • Card 28 of 30</div>
+  <div class="card-header">🎨 Creative Visualizations: Faces & Clouds</div>
+  <div class="card-body">
+    <p>Sometimes standard charts aren't enough. Data scientists use creative techniques to pack more dimensions into 2D space.</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0;">
+      <div style="background:rgba(168,85,247,0.1); border:1px solid #a855f7; border-radius:8px; padding:14px;">
+        <strong>😊 Chernoff Faces</strong><br>
+        <p style="font-size:13px; color:var(--muted-foreground); margin-top:6px;">Each facial feature (eye size, smile curve, eyebrow angle) represents a data dimension. Humans are excellent at reading facial expressions, so this leverages perceptual instinct. Used for: country economic comparisons, sensor monitoring.</p>
+      </div>
+      <div style="background:rgba(168,85,247,0.1); border:1px solid #a855f7; border-radius:8px; padding:14px;">
+        <strong>☁️ Tag/Word Clouds</strong><br>
+        <p style="font-size:13px; color:var(--muted-foreground); margin-top:6px;">Word size = frequency or importance. Great for text data (customer reviews, social media). Quick way to see dominant themes. Limitation: doesn't show context or sentiment.</p>
+      </div>
+    </div>
+    <div class="tag-cloud" style="margin-top:8px;">
+      <span class="tag" style="background:rgba(99,102,241,0.3); font-size:22px; color:var(--accent);">Volume</span>
+      <span class="tag" style="background:rgba(16,185,129,0.2); font-size:16px; color:#10b981;">Velocity</span>
+      <span class="tag" style="background:rgba(59,130,246,0.2); font-size:14px; color:#60a5fa;">Variety</span>
+      <span class="tag" style="background:rgba(245,158,11,0.2); font-size:12px; color:#fcd34d;">Veracity</span>
+      <span class="tag" style="background:rgba(239,68,68,0.2); font-size:18px; color:#f87171;">Value</span>
+      <span class="tag" style="background:rgba(168,85,247,0.2); font-size:11px; color:#c084fc;">Analytics</span>
+      <span class="tag" style="background:rgba(16,185,129,0.15); font-size:13px; color:#6ee7b7;">Statistics</span>
+    </div>
+    <p style="font-size:12px; color:var(--muted-foreground); margin-top:8px;"><em>↑ Simple tag cloud of Module 2 keywords by importance</em></p>
+  </div>
+  <div class="why-box">
+    <strong>🎯 Why does this matter?</strong>
+    Choosing the right visualization is a core data analytics skill. The goal: maximum insight with minimum cognitive effort for the viewer.
+  </div>
+</div>
+
+<!-- CARD 28 - FLIP -->
+<div class="card card-purple" id="card-28">
+  <div class="card-tag">🔄 Active Recall • Card 29 of 30</div>
+  <div class="card-header">🤔 Flip Card: Best Chart for Distribution?</div>
+  <div class="card-body">
+    <p>Think then flip!</p>
+    <div class="flip-wrap">
+      <div class="flip-inner" id="flip-4" onclick="this.classList.toggle('flipped')">
+        <div class="flip-front">
+          <div class="question">What chart type is best for showing the distribution of a continuous variable like "student heights"?</div>
+          <div class="hint">👆 Click to reveal answer</div>
+        </div>
+        <div class="flip-back">
+          <div class="answer">
+            📶 <strong>Histogram</strong> — for the full distribution shape (is it normal? skewed?)<br><br>
+            📦 <strong>Boxplot</strong> — for the 5-number summary and outlier detection<br><br>
+            Use <strong>Histogram</strong> when you want to see the shape of distribution. Use <strong>Boxplot</strong> when you want to compare distributions across groups (e.g., heights by gender).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CARD 29 - END QUIZ ═══════════ -->
+<div class="card" id="card-29" style="border-color:var(--accent);">
+  <div class="card-tag">📝 End of Module Quiz • Card 30 of 30</div>
+  <div class="card-header">🧠 Final Quiz — Test Your Knowledge!</div>
+  <div class="card-body">
+    <div id="quiz-container">
+      <!-- Q1 -->
+      <div class="quiz-question" id="qq1">
+        <p style="font-weight:700; margin-bottom:8px;">Q1. Temperature in Celsius is what type of attribute?</p>
+        <button class="quiz-option" onclick="checkQ(1,'a','a')">a) Nominal</button>
+        <button class="quiz-option" onclick="checkQ(1,'b','a')">b) Ordinal</button>
+        <button class="quiz-option" onclick="checkQ(1,'c','a')">c) Interval ✓</button>
+        <button class="quiz-option" onclick="checkQ(1,'d','a')">d) Ratio</button>
+        <div class="quiz-feedback" id="qf1"></div>
+      </div>
+      <!-- Q2 -->
+      <div class="quiz-question" id="qq2" style="margin-top:18px;">
+        <p style="font-weight:700; margin-bottom:8px;">Q2. Which measure of central tendency is most robust to outliers?</p>
+        <button class="quiz-option" onclick="checkQ(2,'a','b')">a) Mean</button>
+        <button class="quiz-option" onclick="checkQ(2,'b','b')">b) Median ✓</button>
+        <button class="quiz-option" onclick="checkQ(2,'c','b')">c) Mode</button>
+        <button class="quiz-option" onclick="checkQ(2,'d','b')">d) Range</button>
+        <div class="quiz-feedback" id="qf2"></div>
+      </div>
+      <!-- Q3 -->
+      <div class="quiz-question" id="qq3" style="margin-top:18px;">
+        <p style="font-weight:700; margin-bottom:8px;">Q3. What does a standard deviation of 0 mean?</p>
+        <button class="quiz-option" onclick="checkQ(3,'a','c')">a) Data is missing</button>
+        <button class="quiz-option" onclick="checkQ(3,'b','c')">b) Data has no mean</button>
+        <button class="quiz-option" onclick="checkQ(3,'c','c')">c) All values are identical ✓</button>
+        <button class="quiz-option" onclick="checkQ(3,'d','c')">d) Data is normally distributed</button>
+        <div class="quiz-feedback" id="qf3"></div>
+      </div>
+      <!-- Q4 -->
+      <div class="quiz-question" id="qq4" style="margin-top:18px;">
+        <p style="font-weight:700; margin-bottom:8px;">Q4. Which V of Big Data deals with real-time processing speed?</p>
+        <button class="quiz-option" onclick="checkQ(4,'a','d')">a) Volume</button>
+        <button class="quiz-option" onclick="checkQ(4,'b','d')">b) Variety</button>
+        <button class="quiz-option" onclick="checkQ(4,'c','d')">c) Veracity</button>
+        <button class="quiz-option" onclick="checkQ(4,'d','d')">d) Velocity ✓</button>
+        <div class="quiz-feedback" id="qf4"></div>
+      </div>
+      <!-- Q5 -->
+      <div class="quiz-question" id="qq5" style="margin-top:18px;">
+        <p style="font-weight:700; margin-bottom:8px;">Q5. Pearson r = −0.9 means what kind of correlation?</p>
+        <button class="quiz-option" onclick="checkQ(5,'a','e')">a) Strong positive correlation</button>
+        <button class="quiz-option" onclick="checkQ(5,'b','e')">b) Weak negative correlation</button>
+        <button class="quiz-option" onclick="checkQ(5,'c','e')">c) No correlation</button>
+        <button class="quiz-option" onclick="checkQ(5,'d','e')">d) Strong negative correlation ✓</button>
+        <div class="quiz-feedback" id="qf5"></div>
+      </div>
+    </div>
+
+    <div id="score-display">
+      <div id="score-emoji" style="font-size:48px;"></div>
+      <div id="score-text" style="font-size:22px; font-weight:800; margin:8px 0;"></div>
+      <div id="score-msg" style="color:var(--muted-foreground); font-size:14px;"></div>
+      <button onclick="retryQuiz()" style="margin-top:16px; padding:10px 24px; background:var(--primary); color:white; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer;">🔄 Retry Quiz</button>
+    
+        <div class="mt-6 border-t border-[var(--border)] pt-6">
+          <h3 class="text-lg font-bold text-[#f59e0b] mb-4">📚 Additional Slide Topics &amp; Exam Foundations</h3>
+          
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">📋 Primary vs. Secondary Data &amp; 12 Survey Question Types</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Primary Data:</strong> First-hand raw data gathered directly by the investigator through surveys, interviews, observations, focus groups, or experiments.</p>
+              <p>• <strong>Secondary Data:</strong> Data collected earlier by someone else for another purpose (e.g., census records, tax/electoral data, hospital archives, third-party reports).</p>
+              <p>• <strong>Quantitative vs Qualitative Methods:</strong> Quantitative analyzes numerical measurements and frequencies. Qualitative collects deep subjective insights (one-on-one interviews, case studies).</p>
+              <p>• <strong>12 Survey Question Types (from slides):</strong> (1) Single-answer multiple choice, (2) Rating scales, (3) Likert scale (Agree/Disagree), (4) Dropdown questions, (5) Open-ended text, (6) Demographic, (7) Ranking questions, (8) Image choice, (9) Click map, (10) File upload, (11) Slider questions, (12) Benchmarkable questions (e.g. Net Promoter Score: 'How likely are you to recommend?').</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">📐 Extended Central Tendency: Trimmed, Geometric &amp; Harmonic Means</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Trimmed Mean:</strong> A robust measure of center obtained by chopping off a fixed percentage (e.g., top and bottom 5%) of extreme values before averaging, preventing outlier distortion.</p>
+              <p>• <strong>Geometric Mean:</strong> The $n$-th root of the product of $n$ numbers: $(\prod x_i)^{1/n}$. Ideal for growth rates, ratios, and multiplicative indices.</p>
+              <p>• <strong>Harmonic Mean:</strong> The reciprocal of the arithmetic mean of reciprocals: $n / \sum (1/x_i)$. Essential for rates and speeds (e.g., average vehicle speed over fixed distance).</p>
+              <p>• <strong>Empirical Rule of Modes:</strong> For unimodal moderately skewed distributions: $\t\text{Mean} - \t\text{Mode} pprox 3(\t\text{Mean} - \t\text{Median})$.</p>
+              <p>• <strong>Choosing Central Tendency:</strong> Categorical data $\to$ <strong>Mode</strong>. Total quantity is of interest $\to$ <strong>Mean</strong>. Skewed data $\to$ <strong>Median</strong>.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">📏 Extended Dispersion: Quartile Deviation &amp; Coefficient of Variation (CV)</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Quartile Deviation (Semi-Interquartile Range):</strong> $\text{QD} = \frac{Q_3 - Q_1}{2}$. Unlike Range, it is robust and unaffected by extreme outliers.</p>
+              <p>• <strong>Coefficient of Variation (CV):</strong> $\text{CV} = \frac{\text{Standard Deviation}}{\t\text{Mean}} \times 100\%$. Measures relative dispersion. <em>Slide application:</em> Comparing athlete consistency — higher CV means greater inconsistency.</p>
+              <p>• <strong>Statistical Population vs Sample:</strong> Population is described by parameters ($\mu, \sigma$); sample is described by statistics ($ar{x}, s$). <strong>Population error:</strong> The difference between sample mean and population mean ($ar{x} - \mu$).</p>
+              <p>• <strong>Selecting Index of Dispersion:</strong> Bounded variables $\to$ <strong>Range</strong>. Symmetric distributions $\to$ <strong>SD / Variance / CV</strong>. Asymmetric / skewed distributions $\to$ <strong>Percentiles / IQR</strong>.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">📈 Quantile Plots, Q-Q Plots &amp; Why Histograms Beat Boxplots</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Quantile Plot:</strong> Displays all data sorted in ascending order where each value $x_i$ is plotted against its quantile fraction $f_i = \frac{i - 0.5}{N}$ (&dollar;100 f_i\%$ of data $\le x_i$).</p>
+              <p>• <strong>Quantile-Quantile (Q-Q) Plot:</strong> Graphs the quantiles of one univariate distribution directly against the corresponding quantiles of another. A straight line indicates identical distributions; departures reveal shifts in scale, location, or skewness.</p>
+              <p>• <strong>Histograms vs. Bar Charts:</strong> Bar charts plot categorical counts with spaces between bars. Histograms plot continuous quantitative data grouped into bins or intervals.</p>
+              <p>• <strong>Why Histograms Beat Boxplots:</strong> Two completely different distributions (e.g., a bimodal distribution with two peaks vs a uniform distribution) can have the exact same 5-number summary (Min, Q1, Median, Q3, Max). A boxplot hides the bimodality, whereas a histogram clearly shows both peaks.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🎨 Advanced Visualizations: Chernoff Faces, Stick Figures &amp; Dimensional Stacking</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Chernoff Faces (1973):</strong> Maps up to 18 multidimensional variables to facial features (eye size, eyebrow slant, mouth curve, face eccentricity). Exploits human facial recognition capabilities. <em>Slide example:</em> Visualizing lawyer ratings of 12 judges.</p>
+              <p>• <strong>Stick Figure Visualization:</strong> A 5-piece stick icon (1 body + 4 limbs) where two dimensions are mapped to screen coordinates $(x, y)$ and the remaining attributes are mapped to the limb angles and lengths. Dense stick figures form macroscopic <em>texture patterns</em> indicating data clusters and gradients.</p>
+              <p>• <strong>Dimensional Stacking:</strong> High-dimensional visualization technique where an $n$-dimensional space is embedded into nested 2D subspaces stacked inside each other. Outer axes hold the most important variables; inner axes hold lower-order variables (practical for up to 9 dimensions).</p>
+              <p>• <strong>Parallel Coordinates:</strong> $k$ equidistant parallel vertical axes corresponding to dimensions. Each $k$-dimensional record is drawn as a continuous polygonal line intersecting each vertical axis at its attribute value.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🔬 DASFAA-2022 Conference Submission Case Study</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>Data analytics applied to 400 valid research submissions at DASFAA-2022 (Hyderabad):</p>
+              <p>• <strong>Acceptance Rates:</strong> 18% Full papers (72), 19% Short papers (76).</p>
+              <p>• <strong>Submission Timing:</strong> The massive submission peak occurred 1.5 to 2 days before the deadline.</p>
+              <p>• <strong>Submission ID Sweet Spot:</strong> Papers submitted around the 80th percentile of submission IDs had higher acceptance rates than last-minute submissions.</p>
+              <p>• <strong>Author Collaboration:</strong> Papers with 4+ authors had significantly higher acceptance rates than single-author submissions.</p>
+              <p>• <strong>Student First Authors:</strong> Marked increase in acceptance percentage when a graduate student was first author.</p>
+              <p>• <strong>Abstract Word Count:</strong> Abstracts that were neither too short (&lt;100 words) nor too long (&gt;250 words) had the highest success rates.</p>
+            </div>
+          </details>
+        </div>
+</div>
+  </div>
+</div>
+
+<!-- ══ NAVIGATION ══ -->
+<div class="card-nav">
+  <button class="nav-btn nav-btn-prev" id="prev-btn" onclick="navigate(-1)" disabled>← Previous</button>
+  <span id="section-label" style="font-size:12px; color:var(--muted-foreground);">Section 1 of 4</span>
+  <button class="nav-btn nav-btn-next" id="next-btn" onclick="navigate(1)">Next →</button>
+</div>
+
+<!-- ══ APPENDIX ══ -->
+<button id="appendix-toggle" onclick="toggleAppendix()">📐 Appendix: First Principles & Formulas ▼</button>
+<div id="appendix-body">
+  <h3 style="color:var(--accent); margin-bottom:16px;">📐 Mathematical Foundations</h3>
+
+  <h4 style="color:var(--foreground); margin-bottom:8px;">1. Mean, Variance & Standard Deviation</h4>
+  <div class="formula-block">Mean (μ) = (x₁ + x₂ + ... + xₙ) / n = Σxᵢ / n</div>
+  <div class="formula-explain">Sum all values, divide by count. Sensitive to outliers.</div>
+  <div class="formula-block">Variance (σ²) = Σ(xᵢ − μ)² / n  [population]
+Sample Variance (s²) = Σ(xᵢ − x̄)² / (n−1)  [sample]</div>
+  <div class="formula-explain">Average of squared distances from mean. Use n−1 for samples (Bessel's correction) to get unbiased estimate.</div>
+  <div class="formula-block">Standard Deviation (σ) = √Variance = √[Σ(xᵢ − μ)² / n]</div>
+  <div class="formula-explain">Back in original units. About 68% of data falls within μ ± σ for normal distributions.</div>
+
+  <h4 style="color:var(--foreground); margin-top:20px; margin-bottom:8px;">2. Five Number Summary & IQR</h4>
+  <div class="formula-block">IQR = Q3 − Q1
+Outlier if: x < Q1 − 1.5×IQR  OR  x > Q3 + 1.5×IQR</div>
+  <div class="formula-explain">Q1 = 25th percentile, Q3 = 75th percentile. IQR = interquartile range, robust to outliers.</div>
+
+  <h4 style="color:var(--foreground); margin-top:20px; margin-bottom:8px;">3. Pearson Correlation Coefficient</h4>
+  <div class="formula-block">r = Σ[(xᵢ − x̄)(yᵢ − ȳ)] / √[Σ(xᵢ − x̄)² × Σ(yᵢ − ȳ)²]</div>
+  <div class="formula-explain">r ranges from −1 (perfect negative) to +1 (perfect positive). r = 0 means no linear relationship. Note: r only detects LINEAR relationships — two variables can be perfectly related (e.g., y = x²) with r ≈ 0.</div>
+
+  <h4 style="color:var(--foreground); margin-top:20px; margin-bottom:8px;">4. Chi-Square Test (for categorical data)</h4>
+  <div class="formula-block">χ² = Σ [(Observed − Expected)² / Expected]</div>
+  <div class="formula-explain">Tests whether two categorical variables are independent. E.g., "Is hair color independent of eye color?" A large χ² value → the variables are likely related.</div>
+
+  <h4 style="color:var(--foreground); margin-top:20px; margin-bottom:8px;">5. Population vs. Sample</h4>
+  <div style="background:var(--secondary); border-radius:8px; padding:14px; margin:8px 0; font-size:13px;">
+    <strong>Population (N):</strong> The entire set you care about (all voters in India)<br>
+    <strong>Sample (n):</strong> A subset you actually measure (1,000 surveyed voters)<br><br>
+    Use <strong>n−1</strong> (instead of n) for sample statistics to correct for bias (Bessel's correction).<br>
+    Notation: Population uses μ, σ, N. Samples use x̄, s, n.
+  </div>
+</div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+const TOTAL_CARDS = 30;
+let currentCard = 0;
+let timerSeconds = 900; // 15 min
+let timerPaused = false;
+let timerInterval = null;
+let quizAnswered = {};
+let quizScore = 0;
+let quizTotal = 5;
+let quizCorrectMap = { 1:'c', 2:'b', 3:'c', 4:'d', 5:'d' };
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+function navigate(dir) {
+  const next = currentCard + dir;
+  if (next < 0 || next >= TOTAL_CARDS) return;
+  showCard(next);
+}
+
+function jumpTo(idx) {
+  showCard(idx);
+}
+
+function showCard(idx) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.getElementById('card-' + idx).classList.add('active');
+  currentCard = idx;
+  updateProgress();
+  updateSidebar();
+  document.getElementById('prev-btn').disabled = idx === 0;
+  document.getElementById('next-btn').disabled = idx === TOTAL_CARDS - 1;
+
+  // trigger card-specific inits
+  if (idx === 9)  initPentagon();
+  if (idx === 16) initNumLine();
+  if (idx === 18) drawBoxplot();
+  if (idx === 19) drawNormalCurve();
+  if (idx === 22) initScatter();
+
+  // scroll to top
+  document.getElementById('main').scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress() {
+  const pct = ((currentCard + 1) / TOTAL_CARDS) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `Card ${currentCard + 1} of ${TOTAL_CARDS}`;
+  // section labels
+  const secLabels = ['Section 1 of 4','Section 1 of 4','Section 1 of 4','Section 1 of 4','Section 1 of 4','Section 1 of 4','Section 1 of 4','Section 1 of 4',
+                     'Section 2 of 4','Section 2 of 4','Section 2 of 4','Section 2 of 4','Section 2 of 4','Section 2 of 4',
+                     'Section 3 of 4','Section 3 of 4','Section 3 of 4','Section 3 of 4','Section 3 of 4','Section 3 of 4','Section 3 of 4','Section 3 of 4','Section 3 of 4','Section 3 of 4',
+                     'Section 4 of 4','Section 4 of 4','Section 4 of 4','Section 4 of 4','Section 4 of 4',
+                     'Quiz'];
+  document.getElementById('section-label').textContent = secLabels[currentCard] || '';
+}
+
+function updateSidebar() {
+  document.querySelectorAll('.sidebar-item').forEach((btn, i) => {
+    btn.classList.toggle('active', i === currentCard);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  POMODORO TIMER
+// ══════════════════════════════════════════════
+function startTimer() {
+  timerInterval = setInterval(() => {
+    if (timerPaused) return;
+    timerSeconds--;
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      document.getElementById('timer-display').textContent = '⏱ 0:00';
+      document.getElementById('break-overlay').classList.add('show');
+      return;
+    }
+    const m = Math.floor(timerSeconds / 60);
+    const s = timerSeconds % 60;
+    document.getElementById('timer-display').textContent = `⏱ ${m}:${s.toString().padStart(2,'0')}`;
+  }, 1000);
+}
+
+function togglePause() {
+  timerPaused = !timerPaused;
+  const td = document.getElementById('timer-display');
+  if (timerPaused) td.style.opacity = '0.5';
+  else td.style.opacity = '1';
+}
+
+function resumeTimer() {
+  timerSeconds = 900;
+  timerPaused = false;
+  document.getElementById('break-overlay').classList.remove('show');
+  document.getElementById('timer-display').textContent = '⏱ 15:00';
+  startTimer();
+}
+
+// ══════════════════════════════════════════════
+//  TREE NODE INFO
+// ══════════════════════════════════════════════
+const nodeData = {
+  nominal:    { title: '🏷️ Nominal', content: '<strong>Examples:</strong> Eye color, blood type (A/B/O/AB), movie genre, country of origin, student ID numbers.<br><br><strong>Valid Math:</strong> = and ≠ only.<br><strong>Measures:</strong> Mode only.<br><strong>Note:</strong> Even if encoded as numbers (1=Red, 2=Blue), you cannot do arithmetic on nominal data!' },
+  binary:     { title: '⚫⚪ Binary', content: '<strong>Special case of Nominal:</strong> Only 2 possible values.<br><br><strong>Examples:</strong> Yes/No, True/False, Spam/Not-spam, Pass/Fail, Male/Female.<br><br>Often encoded as 0 and 1 for ML algorithms. This is called One-Hot or Dummy encoding.' },
+  ordinal:    { title: '📊 Ordinal', content: '<strong>Examples:</strong> Movie ratings (1-5★), education level (High School/Bachelor/Master/PhD), pain scale (1-10), Likert scale (Strongly Disagree → Strongly Agree).<br><br><strong>Valid Math:</strong> =, ≠, &gt;, &lt; (can rank).<br><strong>Measures:</strong> Mode, Median. Mean is debatable!' },
+  interval:   { title: '🌡️ Interval', content: '<strong>Examples:</strong> Temperature in °C or °F, calendar years (Year 0 is arbitrary), IQ scores, pH scale.<br><br><strong>Valid Math:</strong> =, ≠, &gt;, &lt;, +, − (can add/subtract).<br><strong>Measures:</strong> Mean, Median, Mode all valid.<br><strong>Not valid:</strong> Ratios (30°C is NOT twice as hot as 15°C)!' },
+  ratio:      { title: '⚖️ Ratio', content: '<strong>Examples:</strong> Height, weight, salary, distance, age, temperature in Kelvin, number of purchases.<br><br><strong>Valid Math:</strong> ALL operations (+, −, ×, ÷, ratios).<br><strong>Measures:</strong> All measures including geometric mean.<br><strong>Key feature:</strong> True zero (0 = none of that thing).' },
+  discrete:   { title: '🔢 Discrete', content: '<strong>Discrete = countable whole numbers.</strong><br><br><strong>Examples:</strong> Number of children (0, 1, 2, 3...), number of cars sold, number of goals in a game, number of students in class.<br><br>You cannot have 2.5 children! Values jump in whole steps.' },
+  continuous: { title: '∞ Continuous', content: '<strong>Continuous = measurable, can take any value in a range.</strong><br><br><strong>Examples:</strong> Height (1.723847... meters), temperature, time, weight, blood pressure.<br><br>Can always be measured more precisely — limited only by your measuring instrument.' },
+};
+
+function showNodeInfo(key) {
+  const d = nodeData[key];
+  const box = document.getElementById('node-info-box');
+  document.getElementById('node-info-title').textContent = d.title;
+  document.getElementById('node-info-content').innerHTML = d.content;
+  box.style.display = 'block';
+  // highlight clicked node
+  document.querySelectorAll('.node-rect').forEach(r => r.style.fill = '');
+  const nd = document.getElementById('nd-' + key);
+  if (nd) nd.style.fill = 'rgba(99,102,241,0.45)';
+}
+
+// ══════════════════════════════════════════════
+//  CLASSIFIER
+// ══════════════════════════════════════════════
+const classifyItems = [
+  { label: '🩸 Blood type (A/B/O/AB)', answer: 'nominal' },
+  { label: '🌡️ Temperature (°F)', answer: 'interval' },
+  { label: '👟 Shoe size (1,2,3...)', answer: 'ordinal' },
+  { label: '📏 Distance (km)', answer: 'ratio' },
+  { label: '🆔 Student ID number', answer: 'nominal' },
+  { label: '😐 Likert scale (1-5 agree)', answer: 'ordinal' },
+  { label: '💰 Annual salary (₹)', answer: 'ratio' },
+  { label: '🎬 Movie genre', answer: 'nominal' },
+];
+
+let selectedClassifyIdx = null;
+let classifyResults = {};
+
+function initClassifier() {
+  const container = document.getElementById('classifier-items');
+  container.innerHTML = '';
+  classifyItems.forEach((item, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'classify-item';
+    btn.id = 'ci-' + i;
+    btn.textContent = item.label;
+    btn.onclick = () => selectClassifyItem(i);
+    container.appendChild(btn);
+  });
+}
+
+function selectClassifyItem(i) {
+  if (classifyResults[i] !== undefined) return; // already answered
+  selectedClassifyIdx = i;
+  document.querySelectorAll('.classify-item').forEach(b => b.style.outline = '');
+  const el = document.getElementById('ci-' + i);
+  el.style.outline = '2px solid var(--accent)';
+  document.getElementById('selected-item-display').textContent = `Selected: ${classifyItems[i].label}`;
+  document.getElementById('type-buttons').style.display = 'block';
+  document.getElementById('classify-feedback').textContent = '';
+}
+
+function classify(type) {
+  if (selectedClassifyIdx === null) return;
+  const i = selectedClassifyIdx;
+  const item = classifyItems[i];
+  const correct = item.answer === type;
+  classifyResults[i] = correct;
+
+  const el = document.getElementById('ci-' + i);
+  if (correct) {
+    el.classList.add('correct-classify');
+    document.getElementById('classify-feedback').innerHTML = `<span style="color:#10b981;">✅ Correct! ${item.label.split(' ').slice(1).join(' ')} is ${type}.</span>`;
+  } else {
+    el.classList.add('wrong-classify');
+    document.getElementById('classify-feedback').innerHTML = `<span style="color:#ef4444;">❌ Not quite. It's actually <strong>${item.answer}</strong>.</span>`;
+  }
+  el.style.outline = '';
+  document.getElementById('type-buttons').style.display = 'none';
+  document.getElementById('selected-item-display').textContent = '';
+  selectedClassifyIdx = null;
+
+  const answered = Object.keys(classifyResults).length;
+  const correct_count = Object.values(classifyResults).filter(Boolean).length;
+  document.getElementById('classify-score').textContent = `Score: ${correct_count}/${answered} answered | ${classifyItems.length - answered} remaining`;
+}
+
+function resetClassifier() {
+  classifyResults = {};
+  selectedClassifyIdx = null;
+  document.querySelectorAll('.classify-item').forEach(btn => {
+    btn.classList.remove('correct-classify', 'wrong-classify');
+    btn.style.outline = '';
+  });
+  document.getElementById('classify-feedback').textContent = '';
+  document.getElementById('classify-score').textContent = '';
+  document.getElementById('selected-item-display').textContent = '';
+  document.getElementById('type-buttons').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════
+//  PENTAGON VISUALIZATION
+// ══════════════════════════════════════════════
+const vData = [
+  { label: 'Volume', color: '#6366f1', desc: '<strong>📦 Volume — The Scale Challenge</strong><br><br>The sheer <em>quantity</em> of data generated daily is staggering.<br><br>🌐 Google: ~20 petabytes/day<br>📱 Facebook: ~4 petabytes/day<br>💳 Visa: ~150M transactions/day<br><br><em>Solution: Distributed storage — Hadoop HDFS, Amazon S3, Google BigTable</em>' },
+  { label: 'Variety', color: '#10b981', desc: '<strong>🎭 Variety — Many Forms of Data</strong><br><br>Data comes as structured tables, JSON APIs, images, videos, audio, social media posts, sensor readings...<br><br>📋 Structured: SQL tables, CSVs<br>📄 Semi-structured: JSON, XML<br>🎬 Unstructured: Text, images, video (80% of all data!)<br><br><em>Solution: Data lakes, NoSQL databases (MongoDB, Cassandra)</em>' },
+  { label: 'Velocity', color: '#f59e0b', desc: '<strong>⚡ Velocity — Speed of Data Flow</strong><br><br>How fast is data generated AND how fast must it be processed?<br><br>📈 Stock markets: Millions of trades/second<br>💳 Credit card fraud: Must decide in &lt;100ms<br>🏭 Factory sensors: Readings every millisecond<br><br><em>Solution: Stream processing — Apache Kafka, Apache Spark Streaming</em>' },
+  { label: 'Veracity', color: '#ef4444', desc: '<strong>🤔 Veracity — Can You Trust It?</strong><br><br>Data quality and accuracy is a massive challenge.<br><br>🤖 Fake accounts & bots on social media<br>📝 Medical records with missing/wrong values<br>📰 Contradictory data from different sources<br><br><em>"Garbage in, garbage out" — bad data = wrong decisions. Data cleaning = 60-80% of a data scientist\'s time!</em>' },
+  { label: 'Value', color: '#a855f7', desc: '<strong>💎 Value — The Ultimate Goal</strong><br><br>Raw data has zero value until insights are extracted.<br><br>🎬 Netflix: Saves $1B/year via recommendations<br>🏦 Banks: Real-time fraud detection<br>🏥 Healthcare: Predicting patient deterioration<br>🛒 Amazon: "People who bought X also bought..."<br><br><em>Value is WHY we care about all the other 4 Vs!</em>' },
+];
+
+let pentagonInited = false;
+
+function initPentagon() {
+  if (pentagonInited) return;
+  pentagonInited = true;
+  const canvas = document.getElementById('pentagon-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 140, cy = 140, R = 110;
+
+  // 5 points starting from top (-π/2)
+  const pts = [];
+  for (let i = 0; i < 5; i++) {
+    const angle = -Math.PI / 2 + (2 * Math.PI * i / 5);
+    pts.push({ x: cx + R * Math.cos(angle), y: cy + R * Math.sin(angle) });
+  }
+
+  function drawPentagon(hovIdx) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // background circle
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 20, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    ctx.fill();
+
+    for (let i = 0; i < 5; i++) {
+      const p1 = pts[i], p2 = pts[(i + 1) % 5];
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.closePath();
+      ctx.fillStyle = vData[i].color + (hovIdx === i ? 'cc' : '44');
+      ctx.fill();
+      ctx.strokeStyle = vData[i].color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // labels
+    for (let i = 0; i < 5; i++) {
+      const angle = -Math.PI / 2 + (2 * Math.PI * i / 5);
+      const lx = cx + (R + 30) * Math.cos(angle);
+      const ly = cy + (R + 30) * Math.sin(angle);
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = vData[i].color;
+      ctx.fillText(vData[i].label, lx, ly);
+    }
+  }
+
+  drawPentagon(-1);
+
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+    let hov = -1;
+    for (let i = 0; i < 5; i++) {
+      const p1 = pts[i], p2 = pts[(i + 1) % 5];
+      if (pointInTriangle(mx, my, cx, cy, p1.x, p1.y, p2.x, p2.y)) { hov = i; break; }
+    }
+    drawPentagon(hov);
+    canvas.style.cursor = hov >= 0 ? 'pointer' : 'default';
+  });
+
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+    for (let i = 0; i < 5; i++) {
+      const p1 = pts[i], p2 = pts[(i + 1) % 5];
+      if (pointInTriangle(mx, my, cx, cy, p1.x, p1.y, p2.x, p2.y)) {
+        document.getElementById('v-detail-box').innerHTML = `<div style="font-size:13px; line-height:1.7; color:var(--foreground);">${vData[i].desc}</div>`;
+        break;
+      }
+    }
+  });
+}
+
+function sign(p1x, p1y, p2x, p2y, p3x, p3y) {
+  return (p1x - p3x) * (p2y - p3y) - (p2x - p3x) * (p1y - p3y);
+}
+function pointInTriangle(px, py, ax, ay, bx, by, cx2, cy2) {
+  const d1 = sign(px, py, ax, ay, bx, by);
+  const d2 = sign(px, py, bx, by, cx2, cy2);
+  const d3 = sign(px, py, cx2, cy2, ax, ay);
+  const has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+  const has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+  return !(has_neg && has_pos);
+}
+
+// ══════════════════════════════════════════════
+//  INTERACTIVE NUMBER LINE
+// ══════════════════════════════════════════════
+let nlData = [];
+let nlInited = false;
+
+function initNumLine() {
+  if (nlInited) return;
+  nlInited = true;
+  const canvas = document.getElementById('numline-canvas');
+  if (!canvas) return;
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const val = xToVal(x, canvas.width);
+    if (val < 0 || val > 100) return;
+    nlData.push(Math.round(val));
+    drawNumLine();
+  });
+  drawNumLine();
+}
+
+function xToVal(x, W) {
+  const pad = 40;
+  return ((x - pad) / (W - 2 * pad)) * 100;
+}
+function valToX(v, W) {
+  const pad = 40;
+  return pad + (v / 100) * (W - 2 * pad);
+}
+
+function drawNumLine() {
+  const canvas = document.getElementById('numline-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = 40;
+  // Axis
+  ctx.strokeStyle = '#475569';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(pad, H - 40);
+  ctx.lineTo(W - pad, H - 40);
+  ctx.stroke();
+
+  // Ticks
+  ctx.fillStyle = '#64748b';
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'center';
+  for (let v = 0; v <= 100; v += 10) {
+    const x = valToX(v, W);
+    ctx.beginPath();
+    ctx.moveTo(x, H - 40);
+    ctx.lineTo(x, H - 33);
+    ctx.strokeStyle = '#475569';
+    ctx.stroke();
+    ctx.fillText(v, x, H - 22);
+  }
+
+  if (nlData.length === 0) {
+    ctx.fillStyle = '#475569';
+    ctx.font = '13px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Click here to add data points (0–100)', W / 2, H / 2 - 15);
+    return;
+  }
+
+  // Count frequencies for stacking
+  const freq = {};
+  nlData.forEach(v => freq[v] = (freq[v] || 0) + 1);
+
+  // Draw points stacked
+  const drawn = {};
+  nlData.forEach(v => {
+    drawn[v] = (drawn[v] || 0);
+    const x = valToX(v, W);
+    const y = H - 48 - drawn[v] * 14;
+    ctx.beginPath();
+    ctx.arc(x, y, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#6366f1';
+    ctx.fill();
+    drawn[v]++;
+  });
+
+  // Compute stats
+  const sorted = [...nlData].sort((a, b) => a - b);
+  const n = sorted.length;
+  const mean = sorted.reduce((a, b) => a + b, 0) / n;
+  const median = n % 2 === 0 ? (sorted[n/2-1] + sorted[n/2]) / 2 : sorted[Math.floor(n/2)];
+  const modeMap = {};
+  sorted.forEach(v => modeMap[v] = (modeMap[v] || 0) + 1);
+  const maxFreq = Math.max(...Object.values(modeMap));
+  const modes = Object.entries(modeMap).filter(([,f]) => f === maxFreq).map(([v]) => +v);
+
+  // Draw stat lines
+  const drawLine = (val, color, label) => {
+    const x = valToX(val, W);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([5, 3]);
+    ctx.beginPath();
+    ctx.moveTo(x, 10);
+    ctx.lineTo(x, H - 40);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = color;
+    ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(label + '=' + val.toFixed(1), x, 8);
+  };
+
+  drawLine(mean, '#60a5fa', 'Mean');
+  drawLine(median, '#34d399', 'Median');
+  modes.forEach(m => drawLine(m, '#fb923c', 'Mode'));
+
+  document.getElementById('nl-mean').textContent = mean.toFixed(2);
+  document.getElementById('nl-median').textContent = median.toFixed(2);
+  document.getElementById('nl-mode').textContent = modes.join(', ');
+  document.getElementById('nl-n').textContent = n;
+}
+
+function clearNumLine() {
+  nlData = [];
+  drawNumLine();
+  document.getElementById('nl-mean').textContent = '—';
+  document.getElementById('nl-median').textContent = '—';
+  document.getElementById('nl-mode').textContent = '—';
+  document.getElementById('nl-n').textContent = '0';
+}
+
+// ══════════════════════════════════════════════
+//  BOXPLOT BUILDER
+// ══════════════════════════════════════════════
+function drawBoxplot() {
+  const canvas = document.getElementById('boxplot-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const raw = document.getElementById('boxplot-input').value;
+  const nums = raw.split(/[,\s]+/).map(Number).filter(n => !isNaN(n) && n !== '');
+  if (nums.length < 3) {
+    ctx.fillStyle = '#64748b';
+    ctx.font = '14px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Enter at least 3 numbers above', W / 2, H / 2);
+    return;
+  }
+
+  const sorted = [...nums].sort((a, b) => a - b);
+  const n = sorted.length;
+
+  function quantile(arr, q) {
+    const pos = (arr.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (arr[base + 1] !== undefined) return arr[base] + rest * (arr[base + 1] - arr[base]);
+    return arr[base];
+  }
+
+  const minV = sorted[0];
+  const maxV = sorted[n - 1];
+  const q1 = quantile(sorted, 0.25);
+  const med = quantile(sorted, 0.5);
+  const q3 = quantile(sorted, 0.75);
+  const iqr = q3 - q1;
+  const whiskerLo = Math.max(minV, q1 - 1.5 * iqr);
+  const whiskerHi = Math.min(maxV, q3 + 1.5 * iqr);
+  const outliers = sorted.filter(v => v < whiskerLo || v > whiskerHi);
+
+  // Scale
+  const pad = 60;
+  const scale = (v) => pad + ((v - minV) / ((maxV - minV) || 1)) * (W - 2 * pad);
+
+  const my = H / 2;
+  const bh = 40; // box half-height
+
+  // Grid
+  ctx.strokeStyle = '#1e293b';
+  ctx.lineWidth = 1;
+
+  // Whisker lines
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.moveTo(scale(whiskerLo), my);
+  ctx.lineTo(scale(q1), my);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(scale(q3), my);
+  ctx.lineTo(scale(whiskerHi), my);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Whisker caps
+  [whiskerLo, whiskerHi].forEach(v => {
+    ctx.beginPath();
+    ctx.moveTo(scale(v), my - bh * 0.5);
+    ctx.lineTo(scale(v), my + bh * 0.5);
+    ctx.stroke();
+  });
+
+  // IQR box
+  const boxX = scale(q1), boxW = scale(q3) - scale(q1);
+  ctx.fillStyle = 'rgba(99,102,241,0.25)';
+  ctx.fillRect(boxX, my - bh, boxW, bh * 2);
+  ctx.strokeStyle = '#6366f1';
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(boxX, my - bh, boxW, bh * 2);
+
+  // Median line
+  ctx.strokeStyle = '#10b981';
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.moveTo(scale(med), my - bh);
+  ctx.lineTo(scale(med), my + bh);
+  ctx.stroke();
+
+  // Outliers
+  ctx.fillStyle = '#ef4444';
+  outliers.forEach(v => {
+    ctx.beginPath();
+    ctx.arc(scale(v), my, 7, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Labels
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#94a3b8';
+  const labelItems = [
+    { v: minV, label: 'Min\n' + minV, color: '#94a3b8' },
+    { v: q1, label: 'Q1\n' + q1.toFixed(1), color: '#60a5fa' },
+    { v: med, label: 'Median\n' + med.toFixed(1), color: '#10b981' },
+    { v: q3, label: 'Q3\n' + q3.toFixed(1), color: '#fbbf24' },
+    { v: maxV, label: 'Max\n' + maxV, color: '#94a3b8' },
+  ];
+  labelItems.forEach(({ v, label, color }) => {
+    const lines = label.split('\n');
+    ctx.fillStyle = color;
+    ctx.font = 'bold 10px system-ui';
+    ctx.fillText(lines[0], scale(v), my + bh + 16);
+    ctx.font = '10px system-ui';
+    ctx.fillText(lines[1], scale(v), my + bh + 28);
+  });
+
+  // Update stats
+  document.getElementById('bp-min').textContent = minV;
+  document.getElementById('bp-q1').textContent = q1.toFixed(2);
+  document.getElementById('bp-med').textContent = med.toFixed(2);
+  document.getElementById('bp-q3').textContent = q3.toFixed(2);
+  document.getElementById('bp-max').textContent = maxV;
+  document.getElementById('bp-iqr').textContent = iqr.toFixed(2);
+}
+
+// ══════════════════════════════════════════════
+//  NORMAL DISTRIBUTION CURVE
+// ══════════════════════════════════════════════
+function drawNormalCurve() {
+  const canvas = document.getElementById('normal-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const mu = 0, sigma = 1;
+  const xMin = -4, xMax = 4;
+  const pad = { l: 40, r: 40, t: 20, b: 40 };
+  const W2 = W - pad.l - pad.r, H2 = H - pad.t - pad.b;
+
+  function toX(v) { return pad.l + ((v - xMin) / (xMax - xMin)) * W2; }
+  function gauss(x) { return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * ((x - mu) / sigma) ** 2); }
+  const maxG = gauss(0);
+  function toY(g) { return pad.t + H2 - (g / maxG) * H2 * 0.9; }
+
+  // Shade regions
+  const regions = [
+    { lo: -3, hi: 3, color: 'rgba(59,130,246,0.12)', label: '99.7%' },
+    { lo: -2, hi: 2, color: 'rgba(59,130,246,0.18)', label: '95%' },
+    { lo: -1, hi: 1, color: 'rgba(59,130,246,0.28)', label: '68%' },
+  ];
+  regions.forEach(r => {
+    ctx.beginPath();
+    ctx.moveTo(toX(r.lo), toY(0));
+    for (let x = r.lo; x <= r.hi; x += 0.02) {
+      ctx.lineTo(toX(x), toY(gauss(x)));
+    }
+    ctx.lineTo(toX(r.hi), toY(0));
+    ctx.closePath();
+    ctx.fillStyle = r.color;
+    ctx.fill();
+  });
+
+  // Main curve
+  ctx.beginPath();
+  ctx.moveTo(toX(xMin), toY(gauss(xMin)));
+  for (let x = xMin; x <= xMax; x += 0.05) {
+    ctx.lineTo(toX(x), toY(gauss(x)));
+  }
+  ctx.strokeStyle = '#6366f1';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Baseline
+  ctx.strokeStyle = '#475569';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.l, toY(0));
+  ctx.lineTo(W - pad.r, toY(0));
+  ctx.stroke();
+
+  // SD markers
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'center';
+  [-3,-2,-1,0,1,2,3].forEach(sd => {
+    const x = toX(sd);
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, toY(0)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#64748b';
+    ctx.fillText(sd === 0 ? 'μ' : (sd > 0 ? '+' : '') + sd + 'σ', x, H - 8);
+  });
+
+  // Labels
+  ctx.font = 'bold 11px system-ui';
+  ctx.fillStyle = '#93c5fd';
+  ctx.fillText('68%', toX(0), toY(gauss(0.5)) + 5);
+  ctx.fillStyle = '#60a5fa';
+  ctx.fillText('95%', toX(1.5), toY(gauss(1.5)) + 5);
+  ctx.fillStyle = '#3b82f6';
+  ctx.fillText('99.7%', toX(2.5), toY(gauss(2.5)) + 5);
+}
+
+// ══════════════════════════════════════════════
+//  SCATTER PLOT CORRELATION EXPLORER
+// ══════════════════════════════════════════════
+let scatterPoints = [];
+let scatterInited = false;
+
+function initScatter() {
+  if (scatterInited) return;
+  scatterInited = true;
+  const canvas = document.getElementById('scatter-canvas');
+  if (!canvas) return;
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    scatterPoints.push({ x, y });
+    drawScatter();
+  });
+  drawScatter();
+}
+
+function clearScatter() {
+  scatterPoints = [];
+  drawScatter();
+  document.getElementById('r-display').textContent = 'r = —';
+  document.getElementById('r-display').style.color = 'var(--accent)';
+  document.getElementById('r-interpretation').textContent = 'Add points to calculate correlation';
+  document.getElementById('scatter-n').textContent = '0';
+}
+
+function pearsonR(pts) {
+  const n = pts.length;
+  if (n < 2) return null;
+  const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+  const mx = xs.reduce((a,b)=>a+b,0)/n, my = ys.reduce((a,b)=>a+b,0)/n;
+  let num = 0, dx2 = 0, dy2 = 0;
+  pts.forEach(p => {
+    num += (p.x - mx) * (p.y - my);
+    dx2 += (p.x - mx) ** 2;
+    dy2 += (p.y - my) ** 2;
+  });
+  const denom = Math.sqrt(dx2 * dy2);
+  return denom === 0 ? 0 : num / denom;
+}
+
+function drawScatter() {
+  const canvas = document.getElementById('scatter-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Background grid
+  ctx.strokeStyle = 'rgba(71,85,105,0.3)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= W; x += 70) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y <= H; y += 60) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Labels
+  ctx.fillStyle = '#334155';
+  ctx.font = '12px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('← Click anywhere to add points →', W/2, H/2);
+
+  if (scatterPoints.length < 2) {
+    scatterPoints.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 6, 0, Math.PI*2);
+      ctx.fillStyle = '#6366f1';
+      ctx.fill();
+    });
+    document.getElementById('scatter-n').textContent = scatterPoints.length;
+    return;
+  }
+
+  const r = pearsonR(scatterPoints);
+  // Note: canvas y is inverted, so flip y for correlation calculation
+  const ptsFlipped = scatterPoints.map(p => ({ x: p.x, y: H - p.y }));
+  const rCorrect = pearsonR(ptsFlipped);
+
+  // Color based on r
+  let dotColor = '#94a3b8';
+  let interpText = 'Weak / No correlation';
+  if (rCorrect > 0.7)       { dotColor = '#10b981'; interpText = '💚 Strong positive correlation'; }
+  else if (rCorrect > 0.3)  { dotColor = '#6ee7b7'; interpText = '🟢 Moderate positive correlation'; }
+  else if (rCorrect < -0.7) { dotColor = '#ef4444'; interpText = '🔴 Strong negative correlation'; }
+  else if (rCorrect < -0.3) { dotColor = '#fca5a5'; interpText = '🟠 Moderate negative correlation'; }
+
+  // Trend line (regression line)
+  const xs = ptsFlipped.map(p=>p.x), ys = ptsFlipped.map(p=>p.y);
+  const n = ptsFlipped.length;
+  const mx = xs.reduce((a,b)=>a+b,0)/n, my = ys.reduce((a,b)=>a+b,0)/n;
+  let num = 0, den = 0;
+  ptsFlipped.forEach(p => { num += (p.x - mx)*(p.y - my); den += (p.x - mx)**2; });
+  const slope = den !== 0 ? num/den : 0;
+  const intercept = my - slope * mx;
+
+  const x1 = 0, y1 = slope * x1 + intercept;
+  const x2 = W, y2 = slope * x2 + intercept;
+
+  ctx.strokeStyle = dotColor + '88';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(x1, H - y1);
+  ctx.lineTo(x2, H - y2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Points
+  scatterPoints.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+    ctx.fillStyle = dotColor;
+    ctx.globalAlpha = 0.85;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+
+  document.getElementById('r-display').textContent = `r = ${rCorrect.toFixed(3)}`;
+  document.getElementById('r-display').style.color = dotColor;
+  document.getElementById('r-interpretation').textContent = interpText;
+  document.getElementById('scatter-n').textContent = scatterPoints.length;
+}
+
+// ══════════════════════════════════════════════
+//  END QUIZ
+// ══════════════════════════════════════════════
+let quizAnsweredCount = 0;
+let answeredQuestions = {};
+
+function checkQ(qNum, chosen, correctKey) {
+  if (answeredQuestions[qNum]) return;
+  answeredQuestions[qNum] = true;
+
+  const correct = { 1:'c', 2:'b', 3:'c', 4:'d', 5:'d' };
+  const explanations = {
+    1: 'Temperature in Celsius has equal intervals but no true zero (0°C ≠ no temperature) → Interval.',
+    2: 'Median is unaffected by extreme outliers. Bill Gates in a bar makes the mean skyrocket but barely moves the median.',
+    3: 'SD = 0 means every value equals the mean → all values are identical. No spread whatsoever.',
+    4: 'Velocity = speed of data generation and processing. Real-time fraud detection, stock trading = velocity challenge.',
+    5: 'r = −0.9 is close to −1 → strong negative correlation. As X goes up, Y strongly goes down.',
+  };
+
+  const isCorrect = chosen === correct[qNum];
+  if (isCorrect) quizScore++;
+  quizAnsweredCount++;
+
+  const container = document.getElementById('qq' + qNum);
+  const buttons = container.querySelectorAll('.quiz-option');
+  buttons.forEach((btn, i) => {
+    const opt = String.fromCharCode(97 + i);
+    if (opt === correct[qNum]) btn.classList.add('correct');
+    else if (opt === chosen && !isCorrect) btn.classList.add('wrong');
+    btn.disabled = true;
+  });
+
+  const fb = document.getElementById('qf' + qNum);
+  if (isCorrect) {
+    fb.innerHTML = `<span style="color:#10b981;">✅ Correct! ${explanations[qNum]}</span>`;
+  } else {
+    fb.innerHTML = `<span style="color:#ef4444;">❌ The correct answer was (${correct[qNum]}). ${explanations[qNum]}</span>`;
+  }
+
+  if (quizAnsweredCount === 5) {
+    setTimeout(showScore, 600);
+  }
+}
+
+function showScore() {
+  const sd = document.getElementById('score-display');
+  sd.classList.add('show', 'pop-in');
+  const emojis = ['😔','😐','🙂','😊','🎉','🏆'];
+  const msgs = [
+    "Don't worry! Review the material and try again. You've got this! 💪",
+    "Getting there! Re-read sections 1-3 and try again.",
+    "Good effort! A bit more review and you'll nail it.",
+    "Great work! You have a solid understanding of the material!",
+    "Excellent! Almost perfect — you know this material really well! 🚀",
+    "Perfect Score! Outstanding mastery of data concepts! 🌟"
+  ];
+  document.getElementById('score-emoji').textContent = emojis[quizScore];
+  document.getElementById('score-text').textContent = `You scored ${quizScore} / 5`;
+  document.getElementById('score-msg').textContent = msgs[quizScore];
+}
+
+function retryQuiz() {
+  quizScore = 0;
+  quizAnsweredCount = 0;
+  answeredQuestions = {};
+  document.getElementById('score-display').classList.remove('show');
+  [1,2,3,4,5].forEach(q => {
+    const container = document.getElementById('qq' + q);
+    container.querySelectorAll('.quiz-option').forEach(btn => {
+      btn.classList.remove('correct','wrong');
+      btn.disabled = false;
+    });
+    document.getElementById('qf' + q).innerHTML = '';
+  });
+}
+
+// ══════════════════════════════════════════════
+//  APPENDIX
+// ══════════════════════════════════════════════
+function toggleAppendix() {
+  const body = document.getElementById('appendix-body');
+  const btn = document.getElementById('appendix-toggle');
+  body.classList.toggle('open');
+  btn.textContent = body.classList.contains('open')
+    ? '📐 Appendix: First Principles & Formulas ▲'
+    : '📐 Appendix: First Principles & Formulas ▼';
+}
+
+// ══════════════════════════════════════════════
+//  KEYBOARD NAVIGATION
+// ══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
+});
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+window.addEventListener('load', () => {
+  updateProgress();
+  updateSidebar();
+  initClassifier();
+  startTimer();
+  drawBoxplot();
+});
+</script>
+<div id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+<script>
+function toggleMobileSidebar() {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('sidebar-backdrop');
+  if (sb) sb.classList.toggle('mobile-open');
+  if (bd) bd.classList.toggle('active');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const links = document.querySelectorAll('#sidebar a, #sidebar .sidebar-link, #sidebar button, [onclick*="jumpTo"], [onclick*="showCard"], [onclick*="goToCard"], [onclick*="gotoCard"]');
+  links.forEach(l => {
+    l.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        const sb = document.getElementById('sidebar');
+        const bd = document.getElementById('sidebar-backdrop');
+        if (sb) sb.classList.remove('mobile-open');
+        if (bd) bd.classList.remove('active');
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

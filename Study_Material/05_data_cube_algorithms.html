@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 5: Data Cube Computation Algorithms</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #0f172a;
+    --card: #1e293b;
+    --sidebar: #0f172a;
+    --foreground: #f1f5f9;
+    --muted-foreground: #94a3b8;
+    --border: #334155;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #10b981;
+    --accent: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: system-ui, -apple-system, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    z-index: 50;
+  }
+  #topbar h1 { font-size: 14px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+  #progress-wrap { flex: 1; }
+  #progress-label { font-size: 11px; color: var(--muted-foreground); margin-bottom: 3px; }
+  #progress-bar-outer { background: var(--border); border-radius: 9999px; height: 6px; }
+  #progress-bar-inner { background: var(--primary); border-radius: 9999px; height: 6px; transition: width .4s; }
+  #timer-box {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* ── LAYOUT ── */
+  #layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: 240px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding: 12px 0;
+  }
+  #sidebar h2 { font-size: 10px; font-weight: 700; color: var(--muted-foreground); padding: 0 14px 6px; text-transform: uppercase; letter-spacing: .08em; }
+  .sb-section { margin-bottom: 4px; }
+  .sb-section-title {
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    padding: 6px 14px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  }
+  .sb-card-link {
+    display: block; font-size: 11px; color: var(--muted-foreground);
+    padding: 4px 14px 4px 26px; cursor: pointer; border-left: 2px solid transparent;
+    transition: all .15s; line-height: 1.3;
+  }
+  .sb-card-link:hover { color: var(--foreground); background: rgba(99,102,241,.08); }
+  .sb-card-link.active { color: var(--primary); border-left-color: var(--primary); background: rgba(99,102,241,.1); }
+  .sb-home { display:block; font-size:12px; color:var(--secondary); padding:6px 14px 10px; cursor:pointer; text-decoration:underline; }
+
+  /* ── MAIN ── */
+  #main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── CARDS ── */
+  .study-card {
+    display: none;
+    width: 100%;
+    max-width: 780px;
+    animation: fadeIn .3s ease;
+  }
+  .study-card.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .card-shell {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .card-header {
+    padding: 14px 20px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    background: rgba(99,102,241,.15);
+    color: var(--primary);
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+  .card-section-label { font-size: 11px; color: var(--muted-foreground); margin-left: auto; }
+  .card-body { padding: 20px; }
+  .card-emoji { font-size: 36px; margin-bottom: 10px; display: block; }
+  .card-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+  .card-text { font-size: 14px; line-height: 1.7; color: var(--foreground); }
+  .card-text p { margin-bottom: 8px; }
+
+  .why-box {
+    background: rgba(99,102,241,.08);
+    border-left: 3px solid var(--primary);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--foreground);
+  }
+  .why-box strong { color: var(--primary); }
+
+  /* color variants */
+  .card-blue .card-header { border-bottom-color: #3b82f6; }
+  .card-blue .card-tag { background: rgba(59,130,246,.15); color: #60a5fa; }
+  .card-green .card-header { border-bottom-color: var(--secondary); }
+  .card-green .card-tag { background: rgba(16,185,129,.15); color: #34d399; }
+  .card-yellow .card-header { border-bottom-color: var(--accent); }
+  .card-yellow .card-tag { background: rgba(245,158,11,.15); color: #fbbf24; }
+  .card-yellow .card-shell { border-color: rgba(245,158,11,.3); }
+  .card-red .card-header { border-bottom-color: #ef4444; }
+  .card-red .card-tag { background: rgba(239,68,68,.15); color: #f87171; }
+  .card-purple .card-header { border-bottom-color: #a855f7; }
+  .card-purple .card-tag { background: rgba(168,85,247,.15); color: #c084fc; }
+
+  /* ── FLIP CARD ── */
+  .flip-wrap { perspective: 900px; height: 160px; margin-top: 16px; cursor: pointer; }
+  .flip-inner { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .5s; }
+  .flip-wrap.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-face {
+    position:absolute; width:100%; height:100%; backface-visibility:hidden;
+    border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding: 16px; text-align:center;
+  }
+  .flip-front { background: rgba(99,102,241,.12); border: 2px solid rgba(99,102,241,.3); }
+  .flip-back { background: rgba(16,185,129,.12); border: 2px solid rgba(16,185,129,.3); transform: rotateY(180deg); }
+  .flip-hint { font-size: 10px; color: var(--muted-foreground); margin-top: 6px; }
+
+  /* ── NAV BUTTONS ── */
+  .nav-row { display: flex; gap: 12px; justify-content: space-between; margin-top: 8px; }
+  .btn {
+    padding: 10px 22px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;
+    border: none; transition: all .15s;
+  }
+  .btn-primary { background: var(--primary); color: var(--primary-foreground); }
+  .btn-primary:hover { opacity: .85; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--foreground); }
+  .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+  /* ── QUIZ ── */
+  .quiz-option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 8px;
+    border: 1px solid var(--border); margin-bottom: 8px;
+    cursor: pointer; font-size: 13px; transition: all .15s;
+  }
+  .quiz-option:hover { border-color: var(--primary); background: rgba(99,102,241,.06); }
+  .quiz-option.correct { border-color: var(--secondary); background: rgba(16,185,129,.1); color: #34d399; }
+  .quiz-option.wrong { border-color: #ef4444; background: rgba(239,68,68,.1); color: #f87171; }
+  .quiz-option.disabled { pointer-events: none; }
+
+  /* ── BREAK OVERLAY ── */
+  #break-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,.75); align-items: center; justify-content: center; flex-direction: column;
+  }
+  #break-overlay.show { display: flex; }
+  #break-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    padding: 40px; text-align: center; max-width: 360px;
+  }
+
+  /* ── CANVAS / SVG ── */
+  canvas, svg { display: block; }
+
+  /* ── APPENDIX ── */
+  details summary { cursor: pointer; list-style: none; padding: 10px 14px; font-weight: 700; }
+  details summary::-webkit-details-marker { display: none; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* BUC lattice */
+  .lattice-node {
+    cursor: pointer;
+    transition: all .3s;
+  }
+  .node-circle { transition: fill .4s, stroke .4s; }
+
+  /* highlight box */
+  .highlight-box {
+    background: rgba(245,158,11,.08);
+    border: 1px solid rgba(245,158,11,.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-size: 13px;
+  }
+  .tag-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    margin: 2px;
+  }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (PHONES & TABLETS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  #topbar {
+    padding: 0 10px !important;
+    gap: 6px !important;
+    height: 52px !important;
+    overflow-x: hidden !important;
+  }
+  #topbar .title, #topbar #module-title, #topbar #topbar-title, #topbar .module-title {
+    font-size: 11px !important;
+    max-width: 115px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  #topbar a, #topbar #home-btn {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+    white-space: nowrap !important;
+  }
+  #topbar #pomodoro {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+  }
+  #topbar #timer-display {
+    font-size: 12px !important;
+  }
+  #topbar #section-label, #topbar .sec-pill, #topbar .badge, #topbar #timer-btn-label {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: var(--card, #1e293b) !important;
+    border: 1px solid var(--border, #334155) !important;
+    color: var(--foreground, #f8fafc) !important;
+    padding: 5px 8px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+  }
+  #sidebar {
+    position: fixed !important;
+    top: 52px !important;
+    left: -320px !important;
+    width: 280px !important;
+    max-width: 82vw !important;
+    bottom: 0 !important;
+    height: calc(100vh - 52px) !important;
+    z-index: 9999 !important;
+    background: #0a0f1e !important;
+    border-right: 1px solid var(--border, #334155) !important;
+    box-shadow: 4px 0 25px rgba(0,0,0,0.7) !important;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #sidebar.mobile-open {
+    left: 0 !important;
+  }
+  #sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 52px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(3px);
+    z-index: 9998;
+  }
+  #sidebar-backdrop.active {
+    display: block !important;
+  }
+  #layout {
+    display: block !important;
+    margin-top: 52px !important;
+    height: calc(100vh - 52px) !important;
+    position: relative !important;
+    overflow-x: hidden !important;
+  }
+  #main, #card-container, .main-content, #content-area {
+    margin-left: 0 !important;
+    padding: 16px 12px 100px 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  .card, .card-screen, .card-box, .slide {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 12px !important;
+    margin-bottom: 16px !important;
+  }
+  h1 { font-size: 1.35rem !important; }
+  h2, .card-title { font-size: 1.15rem !important; }
+  h3 { font-size: 1.0rem !important; }
+  p, li, .card-body { font-size: 13.5px !important; line-height: 1.6 !important; }
+  #nav-bar, .bottom-nav, #navigation-bar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+    background: rgba(10, 15, 30, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 1px solid var(--border, #334155) !important;
+    z-index: 9000 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  .nav-btn, #prevBtn, #nextBtn {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    min-height: 42px !important;
+    flex: 1 !important;
+    max-width: 130px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  #cardIndicator, #card-counter, .card-counter {
+    font-size: 12px !important;
+    min-width: 65px !important;
+    text-align: center !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+}
+@media (min-width: 769px) {
+  .mobile-menu-btn, #sidebar-backdrop {
+    display: none !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════════════════════╗ -->
+<!-- ║                     TOP BAR                         ║ -->
+<!-- ╚══════════════════════════════════════════════════════╝ -->
+<div id="topbar">
+  <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation">☰ Menu</button>
+  <div id="topbar-title">
+    <div id="topbar" style="background:var(--card);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:50;">
+    </div>
+  </div>
+  <h1>🧊 Module 5: Data Cube Algorithms</h1>
+  <div id="progress-wrap">
+    <div id="progress-label">Card 1 of 23 • Section 1 of 6</div>
+    <div id="progress-bar-outer"><div id="progress-bar-inner" style="width:4.3%"></div></div>
+  </div>
+  <div id="timer-box" onclick="toggleTimer()" title="Click to pause/resume">⏱ 15:00</div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════╗ -->
+<!-- ║                     LAYOUT                          ║ -->
+<!-- ╚══════════════════════════════════════════════════════╝ -->
+<div id="layout">
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <a class="sb-home" href="00_home.html">← Back to Home</a>
+  <h2>Module 5</h2>
+
+  <div class="sb-section">
+    <div class="sb-section-title">🧊 §1 The Cube Problem</div>
+    <a class="sb-card-link active" onclick="goTo(0)">1.1 Analogy: Pre-calculating everything</a>
+    <a class="sb-card-link" onclick="goTo(1)">1.2 Types of Cubes</a>
+    <a class="sb-card-link" onclick="goTo(2)">1.3 Viz: Cube Types</a>
+    <a class="sb-card-link" onclick="goTo(3)">1.4 Flip: Iceberg Cube</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-title">⬆️ §2 BUC Algorithm</div>
+    <a class="sb-card-link" onclick="goTo(4)">2.1 Analogy: Top of the lattice</a>
+    <a class="sb-card-link" onclick="goTo(5)">2.2 Apriori Pruning</a>
+    <a class="sb-card-link" onclick="goTo(6)">2.3 Viz: BUC Animation</a>
+    <a class="sb-card-link" onclick="goTo(7)">2.4 Dimension Ordering</a>
+    <a class="sb-card-link" onclick="goTo(8)">2.5 Hash Partitioning</a>
+    <a class="sb-card-link" onclick="goTo(9)">2.6 Flip: BUC & Averages</a>
+    <a class="sb-card-link" onclick="goTo(10)">2.7 BUC Performance</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-title">🔢 §3 MultiWay Aggregation</div>
+    <a class="sb-card-link" onclick="goTo(11)">3.1 Analogy: One sweep</a>
+    <a class="sb-card-link" onclick="goTo(12)">3.2 Core Idea</a>
+    <a class="sb-card-link" onclick="goTo(13)">3.3 Viz: Array Chunking</a>
+    <a class="sb-card-link" onclick="goTo(14)">3.4 Chunking Concept</a>
+    <a class="sb-card-link" onclick="goTo(15)">3.5 Flip: Chunking Advantage</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-title">⭐ §4 Star-Cubing</div>
+    <a class="sb-card-link" onclick="goTo(16)">4.1 Analogy: Best of both</a>
+    <a class="sb-card-link" onclick="goTo(17)">4.2 Shared Dimensions</a>
+    <a class="sb-card-link" onclick="goTo(18)">4.3 Star Nodes</a>
+    <a class="sb-card-link" onclick="goTo(19)">4.4 Flip: Star pruning</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-title">🐚 §5 Shell Fragments</div>
+    <a class="sb-card-link" onclick="goTo(20)">5.1 Analogy: Precomputed pairs</a>
+    <a class="sb-card-link" onclick="goTo(21)">5.2 Shell Fragment Algorithm</a>
+    <a class="sb-card-link" onclick="goTo(22)">5.3 Flip: TID Lists</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-title">📝 End Quiz</div>
+    <a class="sb-card-link" onclick="goTo(23)">Module Quiz (5 Qs)</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-title">📚 Appendix</div>
+    <a class="sb-card-link" onclick="goTo(24)">Math Details</a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 0 — §1 C1 — Analogy                 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card active" id="card-0">
+  <div class="card-shell card-green">
+    <div class="card-header">
+      <span class="card-tag">🌿 Analogy</span>
+      <span class="card-section-label">§1 The Cube Problem • Card 1 of 4</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🧊</span>
+      <div class="card-title">Pre-Calculating Every Possible Summary</div>
+      <div class="card-text">
+        <p>Imagine you have a giant spreadsheet of sales data with columns for <strong>City</strong>, <strong>Product</strong>, <strong>Month</strong>, and <strong>Salesperson</strong>. Your boss wants totals "by city", "by product", "by city+product", "by all three", and every other combination — before any question is even asked.</p>
+        <p>With <strong>4 dimensions</strong>, there are <strong>2⁴ = 16</strong> different ways to group the data (each dimension is either "grouped" or "totalled away"). With <strong>10 dimensions</strong> that's <strong>2¹⁰ = 1,024</strong> combinations. With 20 dimensions: over a <em>million</em>!</p>
+        <p>We need smart algorithms that don't naively compute all of them.</p>
+      </div>
+      <div class="highlight-box">
+        <strong>📐 Formula:</strong> A cube with <em>n</em> dimensions has exactly <strong>2ⁿ cuboids</strong> (sub-aggregations). Each dimension is either "kept" or "collapsed".
+      </div>
+      <div class="why-box"><strong>💡 Why it matters:</strong> Without clever algorithms, even a 15-dimension cube would require computing 32,768 separate aggregation tables. We need smarter approaches — BUC, MultiWay, Star-Cubing.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" disabled>← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(1)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 1 — §1 C2 — Types of Cubes          -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-1">
+  <div class="card-shell card-blue">
+    <div class="card-header">
+      <span class="card-tag">📘 Concept</span>
+      <span class="card-section-label">§1 The Cube Problem • Card 2 of 4</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🗂️</span>
+      <div class="card-title">Three Types of Data Cubes</div>
+      <div class="card-text">
+        <p>Instead of always computing <em>everything</em>, we have three strategies:</p>
+      </div>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+        <div style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);border-radius:10px;padding:12px 16px;">
+          <div style="font-weight:800;color:#818cf8;margin-bottom:4px;">🟦 Full Cube</div>
+          <div style="font-size:13px;">Compute <em>all</em> 2ⁿ cuboids. Nothing is skipped. Uses the most memory, but answers any query instantly.</div>
+        </div>
+        <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:10px;padding:12px 16px;">
+          <div style="font-weight:800;color:#34d399;margin-bottom:4px;">🟩 Iceberg Cube</div>
+          <div style="font-size:13px;">Only compute cells where <strong>count ≥ min_support</strong>. Skips sparse/empty cells. Like seeing only the tip of the iceberg — the dense, meaningful data.</div>
+        </div>
+        <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:12px 16px;">
+          <div style="font-weight:800;color:#fbbf24;margin-bottom:4px;">🟨 Shell Cube</div>
+          <div style="font-size:13px;">Only pre-compute <em>small-dimensional</em> cuboids (e.g., 1-D, 2-D, 3-D combos). High-dimensional queries are answered on the fly by combining shells.</div>
+        </div>
+      </div>
+      <div class="why-box"><strong>💡 Real use:</strong> E-commerce sites use iceberg cubes — most product × region × day combinations have zero sales. Why waste memory on them?</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(0)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(2)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 2 — §1 C3 — Viz: Cube Types         -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-2">
+  <div class="card-shell">
+    <div class="card-header">
+      <span class="card-tag">🎨 Visualization</span>
+      <span class="card-section-label">§1 The Cube Problem • Card 3 of 4</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🖼️</span>
+      <div class="card-title">Cube Types — Side by Side</div>
+      <div class="card-text"><p>Below are three 3×3×3 cubes. Colored cells = computed. Grey = skipped.</p></div>
+      <svg id="cube-types-svg" width="100%" viewBox="0 0 720 240" style="margin-top:12px;border-radius:10px;background:rgba(0,0,0,.2);"></svg>
+      <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><div style="width:14px;height:14px;background:#6366f1;border-radius:3px;"></div>Computed cell</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><div style="width:14px;height:14px;background:#334155;border-radius:3px;"></div>Skipped cell</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><div style="width:14px;height:14px;background:#10b981;border-radius:3px;"></div>Dense/significant</div>
+      </div>
+      <div class="why-box"><strong>💡 Key insight:</strong> Real OLAP data is extremely sparse — typically 90–99% of cells are empty. Iceberg & Shell cubes exploit this sparsity.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(1)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 3 — §1 C4 — Flip: Iceberg           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-3">
+  <div class="card-shell card-purple">
+    <div class="card-header">
+      <span class="card-tag">🔁 Active Recall</span>
+      <span class="card-section-label">§1 The Cube Problem • Card 4 of 4</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🧊</span>
+      <div class="card-title">Why Is the Iceberg Cube Useful?</div>
+      <div class="card-text"><p>Think about it for 10 seconds, then click to flip!</p></div>
+      <div class="flip-wrap" onclick="this.classList.toggle('flipped')">
+        <div class="flip-inner">
+          <div class="flip-face flip-front">
+            <div style="font-size:22px;margin-bottom:8px;">❓</div>
+            <div style="font-weight:700;font-size:15px;">Why is the Iceberg Cube useful?</div>
+            <div class="flip-hint">Click to reveal answer</div>
+          </div>
+          <div class="flip-face flip-back">
+            <div style="font-size:20px;margin-bottom:6px;">✅</div>
+            <div style="font-size:13px;line-height:1.6;text-align:left;">
+              Most cells in a large data cube are <strong>EMPTY</strong> (sparse data). The iceberg cube only computes and stores cells that actually have significant data (above min_support), saving <strong>massive amounts of memory and computation time</strong>.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="why-box" style="margin-top:14px;"><strong>📊 Example:</strong> A 10-D retail cube with 10 values per dimension = 10¹⁰ possible cells. Maybe only 10,000 are non-empty. Iceberg cube skips the other 9,999,990,000!</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(2)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(4)">Next → BUC Algorithm 🚀</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 4 — §2 C1 — BUC Analogy             -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-4">
+  <div class="card-shell card-green">
+    <div class="card-header">
+      <span class="card-tag">🌿 Analogy</span>
+      <span class="card-section-label">§2 BUC Algorithm • Card 1 of 7</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🔺</span>
+      <div class="card-title">BUC: Bottom-Up Cube Computation</div>
+      <div class="card-text">
+        <p><strong>BUC</strong> sounds like it builds from the bottom up — but there's a twist! In BUC, "bottom" refers to the <em>lattice</em>, not a physical pyramid.</p>
+        <p>The <strong>lattice</strong> is a graph of all cuboids. At the TOP is the most summarized (fewest dimensions = 0-D, the "all" total). At the BOTTOM is the least aggregated (all dimensions = raw data level).</p>
+        <p>BUC starts at the <strong>TOP of the lattice</strong> (the apex — the grand total) and works <em>downward</em> toward more detailed cuboids — hence "bottom-up" in the sense it moves toward the bottom of the lattice.</p>
+      </div>
+      <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px;margin-top:12px;font-size:13px;">
+        <div style="margin-bottom:6px;font-weight:700;color:#34d399;">🗺️ Lattice for 3 dimensions A, B, C:</div>
+        <div style="text-align:center;font-family:monospace;font-size:12px;line-height:2;">
+          {} (0-D, apex)<br/>
+          A &nbsp;&nbsp; B &nbsp;&nbsp; C<br/>
+          AB &nbsp; AC &nbsp; BC<br/>
+          ABC (3-D, base)
+        </div>
+      </div>
+      <div class="why-box"><strong>💡 Key:</strong> The lattice has 2³ = 8 nodes for 3 dimensions. BUC visits them in a specific top-down order to enable pruning.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(3)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(5)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 5 — §2 C2 — Apriori Pruning         -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-5">
+  <div class="card-shell card-blue">
+    <div class="card-header">
+      <span class="card-tag">📘 Key Concept</span>
+      <span class="card-section-label">§2 BUC Algorithm • Card 2 of 7</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">✂️</span>
+      <div class="card-title">Apriori Pruning — The Magic Behind BUC</div>
+      <div class="card-text">
+        <p>This is the core insight that makes BUC fast:</p>
+        <div style="background:rgba(239,68,68,.08);border:2px solid rgba(239,68,68,.3);border-radius:10px;padding:12px;margin:10px 0;font-size:14px;font-weight:700;text-align:center;">
+          If a cell's count &lt; min_support,<br/>ALL its more-detailed descendants<br/>will ALSO be below min_support.
+        </div>
+        <p><strong>Why?</strong> When you "drill down" (add more dimensions), you split a group into smaller sub-groups. Sub-groups can only have <em>equal or fewer</em> members than the parent. So if the parent fails the threshold, so will all children.</p>
+        <p><strong>Example:</strong> If "City=London" has count=3 (below threshold=5), then "City=London, Product=TV" will have count ≤ 3. Prune that entire branch!</p>
+      </div>
+      <div class="why-box"><strong>💡 This is the Apriori anti-monotone property</strong> — the same principle used in frequent itemset mining. If a set is infrequent, all its supersets are infrequent too.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(4)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(6)">Next → Interactive BUC! 🎮</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 6 — §2 C3 — Viz: BUC Animation      -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-6">
+  <div class="card-shell">
+    <div class="card-header">
+      <span class="card-tag">🎮 Interactive</span>
+      <span class="card-section-label">§2 BUC Algorithm • Card 3 of 7</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🔬</span>
+      <div class="card-title">BUC Step-by-Step Traversal</div>
+      <div class="card-text"><p>min_support = 5. Press <strong>Step</strong> to traverse the lattice. Watch pruning in action! Green = included, Grey = pruned.</p></div>
+
+      <svg id="buc-svg" width="100%" viewBox="0 0 680 360" style="margin-top:8px;border-radius:10px;background:rgba(0,0,0,.25);"></svg>
+
+      <div id="buc-status" style="margin-top:10px;min-height:52px;background:rgba(0,0,0,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--foreground);">
+        Press "Step" to begin BUC traversal. Starting from the apex {} (grand total).
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="bucStep()">▶ Step</button>
+        <button class="btn btn-outline btn-sm" onclick="bucReset()">↺ Reset</button>
+        <button class="btn btn-outline btn-sm" onclick="bucAutoPlay()">⏩ Auto-Play</button>
+      </div>
+
+      <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;"><div style="width:12px;height:12px;background:#6366f1;border-radius:50%;"></div>Not yet visited</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;"><div style="width:12px;height:12px;background:#f59e0b;border-radius:50%;border:2px solid #fbbf24;"></div>Currently examining</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;"><div style="width:12px;height:12px;background:#10b981;border-radius:50%;"></div>Included (≥ min_sup)</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;"><div style="width:12px;height:12px;background:#475569;border-radius:50%;"></div>Pruned (&lt; min_sup)</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(5)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(7)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 7 — §2 C4 — Dimension Ordering      -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-7">
+  <div class="card-shell card-blue">
+    <div class="card-header">
+      <span class="card-tag">📘 Concept</span>
+      <span class="card-section-label">§2 BUC Algorithm • Card 4 of 7</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">📊</span>
+      <div class="card-title">Dimension Ordering Matters</div>
+      <div class="card-text">
+        <p>BUC doesn't just prune — it also cares about the <em>order</em> in which dimensions are processed. The right order = <strong>way more pruning</strong>.</p>
+        <p><strong>Rule:</strong> Order dimensions by <em>cardinality</em> (number of unique values) — highest cardinality first.</p>
+      </div>
+      <div style="margin-top:12px;background:rgba(0,0,0,.2);border-radius:10px;padding:14px;font-size:13px;">
+        <div style="margin-bottom:8px;font-weight:700;">Why high-cardinality first?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:rgba(16,185,129,.1);border-radius:8px;padding:10px;">
+            <div style="font-weight:700;color:#34d399;margin-bottom:4px;">✅ Good Order</div>
+            <div>CustomerID (10,000 values) → City (50) → Category (5)</div>
+            <div style="margin-top:6px;font-size:12px;color:var(--muted-foreground);">High cardinality = many small groups = more likely to fall below threshold = more pruning</div>
+          </div>
+          <div style="background:rgba(239,68,68,.1);border-radius:8px;padding:10px;">
+            <div style="font-weight:700;color:#f87171;margin-bottom:4px;">❌ Bad Order</div>
+            <div>Category (5) → City (50) → CustomerID (10,000)</div>
+            <div style="margin-top:6px;font-size:12px;color:var(--muted-foreground);">Low cardinality first = few big groups = rarely pruned = slow</div>
+          </div>
+        </div>
+      </div>
+      <div class="why-box"><strong>💡 Analogy:</strong> Like filtering a job applicant pool — first filter by hardest requirement (PhD required), then by easier ones. Most pruning happens early.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(6)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(8)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 8 — §2 C5 — Hash Partitioning       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-8">
+  <div class="card-shell card-blue">
+    <div class="card-header">
+      <span class="card-tag">📘 Concept</span>
+      <span class="card-section-label">§2 BUC Algorithm • Card 5 of 7</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🗑️</span>
+      <div class="card-title">Hash Partitioning Optimization</div>
+      <div class="card-text">
+        <p>Without optimization, BUC would scan the entire database for <em>every</em> cuboid it computes. That's very slow.</p>
+        <p><strong>Hash Partitioning</strong> solves this. When processing dimension A, BUC <em>partitions</em> the data into groups by A's values using a hash function. Each partition only contains rows relevant to that sub-group.</p>
+        <p>When BUC recurses to compute AB (fixing a value of A), it only needs to scan the A-partition — not the whole database. Subsequent dimensions sub-partition further.</p>
+      </div>
+      <div style="margin-top:12px;background:rgba(0,0,0,.2);border-radius:10px;padding:14px;">
+        <svg viewBox="0 0 500 140" style="width:100%;border-radius:8px;">
+          <rect width="500" height="140" fill="rgba(0,0,0,0)"/>
+          <!-- Full DB -->
+          <rect x="10" y="10" width="80" height="120" rx="6" fill="rgba(99,102,241,.2)" stroke="#6366f1" stroke-width="1.5"/>
+          <text x="50" y="55" text-anchor="middle" fill="#a5b4fc" font-size="11" font-weight="bold">Full DB</text>
+          <text x="50" y="70" text-anchor="middle" fill="#94a3b8" font-size="9">All rows</text>
+          <!-- Arrow -->
+          <path d="M95 70 L130 70" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow5)"/>
+          <defs><marker id="arrow5" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#6366f1"/></marker></defs>
+          <text x="112" y="62" text-anchor="middle" fill="#94a3b8" font-size="9">Hash on A</text>
+          <!-- Partitions -->
+          <rect x="135" y="10" width="55" height="35" rx="5" fill="rgba(16,185,129,.2)" stroke="#10b981" stroke-width="1.5"/>
+          <text x="162" y="28" text-anchor="middle" fill="#34d399" font-size="10">A=a1</text>
+          <text x="162" y="40" text-anchor="middle" fill="#94a3b8" font-size="9">n₁ rows</text>
+          <rect x="135" y="52" width="55" height="35" rx="5" fill="rgba(245,158,11,.2)" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="162" y="70" text-anchor="middle" fill="#fbbf24" font-size="10">A=a2</text>
+          <text x="162" y="82" text-anchor="middle" fill="#94a3b8" font-size="9">n₂ rows</text>
+          <rect x="135" y="94" width="55" height="35" rx="5" fill="rgba(239,68,68,.2)" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="162" y="112" text-anchor="middle" fill="#f87171" font-size="10">A=a3</text>
+          <text x="162" y="124" text-anchor="middle" fill="#94a3b8" font-size="9">n₃ rows</text>
+          <!-- Arrow to sub-partition -->
+          <path d="M193 27 L230 27" stroke="#10b981" stroke-width="1.5" marker-end="url(#arrow5g)"/>
+          <defs><marker id="arrow5g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#10b981"/></marker></defs>
+          <text x="211" y="20" text-anchor="middle" fill="#94a3b8" font-size="8">Hash on B</text>
+          <rect x="233" y="10" width="50" height="22" rx="4" fill="rgba(16,185,129,.15)" stroke="#10b981" stroke-width="1"/>
+          <text x="258" y="24" text-anchor="middle" fill="#34d399" font-size="9">A=a1,B=b1</text>
+          <rect x="233" y="36" width="50" height="22" rx="4" fill="rgba(16,185,129,.15)" stroke="#10b981" stroke-width="1"/>
+          <text x="258" y="50" text-anchor="middle" fill="#34d399" font-size="9">A=a1,B=b2</text>
+          <text x="380" y="75" text-anchor="middle" fill="#94a3b8" font-size="11" font-style="italic">Each cuboid only scans its own partition!</text>
+        </svg>
+      </div>
+      <div class="why-box"><strong>💡 Benefit:</strong> Work for each partition is proportional to its size. Scan the whole DB just once per level, not once per cuboid.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(7)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(9)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 9 — §2 C6 — Flip: BUC & Average     -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-9">
+  <div class="card-shell card-red">
+    <div class="card-header">
+      <span class="card-tag">⚠️ Gotcha + Flip</span>
+      <span class="card-section-label">§2 BUC Algorithm • Card 6 of 7</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🚫</span>
+      <div class="card-title">Can BUC Handle AVERAGE-Based Iceberg Cubes?</div>
+      <div class="card-text"><p>This is a classic exam trap. Think carefully before flipping!</p></div>
+      <div class="flip-wrap" onclick="this.classList.toggle('flipped')">
+        <div class="flip-inner">
+          <div class="flip-face flip-front">
+            <div style="font-size:22px;margin-bottom:8px;">🤔</div>
+            <div style="font-weight:700;font-size:15px;">Can BUC be used for AVERAGE-based iceberg cubes?</div>
+            <div style="font-size:12px;margin-top:6px;color:var(--muted-foreground);">(e.g., "only keep cells where average_sales ≥ 1000")</div>
+            <div class="flip-hint">Click to reveal answer</div>
+          </div>
+          <div class="flip-face flip-back">
+            <div style="font-size:20px;margin-bottom:6px;">❌ No!</div>
+            <div style="font-size:13px;line-height:1.6;text-align:left;">
+              <strong>AVERAGE is NOT anti-monotonic.</strong> A parent group might have a low average, but a child sub-group could have a high average. BUC cannot safely prune children when the parent fails the average threshold. BUC's pruning only works for COUNT (and other anti-monotonic measures).
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="highlight-box" style="margin-top:12px;">
+        <strong>Example:</strong> "All products" avg = &dollar;50 (below threshold &dollar;100). But "Luxury products" sub-group avg = &dollar;2000! BUC would wrongly prune Luxury products.
+      </div>
+      <div class="why-box"><strong>💡 Alternative:</strong> For non-anti-monotonic measures like AVERAGE, use the H-Cubing algorithm (see Appendix) which works via top-k constraints.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(8)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(10)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 10 — §2 C7 — BUC Performance        -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-10">
+  <div class="card-shell card-purple">
+    <div class="card-header">
+      <span class="card-tag">📈 Performance</span>
+      <span class="card-section-label">§2 BUC Algorithm • Card 7 of 7</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🏎️</span>
+      <div class="card-title">BUC vs Full Cube Performance</div>
+      <div class="card-text">
+        <p>In sparse datasets with a minimum support threshold, BUC can be <strong>orders of magnitude faster</strong> than computing the full cube.</p>
+      </div>
+      <div style="margin-top:12px;background:rgba(0,0,0,.2);border-radius:10px;padding:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
+          <div>
+            <div style="font-weight:700;color:#f87171;margin-bottom:6px;">Full Cube</div>
+            <div>• Computes all 2ⁿ cuboids</div>
+            <div>• Lots of empty cells wasted</div>
+            <div>• Memory: O(Vⁿ) where V = avg values per dim</div>
+            <div>• Good for: Dense data, ad-hoc queries</div>
+          </div>
+          <div>
+            <div style="font-weight:700;color:#34d399;margin-bottom:6px;">BUC Iceberg</div>
+            <div>• Prunes sparse branches early</div>
+            <div>• Only computes meaningful cells</div>
+            <div>• Memory: much smaller (just significant cells)</div>
+            <div>• Good for: Sparse data, min_support threshold</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;background:rgba(99,102,241,.08);border-radius:8px;padding:10px;font-size:12px;">
+          <strong>Research finding:</strong> For real-world market-basket data (~0.1% density), BUC with min_support=3 can reduce computation by 99%+ compared to full cube.
+        </div>
+      </div>
+      <div class="why-box"><strong>💡 Bottom line:</strong> BUC is the algorithm of choice for sparse, high-dimensional OLAP cubes with count-based thresholds.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(9)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(11)">Next → MultiWay Aggregation 🔢</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 11 — §3 C1 — MultiWay Analogy       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-11">
+  <div class="card-shell card-green">
+    <div class="card-header">
+      <span class="card-tag">🌿 Analogy</span>
+      <span class="card-section-label">§3 MultiWay Aggregation • Card 1 of 5</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🗳️</span>
+      <div class="card-title">MultiWay: Tally Everything in One Sweep</div>
+      <div class="card-text">
+        <p>Imagine counting votes in an election. You need totals <em>by age group</em>, <em>by region</em>, <em>by political party</em>, AND <em>by combinations</em>.</p>
+        <p>You could make separate passes through all ballots for each breakdown. But that's wasteful — you'd read every ballot many times.</p>
+        <p>Instead, <strong>MultiWay</strong> reads each ballot ONCE and updates all tallies simultaneously. It's like having many tally sheets on the table and checking every sheet with every ballot.</p>
+        <p>This is the <em>MultiWay Array Aggregation</em> approach — compute multiple cuboids simultaneously in a single sweep of the data.</p>
+      </div>
+      <div class="highlight-box">
+        <strong>Key difference from BUC:</strong> BUC is top-down in the lattice. MultiWay sweeps through the data linearly, updating multiple cuboids at once. It's better suited for <em>dense</em> data.
+      </div>
+      <div class="why-box"><strong>💡 Use case:</strong> MultiWay is best when data is stored as arrays (MOLAP systems) and most cells are non-empty.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(10)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(12)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 12 — §3 C2 — MultiWay Core Idea     -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-12">
+  <div class="card-shell card-blue">
+    <div class="card-header">
+      <span class="card-tag">📘 Concept</span>
+      <span class="card-section-label">§3 MultiWay Aggregation • Card 2 of 5</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🔢</span>
+      <div class="card-title">MultiWay: MOLAP Array Approach</div>
+      <div class="card-text">
+        <p>MultiWay works on <strong>MOLAP</strong> (Multidimensional OLAP) systems where data is stored as multi-dimensional arrays.</p>
+        <p>The key idea: sweep through the array <em>once</em> and compute multiple cuboids simultaneously rather than making multiple independent passes.</p>
+      </div>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;font-size:13px;">
+        <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:10px 14px;">
+          <strong style="color:#818cf8;">Step 1:</strong> Lay out a 3-D array with dimensions A, B, C
+        </div>
+        <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:10px 14px;">
+          <strong style="color:#818cf8;">Step 2:</strong> Divide the array into chunks that fit in memory
+        </div>
+        <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:10px 14px;">
+          <strong style="color:#818cf8;">Step 3:</strong> Process chunk by chunk, maintaining running sums for ALL 2D faces (AB, AC, BC) simultaneously
+        </div>
+        <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:10px 14px;">
+          <strong style="color:#818cf8;">Step 4:</strong> After all chunks are done, all cuboids are computed!
+        </div>
+      </div>
+      <div class="why-box"><strong>💡 Benefit:</strong> Reading data from disk once (instead of 2ⁿ times) dramatically reduces I/O. The bottleneck in large datasets is usually disk reads.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(11)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(13)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 13 — §3 C3 — Viz: Array Chunking    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-13">
+  <div class="card-shell">
+    <div class="card-header">
+      <span class="card-tag">🎨 Visualization</span>
+      <span class="card-section-label">§3 MultiWay Aggregation • Card 3 of 5</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">📦</span>
+      <div class="card-title">Array Chunking: Memory-Efficient Processing</div>
+      <div class="card-text"><p>Click chunks below to see how MultiWay sweeps through a 3D array, computing all 2D projections simultaneously.</p></div>
+
+      <canvas id="chunk-canvas" width="680" height="280" style="width:100%;border-radius:10px;background:rgba(0,0,0,.25);margin-top:8px;cursor:pointer;"></canvas>
+
+      <div id="chunk-status" style="margin-top:10px;background:rgba(0,0,0,.2);border-radius:8px;padding:10px 14px;font-size:13px;min-height:44px;">
+        Click any chunk to process it. Watch the 2D projections update!
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn btn-outline btn-sm" onclick="resetChunks()">↺ Reset</button>
+        <button class="btn btn-primary btn-sm" onclick="autoChunks()">⏩ Process All</button>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(12)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(14)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 14 — §3 C4 — Chunking Concept       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-14">
+  <div class="card-shell card-yellow">
+    <div class="card-header">
+      <span class="card-tag">💡 Concept</span>
+      <span class="card-section-label">§3 MultiWay Aggregation • Card 4 of 5</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🧩</span>
+      <div class="card-title">Why Chunking Matters</div>
+      <div class="card-text">
+        <p>A large 3-D array can be millions of cells. It won't fit in RAM. <strong>Chunking</strong> divides it into small <em>n</em>-dimensional sub-arrays that DO fit in memory.</p>
+        <p><strong>The Row-Major Problem:</strong> In row-major storage (like C/Python), reading column-by-column is slow (cache misses). In column-major (Fortran), reading row-by-row is slow. With a cube, you need to sweep in ALL directions — a nightmare for either storage order.</p>
+        <p><strong>The Fix:</strong> Chunks are small enough that <em>any</em> element within a chunk is close to any other element on disk. Chunk access pattern is symmetric — no preferred direction.</p>
+      </div>
+      <div style="margin-top:10px;background:rgba(0,0,0,.2);border-radius:10px;padding:12px;font-size:13px;">
+        <strong>Choosing chunk size:</strong> Balance between:<br/>
+        • <span style="color:#34d399;">Too small</span> → too many chunks, overhead per chunk is high<br/>
+        • <span style="color:#f87171;">Too large</span> → chunk doesn't fit in memory, defeats the purpose<br/>
+        • <span style="color:#fbbf24;">Just right</span> → chunk fits in available memory, typically a few MB
+      </div>
+      <div class="why-box"><strong>💡 Modern CPUs:</strong> Cache lines are 64 bytes. Chunks aligned to cache sizes maximize CPU efficiency — same idea, different scale.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(13)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(15)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 15 — §3 C5 — Flip: Chunking Advantage -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-15">
+  <div class="card-shell card-purple">
+    <div class="card-header">
+      <span class="card-tag">🔁 Active Recall</span>
+      <span class="card-section-label">§3 MultiWay Aggregation • Card 5 of 5</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">📦</span>
+      <div class="card-title">What Is the Advantage of Array Chunking?</div>
+      <div class="card-text"><p>You've read about chunking. Now test your recall!</p></div>
+      <div class="flip-wrap" onclick="this.classList.toggle('flipped')">
+        <div class="flip-inner">
+          <div class="flip-face flip-front">
+            <div style="font-size:22px;margin-bottom:8px;">❓</div>
+            <div style="font-weight:700;font-size:15px;">What is the advantage of array chunking in MultiWay aggregation?</div>
+            <div class="flip-hint">Click to reveal answer</div>
+          </div>
+          <div class="flip-face flip-back">
+            <div style="font-size:20px;margin-bottom:6px;">✅</div>
+            <div style="font-size:13px;line-height:1.6;text-align:left;">
+              Chunks <strong>eliminate the asymmetry</strong> between row-major and column-major access. Any element of a chunk is equally close on disk. MultiWay must sweep in multiple directions (for different 2D projections), and chunking ensures <strong>no direction is penalized</strong> by storage order.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="why-box" style="margin-top:14px;"><strong>💡 Great work!</strong> You've completed the MultiWay section. Next: Star-Cubing — combining the best of BUC and MultiWay! ⭐</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(14)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(16)">Next → Star-Cubing ⭐</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 16 — §4 C1 — Star-Cubing Analogy    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-16">
+  <div class="card-shell card-green">
+    <div class="card-header">
+      <span class="card-tag">🌿 Analogy</span>
+      <span class="card-section-label">§4 Star-Cubing • Card 1 of 4</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">⭐</span>
+      <div class="card-title">Star-Cubing: Best of Both Worlds</div>
+      <div class="card-text">
+        <p><strong>Star-Cubing</strong> is like a hybrid car — it combines the top-down efficiency of MultiWay with the bottom-up pruning power of BUC.</p>
+        <p>It also adds a clever pre-processing trick: before doing any multi-dimensional computation, it scans <em>each dimension individually</em>. Any value that appears very rarely gets marked with a <strong>star (*)</strong>.</p>
+        <p>Think of it like a Hollywood award ceremony. Before announcing pairs or groups, they first identify which individuals are "not even nominated" (below min_support). Those people are replaced with a generic * placeholder, and all their combinations are automatically skipped.</p>
+      </div>
+      <div class="highlight-box">
+        <strong>Example:</strong> If "City=Timbuktu" has only 2 sales (below min_support=5), it gets marked as * everywhere. Any cuboid involving "City=Timbuktu" is instantly pruned.
+      </div>
+      <div class="why-box"><strong>💡 Impact:</strong> In high-dimensional sparse data, star-conversion can eliminate 70–90% of values before multi-dimensional processing even begins.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(15)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(17)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 17 — §4 C2 — Shared Dimensions      -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-17">
+  <div class="card-shell card-blue">
+    <div class="card-header">
+      <span class="card-tag">📘 Concept</span>
+      <span class="card-section-label">§4 Star-Cubing • Card 2 of 4</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🔗</span>
+      <div class="card-title">Shared Dimensions — Reuse Computation</div>
+      <div class="card-text">
+        <p>When computing related cuboids like AB and ABC, they share the A and B dimensions. Star-Cubing computes them <em>together</em>, sharing the work.</p>
+        <p>This is like computing a tax form — the total income appears in multiple places. Calculate it once, reuse everywhere.</p>
+      </div>
+      <div style="margin-top:12px;background:rgba(0,0,0,.2);border-radius:10px;padding:14px;font-size:13px;">
+        <div style="font-weight:700;margin-bottom:8px;color:var(--accent);">Star-Cubing Computation Tree (3 dimensions A, B, C):</div>
+        <svg viewBox="0 0 480 180" style="width:100%;">
+          <!-- Nodes -->
+          <rect x="190" y="8" width="50" height="24" rx="4" fill="rgba(99,102,241,.3)" stroke="#6366f1" stroke-width="1.5"/>
+          <text x="215" y="24" text-anchor="middle" fill="#a5b4fc" font-size="12" font-weight="bold">{}</text>
+
+          <rect x="60" y="68" width="50" height="24" rx="4" fill="rgba(99,102,241,.25)" stroke="#6366f1"/>
+          <text x="85" y="84" text-anchor="middle" fill="#a5b4fc" font-size="12">{A}</text>
+
+          <rect x="190" y="68" width="50" height="24" rx="4" fill="rgba(16,185,129,.25)" stroke="#10b981"/>
+          <text x="215" y="84" text-anchor="middle" fill="#34d399" font-size="12">{B}</text>
+
+          <rect x="320" y="68" width="50" height="24" rx="4" fill="rgba(245,158,11,.25)" stroke="#f59e0b"/>
+          <text x="345" y="84" text-anchor="middle" fill="#fbbf24" font-size="12">{C}</text>
+
+          <rect x="20" y="138" width="55" height="24" rx="4" fill="rgba(99,102,241,.2)" stroke="#6366f1"/>
+          <text x="47" y="154" text-anchor="middle" fill="#a5b4fc" font-size="11">{A,B}</text>
+
+          <rect x="100" y="138" width="55" height="24" rx="4" fill="rgba(99,102,241,.2)" stroke="#6366f1"/>
+          <text x="127" y="154" text-anchor="middle" fill="#a5b4fc" font-size="11">{A,C}</text>
+
+          <rect x="250" y="138" width="55" height="24" rx="4" fill="rgba(16,185,129,.2)" stroke="#10b981"/>
+          <text x="277" y="154" text-anchor="middle" fill="#34d399" font-size="11">{B,C}</text>
+
+          <!-- Shared label -->
+          <rect x="155" y="138" width="80" height="24" rx="4" fill="rgba(168,85,247,.3)" stroke="#a855f7" stroke-width="1.5"/>
+          <text x="195" y="154" text-anchor="middle" fill="#c084fc" font-size="11">{A,B,C}</text>
+
+          <!-- Edges -->
+          <line x1="215" y1="32" x2="85" y2="68" stroke="#6366f1" stroke-width="1" stroke-dasharray="4"/>
+          <line x1="215" y1="32" x2="215" y2="68" stroke="#10b981" stroke-width="1" stroke-dasharray="4"/>
+          <line x1="215" y1="32" x2="345" y2="68" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4"/>
+          <line x1="85" y1="92" x2="47" y2="138" stroke="#6366f1" stroke-width="1"/>
+          <line x1="85" y1="92" x2="127" y2="138" stroke="#6366f1" stroke-width="1"/>
+          <line x1="85" y1="92" x2="195" y2="138" stroke="#a855f7" stroke-width="1"/>
+          <line x1="215" y1="92" x2="277" y2="138" stroke="#10b981" stroke-width="1"/>
+          <line x1="215" y1="92" x2="195" y2="138" stroke="#a855f7" stroke-width="1"/>
+
+          <text x="195" y="125" text-anchor="middle" fill="#c084fc" font-size="9">shared AB work</text>
+        </svg>
+      </div>
+      <div class="why-box"><strong>💡 Efficiency:</strong> By sharing prefix computations (like A and B), Star-Cubing avoids redundant aggregation work compared to computing each cuboid independently.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(16)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(18)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 18 — §4 C3 — Star Nodes             -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-18">
+  <div class="card-shell card-yellow">
+    <div class="card-header">
+      <span class="card-tag">⭐ Star Nodes</span>
+      <span class="card-section-label">§4 Star-Cubing • Card 3 of 4</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">✨</span>
+      <div class="card-title">Star Nodes: Early Pruning</div>
+      <div class="card-text">
+        <p>Before Star-Cubing begins multi-dimensional work, it scans each dimension independently and identifies <em>infrequent</em> values (count &lt; min_support).</p>
+        <p>These values are replaced with a <strong>star node (*)</strong>. All these * values are then grouped together, and their cuboids are ignored.</p>
+      </div>
+      <div style="margin-top:12px;background:rgba(0,0,0,.2);border-radius:10px;padding:14px;font-size:13px;">
+        <div style="margin-bottom:8px;font-weight:700;color:var(--accent);">Example with min_support = 3:</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div style="color:#94a3b8;margin-bottom:4px;font-size:11px;">Original City values:</div>
+            <div>NYC: count = 150 ✅</div>
+            <div>LA: count = 89 ✅</div>
+            <div>Boise: count = 2 ⭐→*</div>
+            <div>Midway: count = 1 ⭐→*</div>
+          </div>
+          <div>
+            <div style="color:#94a3b8;margin-bottom:4px;font-size:11px;">After star conversion:</div>
+            <div>NYC: 150 ✅</div>
+            <div>LA: 89 ✅</div>
+            <div style="color:#fbbf24;">*: {Boise, Midway} grouped</div>
+            <div style="color:#94a3b8;font-size:11px;margin-top:4px;">NYC×* and LA×* cuboids = pruned</div>
+          </div>
+        </div>
+      </div>
+      <div class="why-box"><strong>💡 Why it works:</strong> If City=Boise has count &lt; min_support alone, then City=Boise ∩ anything_else will also have count &lt; min_support. Star node prunes all its combinations at once.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(17)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(19)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 19 — §4 C4 — Flip: Star Pruning     -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-19">
+  <div class="card-shell card-purple">
+    <div class="card-header">
+      <span class="card-tag">🔁 Active Recall</span>
+      <span class="card-section-label">§4 Star-Cubing • Card 4 of 4</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">⭐</span>
+      <div class="card-title">How Does Star-Cubing Prune Early?</div>
+      <div class="flip-wrap" onclick="this.classList.toggle('flipped')">
+        <div class="flip-inner">
+          <div class="flip-face flip-front">
+            <div style="font-size:22px;margin-bottom:8px;">❓</div>
+            <div style="font-weight:700;font-size:15px;">How does Star-Cubing prune the search space early?</div>
+            <div class="flip-hint">Click to reveal</div>
+          </div>
+          <div class="flip-face flip-back">
+            <div style="font-size:20px;margin-bottom:6px;">✅</div>
+            <div style="font-size:13px;line-height:1.6;text-align:left;">
+              By converting <strong>infrequent single-dimension items to star nodes (*)</strong> before multi-dimensional computation begins. Since a value below min_support in 1-D cannot become frequent in higher dimensions, all cuboids containing that value are pruned immediately — entire lattice branches are eliminated.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="why-box" style="margin-top:14px;"><strong>🚀 Next up:</strong> Shell Fragments — for when you have 50+ dimensions and even computing 2-D cuboids is too many!</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(18)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(20)">Next → Shell Fragments 🐚</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 20 — §5 C1 — Shell Fragments Analogy -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-20">
+  <div class="card-shell card-green">
+    <div class="card-header">
+      <span class="card-tag">🌿 Analogy</span>
+      <span class="card-section-label">§5 Shell Fragments • Card 1 of 3</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🐚</span>
+      <div class="card-title">Shell Fragments: Pre-compute Small Combos</div>
+      <div class="card-text">
+        <p>Imagine you're a travel agent with <strong>50 destination attributes</strong> (country, climate, price range, etc.). A customer can ask about ANY combination. Pre-computing every pair would be 50×49÷2 = <strong>1,225 pairs</strong>. Every triple = <strong>19,600 combos</strong>. That's too many!</p>
+        <p>Instead, you pre-compute only combos of up to 3 attributes — your "shell fragments." When a complex query arrives combining 5 attributes, you grab the right 3-D fragments and combine them quickly on the fly.</p>
+        <p>Shell Fragments do exactly this for ultra-high-dimensional data.</p>
+      </div>
+      <div class="highlight-box">
+        <strong>The math:</strong> With 50 dims, computing ALL 2-D cuboids = 1,225 tables. With shell fragments of size F=3: C(50,3) = 19,600 small fragments. But each fragment is tiny and can answer most OLAP queries when combined.
+      </div>
+      <div class="why-box"><strong>💡 Use case:</strong> Genomics data with 100,000+ gene dimensions. Shell Fragments make OLAP queries feasible where full or iceberg cubes are impossible.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(19)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(21)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 21 — §5 C2 — Shell Fragment Algo    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-21">
+  <div class="card-shell card-blue">
+    <div class="card-header">
+      <span class="card-tag">📘 Algorithm</span>
+      <span class="card-section-label">§5 Shell Fragments • Card 2 of 3</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🔬</span>
+      <div class="card-title">Shell Fragment Algorithm</div>
+      <div class="card-text">
+        <p>The Shell Fragment approach works in two phases:</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;font-size:13px;">
+        <div style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:12px;">
+          <div style="font-weight:700;color:#818cf8;margin-bottom:6px;">Phase 1: Pre-computation (offline)</div>
+          <div>For each group of F dimensions (F ≤ 3 typically):</div>
+          <div style="margin-left:12px;margin-top:4px;">• Build a small local cube (the "shell fragment")</div>
+          <div style="margin-left:12px;">• Store <strong>inverted TID lists</strong> for each cell value</div>
+          <div style="margin-left:12px;">• A TID list = set of transaction IDs with that value</div>
+        </div>
+        <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:12px;">
+          <div style="font-weight:700;color:#34d399;margin-bottom:6px;">Phase 2: Query Answering (online)</div>
+          <div>When a query arrives (e.g., Age=25, City=NYC, Product=TV):</div>
+          <div style="margin-left:12px;margin-top:4px;">• Look up TID list for Age=25: {1, 4, 7, 12}</div>
+          <div style="margin-left:12px;">• Look up TID list for City=NYC: {1, 3, 7, 9, 12}</div>
+          <div style="margin-left:12px;">• <strong>Intersect</strong>: {1, 7, 12} ← matching transactions</div>
+          <div style="margin-left:12px;">• Count = 3</div>
+        </div>
+      </div>
+      <div class="why-box"><strong>💡 Speed:</strong> TID list intersection is extremely fast using bitset operations. Modern CPUs can intersect millions of IDs per second.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(20)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(22)">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 22 — §5 C3 — Flip: TID Lists        -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-22">
+  <div class="card-shell card-purple">
+    <div class="card-header">
+      <span class="card-tag">🔁 Active Recall</span>
+      <span class="card-section-label">§5 Shell Fragments • Card 3 of 3</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">📋</span>
+      <div class="card-title">What is a TID List?</div>
+      <div class="flip-wrap" onclick="this.classList.toggle('flipped')">
+        <div class="flip-inner">
+          <div class="flip-face flip-front">
+            <div style="font-size:22px;margin-bottom:8px;">❓</div>
+            <div style="font-weight:700;font-size:15px;">What is a TID list in Shell Fragments, and why is intersecting them useful?</div>
+            <div class="flip-hint">Click to reveal</div>
+          </div>
+          <div class="flip-face flip-back">
+            <div style="font-size:20px;margin-bottom:6px;">✅</div>
+            <div style="font-size:13px;line-height:1.6;text-align:left;">
+              A TID list is a <strong>list of Transaction IDs</strong> that contain a particular dimension value. Intersecting TID lists from multiple dimensions gives the exact set of transactions matching ALL conditions simultaneously — very fast! Instead of scanning all records, we just intersect small ID lists.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;background:rgba(0,0,0,.2);border-radius:10px;padding:12px;font-size:13px;">
+        <div style="margin-bottom:6px;font-weight:700;">Quick Example:</div>
+        <div>TID(Gender=F) = {2, 5, 6, 9, 11}</div>
+        <div>TID(City=Boston) = {1, 5, 9, 13}</div>
+        <div>TID(Product=Laptop) = {5, 8, 9, 15}</div>
+        <div style="margin-top:6px;"><strong>∩ = {5, 9}</strong> → Only 2 female Bostonians bought a laptop</div>
+      </div>
+      <div class="why-box"><strong>🎉 You've completed all sections!</strong> Time for the final quiz to test your mastery! 💪</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(21)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(23)">📝 Take the Quiz!</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 23 — END QUIZ                        -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-23">
+  <div class="card-shell">
+    <div class="card-header">
+      <span class="card-tag">📝 Module Quiz</span>
+      <span class="card-section-label">5 Questions • Graded</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🏆</span>
+      <div class="card-title">Module 5 — Final Quiz</div>
+
+      <div id="quiz-area">
+
+        <!-- Q1 -->
+        <div class="quiz-question" id="q1" style="margin-bottom:18px;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px;">Q1: In BUC, why does pruning work for COUNT but not AVERAGE?</div>
+          <div class="quiz-option" onclick="checkQ(this,'q1',true)"><span>A</span> COUNT is anti-monotone: a sub-group can only have ≤ count of parent. AVERAGE is not — sub-groups can have higher averages.</div>
+          <div class="quiz-option" onclick="checkQ(this,'q1',false)"><span>B</span> AVERAGE is anti-monotone but BUC doesn't implement it yet.</div>
+          <div class="quiz-option" onclick="checkQ(this,'q1',false)"><span>C</span> BUC only supports integer measures, and averages are floats.</div>
+          <div class="quiz-option" onclick="checkQ(this,'q1',false)"><span>D</span> COUNT has smaller values so BUC's hash function works better for it.</div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="quiz-question" id="q2" style="margin-bottom:18px;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px;">Q2: How many cuboids does a 4-dimension data cube have?</div>
+          <div class="quiz-option" onclick="checkQ(this,'q2',false)"><span>A</span> 8</div>
+          <div class="quiz-option" onclick="checkQ(this,'q2',true)"><span>B</span> 16</div>
+          <div class="quiz-option" onclick="checkQ(this,'q2',false)"><span>C</span> 24</div>
+          <div class="quiz-option" onclick="checkQ(this,'q2',false)"><span>D</span> 4</div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="quiz-question" id="q3" style="margin-bottom:18px;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px;">Q3: What is the main purpose of chunking in MultiWay array aggregation?</div>
+          <div class="quiz-option" onclick="checkQ(this,'q3',false)"><span>A</span> To compress the array and save disk space.</div>
+          <div class="quiz-option" onclick="checkQ(this,'q3',false)"><span>B</span> To enable BUC-style pruning within the array.</div>
+          <div class="quiz-option" onclick="checkQ(this,'q3',true)"><span>C</span> To fit sub-arrays into memory and eliminate row-major vs column-major access asymmetry.</div>
+          <div class="quiz-option" onclick="checkQ(this,'q3',false)"><span>D</span> To sort dimensions by cardinality for faster traversal.</div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="quiz-question" id="q4" style="margin-bottom:18px;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px;">Q4: What is a star node in Star-Cubing?</div>
+          <div class="quiz-option" onclick="checkQ(this,'q4',false)"><span>A</span> A node in the lattice that has the highest count.</div>
+          <div class="quiz-option" onclick="checkQ(this,'q4',true)"><span>B</span> A placeholder (*) representing all dimension values whose individual count is below min_support.</div>
+          <div class="quiz-option" onclick="checkQ(this,'q4',false)"><span>C</span> The apex (grand total) node at the top of the lattice.</div>
+          <div class="quiz-option" onclick="checkQ(this,'q4',false)"><span>D</span> A node with exactly one child in the lattice.</div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="quiz-question" id="q5" style="margin-bottom:18px;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px;">Q5: What is an Iceberg Cube?</div>
+          <div class="quiz-option" onclick="checkQ(this,'q5',false)"><span>A</span> A cube stored inside a glacier database for cold storage.</div>
+          <div class="quiz-option" onclick="checkQ(this,'q5',false)"><span>B</span> A cube that only computes the top-level (0-D and 1-D) cuboids.</div>
+          <div class="quiz-option" onclick="checkQ(this,'q5',true)"><span>C</span> A data cube that only computes and stores cells whose aggregate value meets a minimum threshold (like count ≥ min_support).</div>
+          <div class="quiz-option" onclick="checkQ(this,'q5',false)"><span>D</span> A cube with dimensions arranged in a triangular (iceberg-shaped) lattice.</div>
+        </div>
+
+        <div id="quiz-result" style="display:none;margin-top:12px;"></div>
+        <button class="btn btn-primary" style="margin-top:12px;" onclick="submitQuiz()">Submit Quiz 🎯</button>
+        <button class="btn btn-outline" style="margin-top:12px;margin-left:8px;" onclick="resetQuiz()">↺ Retry</button>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(22)">← Previous</button>
+    <button class="btn btn-primary" onclick="goTo(24)">Appendix 📚</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  CARD 24 — APPENDIX                        -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="study-card" id="card-24">
+  <div class="card-shell">
+    <div class="card-header">
+      <span class="card-tag">📚 Appendix</span>
+      <span class="card-section-label">First Principles & Math</span>
+    </div>
+    <div class="card-body">
+      <span class="card-emoji">🔬</span>
+      <div class="card-title">Mathematical Foundations</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+
+        <details style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:10px;">
+          <summary style="padding:12px 16px;font-weight:700;font-size:13px;">📐 Full Cube vs Iceberg Cube — Formal Definition</summary>
+          <div style="padding:0 16px 14px;font-size:13px;line-height:1.7;">
+            <p>Let <em>D</em> = {d₁, d₂, ..., dₙ} be a set of n dimensions. A <strong>full data cube</strong> computes all 2ⁿ cuboids, where each cuboid is a GROUP BY aggregation on a subset S ⊆ D.</p>
+            <p>An <strong>iceberg cube</strong> computes only cuboid cells c where: <code>measure(c) ≥ min_support</code></p>
+            <p>For COUNT: <code>count(c) ≥ θ</code> where θ is the minimum threshold.</p>
+            <p>Formally: Iceberg_Cube = { c ∈ Full_Cube | count(c) ≥ θ }</p>
+          </div>
+        </details>
+
+        <details style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:10px;">
+          <summary style="padding:12px 16px;font-weight:700;font-size:13px;">📐 Apriori Anti-Monotone Property — Formal Statement</summary>
+          <div style="padding:0 16px 14px;font-size:13px;line-height:1.7;">
+            <p>A measure <em>f</em> is <strong>anti-monotone</strong> with respect to a cuboid lattice if and only if:</p>
+            <p style="background:rgba(99,102,241,.1);padding:8px;border-radius:6px;font-family:monospace;">∀ cuboids c₁, c₂: c₁ is an ancestor of c₂ ⟹ f(c₁) ≥ f(c₂)</p>
+            <p>Translation: Going from a less-detailed to a more-detailed cuboid (drilling down) can only decrease or maintain the aggregate value, never increase it.</p>
+            <p><strong>Anti-monotone measures:</strong> COUNT, SUM (for non-negative values), MAX</p>
+            <p><strong>NOT anti-monotone:</strong> AVERAGE, MIN (over negative values), VARIANCE</p>
+            <p>BUC's pruning is correct only for anti-monotone measures. For COUNT: if parent count &lt; θ, all descendants also &lt; θ → safely prune.</p>
+          </div>
+        </details>
+
+        <details style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:10px;">
+          <summary style="padding:12px 16px;font-weight:700;font-size:13px;">📐 H-Cubing: Top-k for Non-Anti-Monotonic Measures</summary>
+          <div style="padding:0 16px 14px;font-size:13px;line-height:1.7;">
+            <p><strong>H-Cubing</strong> (Hashing-based Cubing) extends BUC to handle non-anti-monotonic measures like AVERAGE by reformulating constraints.</p>
+            <p>For an AVERAGE threshold: instead of "avg ≥ θ", transform to: "sum ≥ θ × count". Both sum and count ARE anti-monotone, so their ratio can be bounded during traversal.</p>
+            <p>H-Cubing uses a <strong>heap-based</strong> structure to maintain top-k cells by average, pruning cells whose maximum possible average (given their sum and minimum count) falls below the k-th best average found so far.</p>
+            <p>This allows approximation of average-based iceberg cubes efficiently without computing every cell.</p>
+          </div>
+        </details>
+
+        <details style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:10px;">
+          <summary style="padding:12px 16px;font-weight:700;font-size:13px;">📐 BUC Complexity Analysis</summary>
+          <div style="padding:0 16px 14px;font-size:13px;line-height:1.7;">
+            <p><strong>Worst case (full cube, no pruning):</strong> O(2ⁿ × |D|) where |D| is database size</p>
+            <p><strong>Best case (high sparsity, aggressive pruning):</strong> Near O(|D| × log|D|) — close to a single sort</p>
+            <p><strong>Space complexity:</strong> O(|IcebergCube|) — only significant cells stored</p>
+            <p>In practice, on transactional databases with min_support=3 and 20+ dimensions, BUC achieves 100-1000× speedup over full cube computation.</p>
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goTo(23)">← Back to Quiz</button>
+    <button class="btn btn-primary" onclick="goTo(0)">🔄 Start Over</button>
+  </div>
+</div>
+
+</div><!-- end #main -->
+</div><!-- end #layout -->
+
+<!-- BREAK OVERLAY -->
+<div id="break-overlay">
+  <div id="break-box">
+    <div style="font-size:48px;margin-bottom:12px;">⏰</div>
+    <div style="font-size:20px;font-weight:800;margin-bottom:8px;">Great work! Take a 5-minute break.</div>
+    <div style="font-size:14px;color:var(--muted-foreground);margin-bottom:20px;">You've been studying for 15 minutes. Rest your eyes, stretch, and come back fresh!</div>
+    <button class="btn btn-primary" onclick="resumeTimer()">▶ Resume Studying</button>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════╗ -->
+<!-- ║                   JAVASCRIPT                        ║ -->
+<!-- ╚══════════════════════════════════════════════════════╝ -->
+<script>
+/* ═══════════════════════════════════════
+   CARD NAVIGATION
+   ═══════════════════════════════════════ */
+const TOTAL_CARDS = 25;
+let currentCard = 0;
+
+const sectionMap = [
+  {s:1,t:'§1 The Cube Problem'},{s:1,t:'§1 The Cube Problem'},{s:1,t:'§1 The Cube Problem'},{s:1,t:'§1 The Cube Problem'},
+  {s:2,t:'§2 BUC Algorithm'},{s:2,t:'§2 BUC Algorithm'},{s:2,t:'§2 BUC Algorithm'},{s:2,t:'§2 BUC Algorithm'},
+  {s:2,t:'§2 BUC Algorithm'},{s:2,t:'§2 BUC Algorithm'},{s:2,t:'§2 BUC Algorithm'},
+  {s:3,t:'§3 MultiWay'},{s:3,t:'§3 MultiWay'},{s:3,t:'§3 MultiWay'},{s:3,t:'§3 MultiWay'},{s:3,t:'§3 MultiWay'},
+  {s:4,t:'§4 Star-Cubing'},{s:4,t:'§4 Star-Cubing'},{s:4,t:'§4 Star-Cubing'},{s:4,t:'§4 Star-Cubing'},
+  {s:5,t:'§5 Shell Fragments'},{s:5,t:'§5 Shell Fragments'},{s:5,t:'§5 Shell Fragments'},
+  {s:6,t:'End Quiz'},{s:7,t:'Appendix'}
+];
+
+function goTo(n) {
+  document.getElementById('card-'+currentCard).classList.remove('active');
+  document.querySelectorAll('.sb-card-link').forEach((l,i)=>l.classList.toggle('active',i===n));
+  currentCard = n;
+  document.getElementById('card-'+currentCard).classList.add('active');
+  updateProgress();
+  document.getElementById('main').scrollTop = 0;
+
+  // Initialize visualizations on demand
+  if (n===2) drawCubeTypes();
+  if (n===6) { bucReset(); }
+  if (n===13) initChunkCanvas();
+}
+
+function updateProgress() {
+  const pct = ((currentCard+1)/TOTAL_CARDS*100).toFixed(1);
+  document.getElementById('progress-bar-inner').style.width = pct+'%';
+  const sm = sectionMap[currentCard];
+  document.getElementById('progress-label').textContent =
+    `Card ${currentCard+1} of ${TOTAL_CARDS} • ${sm.t}`;
+}
+
+/* ═══════════════════════════════════════
+   POMODORO TIMER
+   ═══════════════════════════════════════ */
+let timerSeconds = 15*60;
+let timerRunning = true;
+let timerInterval = setInterval(tickTimer, 1000);
+
+function tickTimer() {
+  if (!timerRunning) return;
+  timerSeconds--;
+  updateTimerDisplay();
+  if (timerSeconds <= 0) {
+    clearInterval(timerInterval);
+    document.getElementById('break-overlay').classList.add('show');
+  }
+}
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds/60).toString().padStart(2,'0');
+  const s = (timerSeconds%60).toString().padStart(2,'0');
+  document.getElementById('timer-box').textContent = '⏱ '+m+':'+s;
+}
+function toggleTimer() {
+  timerRunning = !timerRunning;
+  document.getElementById('timer-box').style.color = timerRunning ? 'var(--accent)' : '#f87171';
+}
+function resumeTimer() {
+  document.getElementById('break-overlay').classList.remove('show');
+  timerSeconds = 15*60;
+  timerRunning = true;
+  timerInterval = setInterval(tickTimer, 1000);
+  updateTimerDisplay();
+}
+
+/* ═══════════════════════════════════════
+   VIZ 1: CUBE TYPES SVG
+   ═══════════════════════════════════════ */
+function drawCubeTypes() {
+  const svg = document.getElementById('cube-types-svg');
+  svg.innerHTML = '';
+
+  const labels = ['Full Cube\n(All cells)', 'Iceberg Cube\n(Dense only)', 'Shell Cube\n(Outer faces)'];
+  const colors = ['#6366f1','#10b981','#f59e0b'];
+  const offsets = [30, 270, 510];
+
+  offsets.forEach((ox, ci) => {
+    // Draw isometric-style 3×3 grid as 2D representation
+    const gridW = 140; const gridH = 160;
+    const cellW = 38; const cellH = 38;
+    const rows = 3; const cols = 3;
+    const startX = ox + 10; const startY = 30;
+
+    // Background
+    const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    bg.setAttribute('x',ox); bg.setAttribute('y',10);
+    bg.setAttribute('width',200); bg.setAttribute('height',220);
+    bg.setAttribute('rx',8); bg.setAttribute('fill','rgba(255,255,255,.03)');
+    bg.setAttribute('stroke','rgba(255,255,255,.08)');
+    svg.appendChild(bg);
+
+    for (let r=0;r<rows;r++) {
+      for (let c=0;c<cols;c++) {
+        let filled = false;
+        if (ci===0) filled = true; // Full cube: all filled
+        if (ci===1) filled = (r===0&&c===0)||(r===0&&c===1)||(r===1&&c===0); // Iceberg: top-left cluster
+        if (ci===2) filled = r===0||r===2||c===0||c===2; // Shell: outer ring
+
+        const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+        rect.setAttribute('x', startX + c*(cellW+4));
+        rect.setAttribute('y', startY + r*(cellH+4));
+        rect.setAttribute('width', cellW); rect.setAttribute('height', cellH);
+        rect.setAttribute('rx',5);
+        rect.setAttribute('fill', filled ? colors[ci]+'cc' : '#1e293b');
+        rect.setAttribute('stroke', filled ? colors[ci] : '#334155');
+        rect.setAttribute('stroke-width','1.5');
+
+        if (filled && ci===1 && r===0 && c===0) {
+          rect.setAttribute('fill','#10b981');
+        }
+        svg.appendChild(rect);
+
+        // Count label in cells
+        if (filled) {
+          const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+          txt.setAttribute('x', startX + c*(cellW+4) + cellW/2);
+          txt.setAttribute('y', startY + r*(cellH+4) + cellH/2+5);
+          txt.setAttribute('text-anchor','middle');
+          txt.setAttribute('fill','white');
+          txt.setAttribute('font-size','11');
+          txt.setAttribute('font-weight','bold');
+          const counts = ci===1 ? [150,89,12,3,null,null,2,null,null] : null;
+          if (counts && counts[r*cols+c]) txt.textContent = counts[r*cols+c];
+          else if (ci===0 || ci===2) txt.textContent = '✓';
+          svg.appendChild(txt);
+        }
+      }
+    }
+
+    // Label
+    const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl.setAttribute('x', ox+100); lbl.setAttribute('y', 210);
+    lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('fill',colors[ci]);
+    lbl.setAttribute('font-size','11'); lbl.setAttribute('font-weight','bold');
+    lbl.textContent = labels[ci].split('\n')[0];
+    svg.appendChild(lbl);
+    const lbl2 = document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl2.setAttribute('x', ox+100); lbl2.setAttribute('y', 225);
+    lbl2.setAttribute('text-anchor','middle'); lbl2.setAttribute('fill','#94a3b8');
+    lbl2.setAttribute('font-size','10');
+    lbl2.textContent = labels[ci].split('\n')[1]||'';
+    svg.appendChild(lbl2);
+
+    // Separator (not after last)
+    if (ci < 2) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', ox+205); line.setAttribute('y1', 30);
+      line.setAttribute('x2', ox+205); line.setAttribute('y2', 230);
+      line.setAttribute('stroke','#334155'); line.setAttribute('stroke-width','1');
+      svg.appendChild(line);
+    }
+  });
+}
+
+/* ═══════════════════════════════════════
+   VIZ 2: BUC LATTICE ANIMATION
+   ═══════════════════════════════════════ */
+// Nodes: 8 nodes for 3 dims (A=City, B=Product, C=Month)
+// counts: simulated data
+const bucNodes = [
+  { id:0, label:'{}',     dims:[],       x:340, y:35,  count:120, state:'idle', children:[1,2,3] },
+  { id:1, label:'{A}',    dims:['A'],    x:140, y:115, count:42,  state:'idle', children:[4,5] },
+  { id:2, label:'{B}',    dims:['B'],    x:340, y:115, count:8,   state:'idle', children:[5,6] },
+  { id:3, label:'{C}',    dims:['C'],    x:540, y:115, count:3,   state:'idle', children:[6,7] },
+  { id:4, label:'{A,B}',  dims:['A','B'],x:140, y:210, count:12,  state:'idle', children:[7] },
+  { id:5, label:'{A,C}',  dims:['A','C'],x:280, y:210, count:7,   state:'idle', children:[7] },
+  { id:6, label:'{B,C}',  dims:['B','C'],x:430, y:210, count:2,   state:'idle', children:[7] },
+  { id:7, label:'{A,B,C}',dims:['A','B','C'],x:280, y:300, count:1, state:'idle', children:[] }
+];
+// Edges
+const bucEdges = [
+  [0,1],[0,2],[0,3],
+  [1,4],[1,5],
+  [2,5],[2,6],
+  [3,6],[3,7],
+  [4,7],[5,7]
+];
+const MIN_SUP = 5;
+// BUC traversal order: top-down depth-first (BUC order)
+const bucOrder = [0, 1, 4, 7, 5, 7, 2, 5, 6, 7, 3, 6, 7];
+let bucStep_idx = -1;
+let bucAutoTimer = null;
+
+function bucDrawNode(svg, node) {
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('class','lattice-node');
+
+  let fill = '#6366f1';
+  let stroke = '#818cf8';
+  let textColor = 'white';
+  let opacity = '1';
+  if (node.state === 'current') { fill = '#f59e0b'; stroke = '#fbbf24'; }
+  else if (node.state === 'included') { fill = '#10b981'; stroke = '#34d399'; }
+  else if (node.state === 'pruned') { fill = '#475569'; stroke = '#64748b'; opacity = '0.6'; }
+
+  const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  circle.setAttribute('cx', node.x); circle.setAttribute('cy', node.y);
+  circle.setAttribute('r', 26); circle.setAttribute('fill', fill);
+  circle.setAttribute('stroke', stroke); circle.setAttribute('stroke-width', node.state==='current'?3:2);
+  circle.setAttribute('opacity', opacity);
+  g.appendChild(circle);
+
+  const t1 = document.createElementNS('http://www.w3.org/2000/svg','text');
+  t1.setAttribute('x', node.x); t1.setAttribute('y', node.y-4);
+  t1.setAttribute('text-anchor','middle'); t1.setAttribute('fill',textColor);
+  t1.setAttribute('font-size','10'); t1.setAttribute('font-weight','bold');
+  t1.setAttribute('opacity', opacity);
+  t1.textContent = node.label;
+  g.appendChild(t1);
+
+  const t2 = document.createElementNS('http://www.w3.org/2000/svg','text');
+  t2.setAttribute('x', node.x); t2.setAttribute('y', node.y+10);
+  t2.setAttribute('text-anchor','middle'); t2.setAttribute('fill',textColor);
+  t2.setAttribute('font-size','9');
+  t2.setAttribute('opacity', opacity);
+  t2.textContent = 'cnt='+node.count;
+  g.appendChild(t2);
+
+  if (node.state === 'pruned') {
+    const x = document.createElementNS('http://www.w3.org/2000/svg','text');
+    x.setAttribute('x', node.x); x.setAttribute('y', node.y+22);
+    x.setAttribute('text-anchor','middle'); x.setAttribute('fill','#f87171');
+    x.setAttribute('font-size','8');
+    x.textContent = 'PRUNED';
+    g.appendChild(x);
+  }
+  if (node.state === 'included') {
+    const check = document.createElementNS('http://www.w3.org/2000/svg','text');
+    check.setAttribute('x', node.x); check.setAttribute('y', node.y+22);
+    check.setAttribute('text-anchor','middle'); check.setAttribute('fill','#86efac');
+    check.setAttribute('font-size','8');
+    check.textContent = '✓ KEPT';
+    g.appendChild(check);
+  }
+
+  svg.appendChild(g);
+}
+
+function bucRender() {
+  const svg = document.getElementById('buc-svg');
+  svg.innerHTML = '';
+
+  // Draw edges first
+  bucEdges.forEach(([a,b]) => {
+    const nA = bucNodes[a], nB = bucNodes[b];
+    const edgePruned = nA.state==='pruned' || nB.state==='pruned';
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',nA.x); line.setAttribute('y1',nA.y+26);
+    line.setAttribute('x2',nB.x); line.setAttribute('y2',nB.y-26);
+    line.setAttribute('stroke', edgePruned ? '#334155' : '#6366f1');
+    line.setAttribute('stroke-width', edgePruned ? '1' : '2');
+    line.setAttribute('stroke-dasharray', edgePruned ? '4' : 'none');
+    line.setAttribute('opacity', edgePruned ? '0.4' : '0.7');
+    svg.appendChild(line);
+  });
+
+  // Labels
+  const dimLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+  dimLabel.setAttribute('x','10'); dimLabel.setAttribute('y','20');
+  dimLabel.setAttribute('fill','#94a3b8'); dimLabel.setAttribute('font-size','10');
+  dimLabel.textContent = 'A=City • B=Product • C=Month • min_support='+MIN_SUP;
+  svg.appendChild(dimLabel);
+
+  // Draw nodes
+  bucNodes.forEach(node => bucDrawNode(svg, node));
+}
+
+function markDescendantsPruned(nodeId) {
+  const node = bucNodes[nodeId];
+  node.children.forEach(cId => {
+    if (bucNodes[cId].state === 'idle' || bucNodes[cId].state === 'current') {
+      bucNodes[cId].state = 'pruned';
+      markDescendantsPruned(cId);
+    }
+  });
+}
+
+// BUC traversal: process nodes in BUC DFS order
+// BUC visits: {} → {A} → {A,B} → {A,B,C} → {A,C} → {A,C,...} → {B} → {B,C} → {C} (already pruned)
+const bucVisitSequence = [0,1,4,5,2,6,3];
+let bucVisitIdx = 0;
+
+function bucStep() {
+  if (bucVisitIdx >= bucVisitSequence.length) {
+    document.getElementById('buc-status').innerHTML = '<strong style="color:#10b981;">✅ BUC traversal complete!</strong> Included cuboids: {}, {A}, {A,B}, {A,C}, {B}. Pruned: {C}, {B,C}, {A,B,C}.';
+    return;
+  }
+  // Mark previous "current" as included/pruned
+  bucNodes.forEach(n => { if(n.state==='current') {
+    n.state = (n.count >= MIN_SUP) ? 'included' : 'pruned';
+    if (n.state === 'pruned') markDescendantsPruned(n.id);
+  }});
+
+  const nodeId = bucVisitSequence[bucVisitIdx];
+  const node = bucNodes[nodeId];
+  if (node.state === 'pruned') {
+    bucVisitIdx++;
+    document.getElementById('buc-status').innerHTML = `<span style="color:#f87171;">↩ Skipping ${node.label} — already pruned by ancestor.</span>`;
+    bucRender();
+    return;
+  }
+  node.state = 'current';
+  bucVisitIdx++;
+
+  const decision = node.count >= MIN_SUP
+    ? `<span style="color:#34d399;">✅ count=${node.count} ≥ ${MIN_SUP} → INCLUDE cuboid ${node.label}</span>`
+    : `<span style="color:#f87171;">❌ count=${node.count} < ${MIN_SUP} → PRUNE cuboid ${node.label} + all its descendants!</span>`;
+
+  document.getElementById('buc-status').innerHTML =
+    `<strong>Examining ${node.label}</strong> (dimensions: ${node.dims.join(', ')||'none — apex'})<br/>${decision}`;
+
+  bucRender();
+}
+
+function bucReset() {
+  bucNodes.forEach(n => n.state = 'idle');
+  bucVisitIdx = 0;
+  if (bucAutoTimer) { clearInterval(bucAutoTimer); bucAutoTimer = null; }
+  bucRender();
+  document.getElementById('buc-status').textContent = 'Press "Step" to begin BUC traversal. Starting from the apex {} (grand total).';
+}
+
+function bucAutoPlay() {
+  if (bucAutoTimer) { clearInterval(bucAutoTimer); bucAutoTimer = null; return; }
+  bucAutoTimer = setInterval(() => {
+    if (bucVisitIdx >= bucVisitSequence.length) {
+      clearInterval(bucAutoTimer); bucAutoTimer = null;
+      // Final step
+      bucNodes.forEach(n => { if(n.state==='current') n.state = n.count>=MIN_SUP?'included':'pruned'; });
+      bucRender();
+      return;
+    }
+    bucStep();
+  }, 1200);
+}
+
+/* ═══════════════════════════════════════
+   VIZ 3: CHUNK CANVAS (MultiWay)
+   ═══════════════════════════════════════ */
+let chunkStates = [];
+let chunkProcessed = 0;
+const CHUNK_ROWS = 3; const CHUNK_COLS = 4;
+const projAB = new Array(CHUNK_ROWS).fill(0);
+const projAC = new Array(CHUNK_ROWS).fill(0);
+const projBC = new Array(CHUNK_COLS).fill(0);
+
+function initChunkCanvas() {
+  chunkStates = [];
+  for (let r=0;r<CHUNK_ROWS;r++) for(let c=0;c<CHUNK_COLS;c++) chunkStates.push({r,c,state:'idle'});
+  projAB.fill(0); projAC.fill(0); projBC.fill(0);
+  chunkProcessed = 0;
+  drawChunks();
+  document.getElementById('chunk-status').textContent = 'Click any chunk to process it. Watch the 2D projections update!';
+}
+
+function drawChunks() {
+  const canvas = document.getElementById('chunk-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = 'rgba(0,0,0,0)';
+
+  const chunkW = 52, chunkH = 52, pad = 8;
+  const startX = 30, startY = 30;
+
+  // Title
+  ctx.fillStyle = '#94a3b8'; ctx.font = '11px system-ui';
+  ctx.fillText('3D Data Array (3×4 chunks)', 30, 18);
+  ctx.fillText('AB Proj', 400, 18); ctx.fillText('BC Proj', 550, 18);
+  ctx.fillText('AC Proj', 400, 170);
+
+  // Draw chunk grid
+  chunkStates.forEach(({r,c,state}) => {
+    const x = startX + c*(chunkW+pad);
+    const y = startY + r*(chunkH+pad);
+
+    let color;
+    if (state==='idle') color = '#1e293b';
+    else if (state==='processing') color = '#f59e0b';
+    else color = '#6366f1';
+
+    ctx.fillStyle = color;
+    ctx.strokeStyle = state==='idle'?'#334155':state==='processing'?'#fbbf24':'#818cf8';
+    ctx.lineWidth = state==='processing'?2.5:1.5;
+    roundRect(ctx, x, y, chunkW, chunkH, 6);
+    ctx.fill(); ctx.stroke();
+
+    if (state !== 'idle') {
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.font = 'bold 10px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText(state==='processing'?'⚙':'✓', x+chunkW/2, y+chunkH/2+4);
+    }
+
+    ctx.fillStyle = '#64748b'; ctx.font = '9px system-ui';
+    ctx.textAlign = 'center';
+    if (state==='idle') ctx.fillText(`[${r},${c}]`, x+chunkW/2, y+chunkH/2+4);
+    ctx.textAlign = 'left';
+  });
+
+  // Draw projections
+  const projColors = ['#10b981','#818cf8','#f59e0b'];
+
+  // AB projection (3 bars)
+  projAB.forEach((v,i) => {
+    const px = 390, py = 30+i*40;
+    ctx.fillStyle = '#1e293b'; ctx.strokeStyle='#334155'; ctx.lineWidth=1;
+    roundRect(ctx, px, py, 110, 30, 4); ctx.fill(); ctx.stroke();
+    if (v>0) {
+      ctx.fillStyle = '#10b981cc';
+      roundRect(ctx, px+2, py+2, Math.min(106, v*10), 26, 3); ctx.fill();
+    }
+    ctx.fillStyle='#94a3b8'; ctx.font='9px system-ui';
+    ctx.fillText('A='+i+': '+v, px+4, py+19);
+  });
+
+  // BC projection (4 bars)
+  projBC.forEach((v,j) => {
+    const px = 540, py = 30+j*38;
+    ctx.fillStyle = '#1e293b'; ctx.strokeStyle='#334155'; ctx.lineWidth=1;
+    roundRect(ctx, px, py, 110, 28, 4); ctx.fill(); ctx.stroke();
+    if (v>0) {
+      ctx.fillStyle = '#818cf8cc';
+      roundRect(ctx, px+2, py+2, Math.min(106, v*8), 24, 3); ctx.fill();
+    }
+    ctx.fillStyle='#94a3b8'; ctx.font='9px system-ui';
+    ctx.fillText('C='+j+': '+v, px+4, py+18);
+  });
+
+  // AC projection (3 bars, lower section)
+  projAC.forEach((v,i) => {
+    const px = 390, py = 175+i*40;
+    ctx.fillStyle = '#1e293b'; ctx.strokeStyle='#334155'; ctx.lineWidth=1;
+    roundRect(ctx, px, py, 110, 30, 4); ctx.fill(); ctx.stroke();
+    if (v>0) {
+      ctx.fillStyle = '#f59e0bcc';
+      roundRect(ctx, px+2, py+2, Math.min(106, v*11), 26, 3); ctx.fill();
+    }
+    ctx.fillStyle='#94a3b8'; ctx.font='9px system-ui';
+    ctx.fillText('A='+i+': '+v, px+4, py+19);
+  });
+
+  // Legend arrows
+  ctx.strokeStyle='#6366f1'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(290, 110); ctx.lineTo(385, 60); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(290, 110); ctx.lineTo(535, 90); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(290, 110); ctx.lineTo(385, 195); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('chunk-canvas');
+  if (canvas) {
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mx = (e.clientX - rect.left) * scaleX;
+      const my = (e.clientY - rect.top) * scaleY;
+      const chunkW=52, chunkH=52, pad=8, startX=30, startY=30;
+      chunkStates.forEach(chunk => {
+        const x = startX + chunk.c*(chunkW+pad);
+        const y = startY + chunk.r*(chunkH+pad);
+        if (mx>x && mx<x+chunkW && my>y && my<y+chunkH && chunk.state==='idle') {
+          processChunk(chunk);
+        }
+      });
+    });
+  }
+});
+
+function processChunk(chunk) {
+  chunk.state = 'processing';
+  drawChunks();
+  setTimeout(() => {
+    chunk.state = 'done';
+    // Simulate aggregation updates
+    const vals = Math.floor(Math.random()*8)+3;
+    projAB[chunk.r] += vals;
+    projBC[chunk.c] += vals;
+    projAC[chunk.r] += Math.floor(vals*0.7);
+    chunkProcessed++;
+    drawChunks();
+    const total = CHUNK_ROWS*CHUNK_COLS;
+    document.getElementById('chunk-status').innerHTML =
+      `Processed chunk [${chunk.r},${chunk.c}]. Updated AB, BC, AC projections simultaneously.<br/>
+      <strong style="color:#10b981;">${chunkProcessed}/${total} chunks done.</strong> ${chunkProcessed===total?'🎉 All cuboids computed in ONE sweep!':'Keep going!'}`;
+  }, 500);
+}
+
+function resetChunks() { initChunkCanvas(); }
+
+function autoChunks() {
+  const idle = chunkStates.filter(c=>c.state==='idle');
+  let i=0;
+  const timer = setInterval(()=>{
+    if (i>=idle.length) { clearInterval(timer); return; }
+    processChunk(idle[i]);
+    i++;
+  }, 400);
+}
+
+/* ═══════════════════════════════════════
+   QUIZ
+   ═══════════════════════════════════════ */
+let quizAnswered = {};
+let quizScore = 0;
+
+function checkQ(el, qId, correct) {
+  if (quizAnswered[qId]) return;
+  quizAnswered[qId] = true;
+  const options = el.parentElement.querySelectorAll('.quiz-option');
+  options.forEach(o => o.classList.add('disabled'));
+  if (correct) { el.classList.add('correct'); quizScore++; }
+  else {
+    el.classList.add('wrong');
+    options.forEach(o => { if (o.onclick.toString().includes('true')) o.classList.add('correct'); });
+  }
+}
+
+function submitQuiz() {
+  const answered = Object.keys(quizAnswered).length;
+  if (answered < 5) {
+    document.getElementById('quiz-result').innerHTML = '<span style="color:#f87171;">Please answer all 5 questions first!</span>';
+    document.getElementById('quiz-result').style.display='block';
+    return;
+  }
+  const pct = Math.round(quizScore/5*100);
+  let msg, color;
+  if (pct >= 80) { msg='🏆 Excellent! You\'ve mastered Data Cube Algorithms!'; color='#34d399'; }
+  else if (pct >= 60) { msg='👍 Good work! Review the highlighted answers and try again.'; color='#fbbf24'; }
+  else { msg='📚 Keep studying! Re-read the cards and retry.'; color='#f87171'; }
+  document.getElementById('quiz-result').innerHTML =
+    `<div style="background:rgba(0,0,0,.2);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:24px;font-weight:800;color:${color};">${quizScore}/5 (${pct}%)</div>
+      <div style="margin-top:6px;font-size:14px;">${msg}</div>
+    
+        <div class="mt-6 border-t border-[var(--border)] pt-6">
+          <h3 class="text-lg font-bold text-[#38bdf8] mb-4">📚 Advanced Data Cube Methodologies (VLDB / SIGMOD Papers)</h3>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">📜 Methodology 1: General Heuristics (Agarwal et al. VLDB 1996)</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Five Core Optimizations:</strong><br/>
+              1. <em>Smallest-Parent:</em> Compute a group-by from the smallest previously computed parent (e.g., compute $AB$ from $ABC$ rather than $ABCD$).<br/>
+              2. <em>Cache-Results:</em> Cache in-memory results of a group-by to compute downstream group-bys without disk I/O.<br/>
+              3. <em>Amortize-Scans:</em> Compute multiple group-bys in a single scan of a parent stored on disk.<br/>
+              4. <em>Share-Sorts:</em> Share sorting costs across multiple sort-based group-bys.<br/>
+              5. <em>Share-Partitions:</em> Share hash-partitioning costs across multiple hash-based group-bys.</p>
+              <p>• <strong>PipeSort Algorithm:</strong> Uses bipartite minimum-cost matching on the search lattice to generate an execution plan with <em>pipeline edges</em> (streaming without re-sorting) and <em>sort edges</em> (re-sorting required).</p>
+              <p>• <strong>PipeHash Algorithm:</strong> Constructs a Minimum Spanning Tree (MST) based on smallest parent sizes and divides it into memory-fitting subtrees computed in single passes.</p>
+              <p>• <strong>Overlap Method:</strong> Exploits partially matching sort orders using <em>sorted runs</em> and partitions as independent units of computation, reducing memory needs to a single partition at a time.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🌲 Methodology 4: H-Cubing with Top-k Average (Han et al. SIGMOD 2001)</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>The Problem:</strong> The measure <code>AVG</code> is NOT anti-monotonic. A cell's average can be low, yet its descendant cells may have high average. Direct Apriori pruning fails!</p>
+              <p>• <strong>Top-$k$ Average ($avg^k(c)$):</strong> Han et al. proved that the average of the <em>top $k$ base cells</em> under $c$ is a weaker condition that IS anti-monotonic: if $avg^k(c) < v$, then NO descendant cell can have average $\ge v$ with count $\ge k$. This restores search space pruning!</p>
+              <p>• <strong>Binning for Top-$k$ Average:</strong> Quant-info stores count, sum, and top-$k$ bin distributions. Large values ($\ge v$) are collapsed, and small values are placed into logarithmic bins.</p>
+              <p>• <strong>H-Tree (Prefix Hyper-Tree):</strong> Compresses data into a prefix tree with header tables and side-links. Constructed in a single database scan. Pruning occurs by rolling up quant-info and skipping nodes that fail top-$k$ average.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🐚 Methodology 6: High-Dimensional OLAP via Shell Fragments (Li et al. VLDB 2004)</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Curse of Dimensionality:</strong> With 50–100 dimensions, full and iceberg cubes explode in size. Even 2D/3D cuboids become too numerous to precompute.</p>
+              <p>• <strong>Frag-Shells Algorithm:</strong> Partitions dimensions vertically into small shell fragments ($F \le 3$, e.g., $\{A, B, C\}$ and $\{D, E\}$). Precomputes small local cubes for each fragment along with <strong>1-D Inverted Indices (TID lists)</strong>.</p>
+              <p>• <strong>Semi-Online Query Processing:</strong> When an online query arrives (e.g. $\langle a_1, ?, ?, d_1, e_2 : \text{count}
+\rangle$), it fetches the corresponding TID lists from the precomputed fragment cubes and intersects them dynamically to produce the answer in milliseconds.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🎯 Advanced Data Cubes: Sampling, Ranking, Prediction &amp; Discovery-Driven</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Sampling Cubes (Li et al. SIGMOD 2008):</strong> OLAP over statistical surveys and sample data. Stores sample statistics and calculates Confidence Intervals ($ar{x} \pm t_c \hat{\sigma}_{ar{x}}$) as algebraic measures. When samples are sparse, uses <strong>Intra-Cuboid</strong> and <strong>Inter-Cuboid Query Expansion</strong> (verified via two-sample $t$-test) to borrow data from similar cells and boost confidence.</p>
+              <p>• <strong>Ranking Cubes (Xin et al. VLDB 2006):</strong> Efficiently computes top-$k$ ranking queries by simultaneously pushing selection conditions and ranking functions into multidimensional cube partitions.</p>
+              <p>• <strong>Prediction Cubes (Chen et al. VLDB 2005):</strong> Stores predictive models in cube space to evaluate which subsets of data yield the highest predictive power for an attribute $V$.</p>
+              <p>• <strong>Multi-Feature Cubes (Ross et al. EDBT 1998):</strong> Supports complex queries with multiple dependent aggregates at varying granularities (e.g. finding max price, and then total sales only among max price tuples).</p>
+              <p>• <strong>Discovery-Driven Data Cubes (Sarawagi et al. EDBT 1998):</strong> Precomputes exception parameters (<code>SelfExp</code>: surprise relative to peer cells; <code>InExp</code>: surprise beneath cell; <code>PathExp</code>: surprise along drill-down path) based on log-linear models, guiding analysts visually to anomalous trends.</p>
+            </div>
+          </details>
+        </div>
+</div>`;
+  document.getElementById('quiz-result').style.display='block';
+}
+
+function resetQuiz() {
+  quizAnswered = {}; quizScore = 0;
+  document.querySelectorAll('.quiz-option').forEach(o => {
+    o.classList.remove('correct','wrong','disabled');
+  });
+  document.getElementById('quiz-result').style.display='none';
+}
+
+/* ═══════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════ */
+window.addEventListener('load', () => {
+  updateProgress();
+  // Initialize BUC SVG for when card 6 is first shown
+  bucRender();
+  // draw cube types if first card visible (it isn't, but harmless)
+});
+</script>
+
+<div id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+<script>
+function toggleMobileSidebar() {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('sidebar-backdrop');
+  if (sb) sb.classList.toggle('mobile-open');
+  if (bd) bd.classList.toggle('active');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const links = document.querySelectorAll('#sidebar a, #sidebar .sidebar-link, #sidebar button, [onclick*="jumpTo"], [onclick*="showCard"], [onclick*="goToCard"], [onclick*="gotoCard"]');
+  links.forEach(l => {
+    l.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        const sb = document.getElementById('sidebar');
+        const bd = document.getElementById('sidebar-backdrop');
+        if (sb) sb.classList.remove('mobile-open');
+        if (bd) bd.classList.remove('active');
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

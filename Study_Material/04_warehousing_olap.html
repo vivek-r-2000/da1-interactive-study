@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 4 — Data Warehousing & OLAP</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #0f1117;
+    --card: #1a1d27;
+    --sidebar: #13161f;
+    --foreground: #e8eaf0;
+    --muted-foreground: #8b90a0;
+    --border: #2a2d3a;
+    --primary: #6c63ff;
+    --primary-foreground: #ffffff;
+    --secondary: #22d3ee;
+    --accent: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 52px;
+    background: var(--sidebar);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 16px; z-index: 100;
+  }
+  #topbar .title { font-size: 13px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+  #progress-wrap { flex: 1; min-width: 0; }
+  #progress-label { font-size: 11px; color: var(--muted-foreground); margin-bottom: 3px; }
+  #progress-bar-bg { background: var(--border); border-radius: 4px; height: 6px; }
+  #progress-bar { height: 6px; border-radius: 4px; background: var(--primary); transition: width .4s ease; }
+  #timer-box {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 4px 10px; cursor: pointer; flex-shrink: 0;
+  }
+  #timer-display { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    position: fixed; top: 52px; left: 0; width: 220px; bottom: 0;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 12px 0; z-index: 90;
+  }
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .sidebar-section { padding: 6px 14px 2px; font-size: 10px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+  .sidebar-item {
+    padding: 6px 16px; font-size: 12px; color: var(--muted-foreground);
+    cursor: pointer; border-left: 3px solid transparent; transition: all .2s;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sidebar-item:hover { color: var(--foreground); background: rgba(108,99,255,.1); }
+  .sidebar-item.active { color: var(--primary); border-left-color: var(--primary); background: rgba(108,99,255,.12); }
+  .home-btn {
+    margin: 0 12px 10px; display: flex; align-items: center; gap: 6px;
+    background: rgba(108,99,255,.15); border: 1px solid rgba(108,99,255,.3);
+    border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600;
+    color: var(--primary); cursor: pointer; transition: all .2s;
+  }
+  .home-btn:hover { background: rgba(108,99,255,.28); }
+
+  /* ── MAIN CONTENT ── */
+  #main {
+    position: fixed; top: 52px; left: 220px; right: 0; bottom: 0;
+    overflow-y: auto; padding: 24px 28px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  #main::-webkit-scrollbar { width: 6px; }
+  #main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ── CARD ── */
+  .card {
+    width: 100%; max-width: 820px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px 30px;
+    display: none; animation: fadeSlide .35s ease;
+    margin-bottom: 24px;
+  }
+  .card.active { display: block; }
+  @keyframes fadeSlide { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }
+
+  .card-tag { font-size: 11px; font-weight: 700; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .card-header { font-size: 22px; font-weight: 800; margin-bottom: 14px; line-height: 1.3; }
+  .card-body { font-size: 14px; line-height: 1.75; color: var(--foreground); }
+  .card-body p { margin-bottom: 10px; }
+
+  /* Color accent borders per type */
+  .card.blue  { border-left: 5px solid #3b82f6; }
+  .card.green { border-left: 5px solid #10b981; }
+  .card.yellow{ border-left: 5px solid #f59e0b; }
+  .card.red   { border-left: 5px solid #ef4444; }
+  .card.purple{ border-left: 5px solid #a855f7; }
+  .card.teal  { border-left: 5px solid #14b8a6; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    margin-top: 16px; padding: 12px 16px;
+    border-radius: 10px; border-left: 4px solid var(--primary);
+    background: rgba(108,99,255,.1); font-size: 13px; line-height: 1.6;
+  }
+  .callout.amber { border-left-color: var(--accent); background: rgba(245,158,11,.1); }
+  .callout.green { border-left-color: #10b981; background: rgba(16,185,129,.08); }
+  .callout.red   { border-left-color: #ef4444; background: rgba(239,68,68,.08); }
+
+  /* ── FLIP CARD ── */
+  .flip-container { perspective: 900px; height: 160px; margin-top: 18px; cursor: pointer; }
+  .flip-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .55s ease; }
+  .flip-container.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-face {
+    position: absolute; inset: 0; backface-visibility: hidden;
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    padding: 20px; text-align: center; font-size: 14px; line-height: 1.6;
+  }
+  .flip-front { background: rgba(108,99,255,.15); border: 2px dashed rgba(108,99,255,.4); }
+  .flip-back  { background: rgba(16,185,129,.12); border: 2px solid rgba(16,185,129,.4); transform: rotateY(180deg); color: #10b981; font-weight: 600; }
+
+  /* ── NAV BUTTONS ── */
+  .nav-row { display: flex; gap: 12px; justify-content: space-between; margin-top: 22px; width: 100%; max-width: 820px; }
+  .nav-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--foreground); border-radius: 10px; padding: 9px 22px;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;
+  }
+  .nav-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .nav-btn.primary { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+  .nav-btn.primary:hover { opacity: .88; }
+  .nav-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* ── TABLES ── */
+  .styled-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13px; }
+  .styled-table th { background: rgba(108,99,255,.2); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  .styled-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,.04); }
+  .styled-table tr:hover td { background: rgba(255,255,255,.03); }
+
+  /* ── PROPERTY BADGE ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(108,99,255,.18); border: 1px solid rgba(108,99,255,.35);
+    color: var(--primary); border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 600; margin: 3px;
+  }
+  .badge.green  { background: rgba(16,185,129,.15); border-color: rgba(16,185,129,.3); color: #10b981; }
+  .badge.amber  { background: rgba(245,158,11,.15); border-color: rgba(245,158,11,.3); color: #f59e0b; }
+  .badge.red    { background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.3); color: #ef4444; }
+
+  /* ── QUIZ ── */
+  .quiz-option {
+    padding: 10px 16px; margin: 6px 0; border-radius: 9px;
+    border: 1px solid var(--border); cursor: pointer; font-size: 13px; transition: all .2s;
+  }
+  .quiz-option:hover { border-color: var(--primary); background: rgba(108,99,255,.08); }
+  .quiz-option.correct { background: rgba(16,185,129,.15); border-color: #10b981; color: #10b981; }
+  .quiz-option.wrong   { background: rgba(239,68,68,.12); border-color: #ef4444; color: #ef4444; }
+  .quiz-feedback { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 13px; display: none; }
+  .quiz-feedback.show { display: block; }
+
+  /* ── BREAK OVERLAY ── */
+  #break-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.82);
+    display: none; align-items: center; justify-content: center; z-index: 999;
+  }
+  #break-overlay.show { display: flex; }
+  .break-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 40px 48px; text-align: center; max-width: 380px;
+  }
+
+  /* ── APPENDIX ── */
+  details summary { cursor: pointer; font-weight: 700; color: var(--primary); padding: 8px 0; }
+  details[open] summary { color: var(--accent); }
+  .appendix-inner { padding: 14px 0; font-size: 13px; line-height: 1.7; color: var(--muted-foreground); }
+  .appendix-inner h4 { color: var(--foreground); margin: 12px 0 4px; font-size: 14px; }
+  .appendix-inner code { background: rgba(255,255,255,.07); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #22d3ee; }
+  pre.code-block {
+    background: rgba(0,0,0,.35); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px; font-family: monospace; font-size: 12px;
+    color: #22d3ee; overflow-x: auto; margin: 8px 0;
+  }
+
+  /* ── OLAP CUBE EXPLORER ── */
+  #cube-explorer { text-align: center; margin-top: 14px; }
+  #cube-svg { margin: 0 auto; display: block; }
+  .cube-btn-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px; }
+  .cube-op-btn {
+    padding: 7px 16px; border-radius: 20px; border: 1px solid var(--border);
+    font-size: 12px; font-weight: 700; cursor: pointer; transition: all .2s;
+    color: var(--foreground); background: var(--card);
+  }
+  .cube-op-btn:hover { border-color: var(--primary); color: var(--primary); }
+  #cube-desc {
+    margin-top: 10px; min-height: 36px; font-size: 13px;
+    color: var(--accent); font-style: italic; transition: opacity .3s;
+  }
+
+  /* ── STAR SCHEMA SVG ── */
+  #star-info {
+    margin-top: 10px; padding: 10px 14px; border-radius: 9px;
+    background: rgba(108,99,255,.1); border: 1px solid rgba(108,99,255,.25);
+    font-size: 12.5px; color: var(--foreground); min-height: 40px; display: none;
+  }
+
+  /* ── LATTICE ── */
+  .lattice-node {
+    cursor: pointer; transition: all .2s;
+  }
+  .lattice-node rect { rx: 8; ry: 8; }
+  #lattice-info {
+    margin-top: 10px; font-size: 13px; color: var(--secondary);
+    padding: 8px 14px; border-radius: 8px; background: rgba(34,211,238,.08);
+    border: 1px solid rgba(34,211,238,.2); min-height: 36px;
+  }
+
+  /* ── AOI TREE ── */
+  #aoi-table { width: 100%; font-size: 12px; border-collapse: collapse; margin-top: 10px; }
+  #aoi-table th { background: rgba(108,99,255,.2); padding: 6px 10px; border: 1px solid var(--border); }
+  #aoi-table td { padding: 6px 10px; border: 1px solid var(--border); transition: all .4s; }
+  .aoi-btn {
+    padding: 8px 20px; border-radius: 20px; border: 1px solid #10b981;
+    color: #10b981; font-weight: 700; font-size: 13px; cursor: pointer;
+    background: rgba(16,185,129,.1); margin-top: 12px; transition: all .2s;
+  }
+  .aoi-btn:hover { background: rgba(16,185,129,.22); }
+  #aoi-level { font-size: 12px; color: var(--muted-foreground); margin-top: 6px; }
+
+  /* Score display */
+  #score-display { text-align: center; margin-top: 20px; }
+  #score-display .score-num { font-size: 48px; font-weight: 900; color: var(--primary); }
+  #score-display .score-msg { font-size: 16px; margin-top: 8px; color: var(--muted-foreground); }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (PHONES & TABLETS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  #topbar {
+    padding: 0 10px !important;
+    gap: 6px !important;
+    height: 52px !important;
+    overflow-x: hidden !important;
+  }
+  #topbar .title, #topbar #module-title, #topbar #topbar-title, #topbar .module-title {
+    font-size: 11px !important;
+    max-width: 115px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  #topbar a, #topbar #home-btn {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+    white-space: nowrap !important;
+  }
+  #topbar #pomodoro {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+  }
+  #topbar #timer-display {
+    font-size: 12px !important;
+  }
+  #topbar #section-label, #topbar .sec-pill, #topbar .badge, #topbar #timer-btn-label {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: var(--card, #1e293b) !important;
+    border: 1px solid var(--border, #334155) !important;
+    color: var(--foreground, #f8fafc) !important;
+    padding: 5px 8px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+  }
+  #sidebar {
+    position: fixed !important;
+    top: 52px !important;
+    left: -320px !important;
+    width: 280px !important;
+    max-width: 82vw !important;
+    bottom: 0 !important;
+    height: calc(100vh - 52px) !important;
+    z-index: 9999 !important;
+    background: #0a0f1e !important;
+    border-right: 1px solid var(--border, #334155) !important;
+    box-shadow: 4px 0 25px rgba(0,0,0,0.7) !important;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #sidebar.mobile-open {
+    left: 0 !important;
+  }
+  #sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 52px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(3px);
+    z-index: 9998;
+  }
+  #sidebar-backdrop.active {
+    display: block !important;
+  }
+  #layout {
+    display: block !important;
+    margin-top: 52px !important;
+    height: calc(100vh - 52px) !important;
+    position: relative !important;
+    overflow-x: hidden !important;
+  }
+  #main, #card-container, .main-content, #content-area {
+    margin-left: 0 !important;
+    padding: 16px 12px 100px 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  .card, .card-screen, .card-box, .slide {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 12px !important;
+    margin-bottom: 16px !important;
+  }
+  h1 { font-size: 1.35rem !important; }
+  h2, .card-title { font-size: 1.15rem !important; }
+  h3 { font-size: 1.0rem !important; }
+  p, li, .card-body { font-size: 13.5px !important; line-height: 1.6 !important; }
+  #nav-bar, .bottom-nav, #navigation-bar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+    background: rgba(10, 15, 30, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 1px solid var(--border, #334155) !important;
+    z-index: 9000 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  .nav-btn, #prevBtn, #nextBtn {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    min-height: 42px !important;
+    flex: 1 !important;
+    max-width: 130px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  #cardIndicator, #card-counter, .card-counter {
+    font-size: 12px !important;
+    min-width: 65px !important;
+    text-align: center !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+}
+@media (min-width: 769px) {
+  .mobile-menu-btn, #sidebar-backdrop {
+    display: none !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ TOP BAR ═══ -->
+<div id="topbar">
+  <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation">☰ Menu</button>
+  <div class="title">🏛️ Module 4 — Data Warehousing &amp; OLAP</div>
+  <div id="progress-wrap">
+    <div id="progress-label">Card 1 of 25 • Section 1 of 6</div>
+    <div id="progress-bar-bg"><div id="progress-bar" style="width:4%"></div></div>
+  </div>
+  <div id="timer-box" onclick="toggleTimer()" title="Click to pause/resume">
+    <span>⏱️</span>
+    <span id="timer-display">15:00</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ SIDEBAR ═══ -->
+<div id="sidebar">
+  <div onclick="location.href='00_home.html'" class="home-btn">🏠 Back to Home</div>
+  <div class="sidebar-section">§1 Data Warehouse</div>
+  <div class="sidebar-item" onclick="jumpTo(0)">💼 Analogy: Cash Register</div>
+  <div class="sidebar-item" onclick="jumpTo(1)">📋 Inmon's 4 Properties</div>
+  <div class="sidebar-item" onclick="jumpTo(2)">⚡ OLTP vs OLAP</div>
+  <div class="sidebar-item" onclick="jumpTo(3)">📊 OLTP vs OLAP Table</div>
+  <div class="sidebar-item" onclick="jumpTo(4)">❓ Flip: Why Separate?</div>
+  <div class="sidebar-section">§2 Data Cube</div>
+  <div class="sidebar-item" onclick="jumpTo(5)">🎲 Analogy: Pivot on Steroids</div>
+  <div class="sidebar-item" onclick="jumpTo(6)">📐 Fact & Dimension Tables</div>
+  <div class="sidebar-item" onclick="jumpTo(7)">⭐ Star Schema (Visual)</div>
+  <div class="sidebar-item" onclick="jumpTo(8)">🔷 Cuboids & Lattice</div>
+  <div class="sidebar-item" onclick="jumpTo(9)">🕸️ Lattice of Cuboids</div>
+  <div class="sidebar-item" onclick="jumpTo(10)">📏 Measure Types</div>
+  <div class="sidebar-item" onclick="jumpTo(11)">❓ Flip: Median</div>
+  <div class="sidebar-section">§3 OLAP Operations</div>
+  <div class="sidebar-item" onclick="jumpTo(12)">🗺️ Analogy: Map Explorer</div>
+  <div class="sidebar-item" onclick="jumpTo(13)">🎮 3D Cube Explorer</div>
+  <div class="sidebar-item" onclick="jumpTo(14)">🔼 Roll-up</div>
+  <div class="sidebar-item" onclick="jumpTo(15)">🔽 Drill-down</div>
+  <div class="sidebar-item" onclick="jumpTo(16)">✂️ Slice &amp; Dice</div>
+  <div class="sidebar-item" onclick="jumpTo(17)">❓ Flip: Slice vs Dice</div>
+  <div class="sidebar-section">§4 Schema Types</div>
+  <div class="sidebar-item" onclick="jumpTo(18)">⭐ Star Schema</div>
+  <div class="sidebar-item" onclick="jumpTo(19)">❄️ Snowflake Schema</div>
+  <div class="sidebar-item" onclick="jumpTo(20)">🌌 Fact Constellation</div>
+  <div class="sidebar-section">§5 AOI</div>
+  <div class="sidebar-item" onclick="jumpTo(21)">🧑‍🤝‍🧑 Analogy: Summarizing Friends</div>
+  <div class="sidebar-item" onclick="jumpTo(22)">🔁 AOI Steps</div>
+  <div class="sidebar-item" onclick="jumpTo(23)">🌳 AOI Generalization Tree</div>
+  <div class="sidebar-item" onclick="jumpTo(24)">❓ Flip: Concept Hierarchy</div>
+  <div class="sidebar-section">§6 Quiz</div>
+  <div class="sidebar-item" onclick="jumpTo(25)">📝 End-of-Module Quiz</div>
+  <div class="sidebar-section">Appendix</div>
+  <div class="sidebar-item" onclick="jumpTo(26)">📚 Appendix</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ MAIN ═══ -->
+<div id="main">
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 0 ━━ -->
+<div class="card green active" id="card-0">
+  <div class="card-tag">🏛️ Data Warehouse • Card 1 of 25</div>
+  <div class="card-header">💼 What IS a Data Warehouse? — The Analogy</div>
+  <div class="card-body">
+    <p>Imagine two parts of a business:</p>
+    <p>🏪 <strong>The cash register</strong> — It handles transactions <em>right now</em>. Customer buys something → register records it instantly. This is your <strong>operational database (OLTP)</strong>.</p>
+    <p>📒 <strong>The accountant's annual report binder</strong> — It doesn't process today's sales. Instead, it <em>accumulates years of data</em> — revenues, trends, comparisons — for the CEO to study patterns. This is your <strong>data warehouse</strong>.</p>
+    <p>The key insight: <strong>the warehouse is NOT for day-to-day transactions.</strong> It's for stepping back and asking big questions like "How did our sales grow over the last 5 years?"</p>
+    <div class="callout amber">
+      💡 <strong>Why it matters:</strong> Without a warehouse, every "how are we doing?" question would slow down the live transaction system — like forcing the cashier to stop and write a quarterly report mid-sale!
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 1 ━━ -->
+<div class="card blue" id="card-1">
+  <div class="card-tag">🏛️ Data Warehouse • Card 2 of 25</div>
+  <div class="card-header">📋 Inmon's 4 Key Properties</div>
+  <div class="card-body">
+    <p>W.H. Inmon (the "father of data warehousing") defined a data warehouse with 4 properties:</p>
+    <div style="margin-top:14px; display:grid; gap:10px;">
+      <div style="padding:12px 16px; border-radius:10px; background:rgba(59,130,246,.1); border:1px solid rgba(59,130,246,.3);">
+        <strong>1. 🎯 Subject-Oriented</strong><br/>
+        <span style="font-size:13px; color:var(--muted-foreground);">Organized around subjects (Sales, Inventory) — not departments (HR, Finance). Like sorting a library by topic, not by who donated the book.</span>
+      </div>
+      <div style="padding:12px 16px; border-radius:10px; background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.25);">
+        <strong>2. 🔗 Integrated</strong><br/>
+        <span style="font-size:13px; color:var(--muted-foreground);">Data from many source systems is cleaned and merged. One unified definition for "customer" or "product" across all departments.</span>
+      </div>
+      <div style="padding:12px 16px; border-radius:10px; background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.25);">
+        <strong>3. ⏳ Time-Variant</strong><br/>
+        <span style="font-size:13px; color:var(--muted-foreground);">Keeps historical snapshots. An OLTP system shows the current price; the warehouse shows the price on every date in history.</span>
+      </div>
+      <div style="padding:12px 16px; border-radius:10px; background:rgba(168,85,247,.08); border:1px solid rgba(168,85,247,.25);">
+        <strong>4. 🔒 Non-Volatile</strong><br/>
+        <span style="font-size:13px; color:var(--muted-foreground);">Data is <em>loaded</em> in bulk, then <em>read-only</em>. Nobody updates individual rows. Old data stays unchanged — it's a historical record.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 2 ━━ -->
+<div class="card blue" id="card-2">
+  <div class="card-tag">🏛️ Data Warehouse • Card 3 of 25</div>
+  <div class="card-header">⚡ OLTP vs OLAP — Two Worlds</div>
+  <div class="card-body">
+    <p><span class="badge">OLTP</span> <strong>Online Transaction Processing</strong> — the engine of daily business.</p>
+    <p>It handles <em>fast reads and writes</em>: "Did customer #123 pay today?" "Update stock level for product #456." Thousands of small operations per second.</p>
+    <hr style="border-color:var(--border); margin: 14px 0;"/>
+    <p><span class="badge green">OLAP</span> <strong>Online Analytical Processing</strong> — the engine of business intelligence.</p>
+    <p>It handles <em>complex, slow queries over massive data</em>: "What was the total revenue by region in Q3 2025 vs Q3 2024, broken down by product category?"</p>
+    <div class="callout green">
+      🚀 Think of OLTP as a surgeon performing an operation (precise, fast, live) and OLAP as a medical researcher studying patterns across thousands of patient records (thorough, analytical, historical).
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 3 ━━ -->
+<div class="card teal" id="card-3">
+  <div class="card-tag">🏛️ Data Warehouse • Card 4 of 25</div>
+  <div class="card-header">📊 OLTP vs OLAP — Side-by-Side</div>
+  <div class="card-body">
+    <p>Click a row to highlight it and see the contrast more clearly:</p>
+    <table class="styled-table" id="olap-table">
+      <thead><tr><th>Property</th><th>🏪 OLTP</th><th>📊 OLAP</th></tr></thead>
+      <tbody>
+        <tr onclick="hlRow(this)" style="cursor:pointer">
+          <td><strong>Users</strong></td><td>Clerks, staff</td><td>Analysts, managers</td>
+        </tr>
+        <tr onclick="hlRow(this)" style="cursor:pointer">
+          <td><strong>Purpose</strong></td><td>Run the business</td><td>Understand the business</td>
+        </tr>
+        <tr onclick="hlRow(this)" style="cursor:pointer">
+          <td><strong>DB Design</strong></td><td>Entity-relationship (normalized)</td><td>Star / Snowflake schema</td>
+        </tr>
+        <tr onclick="hlRow(this)" style="cursor:pointer">
+          <td><strong>Query Type</strong></td><td>Simple (INSERT/UPDATE/SELECT)</td><td>Complex aggregations (GROUP BY)</td>
+        </tr>
+        <tr onclick="hlRow(this)" style="cursor:pointer">
+          <td><strong>Data Size</strong></td><td>MB to GB</td><td>GB to TB+</td>
+        </tr>
+        <tr onclick="hlRow(this)" style="cursor:pointer">
+          <td><strong>Freshness</strong></td><td>Real-time</td><td>Periodic snapshots (ETL)</td>
+        </tr>
+        <tr onclick="hlRow(this)" style="cursor:pointer">
+          <td><strong>Read/Write</strong></td><td>Heavy writes</td><td>Mostly reads</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout" style="margin-top:12px; font-size:12px;">👆 Click any row to highlight it!</div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 4 ━━ -->
+<div class="card purple" id="card-4">
+  <div class="card-tag">🏛️ Data Warehouse • Card 5 of 25</div>
+  <div class="card-header">❓ Active Recall — Flip the Card!</div>
+  <div class="card-body">
+    <p>Think about your answer, <strong>then click the card</strong> to reveal it.</p>
+    <div class="flip-container" id="flip-0" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-face flip-front">
+          <div>
+            <div style="font-size:28px; margin-bottom:8px">🤔</div>
+            <strong>Why maintain a SEPARATE data warehouse instead of running analysis directly on the OLTP database?</strong>
+          </div>
+        </div>
+        <div class="flip-face flip-back">
+          <div>
+            <div style="font-size:22px; margin-bottom:8px">✅</div>
+            <strong>Two reasons:</strong><br/>
+            1️⃣ Analysis queries are slow & complex — they'd <em>block real-time transactions</em>, making your app unusable.<br/>
+            2️⃣ Warehouses store <em>HISTORY</em> — OLTP systems typically overwrite old data with current values.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:14px; font-size:12px;">
+      🎉 <strong>Section 1 complete!</strong> You understand what a data warehouse is and why it exists. Moving to the fun part — Data Cubes! 🎲
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 5 ━━ -->
+<div class="card green" id="card-5">
+  <div class="card-tag">🎲 Data Cube • Card 6 of 25</div>
+  <div class="card-header">🎲 Data Cube — Pivot Table on Steroids</div>
+  <div class="card-body">
+    <p>You've probably used an Excel pivot table — rows are <em>months</em>, columns are <em>products</em>, cells show <em>sales</em>. That's a 2D view.</p>
+    <p>Now imagine a <strong>3D cube</strong> where the three axes are:</p>
+    <div style="display:flex; gap:10px; margin: 10px 0; flex-wrap:wrap;">
+      <span class="badge amber">📦 Product</span>
+      <span class="badge" style="color:#22d3ee; background:rgba(34,211,238,.12); border-color:rgba(34,211,238,.3)">📅 Time</span>
+      <span class="badge green">🌍 Region</span>
+    </div>
+    <p>Each tiny <em>cell</em> inside the cube holds a number — like <strong>total sales</strong> for that Product × Time × Region combination.</p>
+    <svg width="240" height="180" viewBox="0 0 240 180" style="display:block; margin:10px auto;">
+      <!-- isometric cube faces -->
+      <polygon points="120,10 220,60 220,140 120,90" fill="rgba(108,99,255,.35)" stroke="rgba(108,99,255,.8)" stroke-width="1.5"/>
+      <polygon points="20,60 120,10 120,90 20,140" fill="rgba(34,211,238,.25)" stroke="rgba(34,211,238,.7)" stroke-width="1.5"/>
+      <polygon points="20,140 120,90 220,140 120,170" fill="rgba(16,185,129,.25)" stroke="rgba(16,185,129,.7)" stroke-width="1.5"/>
+      <!-- labels -->
+      <text x="180" y="80" fill="rgba(108,99,255,.9)" font-size="11" font-weight="bold">Time →</text>
+      <text x="20" y="100" fill="rgba(34,211,238,.9)" font-size="11" font-weight="bold">Product →</text>
+      <text x="120" y="168" fill="rgba(16,185,129,.9)" font-size="11" font-weight="bold" text-anchor="middle">Region →</text>
+      <!-- cell dot -->
+      <circle cx="145" cy="85" r="5" fill="#f59e0b"/>
+      <text x="152" y="78" fill="#f59e0b" font-size="10">Sales</text>
+    </svg>
+    <div class="callout amber">💡 The magic of a data cube is that you can instantly <em>sum</em> or <em>aggregate</em> along any axis — giving you quick answers to multi-dimensional questions.</div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 6 ━━ -->
+<div class="card blue" id="card-6">
+  <div class="card-tag">🎲 Data Cube • Card 7 of 25</div>
+  <div class="card-header">📐 Fact Table + Dimension Tables</div>
+  <div class="card-body">
+    <p>A data cube is implemented as two types of tables in a database:</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:12px;">
+      <div style="padding:14px; border-radius:12px; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3);">
+        <div style="font-size:20px; margin-bottom:6px">📊</div>
+        <strong>Fact Table</strong>
+        <p style="font-size:12px; color:var(--muted-foreground); margin-top:6px;">The numbers you measure: Sales Amount, Revenue, Quantity Sold, Profit. These are your <em>metrics</em>.</p>
+        <p style="font-size:12px; margin-top:6px;">Also holds <em>foreign keys</em> pointing to dimension tables.</p>
+      </div>
+      <div style="padding:14px; border-radius:12px; background:rgba(108,99,255,.1); border:1px solid rgba(108,99,255,.3);">
+        <div style="font-size:20px; margin-bottom:6px">📋</div>
+        <strong>Dimension Tables</strong>
+        <p style="font-size:12px; color:var(--muted-foreground); margin-top:6px;">The context for those numbers: Products (name, category), Dates (day, month, year, quarter), Customers, Locations.</p>
+        <p style="font-size:12px; margin-top:6px;">These are your <em>axes</em> of the cube.</p>
+      </div>
+    </div>
+    <div class="callout green" style="margin-top:14px;">
+      🍕 <strong>Pizza analogy:</strong> Fact table = the receipt (amounts). Dimension tables = the menu (what product), calendar (what day), address book (which location).
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 7 ━━ -->
+<div class="card teal" id="card-7">
+  <div class="card-tag">🎲 Data Cube • Card 8 of 25</div>
+  <div class="card-header">⭐ Star Schema — Interactive Diagram</div>
+  <div class="card-body">
+    <p>The <strong>Star Schema</strong> puts the Fact Table in the centre, surrounded by dimension tables — like a star. <strong>Click any table</strong> to see its columns.</p>
+    <svg id="star-svg" width="100%" viewBox="0 0 500 300" style="max-height:260px; display:block; margin:0 auto;">
+      <!-- Lines -->
+      <line x1="250" y1="150" x2="250" y2="40" stroke="var(--border)" stroke-width="2"/>
+      <line x1="250" y1="150" x2="390" y2="150" stroke="var(--border)" stroke-width="2"/>
+      <line x1="250" y1="150" x2="250" y2="260" stroke="var(--border)" stroke-width="2"/>
+      <line x1="250" y1="150" x2="110" y2="150" stroke="var(--border)" stroke-width="2"/>
+      <!-- Fact Table -->
+      <rect x="185" y="120" width="130" height="60" rx="10" fill="rgba(245,158,11,.25)" stroke="#f59e0b" stroke-width="2" id="star-fact" style="cursor:pointer"/>
+      <text x="250" y="147" text-anchor="middle" fill="#f59e0b" font-weight="bold" font-size="12" id="star-fact-t" style="cursor:pointer">📊 SALES_FACT</text>
+      <text x="250" y="163" text-anchor="middle" fill="var(--muted-foreground)" font-size="10" style="cursor:pointer">sale_id, amount,</text>
+      <text x="250" y="175" text-anchor="middle" fill="var(--muted-foreground)" font-size="10" style="cursor:pointer">prod_key, date_key...</text>
+      <!-- DIM tables -->
+      <rect x="185" y="10" width="130" height="50" rx="10" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.7)" stroke-width="1.5" class="dim-rect" data-dim="products" style="cursor:pointer"/>
+      <text x="250" y="37" text-anchor="middle" fill="var(--primary)" font-weight="bold" font-size="12" class="dim-text" data-dim="products" style="cursor:pointer">📦 DIM_PRODUCTS</text>
+      <text x="250" y="52" text-anchor="middle" fill="var(--muted-foreground)" font-size="10" class="dim-text" data-dim="products" style="cursor:pointer">Click to see columns</text>
+
+      <rect x="365" y="125" width="130" height="50" rx="10" fill="rgba(34,211,238,.15)" stroke="rgba(34,211,238,.6)" stroke-width="1.5" class="dim-rect" data-dim="time" style="cursor:pointer"/>
+      <text x="430" y="148" text-anchor="middle" fill="#22d3ee" font-weight="bold" font-size="12" class="dim-text" data-dim="time" style="cursor:pointer">📅 DIM_TIME</text>
+      <text x="430" y="163" text-anchor="middle" fill="var(--muted-foreground)" font-size="10" class="dim-text" data-dim="time" style="cursor:pointer">Click to see columns</text>
+
+      <rect x="185" y="240" width="130" height="50" rx="10" fill="rgba(16,185,129,.15)" stroke="rgba(16,185,129,.6)" stroke-width="1.5" class="dim-rect" data-dim="customers" style="cursor:pointer"/>
+      <text x="250" y="263" text-anchor="middle" fill="#10b981" font-weight="bold" font-size="12" class="dim-text" data-dim="customers" style="cursor:pointer">👤 DIM_CUSTOMERS</text>
+      <text x="250" y="278" text-anchor="middle" fill="var(--muted-foreground)" font-size="10" class="dim-text" data-dim="customers" style="cursor:pointer">Click to see columns</text>
+
+      <rect x="5" y="125" width="130" height="50" rx="10" fill="rgba(239,68,68,.12)" stroke="rgba(239,68,68,.5)" stroke-width="1.5" class="dim-rect" data-dim="locations" style="cursor:pointer"/>
+      <text x="70" y="148" text-anchor="middle" fill="#ef4444" font-weight="bold" font-size="12" class="dim-text" data-dim="locations" style="cursor:pointer">🌍 DIM_LOCATIONS</text>
+      <text x="70" y="163" text-anchor="middle" fill="var(--muted-foreground)" font-size="10" class="dim-text" data-dim="locations" style="cursor:pointer">Click to see columns</text>
+    </svg>
+    <div id="star-info"></div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 8 ━━ -->
+<div class="card blue" id="card-8">
+  <div class="card-tag">🎲 Data Cube • Card 9 of 25</div>
+  <div class="card-header">🔷 Cuboids &amp; the Lattice</div>
+  <div class="card-body">
+    <p>With 3 dimensions (Product × Time × Location), you can summarize data in multiple ways — each summary is called a <strong>cuboid</strong>.</p>
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:8px; margin:12px 0;">
+      <div style="padding:8px; border-radius:8px; background:rgba(108,99,255,.12); border:1px solid rgba(108,99,255,.25); font-size:12px; text-align:center;">
+        <strong>All 3 dims</strong><br/><span style="color:var(--muted-foreground)">Product × Time × Location</span>
+      </div>
+      <div style="padding:8px; border-radius:8px; background:rgba(34,211,238,.1); border:1px solid rgba(34,211,238,.25); font-size:12px; text-align:center;">
+        <strong>2 dims</strong><br/><span style="color:var(--muted-foreground)">Product × Time</span>
+      </div>
+      <div style="padding:8px; border-radius:8px; background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.25); font-size:12px; text-align:center;">
+        <strong>1 dim</strong><br/><span style="color:var(--muted-foreground)">Only Product</span>
+      </div>
+      <div style="padding:8px; border-radius:8px; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); font-size:12px; text-align:center;">
+        <strong>0 dims (Apex)</strong><br/><span style="color:var(--muted-foreground)">Grand Total</span>
+      </div>
+    </div>
+    <p>The full collection of ALL possible cuboids forms the <strong>Lattice of Cuboids</strong>. For 3 dimensions, there are 2³ = <strong>8 cuboids</strong> total.</p>
+    <div class="callout amber">
+      💡 The <strong>base cuboid</strong> has ALL dimensions (most detailed). The <strong>apex cuboid</strong> has NO dimensions (just the grand total — one number).
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 9 ━━ -->
+<div class="card teal" id="card-9">
+  <div class="card-tag">🎲 Data Cube • Card 10 of 25</div>
+  <div class="card-header">🕸️ Lattice of Cuboids — Click to Explore</div>
+  <div class="card-body">
+    <p>Each node is a cuboid. <strong>Click a node</strong> to see what aggregation it represents:</p>
+    <svg id="lattice-svg" width="100%" viewBox="0 0 480 280" style="max-height:260px; display:block; margin:0 auto;">
+      <!-- Edges top to level1 -->
+      <line x1="240" y1="30" x2="100" y2="110" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="240" y1="30" x2="240" y2="110" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="240" y1="30" x2="380" y2="110" stroke="var(--border)" stroke-width="1.5"/>
+      <!-- level1 to level2 -->
+      <line x1="100" y1="110" x2="100" y2="190" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="100" y1="110" x2="240" y2="190" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="240" y1="110" x2="100" y2="190" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="240" y1="110" x2="380" y2="190" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="380" y1="110" x2="240" y2="190" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="380" y1="110" x2="380" y2="190" stroke="var(--border)" stroke-width="1.5"/>
+      <!-- level2 to bottom -->
+      <line x1="100" y1="190" x2="240" y2="265" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="240" y1="190" x2="240" y2="265" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="380" y1="190" x2="240" y2="265" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Apex {} -->
+      <g class="lattice-node" onclick="showLattice('apex')" style="cursor:pointer">
+        <rect x="195" y="10" width="90" height="34" rx="7" fill="rgba(245,158,11,.25)" stroke="#f59e0b" stroke-width="2" id="ln-apex"/>
+        <text x="240" y="32" text-anchor="middle" fill="#f59e0b" font-weight="bold" font-size="13">{ } Apex</text>
+      </g>
+      <!-- Level 1: single dims -->
+      <g class="lattice-node" onclick="showLattice('A')" style="cursor:pointer">
+        <rect x="55" y="95" width="90" height="32" rx="7" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.7)" stroke-width="1.5"/>
+        <text x="100" y="116" text-anchor="middle" fill="var(--primary)" font-weight="bold" font-size="12">{Product}</text>
+      </g>
+      <g class="lattice-node" onclick="showLattice('B')" style="cursor:pointer">
+        <rect x="195" y="95" width="90" height="32" rx="7" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.7)" stroke-width="1.5"/>
+        <text x="240" y="116" text-anchor="middle" fill="var(--primary)" font-weight="bold" font-size="12">{Time}</text>
+      </g>
+      <g class="lattice-node" onclick="showLattice('C')" style="cursor:pointer">
+        <rect x="335" y="95" width="90" height="32" rx="7" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.7)" stroke-width="1.5"/>
+        <text x="380" y="116" text-anchor="middle" fill="var(--primary)" font-weight="bold" font-size="12">{Location}</text>
+      </g>
+      <!-- Level 2: pairs -->
+      <g class="lattice-node" onclick="showLattice('AB')" style="cursor:pointer">
+        <rect x="50" y="175" width="100" height="32" rx="7" fill="rgba(34,211,238,.15)" stroke="rgba(34,211,238,.6)" stroke-width="1.5"/>
+        <text x="100" y="196" text-anchor="middle" fill="#22d3ee" font-weight="bold" font-size="11">{Prod × Time}</text>
+      </g>
+      <g class="lattice-node" onclick="showLattice('AC')" style="cursor:pointer">
+        <rect x="185" y="175" width="110" height="32" rx="7" fill="rgba(34,211,238,.15)" stroke="rgba(34,211,238,.6)" stroke-width="1.5"/>
+        <text x="240" y="196" text-anchor="middle" fill="#22d3ee" font-weight="bold" font-size="11">{Prod × Loc}</text>
+      </g>
+      <g class="lattice-node" onclick="showLattice('BC')" style="cursor:pointer">
+        <rect x="330" y="175" width="100" height="32" rx="7" fill="rgba(34,211,238,.15)" stroke="rgba(34,211,238,.6)" stroke-width="1.5"/>
+        <text x="380" y="196" text-anchor="middle" fill="#22d3ee" font-weight="bold" font-size="11">{Time × Loc}</text>
+      </g>
+      <!-- Base {ABC} -->
+      <g class="lattice-node" onclick="showLattice('ABC')" style="cursor:pointer">
+        <rect x="170" y="250" width="140" height="32" rx="7" fill="rgba(16,185,129,.2)" stroke="rgba(16,185,129,.7)" stroke-width="2"/>
+        <text x="240" y="272" text-anchor="middle" fill="#10b981" font-weight="bold" font-size="12">{Prod×Time×Loc}</text>
+      </g>
+    </svg>
+    <div id="lattice-info">👆 Click a node to see what it computes.</div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 10 ━━ -->
+<div class="card yellow" id="card-10">
+  <div class="card-tag">🎲 Data Cube • Card 11 of 25</div>
+  <div class="card-header">📏 Measure Types — Distributive, Algebraic, Holistic</div>
+  <div class="card-body">
+    <p>Not all aggregation functions (measures) work the same way:</p>
+    <div style="margin-top:12px; display:grid; gap:10px;">
+      <div style="padding:12px 16px; border-radius:10px; background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3);">
+        <strong>✅ Distributive</strong> — Can compute from sub-parts.<br/>
+        <span style="font-size:12px; color:var(--muted-foreground);">Total sales = North sales + South sales + East sales. Examples: <code style="color:#22d3ee">COUNT, SUM, MIN, MAX</code></span>
+      </div>
+      <div style="padding:12px 16px; border-radius:10px; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3);">
+        <strong>🔧 Algebraic</strong> — Formula of distributive pieces.<br/>
+        <span style="font-size:12px; color:var(--muted-foreground);">AVG = SUM / COUNT. Both SUM and COUNT are distributive, so AVG can be computed. Examples: <code style="color:#22d3ee">AVG, STANDARD_DEVIATION</code></span>
+      </div>
+      <div style="padding:12px 16px; border-radius:10px; background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3);">
+        <strong>❌ Holistic</strong> — Need ALL data together.<br/>
+        <span style="font-size:12px; color:var(--muted-foreground);">You CANNOT combine medians of regions to get overall median. Must see all values. Examples: <code style="color:#22d3ee">MEDIAN, MODE, RANK</code></span>
+      </div>
+    </div>
+    <div class="callout red" style="margin-top:12px;">⚠️ Holistic measures are <strong>expensive</strong> in data warehouses — they can't be pre-computed in parts!</div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 11 ━━ -->
+<div class="card purple" id="card-11">
+  <div class="card-tag">🎲 Data Cube • Card 12 of 25</div>
+  <div class="card-header">❓ Active Recall — Flip the Card!</div>
+  <div class="card-body">
+    <p>Think carefully, then click:</p>
+    <div class="flip-container" id="flip-1" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-face flip-front">
+          <div>
+            <div style="font-size:28px; margin-bottom:8px">🤔</div>
+            <strong>Can you compute the OVERALL MEDIAN sales by combining the median of each region? Why or why not?</strong>
+          </div>
+        </div>
+        <div class="flip-face flip-back">
+          <div>
+            <div style="font-size:22px; margin-bottom:8px">✅</div>
+            <strong>NO!</strong> Median is <em>holistic</em>. You need ALL values sorted together.<br/><br/>
+            Example: Region A: [1,2,3] → median=2. Region B: [10,20,30] → median=20.<br/>
+            Combined [1,2,3,10,20,30] → median = (3+10)/2 = 6.5. Not 2 or 20!
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:14px; font-size:12px;">🎉 <strong>Section 2 done!</strong> Now let's explore OLAP operations — the fun "moves" you can make on a data cube. 🎮</div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 12 ━━ -->
+<div class="card green" id="card-12">
+  <div class="card-tag">🗺️ OLAP Operations • Card 13 of 25</div>
+  <div class="card-header">🗺️ OLAP Operations — The Map Explorer</div>
+  <div class="card-body">
+    <p>Imagine you're using Google Maps on a cube-shaped world made of sales data:</p>
+    <div style="display:grid; gap:9px; margin-top:12px;">
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:rgba(108,99,255,.1); border:1px solid rgba(108,99,255,.2);">
+        <span style="font-size:22px">🔼</span>
+        <div><strong>Roll-up</strong> — Zoom OUT. Monthly data → Yearly data. Less detail, bigger picture.</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:rgba(34,211,238,.08); border:1px solid rgba(34,211,238,.2);">
+        <span style="font-size:22px">🔽</span>
+        <div><strong>Drill-down</strong> — Zoom IN. Yearly → Monthly → Daily. More detail, narrower focus.</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.2);">
+        <span style="font-size:22px">✂️</span>
+        <div><strong>Slice</strong> — Pick one layer. "Show me only Q1." 3D cube → 2D slice.</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.2);">
+        <span style="font-size:22px">🎛️</span>
+        <div><strong>Dice</strong> — Filter multiple layers. "Q1 AND Electronics only." Sub-cube.</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2);">
+        <span style="font-size:22px">🔄</span>
+        <div><strong>Pivot</strong> — Rotate axes. Swap rows and columns for a new perspective.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 13 ━━ -->
+<div class="card teal" id="card-13">
+  <div class="card-tag">🗺️ OLAP Operations • Card 14 of 25</div>
+  <div class="card-header">🎮 3D Cube Explorer — Click an Operation</div>
+  <div class="card-body">
+    <div id="cube-explorer">
+      <svg id="cube-svg" width="260" height="200" viewBox="0 0 260 200">
+        <!-- Base cube - isometric projection -->
+        <g id="cube-group">
+          <!-- Right face -->
+          <polygon id="cp-right" points="130,40 210,80 210,160 130,120" fill="rgba(108,99,255,.35)" stroke="rgba(108,99,255,.9)" stroke-width="1.8"/>
+          <!-- Left face -->
+          <polygon id="cp-left"  points="50,80 130,40 130,120 50,160" fill="rgba(34,211,238,.25)" stroke="rgba(34,211,238,.8)" stroke-width="1.8"/>
+          <!-- Top face -->
+          <polygon id="cp-top"   points="50,80 130,40 210,80 130,120" fill="rgba(16,185,129,.3)" stroke="rgba(16,185,129,.8)" stroke-width="1.8"/>
+          <!-- Dim labels -->
+          <text x="168" y="96" text-anchor="middle" fill="rgba(108,99,255,.9)" font-size="10" font-weight="bold">Time →</text>
+          <text x="82" y="105" text-anchor="middle" fill="rgba(34,211,238,.9)" font-size="10" font-weight="bold">Region →</text>
+          <text x="130" y="68" text-anchor="middle" fill="rgba(16,185,129,.9)" font-size="10" font-weight="bold">Product →</text>
+          <!-- Slice plane (hidden by default) -->
+          <polygon id="slice-plane" points="130,40 210,80 210,160 130,120" fill="rgba(239,68,68,.55)" stroke="#ef4444" stroke-width="2" opacity="0" style="transition: opacity .5s"/>
+          <!-- Sub-cube for dice -->
+          <g id="dice-sub" opacity="0" style="transition: opacity .5s">
+            <polygon points="130,80 170,100 170,140 130,120" fill="rgba(245,158,11,.6)" stroke="#f59e0b" stroke-width="2"/>
+            <polygon points="90,100 130,80 130,120 90,140" fill="rgba(245,158,11,.45)" stroke="#f59e0b" stroke-width="2"/>
+            <polygon points="90,100 130,80 170,100 130,120" fill="rgba(245,158,11,.5)" stroke="#f59e0b" stroke-width="2"/>
+          </g>
+          <!-- Axis labels -->
+          <text x="215" y="170" fill="var(--muted-foreground)" font-size="9">Q1-Q4</text>
+          <text x="30"  y="170" fill="var(--muted-foreground)" font-size="9">N/S/E/W</text>
+          <text x="115" y="32"  fill="var(--muted-foreground)" font-size="9">Electronics/Food</text>
+        </g>
+        <!-- Pivot arrows (hidden by default) -->
+        <g id="pivot-arrows" opacity="0" style="transition: opacity .5s">
+          <path d="M 200 30 Q 240 60 215 100" stroke="#f59e0b" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
+          <path d="M 60 170 Q 20 140 50 100" stroke="#f59e0b" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
+          <defs>
+            <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#f59e0b"/>
+            </marker>
+          </defs>
+        </g>
+      </svg>
+      <div class="cube-btn-row">
+        <button class="cube-op-btn" onclick="cubeOp('rollup')" style="border-color:#a855f7; color:#a855f7">🔼 Roll-up</button>
+        <button class="cube-op-btn" onclick="cubeOp('drilldown')" style="border-color:#22d3ee; color:#22d3ee">🔽 Drill-down</button>
+        <button class="cube-op-btn" onclick="cubeOp('slice')" style="border-color:#ef4444; color:#ef4444">✂️ Slice</button>
+        <button class="cube-op-btn" onclick="cubeOp('dice')" style="border-color:#f59e0b; color:#f59e0b">🎛️ Dice</button>
+        <button class="cube-op-btn" onclick="cubeOp('pivot')" style="border-color:#10b981; color:#10b981">🔄 Pivot</button>
+        <button class="cube-op-btn" onclick="cubeOp('reset')" style="font-size:11px">↩ Reset</button>
+      </div>
+      <div id="cube-desc">👆 Click an operation to animate the cube and see what happens!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 14 ━━ -->
+<div class="card blue" id="card-14">
+  <div class="card-tag">🗺️ OLAP Operations • Card 15 of 25</div>
+  <div class="card-header">🔼 Roll-up — Climbing Up the Hierarchy</div>
+  <div class="card-body">
+    <p><strong>Roll-up</strong> reduces detail by climbing up a concept hierarchy or reducing dimensions.</p>
+    <div style="display:flex; align-items:center; gap:8px; margin:14px 0; flex-wrap:wrap;">
+      <span style="padding:6px 14px; border-radius:20px; background:rgba(108,99,255,.2); border:1px solid rgba(108,99,255,.4); font-size:13px;">Jan 1st sales</span>
+      <span style="color:var(--accent); font-size:20px">→</span>
+      <span style="padding:6px 14px; border-radius:20px; background:rgba(108,99,255,.2); border:1px solid rgba(108,99,255,.4); font-size:13px;">January sales</span>
+      <span style="color:var(--accent); font-size:20px">→</span>
+      <span style="padding:6px 14px; border-radius:20px; background:rgba(108,99,255,.2); border:1px solid rgba(108,99,255,.4); font-size:13px;">Q1 sales</span>
+      <span style="color:var(--accent); font-size:20px">→</span>
+      <span style="padding:6px 14px; border-radius:20px; background:rgba(108,99,255,.2); border:1px solid rgba(108,99,255,.4); font-size:13px;">2025 sales</span>
+    </div>
+    <p>You can also roll up by <em>reducing a dimension</em> — aggregate across all regions to get a global total.</p>
+    <p><strong>SQL equivalent:</strong> <code style="background:rgba(255,255,255,.07); padding:2px 6px; border-radius:4px; color:#22d3ee">GROUP BY year</code> instead of <code style="background:rgba(255,255,255,.07); padding:2px 6px; border-radius:4px; color:#22d3ee">GROUP BY month</code>.</p>
+    <div class="callout amber">
+      💡 <strong>Memory hook:</strong> Roll-up = Rolling up a map to see less detail but a bigger area. "Zoom out."
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 15 ━━ -->
+<div class="card blue" id="card-15">
+  <div class="card-tag">🗺️ OLAP Operations • Card 16 of 25</div>
+  <div class="card-header">🔽 Drill-down — Into the Details</div>
+  <div class="card-body">
+    <p><strong>Drill-down</strong> is the reverse of roll-up. You navigate <em>from summary to detail</em>.</p>
+    <div style="display:flex; align-items:center; gap:8px; margin:14px 0; flex-wrap:wrap;">
+      <span style="padding:6px 14px; border-radius:20px; background:rgba(34,211,238,.15); border:1px solid rgba(34,211,238,.3); font-size:13px;">2025 sales</span>
+      <span style="color:#22d3ee; font-size:20px">→</span>
+      <span style="padding:6px 14px; border-radius:20px; background:rgba(34,211,238,.15); border:1px solid rgba(34,211,238,.3); font-size:13px;">Q1 sales</span>
+      <span style="color:#22d3ee; font-size:20px">→</span>
+      <span style="padding:6px 14px; border-radius:20px; background:rgba(34,211,238,.15); border:1px solid rgba(34,211,238,.3); font-size:13px;">Jan sales</span>
+      <span style="color:#22d3ee; font-size:20px">→</span>
+      <span style="padding:6px 14px; border-radius:20px; background:rgba(34,211,238,.15); border:1px solid rgba(34,211,238,.3); font-size:13px;">Jan 1 sales</span>
+    </div>
+    <p>Real example: You see Q1 revenue dropped. You drill-down to see <em>which month</em> caused it, then <em>which week</em>, then <em>which day</em>. You're a detective finding the culprit! 🕵️</p>
+    <div class="callout green">
+      💡 Drill-down can also mean <em>adding a new dimension</em> — going from "sales by region" to "sales by region AND product category."
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 16 ━━ -->
+<div class="card blue" id="card-16">
+  <div class="card-tag">🗺️ OLAP Operations • Card 17 of 25</div>
+  <div class="card-header">✂️ Slice &amp; 🎛️ Dice</div>
+  <div class="card-body">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:10px;">
+      <div style="padding:16px; border-radius:12px; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.3);">
+        <div style="font-size:22px; margin-bottom:8px">✂️ Slice</div>
+        <p style="font-size:13px;"><strong>Fix ONE dimension</strong> to a single value.</p>
+        <p style="font-size:12px; color:var(--muted-foreground); margin-top:6px;">3D cube → 2D plane</p>
+        <div style="margin-top:8px; font-size:12px; color:#ef4444; background:rgba(239,68,68,.1); padding:6px 10px; border-radius:6px;">
+          Example:<br/>"Show me only Q1 data"<br/><code>Time = 'Q1'</code>
+        </div>
+      </div>
+      <div style="padding:16px; border-radius:12px; background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.3);">
+        <div style="font-size:22px; margin-bottom:8px">🎛️ Dice</div>
+        <p style="font-size:13px;"><strong>Fix MULTIPLE dimensions</strong> to specific ranges.</p>
+        <p style="font-size:12px; color:var(--muted-foreground); margin-top:6px;">3D cube → smaller 3D sub-cube</p>
+        <div style="margin-top:8px; font-size:12px; color:#f59e0b; background:rgba(245,158,11,.1); padding:6px 10px; border-radius:6px;">
+          Example:<br/>"Q1, Electronics, North"<br/><code>Time='Q1' AND Cat='Elec'</code>
+        </div>
+      </div>
+    </div>
+    <div class="callout amber" style="margin-top:14px;">
+      🧲 <strong>Easy memory trick:</strong> Slice = cheese slicer (removes one layer). Dice = cutting food into cubes (cuts in multiple directions at once).
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 17 ━━ -->
+<div class="card purple" id="card-17">
+  <div class="card-tag">🗺️ OLAP Operations • Card 18 of 25</div>
+  <div class="card-header">❓ Active Recall — Flip the Card!</div>
+  <div class="card-body">
+    <div class="flip-container" id="flip-2" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-face flip-front">
+          <div>
+            <div style="font-size:28px; margin-bottom:8px">🤔</div>
+            <strong>What is the difference between Slice and Dice in OLAP? Give an example of each.</strong>
+          </div>
+        </div>
+        <div class="flip-face flip-back">
+          <div>
+            <div style="font-size:20px; margin-bottom:8px">✅</div>
+            <strong>Slice:</strong> Fix ONE dimension → reduces 3D to 2D face.<br/>
+            "Only show Q1 data" <br/><br/>
+            <strong>Dice:</strong> Fix MULTIPLE dimensions → smaller sub-cube (still 3D).<br/>
+            "Q1, Electronics, North region only"
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:14px; font-size:12px;">🎉 <strong>Section 3 done!</strong> Excellent! On to Schema Types — how we physically structure the warehouse.</div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 18 ━━ -->
+<div class="card blue" id="card-18">
+  <div class="card-tag">🏗️ Schema Types • Card 19 of 25</div>
+  <div class="card-header">⭐ Star Schema</div>
+  <div class="card-body">
+    <p>The simplest warehouse schema. One central <strong>fact table</strong>, surrounded by <strong>denormalized dimension tables</strong>.</p>
+    <svg width="100%" viewBox="0 0 300 160" style="max-height:150px; margin:10px 0;">
+      <rect x="115" y="60" width="70" height="40" rx="7" fill="rgba(245,158,11,.3)" stroke="#f59e0b" stroke-width="1.8"/>
+      <text x="150" y="85" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="bold">FACT</text>
+      <line x1="150" y1="60" x2="150" y2="25" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="185" y1="80" x2="240" y2="80" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="150" y1="100" x2="150" y2="135" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="115" y1="80" x2="60" y2="80" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="115" y="5" width="70" height="28" rx="6" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.6)" stroke-width="1.5"/>
+      <text x="150" y="23" text-anchor="middle" fill="var(--primary)" font-size="10">DIM_TIME</text>
+      <rect x="245" y="66" width="55" height="28" rx="6" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.6)" stroke-width="1.5"/>
+      <text x="272" y="84" text-anchor="middle" fill="var(--primary)" font-size="10">DIM_LOC</text>
+      <rect x="115" y="127" width="70" height="28" rx="6" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.6)" stroke-width="1.5"/>
+      <text x="150" y="145" text-anchor="middle" fill="var(--primary)" font-size="10">DIM_PROD</text>
+      <rect x="0" y="66" width="60" height="28" rx="6" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.6)" stroke-width="1.5"/>
+      <text x="30" y="84" text-anchor="middle" fill="var(--primary)" font-size="10">DIM_CUST</text>
+    </svg>
+    <p>✅ <strong>Pros:</strong> Simple queries, fast performance.</p>
+    <p>⚠️ <strong>Cons:</strong> Dimension tables may have redundant data (denormalized).</p>
+    <div class="callout amber">💡 A star schema is like a solar system — one sun (fact table) with planets (dims) orbiting it directly.</div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 19 ━━ -->
+<div class="card blue" id="card-19">
+  <div class="card-tag">🏗️ Schema Types • Card 20 of 25</div>
+  <div class="card-header">❄️ Snowflake Schema</div>
+  <div class="card-body">
+    <p>Like a star schema, but dimension tables are <strong>normalized</strong> — split into sub-tables to remove redundancy.</p>
+    <svg width="100%" viewBox="0 0 360 180" style="max-height:160px; margin:10px 0;">
+      <rect x="140" y="75" width="70" height="35" rx="7" fill="rgba(245,158,11,.3)" stroke="#f59e0b" stroke-width="1.8"/>
+      <text x="175" y="97" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="bold">FACT</text>
+      <!-- dim product -->
+      <line x1="175" y1="75" x2="175" y2="45" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="135" y="20" width="80" height="28" rx="6" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.6)" stroke-width="1.5"/>
+      <text x="175" y="38" text-anchor="middle" fill="var(--primary)" font-size="10">DIM_PRODUCT</text>
+      <line x1="175" y1="20" x2="175" y2="5" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="130" y="-10" width="90" height="18" rx="5" fill="rgba(168,85,247,.15)" stroke="rgba(168,85,247,.5)" stroke-width="1.2"/>
+      <text x="175" y="2" text-anchor="middle" fill="#a855f7" font-size="9">DIM_CATEGORY</text>
+      <!-- dim loc -->
+      <line x1="210" y1="92" x2="268" y2="92" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="270" y="78" width="70" height="28" rx="6" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.6)" stroke-width="1.5"/>
+      <text x="305" y="96" text-anchor="middle" fill="var(--primary)" font-size="10">DIM_CITY</text>
+      <line x1="340" y1="92" x2="358" y2="92" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="358" y="78" width="0" height="0"/>
+      <text x="350" y="108" fill="rgba(168,85,247,.8)" font-size="9">→ DIM_COUNTRY</text>
+      <!-- dim time -->
+      <line x1="175" y1="110" x2="175" y2="145" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="130" y="145" width="90" height="28" rx="6" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.6)" stroke-width="1.5"/>
+      <text x="175" y="163" text-anchor="middle" fill="var(--primary)" font-size="10">DIM_DATE</text>
+      <line x1="175" y1="173" x2="175" y2="178" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="175" y="178" text-anchor="middle" fill="rgba(168,85,247,.8)" font-size="9">→ DIM_MONTH → DIM_YEAR</text>
+    </svg>
+    <p>✅ <strong>Pros:</strong> Less storage (no redundancy), cleaner data.</p>
+    <p>⚠️ <strong>Cons:</strong> More complex JOIN queries, slower performance.</p>
+    <div class="callout">💡 Snowflake = star with icy branches! The dim tables grow outward into sub-tables.</div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 20 ━━ -->
+<div class="card blue" id="card-20">
+  <div class="card-tag">🏗️ Schema Types • Card 21 of 25</div>
+  <div class="card-header">🌌 Fact Constellation (Galaxy Schema)</div>
+  <div class="card-body">
+    <p>When you have <strong>multiple fact tables</strong> that <em>share</em> some dimension tables, you get a <strong>Fact Constellation</strong> — also called a Galaxy Schema.</p>
+    <svg width="100%" viewBox="0 0 400 160" style="max-height:150px; margin:12px 0;">
+      <!-- Fact 1 -->
+      <rect x="30" y="65" width="90" height="35" rx="7" fill="rgba(245,158,11,.3)" stroke="#f59e0b" stroke-width="1.8"/>
+      <text x="75" y="87" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="bold">FACT_SALES</text>
+      <!-- Fact 2 -->
+      <rect x="285" y="65" width="95" height="35" rx="7" fill="rgba(239,68,68,.25)" stroke="#ef4444" stroke-width="1.8"/>
+      <text x="332" y="87" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="bold">FACT_ORDERS</text>
+      <!-- Shared dim TIME -->
+      <rect x="170" y="5" width="70" height="28" rx="6" fill="rgba(16,185,129,.2)" stroke="rgba(16,185,129,.6)" stroke-width="1.5"/>
+      <text x="205" y="23" text-anchor="middle" fill="#10b981" font-size="10">DIM_TIME ✓</text>
+      <!-- Shared dim LOCATION -->
+      <rect x="170" y="127" width="70" height="28" rx="6" fill="rgba(16,185,129,.2)" stroke="rgba(16,185,129,.6)" stroke-width="1.5"/>
+      <text x="205" y="144" text-anchor="middle" fill="#10b981" font-size="10">DIM_LOC ✓</text>
+      <!-- Lines -->
+      <line x1="120" y1="80" x2="170" y2="20" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="285" y1="80" x2="240" y2="20" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="120" y1="90" x2="170" y2="140" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="285" y1="90" x2="240" y2="140" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="205" y="86" text-anchor="middle" fill="var(--muted-foreground)" font-size="12">🌌 Shared</text>
+    </svg>
+    <p>Use case: One company tracks both <em>Sales</em> and <em>Orders</em>, sharing the same Time and Location dimensions.</p>
+    <div class="callout" style="margin-top:10px;">🎉 <strong>Section 4 complete!</strong> Now for a fascinating data mining technique — AOI.</div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 21 ━━ -->
+<div class="card green" id="card-21">
+  <div class="card-tag">🌳 AOI • Card 22 of 25</div>
+  <div class="card-header">🧑‍🤝‍🧑 AOI — Summarizing Your Friends</div>
+  <div class="card-body">
+    <p>Imagine you want to describe your friend group to someone new. You could say:</p>
+    <div style="padding:12px 16px; border-radius:10px; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.25); margin:10px 0; font-size:13px;">
+      ❌ "Alice: 22, works at Google, New York, &dollar;80k. Bob: 25, works at Meta, Seattle, &dollar;90k. Carol: 23, works at Amazon, Seattle, &dollar;85k..."
+    </div>
+    <p>OR you could say:</p>
+    <div style="padding:12px 16px; border-radius:10px; background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3); margin:10px 0; font-size:13px;">
+      ✅ "Most friends are <strong>young professionals</strong> working at <strong>Big Tech companies</strong> in the <strong>Pacific Northwest/New York</strong> area with <strong>good salaries</strong>."
+    </div>
+    <p>That's <strong>Attribute-Oriented Induction (AOI)</strong> — automatically <em>generalizing</em> specific data into a readable summary by climbing concept hierarchies.</p>
+    <div class="callout amber">💡 AOI helps you go from a messy database table to a clean, human-readable summary — automatically!</div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 22 ━━ -->
+<div class="card blue" id="card-22">
+  <div class="card-tag">🌳 AOI • Card 23 of 25</div>
+  <div class="card-header">🔁 AOI — Step by Step</div>
+  <div class="card-body">
+    <p>AOI works in a series of steps:</p>
+    <div style="display:grid; gap:8px; margin-top:12px; counter-reset: step-counter;">
+      <div style="display:flex; gap:12px; align-items:flex-start; padding:10px 14px; border-radius:9px; background:rgba(255,255,255,.04); border:1px solid var(--border);">
+        <span style="font-size:20px; font-weight:900; color:var(--primary); min-width:24px;">1</span>
+        <div><strong>Start with a data relation</strong> — your initial query result (e.g., all student records).</div>
+      </div>
+      <div style="display:flex; gap:12px; align-items:flex-start; padding:10px 14px; border-radius:9px; background:rgba(255,255,255,.04); border:1px solid var(--border);">
+        <span style="font-size:20px; font-weight:900; color:var(--primary); min-width:24px;">2</span>
+        <div><strong>Remove irrelevant attributes</strong> — e.g., drop Student_ID (too specific, not useful for patterns).</div>
+      </div>
+      <div style="display:flex; gap:12px; align-items:flex-start; padding:10px 14px; border-radius:9px; background:rgba(255,255,255,.04); border:1px solid var(--border);">
+        <span style="font-size:20px; font-weight:900; color:var(--primary); min-width:24px;">3</span>
+        <div><strong>Generalize attribute values</strong> — Replace "New York" with "Northeast USA", or "22" with "Young Adult".</div>
+      </div>
+      <div style="display:flex; gap:12px; align-items:flex-start; padding:10px 14px; border-radius:9px; background:rgba(255,255,255,.04); border:1px solid var(--border);">
+        <span style="font-size:20px; font-weight:900; color:var(--primary); min-width:24px;">4</span>
+        <div><strong>Merge duplicate rows</strong> — After generalization, many rows become identical; merge and count them.</div>
+      </div>
+      <div style="display:flex; gap:12px; align-items:flex-start; padding:10px 14px; border-radius:9px; background:rgba(255,255,255,.04); border:1px solid var(--border);">
+        <span style="font-size:20px; font-weight:900; color:var(--primary); min-width:24px;">5</span>
+        <div><strong>Stop when table is small enough</strong> — A few rows that summarize the whole dataset.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 23 ━━ -->
+<div class="card teal" id="card-23">
+  <div class="card-tag">🌳 AOI • Card 24 of 25</div>
+  <div class="card-header">🌳 AOI Generalization — Interactive Demo</div>
+  <div class="card-body">
+    <p>Click <strong>Generalize</strong> to watch the data climb up the concept hierarchy:</p>
+    <table id="aoi-table">
+      <thead><tr><th>Name</th><th id="city-header">City</th><th id="age-header">Age</th><th id="salary-header">Salary</th></tr></thead>
+      <tbody id="aoi-tbody">
+        <tr><td>Alice</td><td id="c1">New York</td><td id="a1">22</td><td id="s1">&dollar;78,000</td></tr>
+        <tr><td>Bob</td><td id="c2">Seattle</td><td id="a2">25</td><td id="s2">&dollar;92,000</td></tr>
+        <tr><td>Carol</td><td id="c3">Boston</td><td id="a3">23</td><td id="s3">&dollar;85,000</td></tr>
+        <tr><td>Dave</td><td id="c4">Portland</td><td id="a4">28</td><td id="s4">&dollar;110,000</td></tr>
+      </tbody>
+    </table>
+    <div style="text-align:center;">
+      <button class="aoi-btn" id="aoi-gen-btn" onclick="aoiGeneralize()">🔼 Generalize</button>
+      <button class="aoi-btn" onclick="aoiReset()" style="margin-left:8px; border-color:#a855f7; color:#a855f7; background:rgba(168,85,247,.1);">↩ Reset</button>
+    </div>
+    <div id="aoi-level">Level 0: Raw specific data</div>
+    <svg width="100%" viewBox="0 0 400 80" style="max-height:75px; margin-top:8px;">
+      <!-- Hierarchy tree for city -->
+      <text x="200" y="14" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">Concept Hierarchy: City</text>
+      <text x="70"  y="38" text-anchor="middle" fill="#22d3ee" font-size="10">New York</text>
+      <text x="155" y="38" text-anchor="middle" fill="#22d3ee" font-size="10">Seattle</text>
+      <text x="240" y="38" text-anchor="middle" fill="#22d3ee" font-size="10">Boston</text>
+      <text x="325" y="38" text-anchor="middle" fill="#22d3ee" font-size="10">Portland</text>
+      <line x1="70" y1="42" x2="130" y2="57" stroke="var(--border)" stroke-width="1"/>
+      <line x1="155" y1="42" x2="270" y2="57" stroke="var(--border)" stroke-width="1"/>
+      <line x1="240" y1="42" x2="130" y2="57" stroke="var(--border)" stroke-width="1"/>
+      <line x1="325" y1="42" x2="270" y2="57" stroke="var(--border)" stroke-width="1"/>
+      <text x="130" y="66" text-anchor="middle" fill="#10b981" font-size="10">Northeast USA</text>
+      <text x="270" y="66" text-anchor="middle" fill="#10b981" font-size="10">Pacific Northwest</text>
+      <line x1="130" y1="69" x2="200" y2="78" stroke="var(--border)" stroke-width="1"/>
+      <line x1="270" y1="69" x2="200" y2="78" stroke="var(--border)" stroke-width="1"/>
+      <text x="200" y="79" text-anchor="middle" fill="#f59e0b" font-size="10">USA</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 24 ━━ -->
+<div class="card purple" id="card-24">
+  <div class="card-tag">🌳 AOI • Card 25 of 25</div>
+  <div class="card-header">❓ Active Recall — Flip the Card!</div>
+  <div class="card-body">
+    <div class="flip-container" id="flip-3" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-face flip-front">
+          <div>
+            <div style="font-size:28px; margin-bottom:8px">🤔</div>
+            <strong>What is a "concept hierarchy" in Attribute-Oriented Induction?</strong>
+          </div>
+        </div>
+        <div class="flip-face flip-back">
+          <div>
+            <div style="font-size:22px; margin-bottom:8px">✅</div>
+            A <strong>tree</strong> that maps specific values to increasingly general ones.<br/><br/>
+            Examples:<br/>
+            📅 January → Q1 → 2026 → 2020s<br/>
+            🏙️ New York → Northeast → USA → Americas<br/>
+            💰 &dollar;78,000 → Good Salary → High Income
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:14px; font-size:12px;">
+      🚀 <strong>All 25 content cards complete!</strong> Time for the final quiz — let's see how much you've learned!
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 25 — QUIZ ━━ -->
+<div class="card" id="card-25" style="border-left: 5px solid var(--primary);">
+  <div class="card-tag">📝 END-OF-MODULE QUIZ</div>
+  <div class="card-header">📝 Test Your Knowledge — 5 Questions</div>
+  <div class="card-body" id="quiz-body">
+    <div id="quiz-area"></div>
+    <div id="score-display" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CARD 26 — APPENDIX ━━ -->
+<div class="card" id="card-26" style="border-left: 5px solid var(--muted-foreground);">
+  <div class="card-tag">📚 APPENDIX — First Principles</div>
+  <div class="card-header">📚 Appendix</div>
+  <div class="card-body">
+    <details>
+      <summary>📘 SQL GROUP BY Refresher</summary>
+      <div class="appendix-inner">
+        <p><code>GROUP BY</code> aggregates rows sharing a common value:</p>
+        <pre class="code-block">SELECT region, SUM(sales) AS total
+FROM sales_table
+GROUP BY region;</pre>
+        <p>This is the SQL equivalent of a Roll-up. Adding more columns to <code>GROUP BY</code> = more granular cuboid.</p>
+      </div>
+    </details>
+    <details>
+      <summary>🔷 Jim Gray's CUBE Operator</summary>
+      <div class="appendix-inner">
+        <p>SQL <code>GROUP BY CUBE(a, b, c)</code> computes ALL possible GROUP BY combinations — the full lattice of cuboids.</p>
+        <pre class="code-block">SELECT product, time, location, SUM(sales)
+FROM sales
+GROUP BY CUBE(product, time, location);</pre>
+        <p>For 3 dimensions, this runs 2³ = 8 queries automatically! <code>ROLLUP(a, b, c)</code> only computes the hierarchy path: abc → ab → a → ().</p>
+      </div>
+    </details>
+    <details>
+      <summary>⚡ ROLAP vs MOLAP vs HOLAP</summary>
+      <div class="appendix-inner">
+        <h4>ROLAP — Relational OLAP</h4>
+        <p>Stores data in regular relational tables. Flexible but slower for complex queries.</p>
+        <h4>MOLAP — Multidimensional OLAP</h4>
+        <p>Stores data in pre-built multidimensional arrays. Very fast but requires more storage and less flexible.</p>
+        <h4>HOLAP — Hybrid OLAP</h4>
+        <p>Combines both: detailed data in relational storage, aggregates in multidimensional arrays. Best of both worlds.</p>
+        <table class="styled-table" style="margin-top:10px;">
+          <thead><tr><th>Type</th><th>Storage</th><th>Speed</th><th>Flexibility</th></tr></thead>
+          <tbody>
+            <tr><td>ROLAP</td><td>Relational DB</td><td>Slower</td><td>High</td></tr>
+            <tr><td>MOLAP</td><td>MD Array</td><td>Fastest</td><td>Low</td></tr>
+            <tr><td>HOLAP</td><td>Both</td><td>Fast</td><td>Medium</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details>
+      <summary>🔢 Bitmap Index Basics</summary>
+      <div class="appendix-inner">
+        <p>A <strong>bitmap index</strong> represents each distinct value as a bit-vector (0s and 1s).</p>
+        <p>Example — "Region" column with values North, South, East:</p>
+        <pre class="code-block">Row  | North | South | East
+-----|-------|-------|-----
+  1  |   1   |   0   |   0    ← Row 1 is North
+  2  |   0   |   1   |   0    ← Row 2 is South
+  3  |   0   |   0   |   1    ← Row 3 is East
+  4  |   1   |   0   |   0    ← Row 4 is North</pre>
+        <p>To find all North rows: just read the "North" column (mostly 0s and 1s — super fast!). Bitmap indexes are ideal for low-cardinality warehouse dimensions.</p>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- Nav Row -->
+<div class="nav-row">
+  <button class="nav-btn" id="btn-prev" onclick="navigate(-1)" disabled>← Previous</button>
+  <span id="nav-section-label" style="font-size:12px; color:var(--muted-foreground); align-self:center;"></span>
+  <button class="nav-btn primary" id="btn-next" onclick="navigate(1)">Next →</button>
+</div>
+
+</div><!-- end #main -->
+
+<!-- ═══════════════════════════════════════════ BREAK OVERLAY ═══ -->
+<div id="break-overlay">
+  <div class="break-box">
+    <div style="font-size:48px; margin-bottom:12px;">⏰</div>
+    <div style="font-size:20px; font-weight:800; margin-bottom:8px;">Great work! 🎉</div>
+    <div style="font-size:14px; color:var(--muted-foreground); margin-bottom:20px;">You've been studying for 15 minutes.<br/>Take a 5-minute break — your brain will thank you!</div>
+    <button class="nav-btn primary" onclick="resumeTimer()" style="padding:10px 32px; font-size:14px;">▶️ Resume Study</button>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════ SCRIPTS ═══ -->
+<script>
+// ─── CARD NAVIGATION ───────────────────────────────────────────────
+const TOTAL_CARDS = 27; // 0-26
+let currentCard = 0;
+
+const sectionMap = [
+  {section:'Data Warehouse',cards:[0,1,2,3,4]},
+  {section:'Data Cube',cards:[5,6,7,8,9,10,11]},
+  {section:'OLAP Operations',cards:[12,13,14,15,16,17]},
+  {section:'Schema Types',cards:[18,19,20]},
+  {section:'AOI',cards:[21,22,23,24]},
+  {section:'Quiz',cards:[25]},
+  {section:'Appendix',cards:[26]}
+];
+
+function getSectionOf(idx) {
+  for(let s=0;s<sectionMap.length;s++){
+    if(sectionMap[s].cards.includes(idx)) return {num:s+1, name:sectionMap[s].section};
+  }
+  return {num:1, name:'?'};
+}
+
+function showCard(idx) {
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  document.getElementById('card-'+idx).classList.add('active');
+  currentCard = idx;
+
+  // progress
+  const pct = Math.round(((idx+1)/TOTAL_CARDS)*100);
+  document.getElementById('progress-bar').style.width = pct+'%';
+  const sec = getSectionOf(idx);
+  document.getElementById('progress-label').textContent =
+    `Card ${idx+1} of ${TOTAL_CARDS} • Section ${sec.num} of ${sectionMap.length}`;
+  document.getElementById('nav-section-label').textContent = `§${sec.num}: ${sec.name}`;
+
+  // sidebar highlight
+  document.querySelectorAll('.sidebar-item').forEach((el,i)=>el.classList.toggle('active', i===idx));
+
+  // buttons
+  document.getElementById('btn-prev').disabled = idx===0;
+  document.getElementById('btn-next').disabled = idx===TOTAL_CARDS-1;
+
+  window.scrollTo({top:0});
+  document.getElementById('main').scrollTop = 0;
+}
+
+function navigate(dir) { showCard(Math.max(0,Math.min(TOTAL_CARDS-1, currentCard+dir))); }
+function jumpTo(idx)    { showCard(idx); }
+
+// ─── TABLE ROW HIGHLIGHT ────────────────────────────────────────────
+let lastRow = null;
+function hlRow(row) {
+  if(lastRow) { lastRow.style.background=''; lastRow.style.color=''; }
+  if(lastRow === row) { lastRow=null; return; }
+  row.style.background='rgba(108,99,255,.18)';
+  row.style.color='var(--foreground)';
+  lastRow = row;
+}
+
+// ─── STAR SCHEMA CLICK ──────────────────────────────────────────────
+const dimInfo = {
+  products: '📦 <strong>DIM_PRODUCTS columns:</strong> product_key (PK), product_name, category, subcategory, brand, unit_cost, unit_price',
+  time:     '📅 <strong>DIM_TIME columns:</strong> date_key (PK), date, day_of_week, week, month, quarter, year, is_holiday',
+  customers:'👤 <strong>DIM_CUSTOMERS columns:</strong> customer_key (PK), customer_id, name, email, age_group, city, segment',
+  locations:'🌍 <strong>DIM_LOCATIONS columns:</strong> location_key (PK), city, state, region, country, postal_code'
+};
+document.querySelectorAll('.dim-rect, .dim-text').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const dim = el.dataset.dim;
+    const box = document.getElementById('star-info');
+    box.style.display='block';
+    box.innerHTML = dimInfo[dim];
+  });
+});
+document.getElementById('star-fact').addEventListener('click',()=>{
+  const box=document.getElementById('star-info');
+  box.style.display='block';
+  box.innerHTML='📊 <strong>SALES_FACT columns:</strong> sale_id (PK), amount, quantity, profit, product_key (FK), date_key (FK), customer_key (FK), location_key (FK)';
+});
+document.getElementById('star-fact-t').addEventListener('click',()=>document.getElementById('star-fact').dispatchEvent(new Event('click')));
+
+// ─── LATTICE CLICK ──────────────────────────────────────────────────
+const latticeDesc = {
+  apex: '⭐ APEX cuboid {} — The Grand Total. One single number: total sales across ALL products, ALL time, ALL locations. No breakdown at all.',
+  A:    '📦 {Product} — Sales totaled by Product only. "How much did we sell of each product overall?"',
+  B:    '📅 {Time} — Sales totaled by Time only. "How much did we sell in each time period, across all products and regions?"',
+  C:    '🌍 {Location} — Sales totaled by Location only. "How much did each region sell, across all time and products?"',
+  AB:   '📦📅 {Product × Time} — Sales by Product AND Time. "How did each product perform in each time period?"',
+  AC:   '📦🌍 {Product × Location} — Sales by Product AND Location. "Which products sell best in which regions?"',
+  BC:   '📅🌍 {Time × Location} — Sales by Time AND Location. "How did each region perform over time?"',
+  ABC:  '📦📅🌍 {Product × Time × Location} — The BASE cuboid. Most detailed — every single combination. Full detail, no aggregation.'
+};
+function showLattice(key) {
+  document.getElementById('lattice-info').innerHTML = latticeDesc[key];
+}
+
+// ─── OLAP CUBE EXPLORER ─────────────────────────────────────────────
+let cubeState = 'normal';
+function cubeOp(op) {
+  const right  = document.getElementById('cp-right');
+  const left   = document.getElementById('cp-left');
+  const top    = document.getElementById('cp-top');
+  const sp     = document.getElementById('slice-plane');
+  const dc     = document.getElementById('dice-sub');
+  const pa     = document.getElementById('pivot-arrows');
+  const desc   = document.getElementById('cube-desc');
+  const grp    = document.getElementById('cube-group');
+
+  // Reset all
+  sp.setAttribute('opacity','0');
+  dc.setAttribute('opacity','0');
+  pa.setAttribute('opacity','0');
+  grp.style.transform='';
+  right.setAttribute('fill','rgba(108,99,255,.35)');
+  left.setAttribute('fill','rgba(34,211,238,.25)');
+  top.setAttribute('fill','rgba(16,185,129,.3)');
+  right.setAttribute('points','130,40 210,80 210,160 130,120');
+  left.setAttribute('points','50,80 130,40 130,120 50,160');
+  top.setAttribute('points','50,80 130,40 210,80 130,120');
+
+  if(op==='reset') { desc.textContent = '↩ Reset — Back to the original 3D cube (Product × Time × Location).'; cubeState='normal'; return; }
+
+  if(op==='rollup') {
+    // Shrink to fewer detail — show collapsing time axis
+    right.setAttribute('points','130,60 190,85 190,140 130,115');
+    right.setAttribute('fill','rgba(168,85,247,.4)');
+    desc.innerHTML = '🔼 <strong>Roll-up on Time:</strong> Monthly → Yearly aggregation. The cube shrinks as we group months into years, reducing the time dimension.';
+    cubeState='rollup';
+  } else if(op==='drilldown') {
+    // Expand with grid lines
+    right.setAttribute('fill','rgba(34,211,238,.5)');
+    desc.innerHTML = '🔽 <strong>Drill-down on Time:</strong> Yearly → Monthly → Daily. The cube expands revealing more detail. Now each cell represents a single day instead of a year.';
+  } else if(op==='slice') {
+    sp.setAttribute('opacity','1');
+    desc.innerHTML = '✂️ <strong>Slice (Time = Q1):</strong> We fix the Time dimension to Q1. The red face shows the 2D slice — a flat view of Q1 data across all Products and Regions.';
+  } else if(op==='dice') {
+    dc.setAttribute('opacity','1');
+    desc.innerHTML = '🎛️ <strong>Dice (Time=Q1 AND Product=Electronics):</strong> We fix two dimensions. The orange sub-cube inside is the result — a smaller 3D cube with only matching data.';
+  } else if(op==='pivot') {
+    pa.setAttribute('opacity','1');
+    right.setAttribute('fill','rgba(245,158,11,.4)');
+    top.setAttribute('fill','rgba(108,99,255,.35)');
+    desc.innerHTML = '🔄 <strong>Pivot (Rotate axes):</strong> We swap the Time and Region axes. What was on the right face is now on the top. The data is the same, just viewed from a different angle!';
+  }
+}
+
+// ─── AOI GENERALIZATION ─────────────────────────────────────────────
+let aoiLevel = 0;
+const aoiData = [
+  // Level 0: Raw
+  [{name:'Alice',city:'New York',age:'22',salary:'$78,000'},
+   {name:'Bob',  city:'Seattle', age:'25',salary:'$92,000'},
+   {name:'Carol',city:'Boston',  age:'23',salary:'$85,000'},
+   {name:'Dave', city:'Portland',age:'28',salary:'$110,000'}],
+  // Level 1: City → Region, Age → Young/Mid
+  [{name:'Alice',city:'Northeast USA',  age:'Young Adult',salary:'$78,000'},
+   {name:'Bob',  city:'Pacific NW',     age:'Young Adult',salary:'$92,000'},
+   {name:'Carol',city:'Northeast USA',  age:'Young Adult',salary:'$85,000'},
+   {name:'Dave', city:'Pacific NW',     age:'Young Adult',salary:'$110,000'}],
+  // Level 2: Region → USA, Salary → Good/High
+  [{name:'Alice',city:'USA',age:'Young Adult',salary:'Good'},
+   {name:'Bob',  city:'USA',age:'Young Adult',salary:'Good'},
+   {name:'Carol',city:'USA',age:'Young Adult',salary:'Good'},
+   {name:'Dave', city:'USA',age:'Young Adult',salary:'High'}],
+  // Level 3: Merge duplicates + drop Name
+  [{name:'(merged 3)',city:'USA',age:'Young Adult',salary:'Good'},
+   {name:'(merged 1)',city:'USA',age:'Young Adult',salary:'High'}]
+];
+const aoiLabels = [
+  'Level 0: Raw specific data',
+  'Level 1: Cities → Regions, Ages → Categories',
+  'Level 2: Regions → Country, Salaries → Bands',
+  'Level 3: Duplicates merged — final generalized summary!'
+];
+
+function aoiGeneralize() {
+  if(aoiLevel >= aoiData.length-1) return;
+  aoiLevel++;
+  const rows = aoiData[aoiLevel];
+  const tbody = document.getElementById('aoi-tbody');
+  tbody.innerHTML = '';
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.name}</td><td style="color:#10b981; font-weight:600">${r.city}</td><td style="color:#22d3ee">${r.age}</td><td style="color:#f59e0b">${r.salary}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('aoi-level').textContent = aoiLabels[aoiLevel];
+  if(aoiLevel >= aoiData.length-1) document.getElementById('aoi-gen-btn').disabled = true;
+}
+
+function aoiReset() {
+  aoiLevel = 0;
+  const rows = aoiData[0];
+  const tbody = document.getElementById('aoi-tbody');
+  tbody.innerHTML = '';
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.name}</td><td>${r.city}</td><td>${r.age}</td><td>${r.salary}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('aoi-level').textContent = aoiLabels[0];
+  document.getElementById('aoi-gen-btn').disabled = false;
+}
+
+// ─── QUIZ ENGINE ─────────────────────────────────────────────────────
+const quizQuestions = [
+  {
+    q: 'A data warehouse is NON-VOLATILE. What does this mean?',
+    opts: [
+      'Data is deleted after each analysis run',
+      'Data is loaded in bulk then read-only — individual rows are not updated',
+      'The warehouse crashes frequently',
+      'Data expires after 30 days'
+    ],
+    ans: 1,
+    exp: 'Non-volatile means data is loaded (via ETL) and then stays unchanged as a historical record. It\'s never updated or deleted at the row level.'
+  },
+  {
+    q: 'What is the APEX cuboid in a data cube lattice?',
+    opts: [
+      'The cuboid with all dimensions (most detailed)',
+      'The cuboid representing a single dimension',
+      'The cuboid with NO dimensions — just the grand total',
+      'The cuboid at the bottom of the lattice'
+    ],
+    ans: 2,
+    exp: 'The apex (top of the lattice) has no dimensions — it\'s a single aggregated value representing the grand total of everything.'
+  },
+  {
+    q: 'Which OLAP operation reduces a 3D cube to a 2D plane by fixing ONE dimension?',
+    opts: ['Roll-up', 'Drill-down', 'Dice', 'Slice'],
+    ans: 3,
+    exp: 'Slice fixes a single dimension to one value, collapsing the 3D cube into a 2D face. Dice fixes multiple dimensions but keeps the result 3D (sub-cube).'
+  },
+  {
+    q: 'What makes a measure HOLISTIC (vs distributive)?',
+    opts: [
+      'It can be computed by summing sub-parts',
+      'It requires ALL data to be available together — cannot be merged from sub-parts',
+      'It works only on numeric data',
+      'It is faster to compute than SUM'
+    ],
+    ans: 1,
+    exp: 'Holistic measures (like MEDIAN, MODE) cannot be derived by combining results from partitions of data. You need all values together, making them expensive in distributed systems.'
+  },
+  {
+    q: 'What is the key difference between a Star Schema and a Snowflake Schema?',
+    opts: [
+      'Star has multiple fact tables; Snowflake has one',
+      'Star uses relational storage; Snowflake uses arrays',
+      'In a Snowflake, dimension tables are normalized into sub-tables; in a Star they are denormalized and flat',
+      'Star schemas are only used in OLTP systems'
+    ],
+    ans: 2,
+    exp: 'In a Star Schema, each dimension table is flat (denormalized). In a Snowflake Schema, dimension tables are further normalized into sub-tables, reducing redundancy but requiring more JOIN operations.'
+  }
+];
+
+let quizAnswers = {};
+let quizSubmitted = false;
+
+function renderQuiz() {
+  const area = document.getElementById('quiz-area');
+  area.innerHTML = '';
+  quizQuestions.forEach((q, qi) => {
+    const div = document.createElement('div');
+    div.style.marginBottom = '22px';
+    div.innerHTML = `<p style="font-weight:700; margin-bottom:8px; font-size:14px;">${qi+1}. ${q.q}</p>`;
+    q.opts.forEach((opt, oi) => {
+      const btn = document.createElement('div');
+      btn.className = 'quiz-option';
+      btn.textContent = opt;
+      btn.id = `q${qi}-o${oi}`;
+      btn.onclick = () => selectQuiz(qi, oi);
+      div.appendChild(btn);
+    });
+    const fb = document.createElement('div');
+    fb.className = 'quiz-feedback';
+    fb.id = `q${qi}-fb`;
+    div.appendChild(fb);
+    area.appendChild(div);
+  });
+  const submitBtn = document.createElement('button');
+  submitBtn.className = 'nav-btn primary';
+  submitBtn.textContent = '✅ Submit Quiz';
+  submitBtn.id = 'submit-quiz-btn';
+  submitBtn.style.marginTop = '10px';
+  submitBtn.onclick = submitQuiz;
+  area.appendChild(submitBtn);
+}
+
+function selectQuiz(qi, oi) {
+  if(quizSubmitted) return;
+  // Clear previous selection for this question
+  quizQuestions[qi].opts.forEach((_,j)=>{
+    const el = document.getElementById(`q${qi}-o${j}`);
+    el.classList.remove('correct','wrong');
+    el.style.background=''; el.style.borderColor=''; el.style.color='';
+  });
+  quizAnswers[qi] = oi;
+  const sel = document.getElementById(`q${qi}-o${oi}`);
+  sel.style.borderColor = 'var(--primary)';
+  sel.style.background = 'rgba(108,99,255,.15)';
+  sel.style.color = 'var(--primary)';
+}
+
+function submitQuiz() {
+  if(quizSubmitted) return;
+  quizSubmitted = true;
+  let score = 0;
+  quizQuestions.forEach((q, qi)=>{
+    const chosen = quizAnswers[qi];
+    const fb = document.getElementById(`q${qi}-fb`);
+    q.opts.forEach((_,oi)=>{
+      const el = document.getElementById(`q${qi}-o${oi}`);
+      el.style.background=''; el.style.borderColor=''; el.style.color='';
+      if(oi===q.ans) el.classList.add('correct');
+    });
+    if(chosen !== undefined) {
+      if(chosen === q.ans) {
+        score++;
+        fb.style.background='rgba(16,185,129,.1)'; fb.style.borderLeft='3px solid #10b981'; fb.style.padding='8px 12px'; fb.style.borderRadius='6px';
+        fb.innerHTML='✅ Correct! ' + q.exp;
+      } else {
+        document.getElementById(`q${qi}-o${chosen}`).classList.add('wrong');
+        fb.style.background='rgba(239,68,68,.08)'; fb.style.borderLeft='3px solid #ef4444'; fb.style.padding='8px 12px'; fb.style.borderRadius='6px';
+        fb.innerHTML='❌ Incorrect. ' + q.exp;
+      }
+    } else {
+      fb.style.background='rgba(245,158,11,.08)'; fb.style.borderLeft='3px solid #f59e0b'; fb.style.padding='8px 12px'; fb.style.borderRadius='6px';
+      fb.innerHTML='⚠️ Not answered. ' + q.exp;
+    }
+    fb.classList.add('show');
+  });
+  document.getElementById('submit-quiz-btn').style.display='none';
+  const msgs = ['Keep studying! You\'ve got this! 💪','Good effort! Review the missed sections! 🔍','Well done! Solid understanding! 👍','Great work! Almost perfect! 🌟','Perfect score! You\'re a data warehouse expert! 🏆'];
+  const msgIdx = Math.min(Math.floor(score/5*5), 4);
+  const sd = document.getElementById('score-display');
+  sd.style.display='block';
+  sd.innerHTML=`<div class="score-num">${score}/5</div><div class="score-msg">${msgs[score]}
+        <div class="mt-6 border-t border-[var(--border)] pt-6">
+          <h3 class="text-lg font-bold text-[#8b5cf6] mb-4">📚 Advanced Warehousing &amp; AOI Foundations</h3>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🏛️ 3 Warehouse Models &amp; Data Lakehouse Architecture</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Enterprise Warehouse:</strong> Collects all information about subjects spanning the entire enterprise (corporate-wide scope).</p>
+              <p>• <strong>Data Mart:</strong> Departmental or business-unit scope (e.g., Marketing Data Mart). Can be <em>dependent</em> (sourced directly from enterprise warehouse) or <em>independent</em> (sourced directly from operational systems).</p>
+              <p>• <strong>Virtual Warehouse:</strong> A collection of materialized and virtual views computed on-the-fly over operational databases without a separate physical storage store.</p>
+              <p>• <strong>Data Lakehouse Layers:</strong> Raw data layer (loading raw data) → Standardized data layer (efficient transfer &amp; initial cleaning) → Cleansed data layer (transforming data) → Application data layer (business logic) → Sandbox data layer (enrichment by data scientists).</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">💻 DMQL Syntax, Star-Net Model &amp; Extended OLAP Operations</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>DMQL (Data Mining Query Language) Cube Definition:</strong><br/>
+              <code>define cube sales_star [time, item, branch, location]: dollars_sold = sum(sales_in_dollars), avg_sales = avg(sales_in_dollars)</code><br/>
+              <code>define dimension time as (time_key, day, day_of_week, month, quarter, year)</code><br/>
+              <code>define dimension shipper as (shipper_key, shipper_name, location as location in cube sales)</code> (Shared dimension syntax).</p>
+              <p>• <strong>Star-Net Query Model:</strong> Radial lines radiating from a central point, where each line represents a dimension hierarchy. Each node on a radial line is called a <strong>footprint</strong>, representing an available granularity for OLAP exploration.</p>
+              <p>• <strong>Drill-Across:</strong> An OLAP operation that traverses across <em>multiple fact tables</em> sharing common dimensions.</p>
+              <p>• <strong>Drill-Through:</strong> An OLAP operation that drills down through the bottom-most level of the data cube directly into the backend relational database tables via SQL.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🔢 Indexing &amp; Storage: WAH Bitmap Compression, Join Indices &amp; C-Store</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Bitmap Compression (BBC vs WAH):</strong> Bitmaps are fast for boolean bit-ops but waste memory on high-cardinality domains. <strong>Word-Aligned Hybrid (WAH)</strong> compression aligns run-length encoding to machine words, performing operations roughly $2\times$ faster than Byte-aligned Bitmap Code (BBC).</p>
+              <p>• <strong>Join Index:</strong> Pre-computes and materializes relational joins by relating dimension table values directly to lists of matching fact table row IDs (e.g. mapping <code>item.color = 'Black'</code> directly to fact row IDs <code>{1, 2, 4, 5, 6, 10}</code>). Can span multiple dimensions.</p>
+              <p>• <strong>Column-Based Storage (C-Store / Stonebraker et al. VLDB 2005):</strong> Fact tables are wide with hundreds of attributes, but queries access only a few columns. Horizontal storage reads entire tuples; vertical (columnar) storage reads only the requested attribute columns, dramatically reducing disk I/O.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🌲 Attribute-Oriented Induction (AOI): LCHR &amp; LCLR Algorithms</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Framework $\langle D, C, A 
+\rangle$:</strong> $D$ = task-relevant data, $C$ = conceptual bias (concept trees), $A$ = first-order predicate logic representation.</p>
+              <p>• <strong>Five Generalization Strategies:</strong><br/>
+              (1) <em>Attribute Removal:</em> Remove attributes with large distinct values if no hierarchy exists (e.g., student name).<br/>
+              (2) <em>Smallest Decomposable Components:</em> Generalize lowest-level components first (Least Commitment Principle).<br/>
+              (3) <em>Ascending Concept Tree:</em> Substitute low-level values with higher-level concepts.<br/>
+              (4) <em>Threshold Control:</em> Continue ascending if distinct values in an attribute exceed the specified threshold $T$.<br/>
+              (5) <em>Handling Overlapping Tuples:</em> Mark and eliminate tuples that appear in both target and contrasting classes.</p>
+              <p>• <strong>LCHR Algorithm:</strong> Learns <em>Characteristic Rules</em> summarizing the target class by ascending concept trees and aggregating identical tuples with accumulated counts ($t$-weights).</p>
+              <p>• <strong>LCLR Algorithm:</strong> Learns <em>Classification (Discriminant) Rules</em> by comparing target class tuples against contrasting class tuples, removing overlapping tuples to retain only distinct discriminating features.</p>
+              <p>• <strong>AOI vs. Cube-Based OLAP:</strong> OLAP precomputes fixed cuboids query-independently; AOI automatically selects abstraction levels dynamically and works on arbitrary non-relational or un-modeled formats.</p>
+            </div>
+          </details>
+        </div>
+</div>
+  <button class="nav-btn" onclick="retryQuiz()" style="margin-top:16px; display:inline-block;">🔄 Retry Quiz</button>`;
+}
+
+function retryQuiz() {
+  quizAnswers={};
+  quizSubmitted=false;
+  document.getElementById('score-display').style.display='none';
+  renderQuiz();
+}
+
+// ─── POMODORO TIMER ──────────────────────────────────────────────────
+let timerSeconds = 15*60;
+let timerRunning = true;
+let timerInterval = null;
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds/60);
+  const s = timerSeconds%60;
+  document.getElementById('timer-display').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function toggleTimer() {
+  timerRunning = !timerRunning;
+  document.getElementById('timer-display').style.color = timerRunning ? 'var(--accent)' : '#ef4444';
+}
+
+function resumeTimer() {
+  document.getElementById('break-overlay').classList.remove('show');
+  timerSeconds = 15*60;
+  timerRunning = true;
+  updateTimerDisplay();
+}
+
+timerInterval = setInterval(()=>{
+  if(!timerRunning) return;
+  timerSeconds--;
+  updateTimerDisplay();
+  if(timerSeconds <= 0) {
+    timerRunning = false;
+    document.getElementById('break-overlay').classList.add('show');
+  }
+}, 1000);
+
+// ─── INIT ─────────────────────────────────────────────────────────────
+renderQuiz();
+showCard(0);
+</script>
+<div id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+<script>
+function toggleMobileSidebar() {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('sidebar-backdrop');
+  if (sb) sb.classList.toggle('mobile-open');
+  if (bd) bd.classList.toggle('active');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const links = document.querySelectorAll('#sidebar a, #sidebar .sidebar-link, #sidebar button, [onclick*="jumpTo"], [onclick*="showCard"], [onclick*="goToCard"], [onclick*="gotoCard"]');
+  links.forEach(l => {
+    l.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        const sb = document.getElementById('sidebar');
+        const bd = document.getElementById('sidebar-backdrop');
+        if (sb) sb.classList.remove('mobile-open');
+        if (bd) bd.classList.remove('active');
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

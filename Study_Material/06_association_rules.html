@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 6: Association Rule Mining</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #0f1117;
+    --card: #1a1d2e;
+    --sidebar: #12151f;
+    --foreground: #e2e8f0;
+    --muted-foreground: #94a3b8;
+    --border: #2d3250;
+    --primary: #7c6af7;
+    --primary-foreground: #ffffff;
+    --secondary: #1e293b;
+    --accent: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--background); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* TOP BAR */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 56px;
+    background: var(--sidebar);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px; padding: 0 20px;
+    z-index: 100;
+  }
+  #topbar .module-title { font-weight: 700; font-size: 15px; color: var(--primary); white-space: nowrap; }
+  #progress-container { flex: 1; }
+  #progress-label { font-size: 11px; color: var(--muted-foreground); margin-bottom: 3px; }
+  #progress-bar-bg { background: var(--border); border-radius: 4px; height: 6px; }
+  #progress-bar-fill { background: var(--primary); height: 6px; border-radius: 4px; transition: width 0.4s ease; }
+  #timer-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 4px 12px;
+    font-size: 13px; font-weight: 600; color: var(--accent);
+    cursor: pointer; white-space: nowrap;
+  }
+
+  /* SIDEBAR */
+  #sidebar {
+    position: fixed; top: 56px; left: 0; width: 240px; bottom: 0;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 16px 0;
+    z-index: 90;
+  }
+  .sidebar-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    color: var(--muted-foreground); padding: 6px 16px; letter-spacing: 0.08em;
+  }
+  .sidebar-item {
+    padding: 7px 16px; font-size: 12px; color: var(--muted-foreground);
+    cursor: pointer; border-left: 3px solid transparent;
+    transition: all 0.2s; line-height: 1.4;
+  }
+  .sidebar-item:hover { color: var(--foreground); background: rgba(124,106,247,0.08); }
+  .sidebar-item.active { color: var(--primary); border-left-color: var(--primary); background: rgba(124,106,247,0.12); }
+  .sidebar-home {
+    display: block; margin: 0 16px 12px; padding: 8px 12px;
+    background: rgba(124,106,247,0.15); border: 1px solid var(--primary);
+    border-radius: 8px; font-size: 12px; color: var(--primary);
+    text-decoration: none; text-align: center; font-weight: 600;
+  }
+  .sidebar-home:hover { background: rgba(124,106,247,0.25); }
+
+  /* MAIN CONTENT */
+  #main {
+    margin-left: 240px; margin-top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto; padding: 32px 40px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  /* CARDS */
+  .card {
+    width: 100%; max-width: 820px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    display: none;
+    animation: slideIn 0.35s ease;
+    margin-bottom: 16px;
+  }
+  .card.active { display: block; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card-tag {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted-foreground); margin-bottom: 12px;
+  }
+  .card-header {
+    font-size: 22px; font-weight: 800; margin-bottom: 20px; line-height: 1.3;
+  }
+  .card-body { font-size: 14px; line-height: 1.75; color: var(--foreground); }
+  .card-body p { margin-bottom: 12px; }
+  .card-body ul { margin: 8px 0 12px 20px; }
+  .card-body li { margin-bottom: 6px; }
+  .why-box {
+    margin-top: 20px; padding: 14px 18px;
+    background: rgba(124,106,247,0.1);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+  }
+  .why-box strong { color: var(--primary); }
+  .analogy-box {
+    padding: 14px 18px; border-radius: 10px;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.3);
+    margin-bottom: 16px; font-size: 14px;
+  }
+  .formula-box {
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.4);
+    border-radius: 10px; padding: 16px 20px;
+    margin: 14px 0; text-align: center;
+    font-size: 17px; font-weight: 700;
+    color: var(--accent);
+    font-family: 'Courier New', monospace;
+  }
+  .gotcha-box {
+    padding: 14px 18px; border-radius: 10px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    margin-bottom: 16px; font-size: 13px; color: #fca5a5;
+  }
+  .highlight { color: var(--accent); font-weight: 700; }
+  .highlight-purple { color: #a78bfa; font-weight: 700; }
+
+  /* NAV BUTTONS */
+  #nav-btns {
+    width: 100%; max-width: 820px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0 40px;
+  }
+  .nav-btn {
+    padding: 10px 24px; border-radius: 10px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--secondary); color: var(--foreground);
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .nav-btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
+  .nav-btn.primary:hover { opacity: 0.85; }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  #card-counter { font-size: 13px; color: var(--muted-foreground); }
+
+  /* FLIP CARD */
+  .flip-card-container { perspective: 1000px; width: 100%; margin-top: 20px; }
+  .flip-card-inner {
+    position: relative; width: 100%; min-height: 140px;
+    transition: transform 0.6s; transform-style: preserve-3d;
+  }
+  .flip-card-inner.flipped { transform: rotateY(180deg); }
+  .flip-face {
+    position: absolute; width: 100%; min-height: 140px;
+    backface-visibility: hidden; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px; text-align: center; font-size: 15px;
+    cursor: pointer;
+  }
+  .flip-front {
+    background: rgba(124,106,247,0.15);
+    border: 2px dashed var(--primary);
+    color: var(--foreground);
+  }
+  .flip-back {
+    background: rgba(16,185,129,0.15);
+    border: 2px solid rgba(16,185,129,0.5);
+    color: var(--foreground);
+    transform: rotateY(180deg);
+  }
+  .flip-hint { font-size: 11px; color: var(--muted-foreground); margin-top: 8px; text-align: center; }
+
+  /* QUIZ */
+  .quiz-q { margin-bottom: 20px; }
+  .quiz-q p { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+  .quiz-opt {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px; border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 6px; cursor: pointer;
+    font-size: 13px; transition: all 0.2s;
+  }
+  .quiz-opt:hover { border-color: var(--primary); background: rgba(124,106,247,0.08); }
+  .quiz-opt.correct { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.5); color: #6ee7b7; }
+  .quiz-opt.wrong { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+  .quiz-score-box { text-align: center; padding: 30px; }
+  .quiz-score-box .score { font-size: 48px; font-weight: 900; color: var(--primary); }
+  .quiz-score-box .msg { font-size: 16px; margin-top: 8px; }
+  .retry-btn {
+    margin-top: 16px; padding: 10px 28px;
+    background: var(--primary); color: white;
+    border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* POMODORO OVERLAY */
+  #pomo-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 999; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 18px; text-align: center; gap: 20px;
+  }
+  #pomo-overlay.show { display: flex; }
+  #pomo-overlay h2 { font-size: 32px; font-weight: 800; }
+  #pomo-resume {
+    padding: 12px 32px; background: var(--primary); color: white;
+    border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* APPENDIX */
+  #appendix-toggle {
+    width: 100%; max-width: 820px;
+    background: var(--secondary); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 20px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    color: var(--foreground); text-align: left;
+    margin-bottom: 8px; display: none;
+  }
+  #appendix-toggle.visible { display: block; }
+  #appendix-content {
+    width: 100%; max-width: 820px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+    display: none; margin-bottom: 40px;
+    font-size: 13px; line-height: 1.7;
+  }
+  #appendix-content.open { display: block; }
+  #appendix-content h3 { color: var(--accent); font-size: 14px; font-weight: 700; margin: 16px 0 8px; }
+  #appendix-content pre {
+    background: var(--secondary); border-radius: 8px;
+    padding: 12px 16px; font-size: 12px;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto; margin: 8px 0;
+    color: #a78bfa;
+  }
+
+  /* CANVAS / VIZ CONTAINERS */
+  .viz-box {
+    background: var(--secondary); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px; margin-top: 16px;
+  }
+  .viz-btn {
+    padding: 7px 16px; border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--secondary); color: var(--foreground);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; margin: 4px;
+  }
+  .viz-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .viz-btn.active-btn { background: var(--primary); color: white; border-color: var(--primary); }
+  .viz-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .viz-table th { background: rgba(124,106,247,0.2); color: var(--primary); padding: 6px 10px; text-align: center; }
+  .viz-table td { padding: 5px 10px; border: 1px solid var(--border); text-align: center; cursor: pointer; transition: background 0.2s; }
+  .viz-table td:hover { background: rgba(124,106,247,0.1); }
+  .viz-table tr.selected td { background: rgba(245,158,11,0.15); }
+  .viz-table tr.toggled-off td { opacity: 0.35; text-decoration: line-through; }
+  .stat-pill {
+    display: inline-block; padding: 4px 12px;
+    border-radius: 20px; font-size: 13px; font-weight: 700;
+    margin: 4px;
+  }
+  .item-chip {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 6px; font-size: 11px; font-weight: 700;
+    margin: 2px; cursor: pointer; transition: all 0.2s;
+  }
+  input[type="number"] {
+    background: var(--secondary); border: 1px solid var(--border);
+    color: var(--foreground); border-radius: 6px;
+    padding: 6px 10px; font-size: 13px; width: 70px;
+    text-align: center;
+  }
+  input[type="number"]:focus { outline: none; border-color: var(--primary); }
+  .bar-bg { background: var(--border); border-radius: 4px; height: 18px; position: relative; overflow: hidden; margin: 4px 0; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; display: flex; align-items: center; padding-left: 6px; font-size: 11px; font-weight: 700; color: white; }
+
+  /* FP TREE SVG */
+  #fp-tree-svg { width: 100%; overflow: visible; }
+  .fp-node { cursor: pointer; }
+  .fp-node circle { transition: all 0.3s; }
+  .fp-node text { font-size: 11px; font-family: 'Segoe UI', sans-serif; }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (PHONES & TABLETS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  #topbar {
+    padding: 0 10px !important;
+    gap: 6px !important;
+    height: 52px !important;
+    overflow-x: hidden !important;
+  }
+  #topbar .title, #topbar #module-title, #topbar #topbar-title, #topbar .module-title {
+    font-size: 11px !important;
+    max-width: 115px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  #topbar a, #topbar #home-btn {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+    white-space: nowrap !important;
+  }
+  #topbar #pomodoro {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+  }
+  #topbar #timer-display {
+    font-size: 12px !important;
+  }
+  #topbar #section-label, #topbar .sec-pill, #topbar .badge, #topbar #timer-btn-label {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: var(--card, #1e293b) !important;
+    border: 1px solid var(--border, #334155) !important;
+    color: var(--foreground, #f8fafc) !important;
+    padding: 5px 8px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+  }
+  #sidebar {
+    position: fixed !important;
+    top: 52px !important;
+    left: -320px !important;
+    width: 280px !important;
+    max-width: 82vw !important;
+    bottom: 0 !important;
+    height: calc(100vh - 52px) !important;
+    z-index: 9999 !important;
+    background: #0a0f1e !important;
+    border-right: 1px solid var(--border, #334155) !important;
+    box-shadow: 4px 0 25px rgba(0,0,0,0.7) !important;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #sidebar.mobile-open {
+    left: 0 !important;
+  }
+  #sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 52px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(3px);
+    z-index: 9998;
+  }
+  #sidebar-backdrop.active {
+    display: block !important;
+  }
+  #layout {
+    display: block !important;
+    margin-top: 52px !important;
+    height: calc(100vh - 52px) !important;
+    position: relative !important;
+    overflow-x: hidden !important;
+  }
+  #main, #card-container, .main-content, #content-area {
+    margin-left: 0 !important;
+    padding: 16px 12px 100px 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  .card, .card-screen, .card-box, .slide {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 12px !important;
+    margin-bottom: 16px !important;
+  }
+  h1 { font-size: 1.35rem !important; }
+  h2, .card-title { font-size: 1.15rem !important; }
+  h3 { font-size: 1.0rem !important; }
+  p, li, .card-body { font-size: 13.5px !important; line-height: 1.6 !important; }
+  #nav-bar, .bottom-nav, #navigation-bar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+    background: rgba(10, 15, 30, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 1px solid var(--border, #334155) !important;
+    z-index: 9000 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  .nav-btn, #prevBtn, #nextBtn {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    min-height: 42px !important;
+    flex: 1 !important;
+    max-width: 130px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  #cardIndicator, #card-counter, .card-counter {
+    font-size: 12px !important;
+    min-width: 65px !important;
+    text-align: center !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+}
+@media (min-width: 769px) {
+  .mobile-menu-btn, #sidebar-backdrop {
+    display: none !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body>
+
+<!-- POMODORO OVERLAY -->
+<div id="pomo-overlay">
+  <div style="font-size:48px">⏰</div>
+  <h2>Great work! Time for a break.</h2>
+  <p style="color:var(--muted-foreground)">You've focused for 15 minutes straight. Take 5 minutes to rest your eyes.</p>
+  <button id="pomo-resume" onclick="resumePomodoro()">▶ Resume Studying</button>
+</div>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation">☰ Menu</button>
+  <div class="module-title">🔗 Module 6: Association Rule Mining</div>
+  <div id="progress-container">
+    <div id="progress-label">Card 1 of 26 • Section 1 of 5</div>
+    <div id="progress-bar-bg">
+      <div id="progress-bar-fill" style="width:3.8%"></div>
+    </div>
+  </div>
+  <div id="timer-box" onclick="toggleTimer()" title="Click to pause/resume">⏱ 15:00</div>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <a href="00_home.html" class="sidebar-home">🏠 Back to Home</a>
+  <div class="sidebar-section-title">Sections</div>
+  <div class="sidebar-item active" onclick="jumpToCard(0)">1. Basic Concepts</div>
+  <div class="sidebar-item" onclick="jumpToCard(6)">2. Apriori Algorithm</div>
+  <div class="sidebar-item" onclick="jumpToCard(13)">3. FP-Tree Algorithm</div>
+  <div class="sidebar-item" onclick="jumpToCard(21)">4. Pattern Evaluation</div>
+  <div class="sidebar-item" onclick="jumpToCard(26)">5. End Quiz</div>
+  <div class="sidebar-item" onclick="jumpToCard(31)">📎 Appendix</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+<!-- ========== SECTION 1: BASIC CONCEPTS ========== -->
+
+<!-- Card 0 -->
+<div class="card active" data-section="1" data-section-total="6">
+  <div class="card-tag">🛒 Basic Concepts • Card 1 of 6</div>
+  <div class="card-header">🛒 The Art of Finding Hidden Patterns</div>
+  <div class="card-body">
+    <div class="analogy-box">
+      <strong>🧠 Real-World Story:</strong> In the 1990s, Walmart analyzed millions of receipts and discovered something bizarre: <span class="highlight">people who buy diapers on Friday evenings also frequently buy beer!</span> No human analyst would ever look for this connection. Data mining found it automatically.
+    </div>
+    <p>This is <span class="highlight">Association Rule Mining</span> — finding "If A is in the basket, then B is probably also in the basket" patterns hidden inside huge transaction databases.</p>
+    <p>The rules look like: <strong>{diapers} → {beer}</strong>. You read this as: "If someone buys diapers, they will likely also buy beer."</p>
+    <div class="why-box">
+      <strong>💡 Why does this matter?</strong> Retailers use these rules to design store layouts (put beer near diapers!), make product recommendations ("Customers also bought..."), and plan promotions. It's everywhere in modern tech.
+    </div>
+  </div>
+</div>
+
+<!-- Card 1 -->
+<div class="card" data-section="1" data-section-total="6">
+  <div class="card-tag">🛒 Basic Concepts • Card 2 of 6</div>
+  <div class="card-header">📦 Key Terms: Itemsets & Support</div>
+  <div class="card-body">
+    <p>First, some vocabulary we need to understand everything else.</p>
+    <ul>
+      <li><span class="highlight">Transaction</span>: One customer's basket. E.g., {milk, bread, eggs}.</li>
+      <li><span class="highlight">Itemset</span>: Any set of items, like {milk, bread} or {beer, diapers, chips}. A k-itemset has k items.</li>
+      <li><span class="highlight">Support</span>: What fraction of ALL baskets contain this itemset?</li>
+    </ul>
+    <div class="formula-box">
+      Support({milk, bread}) = (# baskets with BOTH milk AND bread) / (total baskets)
+    </div>
+    <p><strong>Example:</strong> 1000 total baskets. 200 contain both milk AND bread. So <span class="highlight">Support({milk, bread}) = 200/1000 = 0.20 = 20%</span>.</p>
+    <div class="why-box">
+      <strong>💡 Why does support matter?</strong> Low-support rules are just coincidences. We only care about patterns that appear frequently enough to be meaningful. We set a <em>minimum support threshold</em> (e.g., 5%) to filter out noise.
+    </div>
+  </div>
+</div>
+
+<!-- Card 2 -->
+<div class="card" data-section="1" data-section-total="6">
+  <div class="card-tag">🛒 Basic Concepts • Card 3 of 6</div>
+  <div class="card-header">🎯 Confidence: How Reliable Is the Rule?</div>
+  <div class="card-body">
+    <p>Support tells us how <em>common</em> an itemset is. But for a rule <strong>A → B</strong>, we also need to know: given that a basket has A, how often does it <em>also</em> have B?</p>
+    <div class="formula-box">
+      Confidence(A → B) = Support({A, B}) / Support({A})
+    </div>
+    <p><strong>Concrete example:</strong></p>
+    <ul>
+      <li>400 baskets contain milk (out of 1000)</li>
+      <li>200 baskets contain BOTH milk AND bread</li>
+      <li>Confidence(milk → bread) = 200/400 = <span class="highlight">0.50 = 50%</span></li>
+    </ul>
+    <p>This means: "50% of the time someone buys milk, they also buy bread."</p>
+    <div class="why-box">
+      <strong>💡 Why confidence?</strong> A rule must be both <em>common</em> (support) AND <em>reliable</em> (confidence) to be useful. We mine all rules that satisfy BOTH a minimum support threshold AND a minimum confidence threshold.
+    </div>
+  </div>
+</div>
+
+<!-- Card 3: LIVE CALCULATOR VIZ -->
+<div class="card" data-section="1" data-section-total="6">
+  <div class="card-tag">🛒 Basic Concepts • Card 4 of 6</div>
+  <div class="card-header">🧪 Interactive: Support & Confidence Calculator</div>
+  <div class="card-body">
+    <p>Click column headers to select the <span style="color:#7c6af7">antecedent (A)</span> and <span style="color:#f59e0b">consequent (B)</span>. Click row numbers to toggle transactions on/off.</p>
+    <div class="viz-box" id="supcalc-box">
+      <div id="supcalc-chips" style="margin-bottom:10px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+        <span style="font-size:12px; color:var(--muted-foreground)">Select Antecedent (A):</span>
+        <span class="item-chip" data-item="Milk" data-role="ant" onclick="pickItem(this,'ant')" style="background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.4);color:#a78bfa">Milk</span>
+        <span class="item-chip" data-item="Bread" data-role="ant" onclick="pickItem(this,'ant')" style="background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.4);color:#a78bfa">Bread</span>
+        <span class="item-chip" data-item="Eggs" data-role="ant" onclick="pickItem(this,'ant')" style="background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.4);color:#a78bfa">Eggs</span>
+        <span class="item-chip" data-item="Beer" data-role="ant" onclick="pickItem(this,'ant')" style="background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.4);color:#a78bfa">Beer</span>
+        <span class="item-chip" data-item="Diapers" data-role="ant" onclick="pickItem(this,'ant')" style="background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.4);color:#a78bfa">Diapers</span>
+      </div>
+      <div id="supcalc-chips2" style="margin-bottom:10px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+        <span style="font-size:12px; color:var(--muted-foreground)">Select Consequent (B): </span>
+        <span class="item-chip" data-item="Milk" data-role="cons" onclick="pickItem(this,'cons')" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#fbbf24">Milk</span>
+        <span class="item-chip" data-item="Bread" data-role="cons" onclick="pickItem(this,'cons')" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#fbbf24">Bread</span>
+        <span class="item-chip" data-item="Eggs" data-role="cons" onclick="pickItem(this,'cons')" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#fbbf24">Eggs</span>
+        <span class="item-chip" data-item="Beer" data-role="cons" onclick="pickItem(this,'cons')" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#fbbf24">Beer</span>
+        <span class="item-chip" data-item="Diapers" data-role="cons" onclick="pickItem(this,'cons')" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#fbbf24">Diapers</span>
+      </div>
+      <table class="viz-table" id="txn-table">
+        <thead>
+          <tr>
+            <th>TID</th>
+            <th>Milk</th><th>Bread</th><th>Eggs</th><th>Beer</th><th>Diapers</th>
+          </tr>
+        </thead>
+        <tbody id="txn-tbody"></tbody>
+      </table>
+      <div id="supcalc-results" style="margin-top:14px; padding:12px; background:rgba(0,0,0,0.2); border-radius:8px; font-size:13px;">
+        <div style="margin-bottom:8px; font-weight:600; color:var(--muted-foreground)">Select items above to see results →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 4 -->
+<div class="card" data-section="1" data-section-total="6">
+  <div class="card-tag">🛒 Basic Concepts • Card 5 of 6</div>
+  <div class="card-header">⚙️ Minimum Thresholds: Finding What Matters</div>
+  <div class="card-body">
+    <p>Not all rules are worth our attention. We set two important filters:</p>
+    <ul>
+      <li><span class="highlight">min_support</span>: How common must a pattern be? (e.g., appears in at least 5% of transactions)</li>
+      <li><span class="highlight">min_confidence</span>: How reliable must a rule be? (e.g., correct at least 60% of the time)</li>
+    </ul>
+    <p>A rule <strong>A → B</strong> is only reported if it passes BOTH thresholds.</p>
+    <div class="formula-box" style="font-size:14px">
+      Frequent Itemset: support(X) ≥ min_support<br>
+      Strong Rule: confidence(A→B) ≥ min_confidence
+    </div>
+    <p><span class="highlight-purple">The mining task:</span> Find ALL association rules from the database that satisfy both thresholds. This is harder than it sounds — there can be exponentially many candidate itemsets!</p>
+    <div class="why-box">
+      <strong>💡 The challenge:</strong> With 100 items in a store, there are 2¹⁰⁰ possible itemsets. We can't check them all. We need clever algorithms — like Apriori and FP-Tree — to do this efficiently.
+    </div>
+  </div>
+</div>
+
+<!-- Card 5: FLIP CARD -->
+<div class="card" data-section="1" data-section-total="6">
+  <div class="card-tag">🛒 Basic Concepts • Card 6 of 6</div>
+  <div class="card-header">🧠 Active Recall: Support & Confidence</div>
+  <div class="card-body">
+    <p>Test yourself! Try to answer before flipping.</p>
+    <div class="flip-card-container">
+      <div class="flip-card-inner" id="flip1">
+        <div class="flip-face flip-front" onclick="flipCard('flip1')">
+          <div>
+            <div style="font-size:28px;margin-bottom:12px">🤔</div>
+            <strong>Support({A,B}) = 0.05<br>Support({A}) = 0.10<br><br>What is Confidence(A → B)?</strong>
+          </div>
+        </div>
+        <div class="flip-face flip-back" onclick="flipCard('flip1')">
+          <div>
+            <div style="font-size:28px;margin-bottom:12px">✅</div>
+            <strong>Confidence(A→B) = Support({A,B}) / Support({A})</strong><br><br>
+            = 0.05 / 0.10 = <span class="highlight">0.5 = 50%</span><br><br>
+            <span style="font-size:12px;color:var(--muted-foreground)">Half the people who buy A also buy B.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="flip-hint">👆 Click the card to reveal the answer</p>
+  </div>
+</div>
+
+<!-- ========== SECTION 2: APRIORI ALGORITHM ========== -->
+
+<!-- Card 6 -->
+<div class="card" data-section="2" data-section-total="7">
+  <div class="card-tag">⚙️ Apriori Algorithm • Card 1 of 7</div>
+  <div class="card-header">🌱 The Apriori Insight: Prune First, Count Later</div>
+  <div class="card-body">
+    <div class="analogy-box">
+      <strong>🧠 Analogy:</strong> Imagine you're looking for expensive restaurants with great food AND great service AND great ambience. If a restaurant doesn't have great food alone, it definitely can't have all three. <span class="highlight">You can stop investigating it immediately</span> — no need to check the other features.
+    </div>
+    <p>Apriori uses this same logic with itemsets:</p>
+    <ul>
+      <li>If <strong>{milk, bread, eggs}</strong> is a frequent itemset, then <strong>{milk, bread}</strong>, <strong>{milk, eggs}</strong>, and <strong>{bread, eggs}</strong> must ALL be frequent too.</li>
+      <li>Equivalently: if <strong>{milk, bread}</strong> is <em>infrequent</em>, then <strong>{milk, bread, eggs}</strong> is definitely infrequent — skip it!</li>
+    </ul>
+    <div class="why-box">
+      <strong>💡 The power:</strong> This "prune early" strategy lets us avoid checking an exponential number of candidates. Real databases have millions of transactions — without pruning, mining would be impossible.
+    </div>
+  </div>
+</div>
+
+<!-- Card 7 -->
+<div class="card" data-section="2" data-section-total="7">
+  <div class="card-tag">⚙️ Apriori Algorithm • Card 2 of 7</div>
+  <div class="card-header">🔬 The Anti-Monotone Property</div>
+  <div class="card-body">
+    <div class="formula-box">
+      If X is infrequent → ∀ Y ⊇ X: Y is also infrequent
+    </div>
+    <p>This is called the <span class="highlight">anti-monotone property</span> (or "downward closure property"). Support is anti-monotone: adding more items to a set can only decrease or maintain the support, never increase it.</p>
+    <p><strong>Why?</strong> Every basket containing {A, B, C} also contains {A, B}. So {A, B} appears at least as often as {A, B, C}.</p>
+    <div class="analogy-box">
+      <strong>Think of it like a sieve:</strong> If grains of sand don't pass through a wide mesh, they definitely won't pass through a finer mesh. The anti-monotone property is the same idea applied to itemsets.
+    </div>
+    <div class="why-box">
+      <strong>💡 Consequence:</strong> We only need to generate candidates from <em>frequent</em> itemsets. Any candidate with an infrequent subset gets pruned before we even count it in the database. Massive savings!
+    </div>
+  </div>
+</div>
+
+<!-- Card 8: APRIORI STEP ANIMATOR -->
+<div class="card" data-section="2" data-section-total="7">
+  <div class="card-tag">⚙️ Apriori Algorithm • Card 3 of 7</div>
+  <div class="card-header">🎬 Apriori Step-by-Step Animator</div>
+  <div class="card-body" style="font-size:13px">
+    <p>Database: 6 transactions with items {A, B, C, D, E}. Min support = 2/6 ≈ 33%. Use the buttons to step through the algorithm.</p>
+    <div class="viz-box" id="apriori-box">
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+        <button class="viz-btn active-btn" id="apriori-step-btn" onclick="aprioriStep()">▶ Next Step</button>
+        <button class="viz-btn" onclick="aprioriReset()">↺ Reset</button>
+        <span id="apriori-step-label" style="font-size:12px; color:var(--accent); padding: 7px 0;">Step 0 of 5</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--muted-foreground); margin-bottom:6px;">TRANSACTIONS</div>
+          <table class="viz-table" id="apriori-db-table">
+            <thead><tr><th>TID</th><th>Items</th></tr></thead>
+            <tbody id="apriori-db-body"></tbody>
+          </table>
+        </div>
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--muted-foreground); margin-bottom:6px;">CANDIDATES / FREQUENT SETS</div>
+          <div id="apriori-candidates" style="min-height:180px;"></div>
+        </div>
+      </div>
+      <div id="apriori-desc" style="margin-top:12px; padding:10px 14px; background:rgba(124,106,247,0.1); border-radius:8px; font-size:13px; color:var(--foreground);">
+        Press "Next Step" to begin the Apriori algorithm.
+      </div>
+      <div id="apriori-stats" style="margin-top:8px; font-size:12px; color:var(--muted-foreground);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 9 -->
+<div class="card" data-section="2" data-section-total="7">
+  <div class="card-tag">⚙️ Apriori Algorithm • Card 4 of 7</div>
+  <div class="card-header">🔗 Candidate Generation: How Apriori Builds Bigger Sets</div>
+  <div class="card-body">
+    <p>Apriori generates candidates for k-itemsets from frequent (k-1)-itemsets in two steps:</p>
+    <p><span class="highlight">Step 1: JOIN</span> — Take two (k-1)-itemsets that share the same first (k-2) items. Join them to create a k-itemset candidate.</p>
+    <p>Example: {A,B,C} and {A,B,D} share prefix {A,B}, so join → candidate {A,B,C,D}.</p>
+    <p><span class="highlight">Step 2: PRUNE</span> — Check every (k-1)-subset of the new candidate. If ANY subset is infrequent → delete the candidate immediately.</p>
+    <div class="formula-box" style="font-size:13px">
+      Apriori-gen(Fk-1) = JOIN step → PRUNE step → Ck candidates
+    </div>
+    <div class="why-box">
+      <strong>💡 Efficiency:</strong> The prune step ensures we never count a candidate whose subset is infrequent — saving potentially thousands of database lookups.
+    </div>
+  </div>
+</div>
+
+<!-- Card 10 -->
+<div class="card" data-section="2" data-section-total="7">
+  <div class="card-tag">⚙️ Apriori Algorithm • Card 5 of 7</div>
+  <div class="card-header">📜 Rule Generation: From Itemsets to Rules</div>
+  <div class="card-body">
+    <p>Once we have all frequent itemsets, we generate association rules from them.</p>
+    <p>For a frequent itemset <strong>L = {A, B, C, D}</strong>, we consider every possible split into antecedent and consequent:</p>
+    <ul>
+      <li>{A,B,C} → {D}, {A,B,D} → {C}, {A,C,D} → {B} ...</li>
+      <li>{A,B} → {C,D}, {A,C} → {B,D} ...</li>
+      <li>{A} → {B,C,D} ...</li>
+    </ul>
+    <p>For each candidate rule, we check if confidence ≥ min_confidence. If so, it's a <span class="highlight">strong rule</span>!</p>
+    <div class="analogy-box">
+      <strong>Smart pruning:</strong> If A → BCD has low confidence, then AB → CD will have even lower confidence (or same). We can prune whole branches of the rule space using this property too!
+    </div>
+  </div>
+</div>
+
+<!-- Card 11 -->
+<div class="card" data-section="2" data-section-total="7">
+  <div class="card-tag">⚙️ Apriori Algorithm • Card 6 of 7</div>
+  <div class="card-header">🚀 Efficiency Improvements</div>
+  <div class="card-body">
+    <p>Standard Apriori can still be slow. Several improvements exist:</p>
+    <ul>
+      <li><span class="highlight">Hash-based counting (DHP)</span>: Use a hash table to count 2-itemsets during the first scan, dramatically reducing C₂ candidates.</li>
+      <li><span class="highlight">Transaction reduction</span>: Remove transactions that contain no frequent k-itemsets — they can't contribute to (k+1)-itemsets.</li>
+      <li><span class="highlight">Partitioning</span>: Divide DB into partitions. Find locally frequent sets in each partition. Any globally frequent set must be locally frequent in at least one partition. Only 2 DB scans needed!</li>
+      <li><span class="highlight">Sampling</span>: Mine a random sample first to get approximate results, then verify on the full DB.</li>
+      <li><span class="highlight">Dynamic itemset counting (DIC)</span>: Start counting new itemsets as soon as all their subsets are found frequent — don't wait for the next pass.</li>
+    </ul>
+    <div class="why-box">
+      <strong>💡 Real impact:</strong> In practice, Apriori with these improvements can handle millions of transactions in reasonable time.
+    </div>
+  </div>
+</div>
+
+<!-- Card 12: FLIP -->
+<div class="card" data-section="2" data-section-total="7">
+  <div class="card-tag">⚙️ Apriori Algorithm • Card 7 of 7</div>
+  <div class="card-header">🧠 Active Recall: Apriori Passes</div>
+  <div class="card-body">
+    <div class="flip-card-container">
+      <div class="flip-card-inner" id="flip2">
+        <div class="flip-face flip-front" onclick="flipCard('flip2')">
+          <div>
+            <div style="font-size:28px;margin-bottom:12px">🤔</div>
+            <strong>How many passes does Apriori make over the database, and what does each pass do?</strong>
+          </div>
+        </div>
+        <div class="flip-face flip-back" onclick="flipCard('flip2')">
+          <div>
+            <div style="font-size:28px;margin-bottom:12px">✅</div>
+            <strong>k passes</strong>, where k = size of largest frequent itemset.<br><br>
+            Pass i: count support for all candidate i-itemsets (Cᵢ) by scanning the DB. Identify frequent i-itemsets (Fᵢ). Use Fᵢ to generate Cᵢ₊₁.
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="flip-hint">👆 Click to flip</p>
+  </div>
+</div>
+
+<!-- ========== SECTION 3: FP-TREE ========== -->
+
+<!-- Card 13 -->
+<div class="card" data-section="3" data-section-total="8">
+  <div class="card-tag">🌳 FP-Tree Algorithm • Card 1 of 8</div>
+  <div class="card-header">🌳 FP-Tree: No Candidates Needed!</div>
+  <div class="card-body">
+    <div class="analogy-box">
+      <strong>🧠 Analogy:</strong> Apriori is like searching for a book by checking every shelf in a huge library multiple times. FP-Tree is like creating a perfectly organized index of the entire library in one go, then mining the index — <span class="highlight">never touching the original shelves again</span>!
+    </div>
+    <p>Apriori's weaknesses:</p>
+    <ul>
+      <li>Scans the database <em>many times</em> (once per itemset size)</li>
+      <li>Generates and stores huge numbers of candidate itemsets</li>
+    </ul>
+    <p>FP-Tree's solution: <span class="highlight">Compress the entire database into a compact tree structure</span>, then mine patterns directly from the tree. No candidate generation!</p>
+    <div class="why-box">
+      <strong>💡 Speed:</strong> FP-Tree scans the database only TWICE. In practice, FP-growth (mining an FP-Tree) can be orders of magnitude faster than Apriori on large databases.
+    </div>
+  </div>
+</div>
+
+<!-- Card 14 -->
+<div class="card" data-section="3" data-section-total="8">
+  <div class="card-tag">🌳 FP-Tree Algorithm • Card 2 of 8</div>
+  <div class="card-header">🏗️ FP-Tree Structure</div>
+  <div class="card-body">
+    <p>An FP-Tree is a <span class="highlight">prefix tree</span> (trie) with special properties:</p>
+    <ul>
+      <li><strong>Root node</strong>: empty (labeled "null")</li>
+      <li><strong>Each node</strong>: stores an item name + count of how many transactions follow this path</li>
+      <li><strong>Items ordered by frequency</strong>: most frequent items appear first in every transaction (so they're most likely to be shared)</li>
+      <li><strong>Shared prefixes = shared nodes</strong>: if two transactions start with the same items, they share nodes in the tree — this is the compression!</li>
+    </ul>
+    <p><strong>Header table</strong>: A separate table that maps each frequent item to its first occurrence in the tree, with linked-list pointers to ALL other occurrences.</p>
+    <div class="why-box">
+      <strong>💡 Compression:</strong> Real databases can be compressed by 10-100x in an FP-Tree because most transactions share common prefixes (like {milk, bread} appearing in many baskets).
+    </div>
+  </div>
+</div>
+
+<!-- Card 15: FP-TREE BUILDER VIZ -->
+<div class="card" data-section="3" data-section-total="8">
+  <div class="card-tag">🌳 FP-Tree Algorithm • Card 3 of 8</div>
+  <div class="card-header">🎬 Interactive FP-Tree Builder</div>
+  <div class="card-body" style="font-size:12px">
+    <p>Click "Insert Next Transaction" to build the FP-Tree step by step. Click a transaction row to highlight its path.</p>
+    <div class="viz-box" id="fptree-box">
+      <div style="display:grid; grid-template-columns:220px 1fr; gap:12px; align-items:start;">
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--muted-foreground); margin-bottom:6px;">TRANSACTIONS (min_sup=2)</div>
+          <table class="viz-table" id="fp-txn-table">
+            <thead><tr><th>TID</th><th>Items (sorted by freq)</th></tr></thead>
+            <tbody id="fp-txn-body"></tbody>
+          </table>
+          <div style="margin-top:8px;">
+            <button class="viz-btn active-btn" id="fp-insert-btn" onclick="fpInsertNext()">▶ Insert Next</button>
+            <button class="viz-btn" onclick="fpReset()">↺ Reset</button>
+          </div>
+          <div style="margin-top:10px; font-size:11px; font-weight:700; color:var(--muted-foreground); margin-bottom:4px;">HEADER TABLE</div>
+          <div id="fp-header-table" style="font-size:11px;"></div>
+        </div>
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--muted-foreground); margin-bottom:6px;">FP-TREE</div>
+          <svg id="fp-tree-svg" height="260" style="width:100%; background:rgba(0,0,0,0.2); border-radius:8px; overflow:visible;"></svg>
+          <div id="fp-status" style="margin-top:8px; font-size:12px; color:var(--accent);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 16 -->
+<div class="card" data-section="3" data-section-total="8">
+  <div class="card-tag">🌳 FP-Tree Algorithm • Card 4 of 8</div>
+  <div class="card-header">🔍 Conditional Pattern Bases</div>
+  <div class="card-body">
+    <p>Once the FP-Tree is built, how do we mine it? We process each frequent item bottom-up.</p>
+    <p>For item <strong>m</strong>: find ALL paths in the FP-Tree that end at a node labeled 'm'. These paths are called the <span class="highlight">conditional pattern base</span> of m — they show the "context" in which m always appears.</p>
+    <div class="analogy-box">
+      <strong>🧠 Analogy:</strong> The conditional pattern base is like looking at everyone who bought milk and asking: "What else did they buy?" You're conditioning on milk being present.
+    </div>
+    <p><strong>Example:</strong> If m appears in paths {f,c,a,m:2} and {f,b,m:1}, then the conditional pattern base of m is: {{f,c,a}:2, {f,b}:1}. Notice we drop 'm' itself — it's always present!</p>
+    <div class="why-box">
+      <strong>💡 Key insight:</strong> We use the header table + node links to quickly find ALL occurrences of each item in the tree without re-scanning the database.
+    </div>
+  </div>
+</div>
+
+<!-- Card 17 -->
+<div class="card" data-section="3" data-section-total="8">
+  <div class="card-tag">🌳 FP-Tree Algorithm • Card 5 of 8</div>
+  <div class="card-header">🌿 Conditional FP-Trees & Recursion</div>
+  <div class="card-body">
+    <p>After finding the conditional pattern base, we:</p>
+    <ol style="margin: 8px 0 12px 20px; line-height:2">
+      <li>Build a <span class="highlight">conditional FP-Tree</span> from the conditional pattern base</li>
+      <li>Mine this smaller tree recursively</li>
+      <li>Each frequent pattern in the conditional tree, when combined with the current item, gives a new frequent pattern</li>
+    </ol>
+    <div class="formula-box" style="font-size:13px">
+      Frequent itemsets containing m = {m} ∪ (patterns mined from conditional FP-Tree of m)
+    </div>
+    <p><strong>Example:</strong> If mining the conditional FP-Tree of m gives us {f}, then {f, m} is a frequent itemset!</p>
+    <div class="why-box">
+      <strong>💡 Recursion terminates</strong> when: (1) the conditional FP-Tree is empty, (2) the tree has a single path (then enumerate all subsets of the path), or (3) all items are frequent individually.
+    </div>
+  </div>
+</div>
+
+<!-- Card 18: FP-GROWTH MINING VIZ -->
+<div class="card" data-section="3" data-section-total="8">
+  <div class="card-tag">🌳 FP-Tree Algorithm • Card 6 of 8</div>
+  <div class="card-header">🎬 FP-Growth Mining Animation</div>
+  <div class="card-body" style="font-size:12px">
+    <p>Using our built FP-Tree, let's mine the conditional pattern base for item <span class="highlight">m</span> step by step.</p>
+    <div class="viz-box" id="fpgrowth-box">
+      <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+        <button class="viz-btn active-btn" id="fpg-step-btn" onclick="fpgStep()">▶ Next Step</button>
+        <button class="viz-btn" onclick="fpgReset()">↺ Reset</button>
+        <span id="fpg-step-label" style="font-size:12px; color:var(--accent); padding:7px 0;">Step 0 of 5</span>
+      </div>
+      <div id="fpg-display" style="min-height:240px;">
+        <div style="color:var(--muted-foreground); font-size:13px; padding:20px 0;">Press "Next Step" to begin FP-Growth mining for item 'm'.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 19 -->
+<div class="card" data-section="3" data-section-total="8">
+  <div class="card-tag">🌳 FP-Tree Algorithm • Card 7 of 8</div>
+  <div class="card-header">⚖️ FP-Tree vs Apriori: The Showdown</div>
+  <div class="card-body">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin: 10px 0;">
+      <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:14px;">
+        <div style="font-weight:700; color:#fca5a5; margin-bottom:8px;">❌ Apriori</div>
+        <ul style="font-size:13px; margin-left:16px; line-height:2">
+          <li>k database scans</li>
+          <li>Huge candidate sets</li>
+          <li>Memory intensive</li>
+          <li>Slow on dense data</li>
+        </ul>
+      </div>
+      <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:10px; padding:14px;">
+        <div style="font-weight:700; color:#6ee7b7; margin-bottom:8px;">✅ FP-Tree</div>
+        <ul style="font-size:13px; margin-left:16px; line-height:2">
+          <li>Only 2 DB scans!</li>
+          <li>No candidate generation</li>
+          <li>Compact tree structure</li>
+          <li>Divide and conquer mining</li>
+        </ul>
+      </div>
+    </div>
+    <div class="why-box">
+      <strong>💡 When to use Apriori:</strong> Small datasets, sparse data, or when you need easy implementation.<br>
+      <strong>💡 When to use FP-Tree:</strong> Large datasets, dense data, or when performance matters.
+    </div>
+  </div>
+</div>
+
+<!-- Card 20: FLIP -->
+<div class="card" data-section="3" data-section-total="8">
+  <div class="card-tag">🌳 FP-Tree Algorithm • Card 8 of 8</div>
+  <div class="card-header">🧠 Active Recall: Header Table</div>
+  <div class="card-body">
+    <div class="flip-card-container">
+      <div class="flip-card-inner" id="flip3">
+        <div class="flip-face flip-front" onclick="flipCard('flip3')">
+          <div>
+            <div style="font-size:28px;margin-bottom:12px">🤔</div>
+            <strong>What is a header table in an FP-Tree, and why is it needed?</strong>
+          </div>
+        </div>
+        <div class="flip-face flip-back" onclick="flipCard('flip3')">
+          <div>
+            <div style="font-size:28px;margin-bottom:12px">✅</div>
+            A table mapping each frequent item → its first node in the FP-Tree, with <strong>linked-list pointers</strong> to ALL other nodes with that item.<br><br>
+            <span style="color:#6ee7b7">Purpose:</span> Quickly find all conditional pattern bases for each item without traversing the entire tree.
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="flip-hint">👆 Click to flip</p>
+  </div>
+</div>
+
+<!-- ========== SECTION 4: PATTERN EVALUATION ========== -->
+
+<!-- Card 21 -->
+<div class="card" data-section="4" data-section-total="5">
+  <div class="card-tag">📊 Pattern Evaluation • Card 1 of 5</div>
+  <div class="card-header">⚠️ The Problem with Support & Confidence</div>
+  <div class="card-body">
+    <div class="gotcha-box">
+      <strong>🚨 Danger Zone:</strong> A rule can have HIGH confidence and still be completely MISLEADING!
+    </div>
+    <p><strong>Real example from a university dataset:</strong></p>
+    <ul>
+      <li>Support(buys_video_game) = 0.60 (60% of students)</li>
+      <li>Support(buys_action_video) = 0.75 (75% of students)</li>
+      <li>Support(both) = 0.40</li>
+    </ul>
+    <p>Confidence(game → video) = 0.40 / 0.60 = <span class="highlight">66.7%</span>. Sounds good!</p>
+    <p>But wait: 75% of ALL students buy videos regardless. So among game buyers, <em>fewer</em> buy videos (67%) than in the general population (75%). <span class="highlight" style="color:#fca5a5">The rule is actually negatively correlated!</span></p>
+    <div class="why-box">
+      <strong>💡 Lesson:</strong> High confidence alone doesn't mean a rule is useful. We need better measures. Enter: <strong>Lift</strong>.
+    </div>
+  </div>
+</div>
+
+<!-- Card 22 -->
+<div class="card" data-section="4" data-section-total="5">
+  <div class="card-tag">📊 Pattern Evaluation • Card 2 of 5</div>
+  <div class="card-header">📐 Lift: The Better Measure</div>
+  <div class="card-body">
+    <div class="formula-box">
+      Lift(A → B) = Confidence(A → B) / Support(B) = P(A ∪ B) / (P(A) × P(B))
+    </div>
+    <p>Lift tells us: "Does knowing A is present <em>help</em> predict B, or are they independent?"</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:12px 0;">
+      <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:8px; padding:10px; text-align:center;">
+        <div style="font-size:20px; font-weight:800; color:#6ee7b7;">Lift > 1</div>
+        <div style="font-size:12px; margin-top:4px;">Positive correlation. A and B co-occur more than by chance. ✅</div>
+      </div>
+      <div style="background:rgba(148,163,184,0.1); border:1px solid rgba(148,163,184,0.3); border-radius:8px; padding:10px; text-align:center;">
+        <div style="font-size:20px; font-weight:800; color:var(--muted-foreground);">Lift = 1</div>
+        <div style="font-size:12px; margin-top:4px;">Independent. A and B have no relationship. →</div>
+      </div>
+      <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:10px; text-align:center;">
+        <div style="font-size:20px; font-weight:800; color:#fca5a5;">Lift &lt; 1</div>
+        <div style="font-size:12px; margin-top:4px;">Negative correlation. A actually inhibits B. ❌</div>
+      </div>
+    </div>
+    <p>For our example: Lift(game → video) = 0.67 / 0.75 = <span class="highlight" style="color:#fca5a5">0.89 &lt; 1</span>. Negative correlation confirmed!</p>
+  </div>
+</div>
+
+<!-- Card 23 -->
+<div class="card" data-section="4" data-section-total="5">
+  <div class="card-tag">📊 Pattern Evaluation • Card 3 of 5</div>
+  <div class="card-header">🎲 The Null Transaction Problem</div>
+  <div class="card-body">
+    <div class="analogy-box">
+      <strong>🧠 Analogy:</strong> Imagine you're studying the relationship between buying beer and buying diapers. In a database of 10 million transactions, maybe only 1000 involve beer and 2000 involve diapers. The other 9.997 million transactions involve <em>neither</em>. These are <span class="highlight">null transactions</span>.
+    </div>
+    <p>Measures like <strong>Lift</strong> and <strong>Chi-square</strong> are heavily influenced by null transactions. In most real databases, most items rarely co-occur, so null transactions dominate and distort results.</p>
+    <div class="gotcha-box">
+      <strong>🚨 Example:</strong> Chi-square says beer and diapers are strongly correlated — but only because there are so many transactions with <em>neither</em> item!
+    </div>
+    <div class="why-box">
+      <strong>💡 Solution:</strong> Use <strong>null-invariant measures</strong> — measures that are NOT affected by the count of transactions containing neither A nor B.
+    </div>
+  </div>
+</div>
+
+<!-- Card 24 -->
+<div class="card" data-section="4" data-section-total="5">
+  <div class="card-tag">📊 Pattern Evaluation • Card 4 of 5</div>
+  <div class="card-header">🎯 Kulczynski: A Null-Invariant Measure</div>
+  <div class="card-body">
+    <div class="formula-box">
+      Kulc(A, B) = ½ × (P(A|B) + P(B|A))
+            = ½ × (Conf(B→A) + Conf(A→B))
+    </div>
+    <p>Kulczynski is the <span class="highlight">average of the two conditional probabilities</span>. It asks: on average, how often does each item appear given the other?</p>
+    <p><strong>Properties:</strong></p>
+    <ul>
+      <li>Range: [0, 1]. Higher = stronger positive association.</li>
+      <li><span class="highlight">Null-invariant</span>: Transactions containing neither A nor B don't affect the calculation at all.</li>
+      <li>Symmetric: Kulc(A,B) = Kulc(B,A).</li>
+    </ul>
+    <div class="analogy-box">
+      <strong>Often used with:</strong> <em>Imbalance Ratio (IR)</em> = |P(A) - P(B)| / (P(A) + P(B) - P(A∩B)). High Kulc + Low IR = genuinely interesting rule!
+    </div>
+  </div>
+</div>
+
+<!-- Card 25: LIFT/KULC EXPLORER VIZ -->
+<div class="card" data-section="4" data-section-total="5">
+  <div class="card-tag">📊 Pattern Evaluation • Card 5 of 5</div>
+  <div class="card-header">🔬 Interactive: Contingency Table Explorer</div>
+  <div class="card-body" style="font-size:13px">
+    <p>Fill in the contingency table counts and see all measures computed instantly.</p>
+    <div class="viz-box" id="lift-box">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;">
+        <div>
+          <div style="font-size:12px; font-weight:700; color:var(--muted-foreground); margin-bottom:8px;">CONTINGENCY TABLE</div>
+          <table style="border-collapse:collapse; width:100%;">
+            <tr>
+              <td style="padding:4px; font-size:12px; color:var(--muted-foreground);"></td>
+              <td style="padding:4px; font-size:12px; text-align:center; color:#a78bfa; font-weight:700;">B present</td>
+              <td style="padding:4px; font-size:12px; text-align:center; color:#a78bfa; font-weight:700;">B absent</td>
+            </tr>
+            <tr>
+              <td style="padding:4px; font-size:12px; color:#fbbf24; font-weight:700;">A present</td>
+              <td style="padding:6px;"><input type="number" id="ct-ab" value="40" min="0" oninput="updateMeasures()" title="Count(A and B)"></td>
+              <td style="padding:6px;"><input type="number" id="ct-anb" value="20" min="0" oninput="updateMeasures()" title="Count(A not B)"></td>
+            </tr>
+            <tr>
+              <td style="padding:4px; font-size:12px; color:#fbbf24; font-weight:700;">A absent</td>
+              <td style="padding:6px;"><input type="number" id="ct-nab" value="35" min="0" oninput="updateMeasures()" title="Count(not A, B)"></td>
+              <td style="padding:6px;"><input type="number" id="ct-nanb" value="905" min="0" oninput="updateMeasures()" title="Count(not A, not B)"></td>
+            </tr>
+          </table>
+          <div style="font-size:11px; color:var(--muted-foreground); margin-top:8px;">
+            Cell labels: AB=both, A¬B=only A, ¬AB=only B, ¬A¬B=neither
+          </div>
+          <div style="margin-top:10px;">
+            <button class="viz-btn" onclick="setPreset('diaper_beer')">🍺 Diaper-Beer</button>
+            <button class="viz-btn" onclick="setPreset('game_video')">🎮 Game-Video</button>
+            <button class="viz-btn" onclick="setPreset('milk_bread')">🥛 Milk-Bread</button>
+          </div>
+        </div>
+        <div id="measures-display" style="font-size:13px; line-height:2;"></div>
+      </div>
+      <div id="measures-verdict" style="margin-top:12px; padding:12px; border-radius:8px; font-size:13px; font-weight:600;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SECTION 5: END QUIZ ========== -->
+
+<!-- Card 26 -->
+<div class="card" data-section="5" data-section-total="5">
+  <div class="card-tag">🎯 End-of-Module Quiz • Question 1 of 5</div>
+  <div class="card-header">🎯 Final Quiz: Test Your Knowledge!</div>
+  <div class="card-body">
+    <div id="quiz-container">
+      <div class="quiz-q" id="quiz-q-0">
+        <p>Q1. The anti-monotone property says: if itemset X is infrequent, then...</p>
+        <div class="quiz-opt" onclick="selectQuiz(0,0)"><span>A</span> All subsets of X are also infrequent</div>
+        <div class="quiz-opt" onclick="selectQuiz(0,1)"><span>B</span> All supersets of X are also infrequent</div>
+        <div class="quiz-opt" onclick="selectQuiz(0,2)"><span>C</span> X should be pruned from the database</div>
+        <div class="quiz-opt" onclick="selectQuiz(0,3)"><span>D</span> X's support equals zero</div>
+      </div>
+      <div class="quiz-q" id="quiz-q-1" style="display:none">
+        <p>Q2. How many database scans does the FP-Tree algorithm require?</p>
+        <div class="quiz-opt" onclick="selectQuiz(1,0)"><span>A</span> k scans (one per itemset size)</div>
+        <div class="quiz-opt" onclick="selectQuiz(1,1)"><span>B</span> Only 1 scan</div>
+        <div class="quiz-opt" onclick="selectQuiz(1,2)"><span>C</span> Only 2 scans</div>
+        <div class="quiz-opt" onclick="selectQuiz(1,3)"><span>D</span> It depends on the data size</div>
+      </div>
+      <div class="quiz-q" id="quiz-q-2" style="display:none">
+        <p>Q3. What does Lift = 1 mean for a rule A → B?</p>
+        <div class="quiz-opt" onclick="selectQuiz(2,0)"><span>A</span> A and B are positively correlated</div>
+        <div class="quiz-opt" onclick="selectQuiz(2,1)"><span>B</span> A and B are negatively correlated</div>
+        <div class="quiz-opt" onclick="selectQuiz(2,2)"><span>C</span> A and B are statistically independent</div>
+        <div class="quiz-opt" onclick="selectQuiz(2,3)"><span>D</span> The rule has 100% confidence</div>
+      </div>
+      <div class="quiz-q" id="quiz-q-3" style="display:none">
+        <p>Q4. The Kulczynski measure is defined as:</p>
+        <div class="quiz-opt" onclick="selectQuiz(3,0)"><span>A</span> P(A∩B) / (P(A) × P(B))</div>
+        <div class="quiz-opt" onclick="selectQuiz(3,1)"><span>B</span> ½ × (P(A|B) + P(B|A))</div>
+        <div class="quiz-opt" onclick="selectQuiz(3,2)"><span>C</span> P(A∩B) / P(A)</div>
+        <div class="quiz-opt" onclick="selectQuiz(3,3)"><span>D</span> P(A) + P(B) - P(A∩B)</div>
+      </div>
+      <div class="quiz-q" id="quiz-q-4" style="display:none">
+        <p>Q5. A conditional pattern base for item m in an FP-Tree is:</p>
+        <div class="quiz-opt" onclick="selectQuiz(4,0)"><span>A</span> All transactions in the database containing m</div>
+        <div class="quiz-opt" onclick="selectQuiz(4,1)"><span>B</span> All FP-Tree nodes with the label m</div>
+        <div class="quiz-opt" onclick="selectQuiz(4,2)"><span>C</span> All prefix paths in the FP-Tree ending at node m</div>
+        <div class="quiz-opt" onclick="selectQuiz(4,3)"><span>D</span> The children of the root node labeled m</div>
+      </div>
+      <div id="quiz-score-box" style="display:none" class="quiz-score-box">
+        <div class="score" id="quiz-score-text">0/5</div>
+        <div class="msg" id="quiz-msg">Loading...</div>
+        <button class="retry-btn" onclick="retryQuiz()">🔄 Retry Quiz</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== APPENDIX ========== -->
+<!-- Card 31 (virtual index for sidebar) -->
+<div class="card" data-section="6" data-section-total="1" id="card-appendix">
+  <div class="card-tag">📎 Appendix • First Principles</div>
+  <div class="card-header">📎 Appendix: Deep Dive Reference</div>
+  <div class="card-body" style="font-size:13px">
+    <p>For the mathematically curious — detailed derivations and advanced topics.</p>
+    <div style="margin-top:12px; color:var(--muted-foreground); font-style:italic;">Click the Appendix section in the sidebar, or scroll down after the quiz to find the expandable appendix.</div>
+  </div>
+</div>
+
+<!-- NAV BUTTONS -->
+<div id="nav-btns">
+  <button class="nav-btn" id="btn-prev" onclick="prevCard()" disabled>← Previous</button>
+  <span id="card-counter">Card 1 of 27</span>
+  <button class="nav-btn primary" id="btn-next" onclick="nextCard()">Next →</button>
+</div>
+
+<!-- APPENDIX TOGGLE -->
+<button id="appendix-toggle" onclick="toggleAppendix()">📎 Appendix: Formal Algorithms & Advanced Topics ▼</button>
+<div id="appendix-content">
+  <h3>1. Apriori Algorithm Pseudocode</h3>
+  <pre>
+L1 = {frequent 1-itemsets}
+for k = 2; Lk-1 ≠ ∅; k++ do:
+    Ck = Apriori-gen(Lk-1)       // candidate generation
+    for each transaction t in DB:
+        Ct = subset(Ck, t)        // get candidates in t
+        for each candidate c in Ct:
+            c.count++             // increment count
+    Lk = {c ∈ Ck | c.count ≥ min_sup}
+return ∪k Lk                      // all frequent itemsets
+
+Apriori-gen(Lk-1):
+    // JOIN step
+    for p, q in Lk-1 where p[1..k-2] = q[1..k-2] and p[k-1] &lt; q[k-1]:
+        c = p ∪ {q[k-1]}          // create candidate
+        // PRUNE step
+        for each (k-1)-subset s of c:
+            if s ∉ Lk-1: delete c; break
+    return candidates
+  </pre>
+
+  <h3>2. ECLAT: Vertical Data Format</h3>
+  <p>Instead of storing transactions horizontally (transaction → list of items), ECLAT stores data vertically: item → list of transaction IDs (TID list).</p>
+  <p>Support(X) = |TID-list(X)|. Support(X ∪ Y) = |TID-list(X) ∩ TID-list(Y)| — just intersect the TID lists! No database scans needed at all.</p>
+  <pre>
+TID-list(A) = {1,2,4,6}
+TID-list(B) = {2,3,5,6}
+TID-list({A,B}) = {1,2,4,6} ∩ {2,3,5,6} = {2,6}
+Support({A,B}) = 2
+  </pre>
+
+  <h3>3. Chi-Square Formula</h3>
+  <pre>
+χ² = Σ (Observed - Expected)² / Expected
+
+For 2×2 contingency table:
+Expected(AB) = (count_A × count_B) / N
+
+χ² &gt; threshold → reject independence
+BUT: affected by null transactions!
+  </pre>
+
+  <h3>4. Closed vs Maximal Frequent Itemsets</h3>
+  <p><strong>Maximal Frequent Itemset:</strong> A frequent itemset X such that no proper superset of X is also frequent. (Compact summary — but loses support info.)</p>
+  <p><strong>Closed Frequent Itemset:</strong> A frequent itemset X such that no proper superset of X has the same support as X. (More information than maximal, still more compact than all frequent itemsets.)</p>
+  <pre>
+If X is closed: ∀ Y ⊃ X, support(Y) &lt; support(X)
+Maximal ⊆ Closed ⊆ Frequent Itemsets
+  </pre>
+
+  <h3>5. Imbalance Ratio (IR)</h3>
+  <pre>
+IR(A, B) = |P(A) - P(B)| / (P(A) + P(B) - P(A∩B))
+
+Range: [0, 1]
+IR = 0 → balanced (P(A) = P(B))
+IR = 1 → maximally imbalanced
+
+Use with Kulczynski:
+  High Kulc + Low IR  → Strong, balanced association ✓
+  High Kulc + High IR → Strong but imbalanced (one rare item)
+  Low Kulc            → Weak or negative association
+  </pre>
+</div>
+
+</div><!-- end #main -->
+
+<script>
+// =========================================================
+// GLOBAL STATE
+// =========================================================
+const TOTAL_CARDS = 27; // 0-26 (cards 0-25 are content, card 26 is quiz on same page as quiz section)
+let currentCard = 0;
+const cards = document.querySelectorAll('.card');
+
+// Pomodoro
+let pomodoroSeconds = 15 * 60;
+let pomodoroRunning = true;
+let pomodoroInterval = null;
+
+// =========================================================
+// CARD NAVIGATION
+// =========================================================
+function showCard(idx) {
+  if (idx < 0 || idx >= cards.length) return;
+  cards.forEach(c => c.classList.remove('active'));
+  cards[idx].classList.add('active');
+  currentCard = idx;
+  updateProgress();
+  updateSidebar();
+  updateNavBtns();
+
+  // show appendix toggle only on last card
+  const appendixToggle = document.getElementById('appendix-toggle');
+  if (idx === cards.length - 1) {
+    appendixToggle.classList.add('visible');
+  } else {
+    appendixToggle.classList.remove('visible');
+    document.getElementById('appendix-content').classList.remove('open');
+  }
+
+  // scroll main to top
+  document.getElementById('main').scrollTo({ top: 0, behavior: 'smooth' });
+
+  // init visualizations when their card becomes visible
+  if (idx === 3) initSupCalc();
+  if (idx === 8) initApriori();
+  if (idx === 15) initFPTree();
+  if (idx === 18) initFPGrowth();
+  if (idx === 25) { updateMeasures(); }
+}
+
+function nextCard() {
+  if (currentCard < cards.length - 1) showCard(currentCard + 1);
+}
+function prevCard() {
+  if (currentCard > 0) showCard(currentCard - 1);
+}
+function jumpToCard(idx) {
+  showCard(idx);
+}
+
+function updateNavBtns() {
+  document.getElementById('btn-prev').disabled = currentCard === 0;
+  document.getElementById('btn-next').disabled = currentCard === cards.length - 1;
+}
+
+function updateProgress() {
+  const card = cards[currentCard];
+  const section = card.dataset.section || '1';
+  const sectionTotal = card.dataset.sectionTotal || '1';
+  const cardNum = currentCard + 1;
+  const totalCards = cards.length;
+  document.getElementById('progress-label').textContent =
+    `Card ${cardNum} of ${totalCards} • Section ${section} of 6`;
+  document.getElementById('progress-bar-fill').style.width =
+    ((cardNum / totalCards) * 100) + '%';
+  document.getElementById('card-counter').textContent =
+    `Card ${cardNum} of ${totalCards}`;
+}
+
+function updateSidebar() {
+  const section = parseInt(cards[currentCard].dataset.section || '1');
+  document.querySelectorAll('.sidebar-item').forEach((el, i) => {
+    el.classList.toggle('active', i + 1 === section);
+  });
+}
+
+// =========================================================
+// FLIP CARDS
+// =========================================================
+function flipCard(id) {
+  document.getElementById(id).classList.toggle('flipped');
+}
+
+// =========================================================
+// POMODORO TIMER
+// =========================================================
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `⏱ ${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function startPomodoro() {
+  pomodoroInterval = setInterval(() => {
+    if (!pomodoroRunning) return;
+    pomodoroSeconds--;
+    document.getElementById('timer-box').textContent = formatTime(pomodoroSeconds);
+    if (pomodoroSeconds <= 0) {
+      clearInterval(pomodoroInterval);
+      document.getElementById('pomo-overlay').classList.add('show');
+    }
+  }, 1000);
+}
+
+function toggleTimer() {
+  pomodoroRunning = !pomodoroRunning;
+  document.getElementById('timer-box').style.opacity = pomodoroRunning ? '1' : '0.5';
+}
+
+function resumePomodoro() {
+  document.getElementById('pomo-overlay').classList.remove('show');
+  pomodoroSeconds = 15 * 60;
+  pomodoroRunning = true;
+  document.getElementById('timer-box').textContent = formatTime(pomodoroSeconds);
+  clearInterval(pomodoroInterval);
+  startPomodoro();
+}
+
+// =========================================================
+// APPENDIX
+// =========================================================
+function toggleAppendix() {
+  const content = document.getElementById('appendix-content');
+  const btn = document.getElementById('appendix-toggle');
+  content.classList.toggle('open');
+  btn.textContent = content.classList.contains('open')
+    ? '📎 Appendix: Formal Algorithms & Advanced Topics ▲'
+    : '📎 Appendix: Formal Algorithms & Advanced Topics ▼';
+}
+
+// =========================================================
+// VISUALIZATION 1: SUPPORT / CONFIDENCE CALCULATOR
+// =========================================================
+const txnData = [
+  { id: 'T01', Milk:1, Bread:1, Eggs:0, Beer:0, Diapers:0 },
+  { id: 'T02', Milk:0, Bread:0, Eggs:1, Beer:1, Diapers:0 },
+  { id: 'T03', Milk:1, Bread:1, Eggs:1, Beer:0, Diapers:0 },
+  { id: 'T04', Milk:1, Bread:0, Eggs:0, Beer:1, Diapers:1 },
+  { id: 'T05', Milk:0, Bread:1, Eggs:1, Beer:0, Diapers:0 },
+  { id: 'T06', Milk:0, Bread:0, Eggs:0, Beer:1, Diapers:1 },
+  { id: 'T07', Milk:1, Bread:1, Eggs:0, Beer:1, Diapers:0 },
+  { id: 'T08', Milk:0, Bread:1, Eggs:1, Beer:0, Diapers:1 },
+  { id: 'T09', Milk:1, Bread:0, Eggs:1, Beer:0, Diapers:0 },
+  { id: 'T10', Milk:0, Bread:1, Eggs:0, Beer:1, Diapers:1 },
+];
+const items = ['Milk','Bread','Eggs','Beer','Diapers'];
+let txnActive = txnData.map(() => true);
+let selectedAnt = null, selectedCons = null;
+
+function initSupCalc() {
+  renderTxnTable();
+}
+
+function renderTxnTable() {
+  const tbody = document.getElementById('txn-tbody');
+  tbody.innerHTML = '';
+  txnData.forEach((row, ri) => {
+    const tr = document.createElement('tr');
+    if (!txnActive[ri]) tr.classList.add('toggled-off');
+    const tdId = document.createElement('td');
+    tdId.textContent = row.id;
+    tdId.style.cursor = 'pointer';
+    tdId.style.fontWeight = '700';
+    tdId.title = 'Click to toggle this transaction';
+    tdId.onclick = () => { txnActive[ri] = !txnActive[ri]; renderTxnTable(); computeSupConf(); };
+    tr.appendChild(tdId);
+    items.forEach(item => {
+      const td = document.createElement('td');
+      td.textContent = row[item] ? '✓' : '·';
+      td.style.color = row[item] ? '#6ee7b7' : 'var(--muted-foreground)';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  computeSupConf();
+}
+
+function pickItem(el, role) {
+  const item = el.dataset.item;
+  if (role === 'ant') {
+    if (selectedAnt === item) { selectedAnt = null; }
+    else { selectedAnt = item; }
+    document.querySelectorAll('[data-role="ant"]').forEach(e => {
+      e.style.border = e.dataset.item === selectedAnt
+        ? '2px solid #7c6af7' : '1px solid rgba(124,106,247,0.4)';
+      e.style.fontWeight = e.dataset.item === selectedAnt ? '800' : '600';
+    });
+  } else {
+    if (selectedCons === item) { selectedCons = null; }
+    else { selectedCons = item; }
+    document.querySelectorAll('[data-role="cons"]').forEach(e => {
+      e.style.border = e.dataset.item === selectedCons
+        ? '2px solid #f59e0b' : '1px solid rgba(245,158,11,0.3)';
+      e.style.fontWeight = e.dataset.item === selectedCons ? '800' : '600';
+    });
+  }
+  computeSupConf();
+}
+
+function computeSupConf() {
+  const res = document.getElementById('supcalc-results');
+  const activeRows = txnData.filter((_, i) => txnActive[i]);
+  const N = activeRows.length;
+  if (N === 0) { res.innerHTML = '<span style="color:var(--muted-foreground)">No active transactions.</span>'; return; }
+
+  if (!selectedAnt && !selectedCons) {
+    // show individual supports
+    let html = `<div style="font-size:12px; font-weight:700; color:var(--muted-foreground); margin-bottom:6px;">Item Support (${N} active transactions)</div>`;
+    items.forEach(item => {
+      const count = activeRows.filter(r => r[item]).length;
+      const sup = count / N;
+      html += `<div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <span style="width:60px;font-size:12px;font-weight:600;">${item}</span>
+        <div class="bar-bg" style="flex:1"><div class="bar-fill" style="width:${(sup*100).toFixed(0)}%;background:var(--primary)">${(sup*100).toFixed(0)}%</div></div>
+        <span style="font-size:11px;color:var(--muted-foreground)">${count}/${N}</span>
+      </div>`;
+    });
+    res.innerHTML = html;
+    return;
+  }
+
+  const A = selectedAnt, B = selectedCons;
+  if (A === B) { res.innerHTML = '<span style="color:#fca5a5">⚠ Antecedent and consequent must be different items.</span>'; return; }
+
+  const countA = A ? activeRows.filter(r => r[A]).length : N;
+  const countB = B ? activeRows.filter(r => r[B]).length : N;
+  const countAB = (A && B) ? activeRows.filter(r => r[A] && r[B]).length : (A ? countA : countB);
+
+  const supA = countA / N;
+  const supB = countB / N;
+  const supAB = countAB / N;
+  const conf = countA > 0 ? countAB / countA : 0;
+  const confBA = countB > 0 ? countAB / countB : 0;
+  const lift = supA > 0 && supB > 0 ? supAB / (supA * supB) : 0;
+
+  const liftColor = lift > 1.05 ? '#6ee7b7' : lift < 0.95 ? '#fca5a5' : '#94a3b8';
+
+  let html = `
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <div>
+        <div style="font-size:11px;color:var(--muted-foreground);font-weight:700;">RULE: ${A||'?'} → ${B||'?'}</div>
+        ${A ? `<div>Support(<span style="color:#a78bfa">${A}</span>) = ${(supA*100).toFixed(1)}%
+          <div class="bar-bg"><div class="bar-fill" style="width:${(supA*100).toFixed(0)}%;background:#7c6af7">${(supA*100).toFixed(0)}%</div></div></div>` : ''}
+        ${B ? `<div>Support(<span style="color:#fbbf24">${B}</span>) = ${(supB*100).toFixed(1)}%
+          <div class="bar-bg"><div class="bar-fill" style="width:${(supB*100).toFixed(0)}%;background:#f59e0b">${(supB*100).toFixed(0)}%</div></div></div>` : ''}
+        ${(A&&B) ? `<div>Support({${A},${B}}) = ${(supAB*100).toFixed(1)}%
+          <div class="bar-bg"><div class="bar-fill" style="width:${(supAB*100).toFixed(0)}%;background:#10b981">${(supAB*100).toFixed(0)}%</div></div></div>` : ''}
+      </div>
+      <div>
+        ${(A&&B) ? `
+          <div style="margin-bottom:6px;"><span class="stat-pill" style="background:rgba(124,106,247,0.2);color:#a78bfa">Conf(${A}→${B}) = ${(conf*100).toFixed(1)}%</span></div>
+          <div style="margin-bottom:6px;"><span class="stat-pill" style="background:rgba(245,158,11,0.2);color:#fbbf24">Conf(${B}→${A}) = ${(confBA*100).toFixed(1)}%</span></div>
+          <div style="margin-bottom:6px;"><span class="stat-pill" style="background:rgba(16,185,129,0.15);color:${liftColor}">Lift = ${lift.toFixed(3)} ${lift > 1.05 ? '✅' : lift < 0.95 ? '❌' : '→'}</span></div>
+          <div style="font-size:11px;color:${liftColor};margin-top:4px">${lift > 1.05 ? 'Positive correlation!' : lift < 0.95 ? 'Negative correlation — misleading rule!' : 'Items appear to be independent.'}</div>
+        ` : '<span style="color:var(--muted-foreground);font-size:12px">Select both antecedent and consequent to see rule metrics.</span>'}
+      </div>
+    </div>`;
+  res.innerHTML = html;
+}
+
+// =========================================================
+// VISUALIZATION 2: APRIORI STEP ANIMATOR
+// =========================================================
+const aprioriDB = [
+  { id:'T1', items: ['A','B','C','E'] },
+  { id:'T2', items: ['A','B','D'] },
+  { id:'T3', items: ['B','C','D'] },
+  { id:'T4', items: ['A','B','C','D'] },
+  { id:'T5', items: ['A','C','E'] },
+  { id:'T6', items: ['B','D','E'] },
+];
+const MIN_SUP_APRIORI = 2; // out of 6
+let aprioriStep = 0;
+let aprioriFreq1, aprioriFreq2, aprioriFreq3;
+let aprioriCandidates2, aprioriCandidates3;
+let aprioriInitDone = false;
+
+function initApriori() {
+  if (aprioriInitDone) return;
+  aprioriInitDone = true;
+  // Render DB table
+  const tbody = document.getElementById('apriori-db-body');
+  tbody.innerHTML = '';
+  aprioriDB.forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.id}</td><td>${t.items.join(', ')}</td>`;
+    tbody.appendChild(tr);
+  });
+  aprioriStep = 0;
+  document.getElementById('apriori-step-label').textContent = 'Step 0 of 5';
+  document.getElementById('apriori-candidates').innerHTML = '';
+  document.getElementById('apriori-stats').textContent = '';
+}
+
+function aprioriReset() {
+  aprioriStep = 0;
+  document.getElementById('apriori-step-label').textContent = 'Step 0 of 5';
+  document.getElementById('apriori-candidates').innerHTML = '';
+  document.getElementById('apriori-desc').textContent = 'Press "Next Step" to begin the Apriori algorithm.';
+  document.getElementById('apriori-stats').textContent = '';
+  document.getElementById('apriori-step-btn').disabled = false;
+}
+
+function countSupport(db, itemset) {
+  return db.filter(t => itemset.every(item => t.items.includes(item))).length;
+}
+
+function aprioriStepFn() {
+  aprioriStep++;
+  document.getElementById('apriori-step-label').textContent = `Step ${aprioriStep} of 5`;
+  const container = document.getElementById('apriori-candidates');
+  const desc = document.getElementById('apriori-desc');
+  const stats = document.getElementById('apriori-stats');
+
+  if (aprioriStep === 1) {
+    // Count 1-itemsets
+    const allItems = ['A','B','C','D','E'];
+    const counts = {};
+    allItems.forEach(i => { counts[i] = countSupport(aprioriDB, [i]); });
+    aprioriFreq1 = allItems.filter(i => counts[i] >= MIN_SUP_APRIORI);
+    let html = `<div style="font-size:11px;font-weight:700;color:var(--muted-foreground);margin-bottom:6px;">C₁ → L₁ (min_sup=${MIN_SUP_APRIORI})</div>`;
+    allItems.forEach(item => {
+      const freq = counts[item] >= MIN_SUP_APRIORI;
+      html += `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;">
+        <span style="width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;background:${freq?'rgba(16,185,129,0.2)':'rgba(239,68,68,0.15)'};color:${freq?'#6ee7b7':'#fca5a5'}">${item}</span>
+        <span style="font-size:12px;">count=${counts[item]}</span>
+        <span style="font-size:11px;color:${freq?'#6ee7b7':'#fca5a5'}">${freq?'✓ Frequent':'✗ Pruned'}</span>
+      </div>`;
+    });
+    container.innerHTML = html;
+    desc.innerHTML = `<strong>Step 1:</strong> Scan DB, count every single item. Grey out items with support < ${MIN_SUP_APRIORI}. Frequent 1-itemsets (L₁): {${aprioriFreq1.join(', ')}}`;
+    stats.textContent = `${allItems.length} candidates → ${aprioriFreq1.length} frequent 1-itemsets`;
+  }
+  else if (aprioriStep === 2) {
+    // Generate C2 from L1
+    aprioriCandidates2 = [];
+    for (let i = 0; i < aprioriFreq1.length; i++) {
+      for (let j = i+1; j < aprioriFreq1.length; j++) {
+        aprioriCandidates2.push([aprioriFreq1[i], aprioriFreq1[j]]);
+      }
+    }
+    let html = `<div style="font-size:11px;font-weight:700;color:var(--muted-foreground);margin-bottom:6px;">C₂ candidates (join L₁ × L₁)</div>`;
+    aprioriCandidates2.forEach(pair => {
+      html += `<div style="font-size:12px;padding:2px 0;color:#a78bfa">➕ {${pair.join(',')}}</div>`;
+    });
+    container.innerHTML = html;
+    desc.innerHTML = `<strong>Step 2:</strong> Join all pairs from L₁ to generate ${aprioriCandidates2.length} candidate 2-itemsets (C₂). All subsets of any pair are in L₁, so no pruning needed for 2-itemsets.`;
+    stats.textContent = `${aprioriCandidates2.length} candidate 2-itemsets generated`;
+  }
+  else if (aprioriStep === 3) {
+    // Count C2, find L2
+    const counts = {};
+    aprioriCandidates2.forEach(pair => {
+      counts[pair.join(',')] = countSupport(aprioriDB, pair);
+    });
+    aprioriFreq2 = aprioriCandidates2.filter(pair => counts[pair.join(',')] >= MIN_SUP_APRIORI);
+    let html = `<div style="font-size:11px;font-weight:700;color:var(--muted-foreground);margin-bottom:6px;">C₂ → L₂ (min_sup=${MIN_SUP_APRIORI})</div>`;
+    aprioriCandidates2.forEach(pair => {
+      const key = pair.join(',');
+      const freq = counts[key] >= MIN_SUP_APRIORI;
+      html += `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:12px;">
+        <span style="color:${freq?'#6ee7b7':'#fca5a5'}">{${pair.join(',')}}</span>
+        <span style="color:var(--muted-foreground)">count=${counts[key]}</span>
+        <span style="font-size:11px;color:${freq?'#6ee7b7':'#fca5a5'}">${freq?'✓':'✗'}</span>
+      </div>`;
+    });
+    container.innerHTML = html;
+    desc.innerHTML = `<strong>Step 3:</strong> Scan DB, count C₂. Frequent 2-itemsets (L₂): {${aprioriFreq2.map(p=>p.join(',')).join('}, {')}}`;
+    stats.textContent = `${aprioriCandidates2.length} candidates → ${aprioriFreq2.length} frequent 2-itemsets`;
+  }
+  else if (aprioriStep === 4) {
+    // Generate C3, with pruning
+    const freq2Set = new Set(aprioriFreq2.map(p => p.join(',')));
+    aprioriCandidates3 = [];
+    let pruned = 0;
+    let generated = 0;
+    let pruneInfo = [];
+    for (let i = 0; i < aprioriFreq2.length; i++) {
+      for (let j = i+1; j < aprioriFreq2.length; j++) {
+        const p = aprioriFreq2[i], q = aprioriFreq2[j];
+        if (p[0] === q[0]) { // share first item
+          const candidate = [p[0], p[1], q[1]].sort();
+          generated++;
+          // prune: check all 2-subsets
+          let prunedFlag = false;
+          const subsets = [[candidate[0],candidate[1]],[candidate[0],candidate[2]],[candidate[1],candidate[2]]];
+          for (const s of subsets) {
+            const key = s.join(',');
+            if (!freq2Set.has(key)) { prunedFlag = true; pruneInfo.push({c:candidate,bad:s}); break; }
+          }
+          if (!prunedFlag) aprioriCandidates3.push(candidate);
+          else pruned++;
+        }
+      }
+    }
+    let html = `<div style="font-size:11px;font-weight:700;color:var(--muted-foreground);margin-bottom:6px;">C₃ (join + prune)</div>`;
+    if (aprioriCandidates3.length === 0 && generated === 0) {
+      html += `<div style="font-size:12px;color:var(--muted-foreground)">No 3-itemset candidates could be generated from L₂.</div>`;
+    } else {
+      aprioriCandidates3.forEach(c => {
+        html += `<div style="font-size:12px;color:#6ee7b7">✓ {${c.join(',')}} kept</div>`;
+      });
+      pruneInfo.forEach(({c,bad}) => {
+        html += `<div style="font-size:12px;color:#fca5a5">✗ {${c.join(',')}} pruned — {${bad.join(',')}} not in L₂</div>`;
+      });
+    }
+    container.innerHTML = html;
+    desc.innerHTML = `<strong>Step 4:</strong> Generate C₃ by joining L₂ pairs sharing first item. PRUNE any candidate with an infrequent 2-subset. Saved ${pruned} DB lookups!`;
+    stats.textContent = `${generated} generated, ${pruned} pruned → ${aprioriCandidates3.length} candidates in C₃`;
+  }
+  else if (aprioriStep === 5) {
+    // Count C3, find L3
+    let html = `<div style="font-size:11px;font-weight:700;color:var(--muted-foreground);margin-bottom:6px;">C₃ → L₃ (final)</div>`;
+    if (aprioriCandidates3.length === 0) {
+      aprioriFreq3 = [];
+      html += `<div style="font-size:12px;color:var(--muted-foreground)">No 3-itemset candidates — algorithm terminates.</div>`;
+    } else {
+      aprioriFreq3 = [];
+      aprioriCandidates3.forEach(c => {
+        const count = countSupport(aprioriDB, c);
+        const freq = count >= MIN_SUP_APRIORI;
+        if (freq) aprioriFreq3.push(c);
+        html += `<div style="font-size:12px;color:${freq?'#6ee7b7':'#fca5a5'}">{${c.join(',')}} count=${count} ${freq?'✓ Frequent':'✗ Infrequent'}</div>`;
+      });
+    }
+    html += `<div style="margin-top:12px;font-size:12px;font-weight:700;color:var(--accent)">🏁 All Frequent Itemsets Found!</div>`;
+    const allFreq = [...aprioriFreq1.map(i=>[i]), ...aprioriFreq2, ...aprioriFreq3];
+    html += `<div style="font-size:11px;margin-top:4px;color:#a78bfa">${allFreq.map(f=>'{'+f.join(',')+'} ').join(' ')}</div>`;
+    container.innerHTML = html;
+    desc.innerHTML = `<strong>Step 5:</strong> Count remaining C₃ candidates. Algorithm terminates since no 4-itemsets can be generated.`;
+    stats.textContent = `Mining complete! Found ${allFreq.length} total frequent itemsets.`;
+    document.getElementById('apriori-step-btn').disabled = true;
+  }
+}
+// Expose as global
+window.aprioriStep = aprioriStepFn;
+
+// =========================================================
+// VISUALIZATION 3: FP-TREE BUILDER
+// =========================================================
+// Transactions (already sorted by frequency — f,c,a,m,p etc.)
+const fpTransactions = [
+  { id:'T1', items:['f','c','a','m','p'] },
+  { id:'T2', items:['f','c','a','b','m'] },
+  { id:'T3', items:['f','b'] },
+  { id:'T4', items:['c','b','p'] },
+  { id:'T5', items:['f','c','a','m','p'] },
+  { id:'T6', items:['c','a','b'] },
+  { id:'T7', items:['f','c'] },
+];
+const FP_MIN_SUP = 3;
+// Global frequency ordering (scan 1)
+const fpItemFreq = {};
+fpTransactions.forEach(t => t.items.forEach(item => { fpItemFreq[item] = (fpItemFreq[item]||0)+1; }));
+const fpOrderedItems = Object.keys(fpItemFreq)
+  .filter(i => fpItemFreq[i] >= FP_MIN_SUP)
+  .sort((a,b) => fpItemFreq[b]-fpItemFreq[a]);
+
+// Sort each transaction by frequency
+const fpSortedTxns = fpTransactions.map(t => ({
+  id: t.id,
+  items: t.items.filter(i => fpOrderedItems.includes(i))
+    .sort((a,b) => fpOrderedItems.indexOf(a) - fpOrderedItems.indexOf(b))
+}));
+
+// FP-Tree structure
+let fpRoot = null;
+let fpInsertIdx = 0;
+let fpTreeInitDone = false;
+let fpHighlightPath = [];
+
+function initFPTree() {
+  if (fpTreeInitDone) return;
+  fpTreeInitDone = true;
+  fpRoot = { label: 'null', count: 0, children: {}, parent: null, x:0, y:0, id:'root' };
+  fpInsertIdx = 0;
+
+  // Render transaction table
+  const tbody = document.getElementById('fp-txn-body');
+  tbody.innerHTML = '';
+  fpSortedTxns.forEach((t, ri) => {
+    const tr = document.createElement('tr');
+    tr.id = `fp-txn-row-${ri}`;
+    tr.innerHTML = `<td style="font-weight:700">${t.id}</td><td>${t.items.join(' → ')}</td>`;
+    tr.style.cursor = 'pointer';
+    tr.onclick = () => fpHighlightTxn(ri);
+    tbody.appendChild(tr);
+  });
+
+  renderFPTree();
+  renderHeaderTable();
+  document.getElementById('fp-status').textContent = `Ready — min_sup=${FP_MIN_SUP}. Frequent items (ordered): ${fpOrderedItems.join(' > ')}`;
+}
+
+function fpReset() {
+  fpRoot = { label: 'null', count: 0, children: {}, parent: null, x:0, y:0, id:'root' };
+  fpInsertIdx = 0;
+  fpHighlightPath = [];
+  document.querySelectorAll('#fp-txn-body tr').forEach(r => r.style.background = '');
+  document.getElementById('fp-insert-btn').disabled = false;
+  renderFPTree();
+  renderHeaderTable();
+  document.getElementById('fp-status').textContent = `Reset. Ready to insert transactions.`;
+}
+
+function fpInsertNext() {
+  if (fpInsertIdx >= fpSortedTxns.length) {
+    document.getElementById('fp-status').textContent = '✅ All transactions inserted! FP-Tree complete.';
+    document.getElementById('fp-insert-btn').disabled = true;
+    return;
+  }
+  const txn = fpSortedTxns[fpInsertIdx];
+  // highlight row
+  document.querySelectorAll('#fp-txn-body tr').forEach(r => r.style.background = '');
+  const row = document.getElementById(`fp-txn-row-${fpInsertIdx}`);
+  if (row) row.style.background = 'rgba(245,158,11,0.12)';
+
+  // Insert into tree
+  fpHighlightPath = ['root'];
+  let node = fpRoot;
+  txn.items.forEach(item => {
+    if (!node.children[item]) {
+      node.children[item] = { label: item, count: 0, children: {}, parent: node, id: item+'_'+Math.random().toFixed(4) };
+    }
+    node.children[item].count++;
+    fpHighlightPath.push(node.children[item].id);
+    node = node.children[item];
+  });
+
+  fpInsertIdx++;
+  renderFPTree();
+  renderHeaderTable();
+  document.getElementById('fp-status').textContent =
+    `Inserted ${txn.id}: [${txn.items.join(' → ')}]. (${fpInsertIdx}/${fpSortedTxns.length})`;
+}
+
+function fpHighlightTxn(ri) {
+  document.querySelectorAll('#fp-txn-body tr').forEach(r => r.style.background = '');
+  const row = document.getElementById(`fp-txn-row-${ri}`);
+  if (row) row.style.background = 'rgba(124,106,247,0.15)';
+
+  // find the path in the tree
+  const txn = fpSortedTxns[ri];
+  fpHighlightPath = ['root'];
+  let node = fpRoot;
+  for (const item of txn.items) {
+    if (node.children[item]) {
+      fpHighlightPath.push(node.children[item].id);
+      node = node.children[item];
+    } else break;
+  }
+  renderFPTree();
+  document.getElementById('fp-status').textContent = `Highlighted path for ${fpSortedTxns[ri].id}: ${txn.items.join(' → ')}`;
+}
+
+function renderHeaderTable() {
+  const div = document.getElementById('fp-header-table');
+  // compute counts
+  const headerCounts = {};
+  function traverse(node) {
+    if (node.label !== 'null') { headerCounts[node.label] = (headerCounts[node.label]||0) + node.count; }
+    Object.values(node.children).forEach(traverse);
+  }
+  traverse(fpRoot);
+  // But actually track individual node counts correctly:
+  const perItemCount = {};
+  function trav2(node) {
+    if (node.label !== 'null') { perItemCount[node.label] = (perItemCount[node.label]||0) + 1; }
+    Object.values(node.children).forEach(trav2);
+  }
+  trav2(fpRoot);
+
+  let html = '<table class="viz-table"><thead><tr><th>Item</th><th>Freq</th><th>Nodes</th></tr></thead><tbody>';
+  fpOrderedItems.forEach(item => {
+    if (fpItemFreq[item] >= FP_MIN_SUP) {
+      html += `<tr><td style="font-weight:700;color:#a78bfa">${item}</td><td>${fpItemFreq[item]}</td><td>${perItemCount[item]||0}</td></tr>`;
+    }
+  });
+  html += '</tbody></table>';
+  div.innerHTML = html;
+}
+
+function renderFPTree() {
+  const svg = document.getElementById('fp-tree-svg');
+  const W = svg.parentElement.clientWidth || 380;
+  const H = 260;
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+  svg.innerHTML = '';
+
+  if (!fpRoot) return;
+
+  // Layout the tree
+  const positions = {};
+  let leafCount = 0;
+  function countLeaves(node) {
+    const children = Object.values(node.children);
+    if (children.length === 0) return 1;
+    return children.reduce((s,c) => s + countLeaves(c), 0);
+  }
+  function layoutNode(node, xStart, xEnd, depth) {
+    const x = (xStart + xEnd) / 2;
+    const y = 24 + depth * 50;
+    positions[node.id || 'root'] = { x, y, node };
+    const children = Object.values(node.children);
+    let cx = xStart;
+    children.forEach(child => {
+      const leaves = countLeaves(child);
+      const fraction = leaves / countLeaves(node);
+      const childEnd = cx + (xEnd - xStart) * fraction;
+      layoutNode(child, cx, childEnd, depth + 1);
+      cx = childEnd;
+    });
+  }
+  if (fpRoot.id) fpRoot.id = 'root';
+  layoutNode(fpRoot, 10, W - 10, 0);
+
+  // Draw edges
+  Object.values(positions).forEach(({ x, y, node }) => {
+    if (node.parent) {
+      const parentId = node.parent.id || 'root';
+      const p = positions[parentId];
+      if (p) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1', p.x); line.setAttribute('y1', p.y);
+        line.setAttribute('x2', x); line.setAttribute('y2', y);
+        const isHighlighted = fpHighlightPath.includes(node.id);
+        line.setAttribute('stroke', isHighlighted ? '#f59e0b' : '#2d3250');
+        line.setAttribute('stroke-width', isHighlighted ? '2.5' : '1.5');
+        svg.appendChild(line);
+      }
+    }
+  });
+
+  // Draw nodes
+  const itemColors = { f:'#7c6af7', c:'#10b981', a:'#f59e0b', m:'#ef4444', p:'#3b82f6', b:'#ec4899', null:'#94a3b8' };
+  Object.values(positions).forEach(({ x, y, node }) => {
+    const isHighlighted = fpHighlightPath.includes(node.id || 'root');
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.classList.add('fp-node');
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', x); circle.setAttribute('cy', y);
+    circle.setAttribute('r', node.label === 'null' ? 10 : 14);
+    const color = itemColors[node.label] || '#7c6af7';
+    circle.setAttribute('fill', isHighlighted ? color : color+'33');
+    circle.setAttribute('stroke', isHighlighted ? color : '#2d3250');
+    circle.setAttribute('stroke-width', isHighlighted ? '2.5' : '1.5');
+    g.appendChild(circle);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x); text.setAttribute('y', y + 4);
+    text.setAttribute('text-anchor','middle');
+    text.setAttribute('fill', isHighlighted ? '#fff' : '#e2e8f0');
+    text.setAttribute('font-size', '11');
+    text.setAttribute('font-weight', '700');
+    text.textContent = node.label === 'null' ? '∅' : node.label;
+    g.appendChild(text);
+
+    if (node.label !== 'null' && node.count > 0) {
+      const cnt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      cnt.setAttribute('x', x + 16); cnt.setAttribute('y', y - 10);
+      cnt.setAttribute('text-anchor','middle');
+      cnt.setAttribute('fill', '#94a3b8');
+      cnt.setAttribute('font-size', '9');
+      cnt.textContent = ':'+node.count;
+      g.appendChild(cnt);
+    }
+    svg.appendChild(g);
+  });
+}
+
+// =========================================================
+// VISUALIZATION 4: FP-GROWTH MINING ANIMATION
+// =========================================================
+let fpgStepNum = 0;
+let fpgInitDone = false;
+const fpgMaxSteps = 5;
+
+const fpgSteps = [
+  {
+    label: 'Step 1: Find all occurrences of item "m" using the header table',
+    html: `
+      <div style="font-size:13px; line-height:1.8;">
+        <p>Using the header table, we follow the link chain for item <span style="color:#ef4444;font-weight:700">m</span>.</p>
+        <p>The header table tells us: <em>m</em> appears in the tree at specific nodes. Let's trace their paths from root to node.</p>
+        <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:12px;margin-top:8px;">
+          <div style="font-weight:700;color:#fca5a5;margin-bottom:6px;">Paths ending at 'm':</div>
+          <div style="font-size:12px;">📍 Path 1: null → <span style="color:#7c6af7">f:4</span> → <span style="color:#10b981">c:3</span> → <span style="color:#f59e0b">a:3</span> → <span style="color:#ef4444">m:2</span> &nbsp;&nbsp;<em>(count = 2)</em></div>
+          <div style="font-size:12px;">📍 Path 2: null → <span style="color:#7c6af7">f:4</span> → <span style="color:#10b981">c:3</span> → <span style="color:#f59e0b">a:3</span> → <span style="color:#ec4899">b:1</span> → <span style="color:#ef4444">m:1</span> &nbsp;&nbsp;<em>(count = 1)</em></div>
+          <div style="font-size:12px;margin-top:6px;color:#f59e0b">Total support of m: 2 + 1 = 3 ≥ min_sup=3 ✓</div>
+        </div>
+      </div>`
+  },
+  {
+    label: 'Step 2: Extract the conditional pattern base for "m"',
+    html: `
+      <div style="font-size:13px; line-height:1.8;">
+        <p>The <span class="highlight">conditional pattern base</span> of m = all prefix paths, weighted by the count at 'm':</p>
+        <table class="viz-table" style="margin:10px 0;">
+          <thead><tr><th>Prefix path (without m)</th><th>Count</th></tr></thead>
+          <tbody>
+            <tr><td style="text-align:left">{f, c, a}</td><td>2</td></tr>
+            <tr><td style="text-align:left">{f, c, a, b}</td><td>1</td></tr>
+          </tbody>
+        </table>
+        <p>We drop 'm' from the paths — it's always present by definition. The counts come from the 'm' node's count, not the full path counts.</p>
+      </div>`
+  },
+  {
+    label: 'Step 3: Build the conditional FP-Tree for "m"',
+    html: `
+      <div style="font-size:13px; line-height:1.8;">
+        <p>Now build a new FP-Tree from the conditional pattern base {{f,c,a}:2, {f,c,a,b}:1}:</p>
+        <div style="background:rgba(124,106,247,0.1);border:1px solid rgba(124,106,247,0.3);border-radius:8px;padding:12px;margin:8px 0;">
+          <div style="font-weight:700;color:#a78bfa;margin-bottom:6px;">Conditional FP-Tree of m:</div>
+          <div style="font-family:monospace;font-size:12px;line-height:2;">
+            ∅<br>
+            └─ <span style="color:#7c6af7">f:3</span><br>
+            &nbsp;&nbsp;&nbsp;└─ <span style="color:#10b981">c:3</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ <span style="color:#f59e0b">a:3</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ <span style="color:#ec4899">b:1</span> (pruned, count=1 &lt; 3)
+          </div>
+        </div>
+        <p>Item b has count=1 &lt; min_sup=3, so it's pruned. The conditional FP-Tree of m is a single path: f:3 → c:3 → a:3.</p>
+      </div>`
+  },
+  {
+    label: 'Step 4: Mine the conditional FP-Tree',
+    html: `
+      <div style="font-size:13px; line-height:1.8;">
+        <p>Since the conditional FP-Tree is a single path <span style="color:#7c6af7">f</span> → <span style="color:#10b981">c</span> → <span style="color:#f59e0b">a</span>, we enumerate ALL subsets of this path:</p>
+        <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:12px;margin:8px 0;">
+          <div style="font-weight:700;color:#6ee7b7;margin-bottom:6px;">Frequent itemsets containing m:</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;">
+            <span style="color:#a78bfa">{m}</span>
+            <span style="color:#a78bfa">{a, m}</span>
+            <span style="color:#a78bfa">{c, m}</span>
+            <span style="color:#a78bfa">{f, m}</span>
+            <span style="color:#a78bfa">{a, c, m}</span>
+            <span style="color:#a78bfa">{a, f, m}</span>
+            <span style="color:#a78bfa">{c, f, m}</span>
+            <span style="color:#a78bfa">{a, c, f, m}</span>
+          </div>
+        </div>
+        <p>Each has support = 3 (the minimum count in the path). We combine m with every subset of the path!</p>
+      </div>`
+  },
+  {
+    label: 'Step 5: Summary — FP-Growth found all frequent itemsets containing m',
+    html: `
+      <div style="font-size:13px; line-height:1.8;">
+        <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:12px;margin-bottom:10px;">
+          <div style="font-weight:700;color:#fbbf24;margin-bottom:6px;">🎉 Complete! In just a few steps:</div>
+          <ul style="margin-left:16px;">
+            <li>Found all paths containing m in the FP-Tree (using header table — no DB scan!)</li>
+            <li>Extracted conditional pattern base</li>
+            <li>Built a much smaller conditional FP-Tree</li>
+            <li>Enumerated all 8 frequent itemsets containing m</li>
+          </ul>
+        </div>
+        <p>Next, we repeat this for each frequent item: p, b, a, c, f — each generating their own conditional pattern bases and conditional FP-Trees recursively.</p>
+        <p style="color:var(--accent)">🚀 Total database scans: still just 2 (done at the start). All mining happens inside the FP-Tree!</p>
+      </div>`
+  }
+];
+
+function initFPGrowth() {
+  fpgStepNum = 0;
+  document.getElementById('fpg-step-label').textContent = 'Step 0 of 5';
+  document.getElementById('fpg-display').innerHTML = '<div style="color:var(--muted-foreground);font-size:13px;padding:20px 0;">Press "Next Step" to begin FP-Growth mining for item \'m\'.</div>';
+  document.getElementById('fpg-step-btn').disabled = false;
+}
+
+function fpgReset() {
+  fpgStepNum = 0;
+  document.getElementById('fpg-step-label').textContent = 'Step 0 of 5';
+  document.getElementById('fpg-display').innerHTML = '<div style="color:var(--muted-foreground);font-size:13px;padding:20px 0;">Press "Next Step" to begin FP-Growth mining for item \'m\'.</div>';
+  document.getElementById('fpg-step-btn').disabled = false;
+}
+
+function fpgStep() {
+  if (fpgStepNum >= fpgMaxSteps) return;
+  const step = fpgSteps[fpgStepNum];
+  document.getElementById('fpg-display').innerHTML = `
+    <div style="margin-bottom:10px;padding:8px 12px;background:rgba(124,106,247,0.1);border-radius:6px;font-size:12px;font-weight:600;color:var(--primary)">${step.label}</div>
+    ${step.html}`;
+  fpgStepNum++;
+  document.getElementById('fpg-step-label').textContent = `Step ${fpgStepNum} of 5`;
+  if (fpgStepNum >= fpgMaxSteps) {
+    document.getElementById('fpg-step-btn').disabled = true;
+  }
+}
+
+// =========================================================
+// VISUALIZATION 5: LIFT & KULC EXPLORER
+// =========================================================
+const presets = {
+  diaper_beer: { ab:2000, anb:1000, nab:3000, nanb:94000, name:'Diaper→Beer' },
+  game_video:  { ab:40,   anb:20,   nab:35,   nanb:905,   name:'Game→Video' },
+  milk_bread:  { ab:200,  anb:100,  nab:50,   nanb:650,   name:'Milk→Bread' }
+};
+
+function setPreset(key) {
+  const p = presets[key];
+  document.getElementById('ct-ab').value = p.ab;
+  document.getElementById('ct-anb').value = p.anb;
+  document.getElementById('ct-nab').value = p.nab;
+  document.getElementById('ct-nanb').value = p.nanb;
+  updateMeasures();
+}
+
+function updateMeasures() {
+  const ab = parseFloat(document.getElementById('ct-ab').value)||0;
+  const anb = parseFloat(document.getElementById('ct-anb').value)||0;
+  const nab = parseFloat(document.getElementById('ct-nab').value)||0;
+  const nanb = parseFloat(document.getElementById('ct-nanb').value)||0;
+  const N = ab + anb + nab + nanb;
+  if (N === 0) return;
+
+  const PA = (ab + anb) / N;
+  const PB = (ab + nab) / N;
+  const PAB = ab / N;
+  const confAB = PA > 0 ? PAB / PA : 0;
+  const confBA = PB > 0 ? PAB / PB : 0;
+  const lift = (PA > 0 && PB > 0) ? PAB / (PA * PB) : 0;
+  const kulc = (confAB + confBA) / 2;
+  const IR = (PA + PB - PAB) > 0 ? Math.abs(PA - PB) / (PA + PB - PAB) : 0;
+
+  // Chi-square
+  const E_ab = (ab+anb)*(ab+nab)/N;
+  const E_anb = (ab+anb)*(anb+nanb)/N;
+  const E_nab = (nab+nanb)*(ab+nab)/N;
+  const E_nanb = (nab+nanb)*(anb+nanb)/N;
+  const chi2 = (E_ab>0?(ab-E_ab)**2/E_ab:0) + (E_anb>0?(anb-E_anb)**2/E_anb:0) +
+                (E_nab>0?(nab-E_nab)**2/E_nab:0) + (E_nanb>0?(nanb-E_nanb)**2/E_nanb:0);
+
+  const fmt = (v, pct=true) => pct ? (v*100).toFixed(1)+'%' : v.toFixed(3);
+
+  const liftColor = lift > 1.05 ? '#6ee7b7' : lift < 0.95 ? '#fca5a5' : '#94a3b8';
+  const kulcColor = kulc > 0.5 ? '#6ee7b7' : kulc > 0.3 ? '#fbbf24' : '#fca5a5';
+
+  document.getElementById('measures-display').innerHTML = `
+    <div style="font-size:12px;font-weight:700;color:var(--muted-foreground);margin-bottom:8px;">COMPUTED MEASURES (N=${N})
+        <div class="mt-8 border-t border-[var(--border)] pt-6">
+          <h3 class="text-xl font-bold text-[#f59e0b] mb-4">📚 Complete Lecture &amp; Research Foundations</h3>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🌳 Apriori Candidate Hash-Tree &amp; Subset Function Traversal</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Candidate Hash-Tree Structure:</strong> Storing candidates $C_k$ in a hash-tree accelerates support counting. The root is at depth 1. An interior node at depth $d$ contains a hash table whose buckets point to nodes at depth $d+1$, hashed on the $d$-th item of the candidate.</p>
+              <p>• <strong>Leaf Nodes:</strong> Store lists of candidate itemsets and their support counts. When candidates exceed <em>max leaf size</em>, the leaf splits into an interior node.</p>
+              <p>• <strong>Subset Function:</strong> Given a transaction $t$, it hashes on every item in $t$ at the root, and recursively traverses subsequent matching branches in $O(\max(k, \text{size}(t)))$ using a temporary bitmap, avoiding brute-force scanning.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">⚡ Five Major Apriori Optimization Algorithms</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>DHP (Direct Hashing &amp; Pruning, Park et al. SIGMOD 1995):</strong> While scanning DB to count 1-itemsets, hashes all 2-itemsets of each transaction into hash table $H_2$. Any bucket with count &lt; min_sup prunes all candidate 2-itemsets mapping to it.</p>
+              <p>• <strong>Transaction Reduction:</strong> A transaction that does not contain any frequent $k$-itemsets cannot contain any frequent $(k+1)$-itemsets. Such transactions are dropped from future scans.</p>
+              <p>• <strong>Partitioning (Savasere et al. VLDB 1995):</strong> Partitions DB into $k$ chunks. Any globally frequent itemset must be locally frequent in at least one partition. Requires <strong>only 2 scans</strong>: Scan 1 finds local candidates; Scan 2 computes global counts.</p>
+              <p>• <strong>Sampling (Toivonen VLDB 1996):</strong> Mines on a small sample with lower support threshold, verifies on DB checking the <em>negative border</em> of closure, requiring a second pass only if candidates cross the border.</p>
+              <p>• <strong>Dynamic Itemset Counting (DIC, Brin et al. SIGMOD 1997):</strong> The "Train Metaphor" — instead of waiting for full passes, adds candidate itemsets dynamically at intermediate transaction intervals (stops), completing mining in ~1.5 passes.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🌲 Single-Path Optimization &amp; Scaling FP-Growth</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Single Prefix-Path Optimization:</strong> If an FP-tree contains a single path $P$, all frequent patterns can be generated by enumerating all non-empty combinations of items along $P$, with support equal to the minimum support count of items in the combination. No recursive conditional tree construction needed!</p>
+              <p>• <strong>Scaling FP-Growth to Massive Databases:</strong> (1) <em>Projected Databases:</em> Partition database into independent projected DBs that fit in memory; (2) <em>Disk-Resident FP-Trees:</em> Store tree nodes in $B^+$-tree disk pages; (3) <em>Incremental Maintenance:</em> Updating tree structures without full rebuilds.</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">📑 ECLAT &amp; The Diffset Optimization (Zaki IEEE TKDE 2000)</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>Vertical Format:</strong> Represents each item as a list of transaction IDs (TID-list). Support = $|\text{TID-list}|$.</p>
+              <p>• <strong>The Problem:</strong> For dense datasets, TID-lists grow very long, consuming massive memory during set intersections.</p>
+              <p>• <strong>Diffset Optimization:</strong> Keeps track only of the <em>differences</em> in TID sets between parent and child: $\text{diffset}(\{I_1, I_2\}, \{I_1\}) = \t\text{TID}(I_1) \setminus \t\text{TID}(I_1, I_2)$. Since diffsets shrink dramatically as itemset size increases, memory usage drops by orders of magnitude!</p>
+            </div>
+          </details>
+
+          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
+            <summary class="font-bold text-[var(--foreground)] cursor-pointer">⚖️ Complete Null-Invariant Measures &amp; Imbalance Ratio (IR)</summary>
+            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
+              <p>• <strong>The Null Transaction Dilemma:</strong> In real market basket databases, the number of transactions with neither item ($\overline{mc}$) is huge. Measures like Lift and $\chi^2$ depend on $\overline{mc}$, leading to false correlations.</p>
+              <p>• <strong>Four Null-Invariant Measures (Range $[0, 1]$):</strong><br/>
+              1. <em>All-Confidence:</em> $\min\{P(A|B), P(B|A)\} = \frac{\sup(A \cup B)}{\max\{\sup(A), \sup(B)\}}$<br/>
+              2. <em>Max-Confidence:</em> $\max\{P(A|B), P(B|A)\} = \frac{\sup(A \cup B)}{\min\{\sup(A), \sup(B)\}}$<br/>
+              3. <em>Kulczynski (Kulc):</em> $\frac{1}{2}(P(A|B) + P(B|A))$ (arithmetic mean of conditional probabilities)<br/>
+              4. <em>Cosine:</em> $\frac{P(A \cup B)}{\sqrt{P(A)P(B)}} = \sqrt{P(A|B)P(B|A)}$ (geometric mean)</p>
+              <p>• <strong>Imbalance Ratio (IR):</strong> $\text{IR}(A, B) = \frac{|\sup(A) - \sup(B)|}{\sup(A) + \sup(B) - \sup(A \cup B)} \in [0, 1]$. Measures imbalance in rule frequency. <strong>Kulczynski + IR together</strong> give a complete, unbiased evaluation of association patterns!</p>
+            </div>
+          </details>
+        </div>
+</div>
+    <table style="width:100%;font-size:12px;">
+      <tr><td style="padding:3px 0;color:var(--muted-foreground)">Support(A)</td><td style="color:#a78bfa;font-weight:700">${fmt(PA)}</td></tr>
+      <tr><td style="padding:3px 0;color:var(--muted-foreground)">Support(B)</td><td style="color:#fbbf24;font-weight:700">${fmt(PB)}</td></tr>
+      <tr><td style="padding:3px 0;color:var(--muted-foreground)">Support(A∩B)</td><td style="color:#10b981;font-weight:700">${fmt(PAB)}</td></tr>
+      <tr><td style="padding:3px 0;color:var(--muted-foreground)">Conf(A→B)</td><td style="font-weight:700">${fmt(confAB)}</td></tr>
+      <tr><td style="padding:3px 0;color:var(--muted-foreground)">Conf(B→A)</td><td style="font-weight:700">${fmt(confBA)}</td></tr>
+      <tr><td style="padding:3px 0;color:var(--muted-foreground)">Lift</td><td style="color:${liftColor};font-weight:700">${lift.toFixed(3)} ${lift>1.05?'↑':lift<0.95?'↓':'='}</td></tr>
+      <tr><td style="padding:3px 0;color:var(--muted-foreground)">Chi-square χ²</td><td style="font-weight:700">${chi2.toFixed(2)}</td></tr>
+      <tr><td style="padding:3px 0;color:var(--muted-foreground)">Kulczynski</td><td style="color:${kulcColor};font-weight:700">${kulc.toFixed(3)}</td></tr>
+      <tr><td style="padding:3px 0;color:var(--muted-foreground)">Imbalance Ratio</td><td style="font-weight:700">${IR.toFixed(3)}</td></tr>
+    </table>`;
+
+  let verdict, verdictBg, verdictBorder;
+  if (lift > 1.05 && kulc > 0.5) {
+    verdict = '✅ Genuinely Interesting Rule! High lift AND high Kulczynski — strong positive association.';
+    verdictBg = 'rgba(16,185,129,0.1)'; verdictBorder = 'rgba(16,185,129,0.4)';
+  } else if (lift < 0.95) {
+    verdict = '❌ Misleading Rule! Lift < 1 means negative correlation — A actually inhibits B.';
+    verdictBg = 'rgba(239,68,68,0.1)'; verdictBorder = 'rgba(239,68,68,0.4)';
+  } else if (kulc < 0.3) {
+    verdict = '⚠ Weak Association. Low Kulczynski — not a reliable pattern.';
+    verdictBg = 'rgba(245,158,11,0.1)'; verdictBorder = 'rgba(245,158,11,0.4)';
+  } else {
+    verdict = '→ Moderate association. Check context before using.';
+    verdictBg = 'rgba(148,163,184,0.1)'; verdictBorder = 'rgba(148,163,184,0.3)';
+  }
+
+  const verdictEl = document.getElementById('measures-verdict');
+  verdictEl.textContent = verdict;
+  verdictEl.style.background = verdictBg;
+  verdictEl.style.border = `1px solid ${verdictBorder}`;
+  verdictEl.style.color = lift > 1.05 && kulc > 0.5 ? '#6ee7b7' : lift < 0.95 ? '#fca5a5' : '#fbbf24';
+}
+
+// =========================================================
+// QUIZ LOGIC
+// =========================================================
+const quizAnswers = [1, 2, 2, 1, 2]; // correct option indices (0-based)
+let quizSelected = [-1,-1,-1,-1,-1];
+let quizCurrentQ = 0;
+let quizSubmitted = false;
+
+function selectQuiz(qIdx, optIdx) {
+  if (quizSubmitted) return;
+  quizSelected[qIdx] = optIdx;
+  const qEl = document.getElementById(`quiz-q-${qIdx}`);
+  qEl.querySelectorAll('.quiz-opt').forEach((opt, i) => {
+    opt.classList.remove('correct','wrong');
+    if (i === optIdx) {
+      if (optIdx === quizAnswers[qIdx]) opt.classList.add('correct');
+      else opt.classList.add('wrong');
+    }
+    if (i === quizAnswers[qIdx]) opt.classList.add('correct');
+  });
+  // Show next question after short delay
+  setTimeout(() => {
+    const nextQ = qIdx + 1;
+    if (nextQ < 5) {
+      document.getElementById(`quiz-q-${nextQ}`).style.display = 'block';
+    } else {
+      showQuizScore();
+    }
+  }, 800);
+}
+
+function showQuizScore() {
+  quizSubmitted = true;
+  const score = quizSelected.filter((sel, i) => sel === quizAnswers[i]).length;
+  document.getElementById('quiz-score-box').style.display = 'block';
+  document.getElementById('quiz-score-text').textContent = `${score}/5`;
+  const msgs = [
+    '😅 Keep reviewing — you\'ll get there!',
+    '😊 Nice start! Review the tricky ones.',
+    '👍 Good job! A bit more review will help.',
+    '🌟 Great work! Almost perfect!',
+    '🏆 Perfect score! You\'ve mastered this module!'
+  ];
+  document.getElementById('quiz-msg').textContent = msgs[score];
+  document.getElementById('main').scrollTo({ top: document.getElementById('quiz-score-box').offsetTop, behavior: 'smooth' });
+}
+
+function retryQuiz() {
+  quizSelected = [-1,-1,-1,-1,-1];
+  quizSubmitted = false;
+  quizCurrentQ = 0;
+  for (let i = 0; i < 5; i++) {
+    const qEl = document.getElementById(`quiz-q-${i}`);
+    qEl.style.display = i === 0 ? 'block' : 'none';
+    qEl.querySelectorAll('.quiz-opt').forEach(opt => opt.classList.remove('correct','wrong'));
+  }
+  document.getElementById('quiz-score-box').style.display = 'none';
+}
+
+// =========================================================
+// INIT
+// =========================================================
+window.addEventListener('DOMContentLoaded', () => {
+  showCard(0);
+  startPomodoro();
+  // Pre-populate sup calc on card 3 init
+  // Pre-set lift explorer
+  setPreset('game_video');
+});
+
+// Handle window resize for FP tree
+window.addEventListener('resize', () => {
+  if (currentCard === 15) renderFPTree();
+});
+</script>
+<div id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+<script>
+function toggleMobileSidebar() {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('sidebar-backdrop');
+  if (sb) sb.classList.toggle('mobile-open');
+  if (bd) bd.classList.toggle('active');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const links = document.querySelectorAll('#sidebar a, #sidebar .sidebar-link, #sidebar button, [onclick*="jumpTo"], [onclick*="showCard"], [onclick*="goToCard"], [onclick*="gotoCard"]');
+  links.forEach(l => {
+    l.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        const sb = document.getElementById('sidebar');
+        const bd = document.getElementById('sidebar-backdrop');
+        if (sb) sb.classList.remove('mobile-open');
+        if (bd) bd.classList.remove('active');
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

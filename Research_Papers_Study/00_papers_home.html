@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Research Papers Study Hub | Data Analytics-I</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #090d16;
+    --card: #131b2e;
+    --sidebar: #090d16;
+    --foreground: #f8fafc;
+    --muted-foreground: #94a3b8;
+    --border: #22304d;
+    --primary: #6366f1;
+    --accent: #8b5cf6;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  .paper-card {
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .paper-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.15);
+  }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (RESEARCH PAPERS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  body {
+    padding: 0.75rem 0.5rem !important;
+  }
+  header.sticky {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 1.25rem !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  header.sticky h1 {
+    font-size: 1.2rem !important;
+    line-height: 1.3 !important;
+  }
+  .grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5 {
+    grid-template-columns: 1fr !important;
+  }
+  .interactive-box {
+    padding: 1rem !important;
+    border-radius: 0.75rem !important;
+  }
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  .quiz-btn, button {
+    min-height: 42px !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body class="p-6 md:p-10">
+
+  <!-- Top Navigation & Return -->
+  <div class="max-w-7xl mx-auto flex items-center justify-between pb-6 border-b border-[var(--border)] mb-8">
+    <div class="flex items-center gap-3">
+      <a href="../Study_Material/00_home.html" class="flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 font-semibold bg-indigo-950/50 px-3 py-1.5 rounded-lg border border-indigo-800/60">
+        ← Return to Main Course Hub
+      </a>
+      <span class="text-xs text-[var(--muted-foreground)]">| Course Code: CS4.405 (Monsoon 2026)</span>
+    </div>
+    <div class="text-xs bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 px-3 py-1 rounded-full font-bold">
+      35 Research Papers • Single-Topic Apps
+    </div>
+  </div>
+
+  <!-- Hero Header -->
+  <div class="max-w-7xl mx-auto text-center mb-10">
+    <span class="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-3">
+      Academic Foundations &amp; Landmark Literature
+    </span>
+    <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+      Research Papers Study Suite 📑
+    </h1>
+    <p class="text-[var(--muted-foreground)] max-w-3xl mx-auto text-sm md:text-base leading-relaxed">
+      Every foundational paper assigned in Professor Krishna Reddy's Data Analytics-I curriculum—translated into an ADHD-friendly, micro-card interactive app with real-world analogies, step-by-step algorithmic simulations, and first-principles appendices.
+    </p>
+
+    <!-- ADHD Study Guide Banner -->
+    <div class="mt-6 inline-flex flex-wrap items-center justify-center gap-3 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 text-xs text-[var(--muted-foreground)] max-w-3xl">
+      <span class="text-amber-400 font-bold">💡 How to Read Papers with Low Attention:</span>
+      <span class="bg-indigo-950/60 text-indigo-300 px-2.5 py-1 rounded-md">1. Start with the "Why" Hook</span>
+      <span class="bg-purple-950/60 text-purple-300 px-2.5 py-1 rounded-md">2. Play with the Interactive Toy</span>
+      <span class="bg-blue-950/60 text-blue-300 px-2.5 py-1 rounded-md">3. Flip the Recall Cards</span>
+      <span class="bg-emerald-950/60 text-emerald-300 px-2.5 py-1 rounded-md">4. Stop at 15 Mins (Pomodoro)</span>
+    </div>
+  </div>
+
+  <!-- Filter Buttons -->
+  <div class="max-w-7xl mx-auto mb-8 flex flex-wrap gap-2 justify-center">
+    <button onclick="filterCategory('all')" class="filter-btn active px-4 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white border border-indigo-500">All Papers (35)</button>
+    <button onclick="filterCategory('midsem')" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)] hover:text-white">⭐ Midsem Priority (14)</button>
+    <button onclick="filterCategory('Foundations')" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)] hover:text-white">Foundations</button>
+    <button onclick="filterCategory('Data Cube Algorithms')" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)] hover:text-white">Data Cubes</button>
+    <button onclick="filterCategory('Association Rules')" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)] hover:text-white">Association Mining</button>
+    <button onclick="filterCategory('Advanced Patterns')" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)] hover:text-white">Advanced Patterns</button>
+    <button onclick="filterCategory('Data Cleaning')" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)] hover:text-white">Data Cleaning</button>
+  </div>
+
+  <!-- Cards Grid -->
+  <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="papers-grid">
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Foundations" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Quiz 1 & Midsem Essential
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_01_dikw_ackoff.html">From Data to Wisdom & The DIKW Framework</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Russell L. Ackoff (1989); Bellinger, Castro, Mills</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">The canonical 5-level hierarchy: Data (symbols) → Information (relational) → Knowledge (deterministic) → Understanding (cognitive) → Wisdom (philosophical discernment).</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Interactive 5-Level Cognitive Transformation Simulator</span>
+        </div>
+        <a href="paper_01_dikw_ackoff.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Foundations" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Reading
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 20 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_02_data_science_ozsu.html">Data Science: A Systematic Treatment</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">M. Tamer Özsu (CACM 2023)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Deconstructs data science as a formal discipline: computational pipelines, data-centric systems, reproducibility, and ethical governance.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Multifaceted Data Science Lifecycle Flowchart</span>
+        </div>
+        <a href="paper_02_data_science_ozsu.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Foundations" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Reading
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_03_kdd_theory_mannila.html">Theoretical Frameworks for Data Mining</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Heikki Mannila (ACM SIGKDD 2000)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Formalizes data mining as querying an inductive database: defining rule spaces, satisfaction predicates, and sentence evaluation.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Inductive Database Sentence Evaluation Visualizer</span>
+        </div>
+        <a href="paper_03_kdd_theory_mannila.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Foundations" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Quiz 1 Essential
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_04_data_science_cao.html">Data Science: A Comprehensive Overview</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Longbing Cao (ACM Computing Surveys 2017)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Comprehensive overview of Data-to-Insight-to-Decision whole-of-life analytics, cross-disciplinary paradigms, and actionable intelligence.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Data-to-Insight-to-Decision Analytics Matrix</span>
+        </div>
+        <a href="paper_04_data_science_cao.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Foundations" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Reading
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 15 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_05_theory_building_markus.html">Looking Backward and Forward at Theories</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">M. Lynne Markus & Mark Saunders</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Scientific epistemology and theory building: inductive reasoning from empirical datasets versus deductive hypothesis testing.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Inductive vs. Deductive Theory Building Flow</span>
+        </div>
+        <a href="paper_05_theory_building_markus.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Multimodal & Applications" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Advanced Reading
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_06_covid_multimodal_fusion.html">Multimodal Fusion Framework for COVID-19</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Santosh Kumar, Mithilesh Kumar Chaube et al. (CMPB 2022)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Multimodal fusion combining chest X-ray deep features with acoustic speech signal processing for rapid, non-invasive COVID-19 diagnosis.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Interactive Dual-Stream Feature Fusion Simulator</span>
+        </div>
+        <a href="paper_06_covid_multimodal_fusion.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Streams" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Advanced Reading
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_07_streaming_domingos_hulten.html">Mining High-Speed Data Streams (VFDT)</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Pedro Domingos & Geoff Hulten (ACM SIGKDD 2000)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Very Fast Decision Tree (VFDT) using the mathematical Hoeffding bound to build decision trees from infinite high-speed data streams in constant memory.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Hoeffding Bound Sample Size & Stream Split Playground</span>
+        </div>
+        <a href="paper_07_streaming_domingos_hulten.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Visualization" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Reading
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_08_visual_mining_survey.html">From Visual Exploration to Visual Data Mining: A Survey</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Maria C. F. de Oliveira & Haim Levkowitz (IEEE TVCG 2003)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Survey of visual data exploration techniques: geometric projection, iconographic displays, pixel-oriented screens, and visualization taxonomies.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Interactive Visual Mining Taxonomy Explorer</span>
+        </div>
+        <a href="paper_08_visual_mining_survey.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Quality & Web" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Advanced Reading
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_09_truth_discovery_yin_han.html">Truth Discovery with Conflicting Web Providers (TruthFinder)</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Xiaoxin Yin, Jiawei Han, Philip S. Yu (ACM SIGKDD 2007)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">TruthFinder algorithm: iterative propagation between website trustworthiness and fact confidence to discover true facts among conflicting web claims.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">TruthFinder Iterative Trust-Confidence Propagator</span>
+        </div>
+        <a href="paper_09_truth_discovery_yin_han.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Machine Learning & Preprocessing" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            IIIT-H Landmark Paper
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_10_pest_dynamics_neuralnet.html">Pest Population Dynamics Using Neural Networks</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Rajat, P. Krishna Reddy et al. (IEEE ICDM 2003)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Applying neural network modeling on agricultural sensor and weather data to forecast Helicoverpa armigera chickpea crop pest outbreaks.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Agro-Meteorological Feature Correlation Explorer</span>
+        </div>
+        <a href="paper_10_pest_dynamics_neuralnet.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Curation" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Reading
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 20 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_11_data_curation_knowledge.html">Machine Knowledge: Creation & Curation of Knowledge</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Gerhard Weikum et al. (ACM SIGMOD Record 2021)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Modern paradigms of large-scale machine knowledge: extracting, canonicalizing, validating, and curating multi-source enterprise knowledge graphs.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Knowledge Extraction & Entity Canonicalization Toy</span>
+        </div>
+        <a href="paper_11_data_curation_knowledge.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Cleaning" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Data Cleaning
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_12_similarity_joins_cleaning.html">A Primitive Operator for Similarity Joins in Data Cleaning</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Surajit Chaudhuri, Venkatesh Ganti, Raghav Kaushik (MSR / ICDE)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">A primitive database operator for similarity joins over fuzzy text attributes, enabling scalable error detection and fuzzy deduplication.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Interactive Edit-Distance & Jaccard Similarity Join Filter</span>
+        </div>
+        <a href="paper_12_similarity_joins_cleaning.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Integration" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Reading
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_13_human_in_loop_integration.html">Human-in-the-Loop Data Integration</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Guoliang Li (VLDB 2017)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Synergizing algorithmic machine learning with human crowd-intelligence for schema matching, entity resolution, and data fusion.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Active Learning & Crowd-Worker Assignment Visualizer</span>
+        </div>
+        <a href="paper_13_human_in_loop_integration.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Cleaning" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Class 5 Essential
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_14_potters_wheel_cleaning.html">Potter's Wheel: An Interactive Data Cleaning System</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Vijayshankar Raman & Joseph M. Hellerstein (VLDB 2001)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Interactive data cleaning: declarative graphical transforms (Format, Drop, Copy, Split, Merge, Fold) executed with instant visual previews.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Interactive Potter's Wheel Transformation Workbench</span>
+        </div>
+        <a href="paper_14_potters_wheel_cleaning.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Cleaning" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Advanced Reading
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_15_sequential_dependencies.html">Sequential Dependencies for Data Cleaning</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Lukasz Golab, Howard Karloff, Flip Korn, Divesh Srivastava (VLDB 2009)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Sequential Dependencies (SDs): functional dependencies extended with order and interval constraints to detect anomalies in ordered and stream logs.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Sequential Dependency Violation Checker</span>
+        </div>
+        <a href="paper_15_sequential_dependencies.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Warehousing & Induction" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_16_han_cai_aoi.html">Knowledge Discovery: An Attribute-Oriented Approach (AOI)</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Jiawei Han, Yandong Cai, Nick Cercone (VLDB 1992)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">The seminal AOI paper: Least Commitment Principle, concept tree climbing, and the LCHR (Characteristic) and LCLR (Classification) algorithms.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Step-by-Step LCHR / LCLR Concept Tree Climber</span>
+        </div>
+        <a href="paper_16_han_cai_aoi.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Warehousing & OLAP" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_17_data_cube_jim_gray.html">Data Cube: A Relational Aggregation Operator</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Jim Gray, Surajit Chaudhuri, Adam Bosworth et al. (DMKD 1997)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">The paper that invented the CUBE operator: generalizing GROUP BY, Cross-Tabs, and Roll-Ups with the ALL token and multidimensional lattices.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">3D Data Cube vs. GROUP BY Interactive Comparator</span>
+        </div>
+        <a href="paper_17_data_cube_jim_gray.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Cube Algorithms" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_18_multidim_aggregates_vldb96.html">On the Computation of Multidimensional Aggregates</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Sameet Agarwal, Rakesh Agrawal, Prasad Deshpande et al. (VLDB 1996)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">The 5 core optimizations (Smallest-Parent, Cache-Results, Amortize-Scans, Share-Sorts, Share-Partitions), PipeSort bipartite matching, and PipeHash.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">PipeSort Bipartite Matching & Sort Plan Visualizer</span>
+        </div>
+        <a href="paper_18_multidim_aggregates_vldb96.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Cube Algorithms" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_19_multiway_array_sigmod97.html">Multiway Array Aggregation for Full Cube Computation</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Yihong Zhao, Prasad M. Deshpande, Jeffrey F. Naughton (ACM SIGMOD 1997)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Array-based cube computation (MOLAP): array chunking, chunk-offset compression, and simultaneous multiway plane sweeps in minimum memory.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Multiway Array Chunk Sweeper & Memory Buffer Animator</span>
+        </div>
+        <a href="paper_19_multiway_array_sigmod97.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Cube Algorithms" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_20_buc_sigmod99.html">Bottom-Up Computation of Sparse and Iceberg CUBEs (BUC)</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Kevin Beyer & Raghu Ramakrishnan (ACM SIGMOD 1999)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">BUC algorithm: computing iceberg cubes from apex downward, exploiting monotonic Apriori pruning, dimension ordering, and counting sort.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">BUC Recursive Partitioning & Monotonic Pruning Animator</span>
+        </div>
+        <a href="paper_20_buc_sigmod99.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Association Rules" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Foundational Milestone
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_21_ais_sigmod93.html">Mining Association Rules Between Sets of Items (AIS)</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Rakesh Agrawal, Tomasz Imielinski, Arun Swami (ACM SIGMOD 1993)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">The paper that started Association Rule Mining: introducing the market basket problem, support, confidence, and the pioneering AIS algorithm.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">AIS Transaction-by-Transaction Candidate Generator</span>
+        </div>
+        <a href="paper_21_ais_sigmod93.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Association Rules" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_22_apriori_vldb94.html">Fast Algorithms for Mining Association Rules (Apriori)</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Rakesh Agrawal & Ramakrishnan Srikant (VLDB 1994)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">The classic Apriori algorithm: the anti-monotone downward closure property, apriori-gen self-join and prune, candidate hash-trees, and AprioriTid.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Apriori Candidate Generation & Prune Step-by-Step Simulator</span>
+        </div>
+        <a href="paper_22_apriori_vldb94.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Association Rules" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_23_fptree_sigmod00.html">Mining Frequent Patterns without Candidate Generation (FP-Growth)</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Jiawei Han, Jian Pei, Yiwen Yin (ACM SIGMOD 2000)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">The FP-growth revolution: compressing databases into prefix FP-Trees in 2 scans, extracting conditional pattern bases, and recursive mining without candidates.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Interactive FP-Tree Constructor & Conditional Base Explorer</span>
+        </div>
+        <a href="paper_23_fptree_sigmod00.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Association Rules" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_24_eclat_tkde00.html">Scalable Algorithms for Association Mining (ECLAT)</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Mohammed J. Zaki (IEEE TKDE 2000)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Vertical data format mining: representing itemsets as TID-lists, intersection-based support counting, and the memory-saving Diffset optimization.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">ECLAT Vertical TID-List Intersector & Diffset Calculator</span>
+        </div>
+        <a href="paper_24_eclat_tkde00.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Advanced Patterns" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_25_coverage_patterns_2012.html">Discovering Coverage Patterns for Banner Advertisement</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">P. Gowtham Srinivas, P. Krishna Reddy et al. (2012)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Banner ad placement: Coverage Set (CSet), Coverage Support (CS), Overlap Ratio (OR), Sorted Closure Property, and the CMine algorithm.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">CMine Banner Placement Simulator & Overlap Ratio Evaluator</span>
+        </div>
+        <a href="paper_25_coverage_patterns_2012.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Advanced Patterns" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_26_multilevel_mining_1999.html">Mining Multiple-Level Association Rules in Large Databases</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Jiawei Han & Yongjian Fu (IEEE TKDE 1999)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Multiple-level association rules: concept hierarchies, encoded transaction tables (T[1], T[2]), ascending minsup, and redundancy filtering.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Encoded Transaction Table & Multi-Level Support Explorer</span>
+        </div>
+        <a href="paper_26_multilevel_mining_1999.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Advanced Patterns" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_27_high_utility_pakdd05.html">A Two-Phase Algorithm for Fast Discovery of High Utility Itemsets</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Ying Liu, Wei-keng Liao, Alok Choudhary (PAKDD 2005)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Mining valuable itemsets by quantity and unit profit: Transaction-Weighted Utilization (TWU), the TWDC property, and the Two-Phase algorithm.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Two-Phase High-Utility Itemset Calculator (TWU vs. Real Utility)</span>
+        </div>
+        <a href="paper_27_high_utility_pakdd05.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Advanced Patterns" data-midsem="true">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-950/80 text-amber-300 border-amber-700/60">
+            Midsem Top Priority
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 30 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_28_quantitative_rules_sigmod96.html">Mining Quantitative Association Rules in Large Relational Tables</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Ramakrishnan Srikant & Rakesh Agrawal (ACM SIGMOD 1996)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Quantitative association rules on relational data: Boolean mapping, the MinSup vs. MinConf Catch-22 dilemma, and dynamic interval merging.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Quantitative Rule Interval Merging & Catch-22 Playground</span>
+        </div>
+        <a href="paper_28_quantitative_rules_sigmod96.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Advanced Patterns" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            IIIT-H Landmark Paper
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_29_diverse_patterns_2020.html">Model of Concept Hierarchy-Based Diverse Frequent Patterns</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">B. Swamy, P. Krishna Reddy et al. (JDSA 2020)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Measuring item diversity across concept hierarchies: minimal vs. maximal subtree projections, and calculating the Diverse Rank (drank) metric.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Concept Tree Projection & Diverse Rank (drank) Calculator</span>
+        </div>
+        <a href="paper_29_diverse_patterns_2020.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Advanced Patterns" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            IIIT-H Landmark Paper
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_30_periodic_patterns_2019.html">Multi-Location Visibility Query Processing & Periodic Patterns</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">P. Radha Krishna, P. Krishna Reddy et al. (DMKD 2019)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Portion-based transactional modeling for spatial-temporal data: periodic patterns, multi-location visibility queries, and location-aware recommendations.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Portion-Based Temporal Transaction Grid Visualizer</span>
+        </div>
+        <a href="paper_30_periodic_patterns_2019.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Path & Sequence Mining" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            IIIT-H Landmark Paper
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_31_popular_paths_dapd21.html">Discovering Popular Paths Using Transactional Modeling</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Ravanth & P. Krishna Reddy (DAPD 2021)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Mining popular movement paths across road networks and GPS trajectories using transactional path modeling and prefix frequency trees.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Road Network Trajectory & Popular Path Extractor</span>
+        </div>
+        <a href="paper_31_popular_paths_dapd21.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Graph Mining" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            IIIT-H Landmark Paper
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_32_subgraph_coverage_jdsa21.html">Mining Subgraph Coverage Patterns from Graph Transactions</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">A. Srinivas & P. Krishna Reddy (JDSA 2021)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Extending coverage patterns from sets to graphs: finding small subgraphs that cover a maximal fraction of transaction graphs with minimal overlap.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Graph Transaction Subgraph Coverage Visualizer</span>
+        </div>
+        <a href="paper_32_subgraph_coverage_jdsa21.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Data Cube Applications" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            IIIT-H Recent Breakthrough
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_33_datacube_justice_2025.html">Data Cube for Exploring Anomalies in Justice Delivery</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Sriharshitha Bondugula, P. Krishna Reddy et al. (AIR 2025)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Applying multidimensional data cubes on Indian legal court judgements to discover anomalies and bottlenecks in case pendency across states and years.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">Indian Court Judgement Multidimensional Cube Explorer</span>
+        </div>
+        <a href="paper_33_datacube_justice_2025.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Surveys & Landmarks" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Essential Survey
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 35 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_34_top10_algorithms_2008.html">Top 10 Algorithms in Data Mining</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Wu, Kumar, Quinlan, Ghosh, Yang, Motwani et al. (KAIS 2008)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">The 10 most influential algorithms identified by the community: C4.5, k-Means, SVM, Apriori, EM, PageRank, AdaBoost, k-NN, Naive Bayes, and CART.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">The Top 10 Algorithms Interactive Selector & Comparator</span>
+        </div>
+        <a href="paper_34_top10_algorithms_2008.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+    <div class="paper-card bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between" data-category="Surveys & Landmarks" data-midsem="false">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-800 text-slate-300 border-slate-700">
+            Classification History
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">⏱️ 25 min</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--foreground)] mb-1 leading-snug hover:text-indigo-400 transition-colors">
+          <a href="paper_35_fifty_years_trees_2014.html">Fifty Years of Classification and Regression Trees</a>
+        </h3>
+        <p class="text-xs text-indigo-400 mb-3 font-medium">Wei-Yin Loh (International Statistical Review 2014)</p>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">Historical retrospective on 50 years of decision trees: from Morgan & Sonquist (1963 AID) through Breiman's CART to QUEST, CRUISE, and GUIDE.</p>
+      </div>
+      <div>
+        <div class="bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2.5 mb-4 text-[11px] text-indigo-300 flex items-center gap-2">
+          <span>🎮</span>
+          <span class="truncate">50-Year Decision Tree Evolution Interactive Timeline</span>
+        </div>
+        <a href="paper_35_fifty_years_trees_2014.html" class="block w-full text-center text-xs font-bold py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm transition-all">
+          Study Interactive Paper →
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="max-w-7xl mx-auto mt-16 pt-8 border-t border-[var(--border)] text-center text-xs text-[var(--muted-foreground)]">
+    <p>Data Analytics-I Research Paper Interactive Suite • Designed for CS4.405 Monsoon 2026</p>
+    <p class="mt-1">Each app is self-contained with offline-ready Canvas/SVG simulations, active recall flip-cards, and Pomodoro timers.</p>
+  </footer>
+
+  <script>
+    function filterCategory(cat) {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
+        btn.classList.add('bg-[var(--card)]', 'text-[var(--muted-foreground)]');
+      });
+      event.target.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
+      event.target.classList.remove('bg-[var(--card)]', 'text-[var(--muted-foreground)]');
+
+      const cards = document.querySelectorAll('.paper-card');
+      cards.forEach(card => {
+        if (cat === 'all') {
+          card.style.display = 'flex';
+        } else if (cat === 'midsem') {
+          card.style.display = card.getAttribute('data-midsem') === 'true' ? 'flex' : 'none';
+        } else {
+          card.style.display = card.getAttribute('data-category') === cat ? 'flex' : 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

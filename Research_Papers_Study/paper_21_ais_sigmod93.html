@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mining Association Rules between Sets of Items in Large Databases — Visual Tutorial</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #090d16;
+    --card: #131b2e;
+    --card-hover: #1a253e;
+    --sidebar: #090d16;
+    --foreground: #f8fafc;
+    --muted-foreground: #94a3b8;
+    --border: #22304d;
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --accent: #8b5cf6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  .interactive-box {
+    background: #0d1527;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+  }
+  .step-node.active {
+    background: rgba(99, 102, 241, 0.25);
+    border-color: var(--primary);
+    color: #fff;
+  }
+  .math-def {
+    background: #0a101f;
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+  .quiz-btn.correct {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: #10b981 !important;
+    color: #34d399 !important;
+  }
+  .quiz-btn.wrong {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: #ef4444 !important;
+    color: #f87171 !important;
+  }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (RESEARCH PAPERS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  body {
+    padding: 0.75rem 0.5rem !important;
+  }
+  header.sticky {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 1.25rem !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  header.sticky h1 {
+    font-size: 1.2rem !important;
+    line-height: 1.3 !important;
+  }
+  .grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5 {
+    grid-template-columns: 1fr !important;
+  }
+  .interactive-box {
+    padding: 1rem !important;
+    border-radius: 0.75rem !important;
+  }
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  .quiz-btn, button {
+    min-height: 42px !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body class="p-4 md:p-8 max-w-6xl mx-auto">
+
+  <!-- Sticky Navigation Header -->
+  <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md pb-4 pt-2 border-b border-[var(--border)] mb-8 flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-3">
+        <a href="00_papers_home.html" class="text-xs font-bold text-indigo-400 bg-indigo-950/60 hover:bg-indigo-900/60 px-3 py-1.5 rounded-lg border border-indigo-800/60 transition-all flex items-center gap-1">
+          ← Research Hub
+        </a>
+        <span class="text-xs text-[var(--muted-foreground)]">| In-Depth Tutorial</span>
+      </div>
+      <h1 class="text-xl md:text-2xl font-black text-white mt-2 leading-tight">Mining Association Rules between Sets of Items in Large Databases</h1>
+      <p class="text-xs text-indigo-300 font-medium">Rakesh Agrawal, Tomasz Imielinski, Arun Swami (SIGMOD 1993)</p>
+    </div>
+
+    <!-- Pomodoro Timer -->
+    <div class="flex items-center gap-2">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs font-mono font-bold text-amber-400">
+        <span>⏱️ Focus:</span>
+        <span id="timer-display">15:00</span>
+      </div>
+      <button onclick="toggleTimer()" class="text-xs bg-[var(--card)] hover:bg-[var(--border)] px-2.5 py-1.5 rounded-lg border border-[var(--border)]">⏯</button>
+    </div>
+  </header>
+
+  <!-- Main Tutorial Content Container -->
+  <main class="space-y-12">
+    
+    <!-- 1. The Birth of Market Basket Analysis -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 mb-3">
+        1. The Historical Genesis
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">The Paper That Founded Association Rule Mining</h2>
+      <p class="text-sm text-[var(--muted-foreground)] leading-relaxed mb-4">
+        In 1993, <strong>Rakesh Agrawal, Tomasz Imielinski, and Arun Swami</strong> published <em>Mining Association Rules between Sets of Items in Large Databases</em> at ACM SIGMOD. This landmark paper introduced the terms <strong>Support</strong>, <strong>Confidence</strong>, and <strong>Market Basket Analysis</strong> to computer science.
+      </p>
+      <div class="p-4 rounded-xl bg-indigo-950/30 border border-indigo-800/40 text-sm text-indigo-200 leading-relaxed mb-4">
+        <strong>🛒 The Problem Formalization:</strong>
+        Given a set of items $I = \{i_1, i_2, \dots, i_m\}$ and a database of transactions $D$, find all rules $X \implies Y$ such that:
+        1. <strong>Support:</strong> The percentage of transactions that contain $X \cup Y$ is $\ge \t\text{minsup}$.
+        2. <strong>Confidence:</strong> The percentage of transactions containing $X$ that ALSO contain $Y$ is $\ge \text{minconf}$.
+      </div>
+    </section>
+
+    <!-- 2. The AIS Mechanism & The Fatal Flaw -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20 mb-3">
+        2. The AIS Algorithm & Its Fatal Bottleneck
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">Why Did AIS Suffer From Candidate Explosion?</h2>
+      <p class="text-sm text-[var(--muted-foreground)] leading-relaxed mb-4">
+        To understand why <em>Apriori (1994)</em> became so famous, you must understand how AIS worked in 1993 and why it ran out of memory.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="p-4 rounded-xl bg-[#0a101f] border border-rose-900/60">
+          <div class="text-xs font-bold text-rose-400 mb-2">❌ How AIS Generated Candidates:</div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            In pass $k$, AIS reads transaction $T$. It checks which frequent $(k-1)$-itemsets $l \in L_{k-1}$ are present in $T$. For each such $l$, it pairs $l$ with <strong>EVERY OTHER ITEM</strong> present in $T$!
+            <br/><br/>
+            If transaction $T$ contains 40 items and matches 10 frequent sets, AIS immediately creates hundreds of candidates inside memory for that single basket, even if those items have never appeared together anywhere else!
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-[#0a101f] border border-emerald-900/60">
+          <div class="text-xs font-bold text-emerald-400 mb-2">✓ The Apriori 1994 Revolution:</div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Apriori recognized: <em>Never look at raw transactions to generate candidates!</em>
+            <br/><br/>
+            Instead, generate candidates globally using <code class="text-indigo-300">apriori-gen</code> strictly from $L_{k-1} owtie L_{k-1}$, and immediately prune any candidate with an infrequent subset. Apriori generates 100x fewer candidates than AIS!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Interactive AIS vs Apriori Candidate Generator Arena -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 mb-3">
+        3. Interactive Algorithmic Simulation
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">AIS vs. Apriori: Candidate Explosion Arena</h2>
+      <p class="text-xs text-[var(--muted-foreground)] mb-6">
+        Given a single customer transaction with 5 items: <code class="text-amber-400">{A, B, C, D, E}</code> and frequent 2-itemsets $L_2 = \{\{A,B\}, \{A,C\}, \{B,C\}\}$. Watch how many candidate 3-itemsets AIS generates versus Apriori!
+      </p>
+
+      <div class="flex items-center gap-3 mb-6">
+        <button onclick="runAISArena('ais')" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+          Generate via AIS (1993) 💥
+        </button>
+        <button onclick="runAISArena('apriori')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+          Generate via Apriori (1994) 🛡️
+        </button>
+      </div>
+
+      <div class="interactive-box" id="ais-arena-box">
+        <div class="text-xs text-slate-400 font-mono">Select a generator above to compare candidate generation behavior.</div>
+      </div>
+    </section>
+
+    <!-- 4. Retention Quiz -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20 mb-3">
+        4. Active Retention Quiz
+      </div>
+      <h2 class="text-2xl font-black text-white mb-6">Test Your Understanding</h2>
+
+      <div class="space-y-6">
+        <!-- Q1 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">1. Where does the AIS algorithm generate candidate itemsets?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Inside each transaction during the database scan, extending known frequent sets with other items in that basket.</button>
+            <button onclick="answerQuiz(this, false, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Globally before reading transactions using relational joins.</button>
+            <button onclick="answerQuiz(this, false, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">In a neural network embedding layer.</button>
+          </div>
+          <div id="q1-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! AIS generated candidates on the fly while scanning transactions, leading to enormous memory bloat when transactions were wide.
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">2. If Support({A, B}) = 10% and Support({A}) = 20%, what is Confidence(A ➔ B)?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">50% (Support({A, B}) / Support({A}) = 0.10 / 0.20 = 0.50)</button>
+            <button onclick="answerQuiz(this, false, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">200%</button>
+            <button onclick="answerQuiz(this, false, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">2%</button>
+          </div>
+          <div id="q2-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! Confidence measures conditional probability P(B|A) = Support(A ∪ B) / Support(A).
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">3. What was the SETM algorithm developed alongside AIS?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">An SQL-oriented algorithm that expressed candidate generation using relational SQL operations.</button>
+            <button onclick="answerQuiz(this, false, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">A streaming decision tree classifier.</button>
+            <button onclick="answerQuiz(this, false, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">A clustering algorithm for spatial points.</button>
+          </div>
+          <div id="q3-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! SETM used SQL table joins for candidate generation, but generated huge intermediate tables.
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">4. Why does Apriori (1994) dominate AIS (1993) in runtime and memory?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Apriori uses the anti-monotone property to prune candidates BEFORE transaction scanning, drastically reducing candidate counts.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Apriori avoids computing confidence.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Apriori only works on datasets with fewer than 10 transactions.</button>
+          </div>
+          <div id="q4-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! Apriori's prune step discards candidates whose subsets are not frequent before even counting them in transactions.
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">5. Can confidence alone prove that two items are truly positively correlated?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, false, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Yes; confidence &gt; 80% always means a strong positive cause.</button>
+            <button onclick="answerQuiz(this, true, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">No; if the consequent Y is universally popular (e.g., P(Y) = 90%), a rule with 80% confidence actually indicates NEGATIVE correlation (Lift &lt; 1).</button>
+            <button onclick="answerQuiz(this, false, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Yes; correlation and confidence are identical definitions.</button>
+          </div>
+          <div id="q5-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! This limitation led to Lift, Chi-Square, and Kulczynski measures in later years.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="mt-16 pt-8 border-t border-[var(--border)] text-center text-xs text-[var(--muted-foreground)] pb-12">
+    <p>Data Analytics-I Academic Research Suite • Deep-Dive Series</p>
+    <p class="mt-1">Designed for university students learning foundational data science from first principles.</p>
+  </footer>
+
+  <script>
+    // Pomodoro Timer
+    let timeLeft = 15 * 60;
+    let timerRunning = true;
+    const timerDisplay = document.getElementById('timer-display');
+    setInterval(() => {
+      if (timerRunning && timeLeft > 0) {
+        timeLeft--;
+        const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+        const s = String(timeLeft % 60).padStart(2, '0');
+        timerDisplay.innerText = m + ':' + s;
+        if (timeLeft === 0) alert('⏰ 15-Minute Learning Sprint Finished! Stand up, stretch, and let your brain integrate.');
+      }
+    }, 1000);
+    function toggleTimer() { timerRunning = !timerRunning; }
+
+    // Quiz logic helper
+    function answerQuiz(btn, isCorrect, explanationId) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.quiz-btn').forEach(b => b.classList.remove('correct', 'wrong'));
+      if (isCorrect) {
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('wrong');
+      }
+      document.getElementById(explanationId).classList.remove('hidden');
+    }
+
+    
+  function runAISArena(mode) {
+    const box = document.getElementById('ais-arena-box');
+    if (!box) return;
+
+    if (mode === 'ais') {
+      box.innerHTML = `
+        <div class="space-y-3">
+          <div class="text-xs font-bold text-rose-400">💥 AIS 1993 On-the-Fly Generation for Basket {A, B, C, D, E}:</div>
+          <p class="text-xs text-slate-300">Matching frequent sets in basket: {A,B}, {A,C}, {B,C}.<br/>
+          AIS extends each with EVERY other item in {A, B, C, D, E}:</p>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs font-mono text-rose-300">
+            <div class="p-2 bg-rose-950/40 border border-rose-900 rounded">{A,B} + C ➔ {A,B,C}</div>
+            <div class="p-2 bg-rose-950/40 border border-rose-900 rounded">{A,B} + D ➔ {A,B,D} ⚠️</div>
+            <div class="p-2 bg-rose-950/40 border border-rose-900 rounded">{A,B} + E ➔ {A,B,E} ⚠️</div>
+            <div class="p-2 bg-rose-950/40 border border-rose-900 rounded">{A,C} + D ➔ {A,C,D} ⚠️</div>
+            <div class="p-2 bg-rose-950/40 border border-rose-900 rounded">{A,C} + E ➔ {A,C,E} ⚠️</div>
+            <div class="p-2 bg-rose-950/40 border border-rose-900 rounded">{B,C} + D ➔ {B,C,D} ⚠️</div>
+            <div class="p-2 bg-rose-950/40 border border-rose-900 rounded">{B,C} + E ➔ {B,C,E} ⚠️</div>
+          </div>
+          <div class="p-3 rounded bg-rose-900/30 border border-rose-700 text-xs text-rose-200">
+            <strong>Total Candidates Generated: 7 candidates</strong><br/>
+            Notice that {A,B,D}, {A,B,E}, etc. are doomed because {A,D} or {A,E} are not even frequent! AIS bloats memory holding doomed candidates.
+          </div>
+        </div>
+      `;
+    } else {
+      box.innerHTML = `
+        <div class="space-y-3">
+          <div class="text-xs font-bold text-emerald-400">🛡️ Apriori 1994 Global Join & Prune:</div>
+          <p class="text-xs text-slate-300">Apriori uses apriori-gen on L2 = {{A,B}, {A,C}, {B,C}}:</p>
+          <div class="p-3 bg-emerald-950/40 border border-emerald-900 rounded text-xs font-mono text-emerald-200">
+            1. Join step: {A,B} ⋈ {A,C} ➔ Candidate: {A,B,C}<br/>
+            2. Prune step: Subsets are {A,B}, {A,C}, {B,C}. All exist in L2! Kept.<br/>
+            3. Items D and E are NEVER paired because they aren't in frequent pairs!
+          </div>
+          <div class="p-3 rounded bg-emerald-900/30 border border-emerald-700 text-xs text-emerald-200">
+            <strong>Total Candidates Generated: Exactly 1 candidate ({A,B,C})!</strong><br/>
+            Apriori achieved an <strong>86% reduction in candidates</strong> for this single transaction alone!
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  </script>
+</body>
+</html>

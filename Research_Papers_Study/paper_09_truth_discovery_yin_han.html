@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Truth Discovery with TruthFinder — Visual Tutorial</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #090d16;
+    --card: #131b2e;
+    --card-hover: #1a253e;
+    --sidebar: #090d16;
+    --foreground: #f8fafc;
+    --muted-foreground: #94a3b8;
+    --border: #22304d;
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --accent: #8b5cf6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  .interactive-box {
+    background: #0d1527;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+  }
+  .step-node.active {
+    background: rgba(99, 102, 241, 0.25);
+    border-color: var(--primary);
+    color: #fff;
+  }
+  .math-def {
+    background: #0a101f;
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+  .quiz-btn.correct {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: #10b981 !important;
+    color: #34d399 !important;
+  }
+  .quiz-btn.wrong {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: #ef4444 !important;
+    color: #f87171 !important;
+  }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (RESEARCH PAPERS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  body {
+    padding: 0.75rem 0.5rem !important;
+  }
+  header.sticky {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 1.25rem !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  header.sticky h1 {
+    font-size: 1.2rem !important;
+    line-height: 1.3 !important;
+  }
+  .grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5 {
+    grid-template-columns: 1fr !important;
+  }
+  .interactive-box {
+    padding: 1rem !important;
+    border-radius: 0.75rem !important;
+  }
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  .quiz-btn, button {
+    min-height: 42px !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body class="p-4 md:p-8 max-w-6xl mx-auto">
+
+  <!-- Sticky Navigation Header -->
+  <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md pb-4 pt-2 border-b border-[var(--border)] mb-8 flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-3">
+        <a href="00_papers_home.html" class="text-xs font-bold text-indigo-400 bg-indigo-950/60 hover:bg-indigo-900/60 px-3 py-1.5 rounded-lg border border-indigo-800/60 transition-all flex items-center gap-1">
+          ← Research Hub
+        </a>
+        <span class="text-xs text-[var(--muted-foreground)]">| In-Depth Tutorial</span>
+      </div>
+      <h1 class="text-xl md:text-2xl font-black text-white mt-2 leading-tight">Truth Discovery with TruthFinder</h1>
+      <p class="text-xs text-indigo-300 font-medium">Xiaoxin Yin, Jiawei Han, Philip S. Yu (IEEE TKDE 2007)</p>
+    </div>
+
+    <!-- Pomodoro Timer -->
+    <div class="flex items-center gap-2">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs font-mono font-bold text-amber-400">
+        <span>⏱️ Focus:</span>
+        <span id="timer-display">15:00</span>
+      </div>
+      <button onclick="toggleTimer()" class="text-xs bg-[var(--card)] hover:bg-[var(--border)] px-2.5 py-1.5 rounded-lg border border-[var(--border)]">⏯</button>
+    </div>
+  </header>
+
+  <!-- Main Tutorial Content Container -->
+  <main class="space-y-12">
+    
+    <!-- 1. The Web Truth Dilemma -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 mb-3">
+        1. Conflicting Web Data
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">Discovering Truth in a Web of Rumors, Scrapers, and Conflicts</h2>
+      <p class="text-sm text-[var(--muted-foreground)] leading-relaxed mb-4">
+        On the World Wide Web, information is frequently contradictory. Multiple online bookstores list completely different authors for the same book; medical forums give contradictory dosage advice.
+      </p>
+      <div class="p-4 rounded-xl bg-indigo-950/30 border border-indigo-800/40 text-sm text-indigo-200 leading-relaxed mb-4">
+        <strong>⚠️ Why Simple Majority Voting Fails:</strong>
+        One inaccurate blog post is often scraped by 50 cheap automated scraper websites. If an algorithm uses simple democratic majority voting, <strong>the false claim wins 50 to 1</strong>!
+        <br/><br/>
+        <strong>Xiaoxin Yin, Jiawei Han, and Philip S. Yu (IEEE TKDE 2007)</strong> introduced <strong>TruthFinder</strong>, the foundational algorithm for <em>Truth Discovery</em> based on bipartite mutual reinforcement.
+      </div>
+    </section>
+
+    <!-- 2. Bipartite Mutual Reinforcement Mathematics -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20 mb-3">
+        2. Mathematical Formalism
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">Bipartite Graphs & Log-Likelihood Damping</h2>
+      <p class="text-sm text-[var(--muted-foreground)] leading-relaxed mb-4">
+        Websites $W$ and candidate facts $F$ form a bipartite graph. The fundamental axiom:
+        <br/>
+        <em>"A website is trustworthy if it asserts true facts; a fact is believable if asserted by trustworthy websites."</em>
+      </p>
+
+      <div class="math-def mb-6 text-xs text-indigo-300">
+        TruthFinder Iterative Equations:<br/>
+        1. Fact Confidence from Website Trustworthiness:<br/>
+        &sigma;(f) = 1 - &prod;_{w &isin; W(f)} (1 - t(w))<br/><br/>
+        2. Website Trustworthiness from Fact Confidence:<br/>
+        t(w) = &sum;_{f &isin; F(w)} c(f) / |F(w)|<br/><br/>
+        3. Conflict Damping Factor (&rho;):<br/>
+        If fact f1 conflicts with f2 (e.g. Author is John vs Author is Bob):<br/>
+        Score(f1) = Confidence(f1) - &rho; &times; Score(f2)<br/>
+        Negative evidence from authoritative sources actively dampens conflicting false facts!
+      </div>
+    </section>
+
+    <!-- 3. Interactive TruthFinder Convergence Simulator -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 mb-3">
+        3. Interactive Visual Simulation
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">TruthFinder Bipartite Iteration Simulator</h2>
+      <p class="text-xs text-[var(--muted-foreground)] mb-6">
+        Below are 3 websites claiming different author names for a book. Step through iterations to watch how TruthFinder suppresses the spam network and identifies the true fact!
+      </p>
+
+      <div class="flex items-center gap-3 mb-6">
+        <button onclick="stepTruthFinder()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+          Run Next Iteration ▶
+        </button>
+        <button onclick="resetTruthFinder()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700">
+          Reset ↺
+        </button>
+        <span id="tf-iter-disp" class="text-xs font-mono font-bold text-amber-400">Iteration: 0</span>
+      </div>
+
+      <div class="interactive-box" id="tf-display-box">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 4. Retention Quiz -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20 mb-3">
+        4. Active Retention Quiz
+      </div>
+      <h2 class="text-2xl font-black text-white mb-6">Test Your Understanding</h2>
+
+      <div class="space-y-6">
+        <!-- Q1 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">1. Why does naive majority voting fail in web data integration?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Unreliable scraper websites frequently copy errors from each other, giving falsehoods an artificial majority.</button>
+            <button onclick="answerQuiz(this, false, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Because websites refuse to be scraped.</button>
+            <button onclick="answerQuiz(this, false, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Because votes can only be cast in November.</button>
+          </div>
+          <div id="q1-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! Syndication and copying create artificial majorities for incorrect facts.
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">2. What graph topology represents the relationship between sources and claims in TruthFinder?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">A Bipartite Graph between Websites (Sources) and Facts (Claims).</button>
+            <button onclick="answerQuiz(this, false, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">A single linked list.</button>
+            <button onclick="answerQuiz(this, false, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">A binary search tree.</button>
+          </div>
+          <div id="q2-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! The dual sets of sources and facts form a natural bipartite network.
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">3. How does conflict damping (&rho;) operate in TruthFinder?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">High confidence in one fact actively reduces the score of mutually exclusive conflicting candidate facts.</button>
+            <button onclick="answerQuiz(this, false, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">It shuts down conflicting websites.</button>
+            <button onclick="answerQuiz(this, false, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">It averages all conflicting strings alphabetically.</button>
+          </div>
+          <div id="q3-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! Evidence in favor of one fact acts as negative evidence against its mutually exclusive rivals.
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">4. What algorithmic paradigm does TruthFinder share with Google PageRank and Kleinberg's HITS?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Iterative power iteration on mutual reinforcement matrices until convergence.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Convolutional deep neural networks.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Decision tree pruning.</button>
+          </div>
+          <div id="q4-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! Like Hubs and Authorities in HITS, trustworthiness and confidence reinforce each other iteratively.
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">5. Can TruthFinder detect copied sources?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Yes; sources that consistently copy claims without independent verification have their joint votes discounted.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">No, all sources are assumed completely independent.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Only if given access to server source code.</button>
+          </div>
+          <div id="q5-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! Source dependency detection discounts copied answers.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="mt-16 pt-8 border-t border-[var(--border)] text-center text-xs text-[var(--muted-foreground)] pb-12">
+    <p>Data Analytics-I Academic Research Suite • Deep-Dive Series</p>
+    <p class="mt-1">Designed for university students learning foundational data science from first principles.</p>
+  </footer>
+
+  <script>
+    // Pomodoro Timer
+    let timeLeft = 15 * 60;
+    let timerRunning = true;
+    const timerDisplay = document.getElementById('timer-display');
+    setInterval(() => {
+      if (timerRunning && timeLeft > 0) {
+        timeLeft--;
+        const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+        const s = String(timeLeft % 60).padStart(2, '0');
+        timerDisplay.innerText = m + ':' + s;
+        if (timeLeft === 0) alert('⏰ 15-Minute Learning Sprint Finished! Stand up, stretch, and let your brain integrate.');
+      }
+    }, 1000);
+    function toggleTimer() { timerRunning = !timerRunning; }
+
+    // Quiz logic helper
+    function answerQuiz(btn, isCorrect, explanationId) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.quiz-btn').forEach(b => b.classList.remove('correct', 'wrong'));
+      if (isCorrect) {
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('wrong');
+      }
+      document.getElementById(explanationId).classList.remove('hidden');
+    }
+
+    
+  let tfIter = 0;
+  const tfStates = [
+    {
+      w1: 0.50, w2: 0.50, w3: 0.50,
+      f1: 0.50, f2: 0.67,
+      note: "Initial State (Uniform Prior): 2 scraper blogs out-vote 1 authoritative library website!"
+    },
+    {
+      w1: 0.72, w2: 0.38, w3: 0.38,
+      f1: 0.65, f2: 0.44,
+      note: "Iteration 1: Authoritative site verified on other non-conflicting facts. Trustworthiness increases."
+    },
+    {
+      w1: 0.91, w2: 0.18, w3: 0.18,
+      f1: 0.94, f2: 0.11,
+      note: "Iteration 2: Conflict damping heavily suppresses False claim. True fact confidence surges!"
+    },
+    {
+      w1: 0.96, w2: 0.08, w3: 0.08,
+      f1: 0.98, f2: 0.03,
+      note: "Converged State: Truth discovered! False scrapers effectively silenced."
+    }
+  ];
+
+  function renderTruthFinder() {
+    const box = document.getElementById('tf-display-box');
+    if (!box) return;
+
+    let s = tfStates[tfIter];
+    document.getElementById('tf-iter-disp').innerText = `Iteration: ${tfIter}`;
+
+    box.innerHTML = `
+      <div class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 bg-[#0a101f] border border-[var(--border)] rounded-xl">
+            <div class="text-xs font-bold text-amber-400 mb-2">Websites & Trustworthiness t(w):</div>
+            <div class="space-y-2 text-xs font-mono">
+              <div class="flex justify-between p-2 rounded bg-indigo-950/30 border border-indigo-900">
+                <span>🏛️ Official University Press:</span>
+                <span class="text-emerald-400 font-bold">${s.w1.toFixed(2)}</span>
+              </div>
+              <div class="flex justify-between p-2 rounded bg-rose-950/30 border border-rose-900">
+                <span>🤖 ScraperBlog 1:</span>
+                <span class="text-rose-400 font-bold">${s.w2.toFixed(2)}</span>
+              </div>
+              <div class="flex justify-between p-2 rounded bg-rose-950/30 border border-rose-900">
+                <span>🤖 ScraperBlog 2:</span>
+                <span class="text-rose-400 font-bold">${s.w3.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-[#0a101f] border border-[var(--border)] rounded-xl">
+            <div class="text-xs font-bold text-indigo-400 mb-2">Candidate Facts & Confidence c(f):</div>
+            <div class="space-y-2 text-xs font-mono">
+              <div class="p-2 rounded bg-[#0d1527] border border-[var(--border)]">
+                <div class="flex justify-between">
+                  <span>Fact 1: "Author is Michael Stonebraker"</span>
+                  <span class="text-emerald-400 font-bold">${s.f1.toFixed(2)}</span>
+                </div>
+                <div class="text-[10px] text-slate-400 mt-1">Claimed by: Official University Press</div>
+              </div>
+              <div class="p-2 rounded bg-[#0d1527] border border-[var(--border)]">
+                <div class="flex justify-between">
+                  <span>Fact 2: "Author is Mike Stoner" (Typo/Fake)</span>
+                  <span class="text-rose-400 font-bold">${s.f2.toFixed(2)}</span>
+                </div>
+                <div class="text-[10px] text-slate-400 mt-1">Claimed by: ScraperBlog 1, ScraperBlog 2</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-lg bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+          <strong>Convergence Status:</strong> ${s.note}
+        </div>
+      </div>
+    `;
+  }
+
+  function stepTruthFinder() {
+    if (tfIter < tfStates.length - 1) {
+      tfIter++;
+      renderTruthFinder();
+    }
+  }
+
+  function resetTruthFinder() {
+    tfIter = 0;
+    renderTruthFinder();
+  }
+  renderTruthFinder();
+
+  </script>
+</body>
+</html>

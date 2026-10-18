@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fast Algorithms for Mining Association Rules — Visual Tutorial</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<style>
+  :root {
+    --background: #090d16;
+    --card: #131b2e;
+    --card-hover: #1a253e;
+    --sidebar: #090d16;
+    --foreground: #f8fafc;
+    --muted-foreground: #94a3b8;
+    --border: #22304d;
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --accent: #8b5cf6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  .interactive-box {
+    background: #0d1527;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+  }
+  .step-node.active {
+    background: rgba(99, 102, 241, 0.25);
+    border-color: var(--primary);
+    color: #fff;
+  }
+  .math-def {
+    background: #0a101f;
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+  .quiz-btn.correct {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: #10b981 !important;
+    color: #34d399 !important;
+  }
+  .quiz-btn.wrong {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: #ef4444 !important;
+    color: #f87171 !important;
+  }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS SUITE (RESEARCH PAPERS)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  body {
+    padding: 0.75rem 0.5rem !important;
+  }
+  header.sticky {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 1.25rem !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  header.sticky h1 {
+    font-size: 1.2rem !important;
+    line-height: 1.3 !important;
+  }
+  .grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5 {
+    grid-template-columns: 1fr !important;
+  }
+  .interactive-box {
+    padding: 1rem !important;
+    border-radius: 0.75rem !important;
+  }
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  .quiz-btn, button {
+    min-height: 42px !important;
+  }
+}
+
+</style>
+<!-- KaTeX Math Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false,ignoredClasses:['katex-ignore']});}"></script>
+
+</head>
+<body class="p-4 md:p-8 max-w-6xl mx-auto">
+
+  <!-- Sticky Navigation Header -->
+  <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md pb-4 pt-2 border-b border-[var(--border)] mb-8 flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-3">
+        <a href="00_papers_home.html" class="text-xs font-bold text-indigo-400 bg-indigo-950/60 hover:bg-indigo-900/60 px-3 py-1.5 rounded-lg border border-indigo-800/60 transition-all flex items-center gap-1">
+          ← Research Hub
+        </a>
+        <span class="text-xs text-[var(--muted-foreground)]">| In-Depth Tutorial</span>
+      </div>
+      <h1 class="text-xl md:text-2xl font-black text-white mt-2 leading-tight">Fast Algorithms for Mining Association Rules</h1>
+      <p class="text-xs text-indigo-300 font-medium">Rakesh Agrawal & Ramakrishnan Srikant (VLDB 1994)</p>
+    </div>
+
+    <!-- Pomodoro Timer -->
+    <div class="flex items-center gap-2">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs font-mono font-bold text-amber-400">
+        <span>⏱️ Focus:</span>
+        <span id="timer-display">15:00</span>
+      </div>
+      <button onclick="toggleTimer()" class="text-xs bg-[var(--card)] hover:bg-[var(--border)] px-2.5 py-1.5 rounded-lg border border-[var(--border)]">⏯</button>
+    </div>
+  </header>
+
+  <!-- Main Tutorial Content Container -->
+  <main class="space-y-12">
+    
+    <!-- 1. The Core Retail Problem -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 mb-3">
+        1. The Retail Nightmare
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">Finding Hidden Shopping Habits in Billions of Transactions</h2>
+      <p class="text-sm text-[var(--muted-foreground)] leading-relaxed mb-4">
+        In 1994, supermarkets had point-of-sale barcode scanners recording millions of shopping baskets. If a supermarket carries 10,000 items, the number of possible item combinations is &dollar;2^{10,000}$—an unfathomable number larger than all atoms in the universe. Testing every combination is impossible.
+      </p>
+      <div class="p-4 rounded-xl bg-indigo-950/30 border border-indigo-800/40 text-sm text-indigo-200 leading-relaxed mb-4">
+        <strong>🥨 The Beginner's Analogy:</strong> If nobody in your town buys anchovies, can {Bread, Milk, Anchovies} be a popular combination? Absolutely not! Every basket containing Bread, Milk, and Anchovies ALSO contains Anchovies. If Anchovies fails the popularity test on its own, ANY larger basket containing it fails automatically. That is the <strong>Apriori Principle</strong>.
+      </div>
+    </section>
+
+    <!-- 2. Interactive Apriori Join & Prune Step-Through -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20 mb-3">
+        2. Interactive Algorithmic Simulation
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">Interactive Candidate Generator: apriori-gen</h2>
+      <p class="text-xs text-[var(--muted-foreground)] mb-6">
+        Step through the Join and Prune phases on frequent 3-itemsets $L_3$ to see how Apriori prevents explosive candidate growth.
+      </p>
+
+      <div class="p-4 rounded-xl bg-[#0d1527] border border-[var(--border)] mb-6">
+        <div class="text-xs text-indigo-300 font-mono mb-2">Given Frequent 3-Itemsets ($L_3$):</div>
+        <div class="flex flex-wrap gap-2 text-xs font-mono font-bold text-amber-400">
+          <span class="px-2.5 py-1 bg-slate-800 rounded border border-slate-700">{1, 2, 3}</span>
+          <span class="px-2.5 py-1 bg-slate-800 rounded border border-slate-700">{1, 2, 4}</span>
+          <span class="px-2.5 py-1 bg-slate-800 rounded border border-slate-700">{1, 3, 4}</span>
+          <span class="px-2.5 py-1 bg-slate-800 rounded border border-slate-700">{1, 3, 5}</span>
+          <span class="px-2.5 py-1 bg-slate-800 rounded border border-slate-700">{2, 3, 4}</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 mb-6">
+        <button onclick="stepApriori(1)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+          Step 1: Join ($L_3 \bowtie L_3$) 🔗
+        </button>
+        <button onclick="stepApriori(2)" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+          Step 2: Prune Subsets ✂️
+        </button>
+        <button onclick="stepApriori(0)" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700">
+          Reset ↺
+        </button>
+      </div>
+
+      <div class="interactive-box" id="apriori-trace-box">
+        <div class="text-xs text-slate-400 font-mono">Click Step 1 to perform candidate self-join on L3.</div>
+      </div>
+    </section>
+
+    <!-- 3. Theory & Candidate Hash-Tree -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 mb-3">
+        3. Theoretical Deep-Dive
+      </div>
+      <h2 class="text-2xl font-black text-white mb-4">How Candidate Hash-Trees Accelerate Support Counting</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-[var(--muted-foreground)] leading-relaxed">
+        <div class="p-4 rounded-xl bg-[#0a101f] border border-[var(--border)] space-y-2">
+          <h3 class="text-sm font-black text-indigo-300 uppercase font-mono">1. Hash-Tree Architecture</h3>
+          <p>Candidates $C_k$ are stored in a tree of depth $k$. At depth $d$, internal nodes contain hash buckets partitioned by hashing the $d$-th item.</p>
+          <p>Leaf nodes store actual candidate itemsets. When a leaf exceeds <em>max leaf size</em>, it splits into an internal hash node.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[#0a101f] border border-[var(--border)] space-y-2">
+          <h3 class="text-sm font-black text-emerald-300 uppercase font-mono">2. The Recursive Subset Function</h3>
+          <p>For each transaction $t$ in the database, the algorithm calls <code>subset(node, t)</code>. It hashes on every item in $t$, recursively traversing matched branches in $O(\max(k, |t|))$, skipping candidates that don't match.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Quiz -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20 mb-3">
+        4. Midsem Practice Quiz
+      </div>
+      <h2 class="text-2xl font-black text-white mb-6">Exam Retention Check</h2>
+
+      <div class="space-y-6">
+        <div>
+          <p class="text-sm font-bold text-white mb-3">Q1. If {A, B} is frequent and {A, C} is frequent, but {B, C} is INFREQUENT. Can candidate {A, B, C} survive the prune step in apriori-gen?</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <button onclick="answerQuiz(this, false, 'exp_ap1')" class="quiz-btn p-3 text-xs text-left rounded-lg border border-[var(--border)] bg-[#0d1527] hover:bg-slate-800 transition-all">A. Yes, because it was formed by joining {A,B} and {A,C}</button>
+            <button onclick="answerQuiz(this, true, 'exp_ap1')" class="quiz-btn p-3 text-xs text-left rounded-lg border border-[var(--border)] bg-[#0d1527] hover:bg-slate-800 transition-all">B. No! Subset {B, C} is infrequent, so {A, B, C} is pruned immediately</button>
+            <button onclick="answerQuiz(this, false, 'exp_ap1')" class="quiz-btn p-3 text-xs text-left rounded-lg border border-[var(--border)] bg-[#0d1527] hover:bg-slate-800 transition-all">C. Yes, if minconf is above 80%</button>
+            <button onclick="answerQuiz(this, false, 'exp_ap1')" class="quiz-btn p-3 text-xs text-left rounded-lg border border-[var(--border)] bg-[#0d1527] hover:bg-slate-800 transition-all">D. It depends on database size</button>
+          </div>
+          <div id="exp_ap1" class="hidden mt-2 p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-xs text-emerald-300">
+            <strong>Correct!</strong> In the prune step of apriori-gen, every (k-1)-subset must be in L_{k-1}. Since subset {B, C} is infrequent, candidate {A, B, C} is deleted immediately without checking the database.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Active Retention Quiz -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
+      <div class="inline-block text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20 mb-3">
+        5. Active Retention Quiz
+      </div>
+      <h2 class="text-2xl font-black text-white mb-6">Test Your Understanding</h2>
+
+      <div class="space-y-6">
+        <!-- Q1 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">1. What is the fundamental anti-monotone property of support in Apriori?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">If an itemset is infrequent, all of its supersets must also be infrequent.</button>
+            <button onclick="answerQuiz(this, false, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">If an itemset is frequent, all its supersets must be frequent.</button>
+            <button onclick="answerQuiz(this, false, 'q1-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Support always equals confidence.</button>
+          </div>
+          <div id="q1-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! Any transaction containing superset X must also contain subset Y. Therefore Support(X) &le; Support(Y).
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">2. In apriori-gen, how are candidate k-itemsets generated in the Join step?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">By joining two frequent (k-1)-itemsets that share their first (k-2) items in alphabetical order.</button>
+            <button onclick="answerQuiz(this, false, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">By pairing all possible items in the universe at random.</button>
+            <button onclick="answerQuiz(this, false, 'q2-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">By scanning raw transaction files from scratch.</button>
+          </div>
+          <div id="q2-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! The prefix-matching join ensures candidates are generated without duplicate permutations.
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">3. What does the Prune step of apriori-gen do?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">It discards any candidate k-itemset if ANY of its (k-1) subsets is NOT present in L_{k-1}.</button>
+            <button onclick="answerQuiz(this, false, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">It deletes transactions from the database.</button>
+            <button onclick="answerQuiz(this, false, 'q3-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">It rounds support values down to zero.</button>
+          </div>
+          <div id="q3-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! By the anti-monotone property, if any subset is infrequent, the candidate cannot possibly be frequent.
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">4. What data structure did Agrawal & Srikant use to count candidate occurrences rapidly within a transaction?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Candidate Hash-Tree.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Red-Black Tree.</button>
+            <button onclick="answerQuiz(this, false, 'q4-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">B-Tree index.</button>
+          </div>
+          <div id="q4-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! The hash-tree hashes items at each level to quickly identify which candidates are contained in a transaction.
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="p-5 rounded-xl bg-[#0d1527] border border-[var(--border)]">
+          <p class="text-sm font-bold text-white mb-3">5. How many database scans does Apriori make if the longest frequent itemset has length K?</p>
+          <div class="space-y-2">
+            <button onclick="answerQuiz(this, true, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">K database scans (or K + 1 scans until candidate set is empty).</button>
+            <button onclick="answerQuiz(this, false, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">Exactly 1 scan.</button>
+            <button onclick="answerQuiz(this, false, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">2^K scans.</button>
+          </div>
+          <div id="q5-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+            <strong>Explanation:</strong> Correct! Each pass k scans the database to count support for candidate k-itemsets.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="mt-16 pt-8 border-t border-[var(--border)] text-center text-xs text-[var(--muted-foreground)] pb-12">
+    <p>Data Analytics-I Academic Research Suite • Deep-Dive Series</p>
+    <p class="mt-1">Designed for university students learning foundational data science from first principles.</p>
+  </footer>
+
+  <script>
+    // Pomodoro Timer
+    let timeLeft = 15 * 60;
+    let timerRunning = true;
+    const timerDisplay = document.getElementById('timer-display');
+    setInterval(() => {
+      if (timerRunning && timeLeft > 0) {
+        timeLeft--;
+        const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+        const s = String(timeLeft % 60).padStart(2, '0');
+        timerDisplay.innerText = m + ':' + s;
+        if (timeLeft === 0) alert('⏰ 15-Minute Learning Sprint Finished! Stand up, stretch, and let your brain integrate.');
+      }
+    }, 1000);
+    function toggleTimer() { timerRunning = !timerRunning; }
+
+    // Quiz logic helper
+    function answerQuiz(btn, isCorrect, explanationId) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.quiz-btn').forEach(b => b.classList.remove('correct', 'wrong'));
+      if (isCorrect) {
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('wrong');
+      }
+      document.getElementById(explanationId).classList.remove('hidden');
+    }
+
+    
+  function stepApriori(step) {
+    const box = document.getElementById('apriori-trace-box');
+    if (step === 0) {
+      box.innerHTML = `<div class="text-xs text-slate-400 font-mono">Click Step 1 to perform candidate self-join on L3.</div>`;
+    } else if (step === 1) {
+      box.innerHTML = `
+        <div class="text-xs space-y-3 font-mono">
+          <div class="text-indigo-300 font-bold">Step 1: Join Step (L3 ⋈ L3):</div>
+          <p class="text-slate-300">Items share first 2 items (k-2 = 1st and 2nd item):</p>
+          <div class="p-2.5 rounded bg-[#0a101f] border border-[var(--border)] text-amber-300">
+            • {1, 2, 3} ⋈ {1, 2, 4}  →  Candidate: <strong>{1, 2, 3, 4}</strong><br/>
+            • {1, 3, 4} ⋈ {1, 3, 5}  →  Candidate: <strong>{1, 3, 4, 5}</strong>
+          </div>
+          <div class="text-slate-400">Total raw candidates generated: 2. Now click Step 2 to prune!</div>
+        </div>
+      `;
+    } else if (step === 2) {
+      box.innerHTML = `
+        <div class="text-xs space-y-3 font-mono">
+          <div class="text-emerald-300 font-bold">Step 2: Prune Step (Verifying all 3-subsets in L3):</div>
+          <div class="p-2.5 rounded bg-[#0a101f] border border-emerald-800/40 text-slate-300 space-y-1">
+            <div class="text-white font-bold">Testing Candidate {1, 2, 3, 4}:</div>
+            <div>Subsets: {1,2,3}∈L3✓, {1,2,4}∈L3✓, {1,3,4}∈L3✓, {2,3,4}∈L3✓</div>
+            <div class="text-emerald-400 font-bold">✓ SURVIVES into C4!</div>
+          </div>
+          <div class="p-2.5 rounded bg-[#0a101f] border border-red-800/40 text-slate-300 space-y-1">
+            <div class="text-white font-bold">Testing Candidate {1, 3, 4, 5}:</div>
+            <div>Subsets: {1,3,4}∈L3✓, {1,3,5}∈L3✓, {1,4,5}∉L3 ✗, {3,4,5}∉L3 ✗</div>
+            <div class="text-red-400 font-bold">✂️ PRUNED! (Subset {1,4,5} is missing from L3)</div>
+          </div>
+          <div class="text-amber-400 font-bold">Final Surviving Candidate Set C4 = { {1, 2, 3, 4} }</div>
+        </div>
+      `;
+    }
+  }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Ignore bulky course raw files, binaries, assignments
+Course_Materials/
+Assignments/
+Lecture_Slides/
+Discussions/
+.tools/
+scratch/
+.system_generated/
+*.pdf
+*.zip
+*.docx
+*.exe
+*.py
+tmp_check.js
+A1/
+A2/
+*.png
+.surgeignore
+CNAME
+PUBLIC_URL.txt
+LAUNCH_GLOBAL_SERVER.bat
+DEPLOY_SURGE.bat
+DEPLOY_GITHUB_PAGES.bat

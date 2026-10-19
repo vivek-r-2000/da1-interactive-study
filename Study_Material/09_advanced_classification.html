@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 09 — Advanced Classification Methods | DA-I</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"/>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  :root {
+    --background: #0f172a;
+    --card: #1e293b;
+    --sidebar: #0f172a;
+    --foreground: #f1f5f9;
+    --muted-foreground: #94a3b8;
+    --border: #334155;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #0ea5e9;
+    --accent: #8b5cf6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top Bar ── */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+    display: flex; align-items: center; padding: 0 16px; gap: 12px;
+  }
+  #topbar .title { font-weight: 700; font-size: 15px; white-space: nowrap; color: var(--foreground); }
+  #progress-bar-wrap { flex: 1; background: var(--border); border-radius: 9999px; height: 8px; min-width: 80px; }
+  #progress-bar { height: 100%; border-radius: 9999px; background: var(--primary); transition: width .4s ease; }
+  #progress-text { font-size: 12px; color: var(--muted-foreground); white-space: nowrap; }
+  #timer {
+    font-size: 14px; font-weight: 700; color: var(--primary);
+    background: rgba(99,102,241,.15); padding: 4px 10px; border-radius: 8px;
+    cursor: pointer; white-space: nowrap;
+  }
+  #home-btn {
+    font-size: 12px; padding: 4px 10px; border-radius: 8px;
+    background: rgba(255,255,255,.07); color: var(--foreground); text-decoration: none;
+    border: 1px solid var(--border); white-space: nowrap;
+  }
+
+  /* ── Layout ── */
+  #layout { display: flex; margin-top: 56px; height: calc(100vh - 56px); }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 250px; min-width: 250px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 12px 0;
+  }
+  .sidebar-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em;
+    color: var(--muted-foreground); padding: 10px 16px 4px;
+    text-transform: uppercase;
+  }
+  .sidebar-item {
+    display: block; padding: 7px 16px; font-size: 12px;
+    color: var(--muted-foreground); cursor: pointer; border-radius: 6px;
+    margin: 1px 6px; transition: background .15s, color .15s;
+    border: none; background: none; text-align: left; width: calc(100% - 12px);
+  }
+  .sidebar-item:hover { background: rgba(255,255,255,.06); color: var(--foreground); }
+  .sidebar-item.active { background: rgba(99,102,241,.2); color: var(--primary); font-weight: 600; }
+
+  /* ── Main Content ── */
+  #main { flex: 1; overflow-y: auto; padding: 28px 32px; position: relative; }
+
+  /* ── Cards ── */
+  .card-container { display: none; animation: fadeIn .35s ease; }
+  .card-container.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    max-width: 840px; margin: 0 auto 20px;
+  }
+  .card-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    color: var(--muted-foreground); text-transform: uppercase; margin-bottom: 12px;
+  }
+  .card-header {
+    font-size: 22px; font-weight: 800; margin-bottom: 16px; line-height: 1.25;
+  }
+  .card-body { font-size: 14px; line-height: 1.7; color: #cbd5e1; }
+  .card-body p { margin-bottom: 14px; }
+  .card-body strong { color: var(--foreground); }
+
+  /* ── Interactive Components ── */
+  .interactive-box {
+    background: #090d16;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 18px 0;
+  }
+  .btn-primary {
+    background: var(--primary); color: #fff;
+    padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px;
+    border: none; cursor: pointer; transition: opacity .2s;
+  }
+  .btn-primary:hover { opacity: .9; }
+  .btn-secondary {
+    background: rgba(255,255,255,.08); color: var(--foreground);
+    padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px;
+    border: 1px solid var(--border); cursor: pointer;
+  }
+
+  /* Flip Card */
+  .flip-card {
+    background: transparent;
+    perspective: 1000px;
+    cursor: pointer;
+    min-height: 180px;
+    margin: 16px 0;
+  }
+  .flip-inner {
+    position: relative; width: 100%; height: 100%;
+    text-align: center; transition: transform .6s;
+    transform-style: preserve-3d;
+  }
+  .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back {
+    position: absolute; width: 100%; height: 100%;
+    -webkit-backface-visibility: hidden; backface-visibility: hidden;
+    border-radius: 12px; padding: 24px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .flip-front { background: #131b2e; border: 1px solid #3b82f6; color: #93c5fd; }
+  .flip-back { background: #1e1b4b; border: 1px solid #818cf8; color: #e0e7ff; transform: rotateY(180deg); }
+
+  /* Mobile slide-out */
+  #mobile-toggle { display: none; }
+  @media (max-width: 768px) {
+    #mobile-toggle { display: inline-flex; }
+    #sidebar {
+      position: fixed; left: -260px; top: 56px; bottom: 0; z-index: 40;
+      transition: left .3s ease; box-shadow: 2px 0 16px rgba(0,0,0,.5);
+    }
+    #sidebar.mobile-open { left: 0; }
+    #sidebar-backdrop {
+      display: none; position: fixed; inset: 0; top: 56px; background: rgba(0,0,0,.6); z-index: 39;
+    }
+    #sidebar-backdrop.active { display: block; }
+    #main { padding: 16px; }
+    .card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <button id="mobile-toggle" onclick="toggleMobileSidebar()" class="p-1.5 text-slate-300 hover:text-white bg-slate-800 rounded-lg">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <a href="00_home.html" id="home-btn">← Hub</a>
+    <span class="title hidden sm:inline">Module 09: Advanced Classification</span>
+    <div id="progress-bar-wrap">
+      <div id="progress-bar" style="width: 3%"></div>
+    </div>
+    <span id="progress-text">Card 1 / 30</span>
+    <span id="timer" onclick="toggleTimer()">⏱ 15:00</span>
+  </header>
+
+  <div id="layout">
+
+    <!-- SIDEBAR -->
+    <nav id="sidebar">
+      <div class="sidebar-section-label">1. Feature Engineering</div>
+      <button class="sidebar-item active" onclick="goToCard(0)">01. Feature Selection Core</button>
+      <button class="sidebar-item" onclick="goToCard(1)">02. Filter vs Wrapper vs Embedded</button>
+      <button class="sidebar-item" onclick="goToCard(2)">03. Interactive Feature Selector</button>
+      <button class="sidebar-item" onclick="goToCard(3)">04. Recall: Feature Selection</button>
+
+      <div class="sidebar-section-label">2. Bayesian Belief Networks</div>
+      <button class="sidebar-item" onclick="goToCard(4)">05. Beyond Naive Bayes</button>
+      <button class="sidebar-item" onclick="goToCard(5)">06. DAGs & CPT Architecture</button>
+      <button class="sidebar-item" onclick="goToCard(6)">07. Interactive BBN Simulator</button>
+      <button class="sidebar-item" onclick="goToCard(7)">08. Training BBNs & Markov Chains</button>
+
+      <div class="sidebar-section-label">3. Support Vector Machines</div>
+      <button class="sidebar-item" onclick="goToCard(8)">09. Support Vector Machines (SVM)</button>
+      <button class="sidebar-item" onclick="goToCard(9)">10. Maximum Margin Hyperplane</button>
+      <button class="sidebar-item" onclick="goToCard(10)">11. The Kernel Trick & Hilbert Space</button>
+      <button class="sidebar-item" onclick="goToCard(11)">12. Interactive SVM 2D Sandbox</button>
+      <button class="sidebar-item" onclick="goToCard(12)">13. SVM vs Neural Networks</button>
+
+      <div class="sidebar-section-label">4. Rule & Associative Mining</div>
+      <button class="sidebar-item" onclick="goToCard(13)">14. Rule-Based Classification</button>
+      <button class="sidebar-item" onclick="goToCard(14)">15. Sequential Covering (FOIL/RIPPER)</button>
+      <button class="sidebar-item" onclick="goToCard(15)">16. Associative Classification (CBA)</button>
+
+      <div class="sidebar-section-label">5. Weak Supervision Paradigms</div>
+      <button class="sidebar-item" onclick="goToCard(16)">17. The Labeling Bottleneck</button>
+      <button class="sidebar-item" onclick="goToCard(17)">18. Semi-Supervised Self-Training</button>
+      <button class="sidebar-item" onclick="goToCard(18)">19. Active Learning & Human Oracles</button>
+      <button class="sidebar-item" onclick="goToCard(19)">20. Transfer Learning & TrAdaBoost</button>
+      <button class="sidebar-item" onclick="goToCard(20)">21. Zero-Shot Learning (Semantics)</button>
+      <button class="sidebar-item" onclick="goToCard(21)">22. Interactive Zero-Shot Classifier</button>
+
+      <div class="sidebar-section-label">6. Rich Data & Soft Computing</div>
+      <button class="sidebar-item" onclick="goToCard(22)">23. Streams, Sequences & Graphs</button>
+      <button class="sidebar-item" onclick="goToCard(23)">24. Multiclass: OVA & ECOC Codes</button>
+      <button class="sidebar-item" onclick="goToCard(24)">25. Model Interpretability & LIME</button>
+      <button class="sidebar-item" onclick="goToCard(25)">26. Rough Sets: Lower & Upper Bounds</button>
+      <button class="sidebar-item" onclick="goToCard(26)">27. Fuzzy Sets & Membership Curves</button>
+      <button class="sidebar-item" onclick="goToCard(27)">28. Interactive Fuzzy Logic Explorer</button>
+
+      <div class="sidebar-section-label">7. Mastery & Review</div>
+      <button class="sidebar-item" onclick="goToCard(28)">29. Comprehensive Mastery Quiz</button>
+      <button class="sidebar-item" onclick="goToCard(29)">30. Appendix & Slide References</button>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main id="main">
+
+      <!-- CARD 0: Feature Selection Core -->
+      <div class="card-container active" id="card-0">
+        <div class="card">
+          <div class="card-tag">Section 1: Feature Engineering • Card 1 of 30</div>
+          <h2 class="card-header">Why Feature Selection? The Real-World Dilemma</h2>
+          <div class="card-body">
+            <p>In classical introductory machine learning, we make a massive, unrealistic assumption: <em>"A clean training table with $n$ rows and $p$ perfectly chosen attributes is already handed to us."</em></p>
+            <p><strong>Reality in Data Analytics:</strong> In enterprise datasets, we often collect <strong>thousands or tens of thousands of features</strong> (gene expression levels, browser cookies, sensor telemetry, text tokens). Most of these features are noisy, redundant, or completely irrelevant to our target variable.</p>
+            <div class="p-4 rounded-xl bg-indigo-950/40 border border-indigo-800/50 mb-4">
+              <h4 class="font-bold text-indigo-300 text-sm mb-1">🎯 The Triple Curse of Too Many Features:</h4>
+              <ul class="text-xs space-y-1 text-slate-300 list-disc list-inside">
+                <li><strong>Overfitting:</strong> Algorithms memorize spurious correlations in high dimensions instead of real patterns.</li>
+                <li><strong>Curse of Dimensionality:</strong> In high dimensions, points become equidistant and distance-based metrics (k-NN, clustering) break down.</li>
+                <li><strong>Computational Cost:</strong> Training time explodes exponentially or quadratically with $p$.</li>
+              </ul>
+            </div>
+            <p><strong>Feature Selection Goal:</strong> Select a minimal subset of $k$ features ($k \ll p$) that maximizes classification accuracy while improving model interpretability.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 1: Filter vs Wrapper vs Embedded -->
+      <div class="card-container" id="card-1">
+        <div class="card">
+          <div class="card-tag">Section 1: Feature Engineering • Card 2 of 30</div>
+          <h2 class="card-header">The 3 Pillars: Filter, Wrapper & Embedded Methods</h2>
+          <div class="card-body">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              <div class="p-3.5 rounded-xl bg-[#090d16] border border-blue-500/40">
+                <span class="badge bg-blue-500/20 text-blue-300">1. Filter Methods</span>
+                <h4 class="font-bold text-white text-sm my-1.5">Model Independent</h4>
+                <p class="text-xs text-slate-400">Ranks features purely using statistical properties ($\chi^2$ test, correlation, mutual information). Fast ($O(p)$), but ignores interactions between features.</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-[#090d16] border border-emerald-500/40">
+                <span class="badge bg-emerald-500/20 text-emerald-300">2. Wrapper Methods</span>
+                <h4 class="font-bold text-white text-sm my-1.5">Model as Evaluator</h4>
+                <p class="text-xs text-slate-400">Uses the classifier itself to test feature subsets (Forward Selection, Backward Elimination). Very accurate, but computationally expensive ($2^p - 1$ subsets).</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-[#090d16] border border-purple-500/40">
+                <span class="badge bg-purple-500/20 text-purple-300">3. Embedded Methods</span>
+                <h4 class="font-bold text-white text-sm my-1.5">Built-in Selection</h4>
+                <p class="text-xs text-slate-400">Feature selection happens simultaneously during model training. E.g., Decision Tree node splits, LASSO ($L_1$ penalty forcing zero coefficients).</p>
+              </div>
+            </div>
+            <p><strong>Slide Rule of Thumb:</strong> When you have $100,000$ features, run a fast <em>Filter</em> first to drop to $500$, then use a <em>Wrapper</em> or <em>Embedded</em> model for final optimization!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2: Interactive Feature Selector -->
+      <div class="card-container" id="card-2">
+        <div class="card">
+          <div class="card-tag">Section 1: Feature Engineering • Card 3 of 30</div>
+          <h2 class="card-header">Interactive Sandbox: Feature Ranking Explorer</h2>
+          <div class="card-body">
+            <p class="text-xs text-slate-300 mb-2">Simulate a Filter feature selection pipeline. Adjust the threshold slider to see which features survive filtering based on their Chi-Square score ($\chi^2$):</p>
+            <div class="interactive-box">
+              <div class="flex items-center justify-between mb-4">
+                <label class="text-xs text-slate-300 font-semibold">Minimum $\chi^2$ Threshold: <span id="feat-thresh-val" class="text-indigo-400 font-mono">15.0</span></label>
+                <input type="range" min="0" max="40" value="15" step="1" id="feat-slider" class="w-48 accent-indigo-500" oninput="updateFeatureSandbox()"/>
+              </div>
+              <div class="space-y-2" id="feature-list">
+                <!-- Injected via JS -->
+              </div>
+              <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
+                <span class="text-slate-400">Surviving Features: <strong id="surviving-count" class="text-emerald-400">3 / 5</strong></span>
+                <span class="text-slate-400">Est. Dimensionality Reduction: <strong id="reduction-pct" class="text-indigo-400">40%</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 3: Active Recall Flip -->
+      <div class="card-container" id="card-3">
+        <div class="card">
+          <div class="card-tag">Section 1: Active Recall • Card 4 of 30</div>
+          <h2 class="card-header">Active Recall: Filter vs Wrapper</h2>
+          <div class="card-body">
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-inner">
+                <div class="flip-front">
+                  <div class="text-2xl mb-2">💡</div>
+                  <h3 class="font-bold text-base mb-2">Question (Click to Flip):</h3>
+                  <p class="text-xs max-w-md">Why can't we simply use a Wrapper method on a dataset with 5,000 attributes like DNA microarray data?</p>
+                </div>
+                <div class="flip-back">
+                  <div class="text-2xl mb-2">✅</div>
+                  <h3 class="font-bold text-base mb-2">The Exponential Wall!</h3>
+                  <p class="text-xs max-w-md">With $p = 5000$, testing all feature subsets requires $2^{5000} - 1$ model training evaluations—far greater than atoms in the known universe! Even greedy sequential search would require training thousands of full classifiers, leading to prohibitive runtime and severe overfitting.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 4: Beyond Naive Bayes -->
+      <div class="card-container" id="card-4">
+        <div class="card">
+          <div class="card-tag">Section 2: Bayesian Networks • Card 5 of 30</div>
+          <h2 class="card-header">Breaking the "Naive" Assumption: Bayesian Belief Networks</h2>
+          <div class="card-body">
+            <p>Recall from Module 08 that Naive Bayes makes a radical assumption: <strong>Class Conditional Independence</strong>:</p>
+            <p>$$P(\mathbf{X} \mid C) = \prod_{k=1}^d P(x_k \mid C)$$</p>
+            <p>In medical diagnosis, this assumption fails catastrophically! A patient having a <em>cough</em> and a <em>fever</em> are strongly dependent because both are caused by a common viral infection. Treating them as independent counts the same evidence twice!</p>
+            <p><strong>Bayesian Belief Networks (BBN):</strong> A graphical model that specifies <em>which</em> subsets of variables are conditionally independent, allowing us to model rich causal interactions between variables.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 5: DAGs & CPT Architecture -->
+      <div class="card-container" id="card-5">
+        <div class="card">
+          <div class="card-tag">Section 2: Bayesian Networks • Card 6 of 30</div>
+          <h2 class="card-header">The Two Components of a Belief Network</h2>
+          <div class="card-body">
+            <p>A Bayesian Belief Network is formally defined by two mathematical components:</p>
+            <ol class="list-decimal list-inside space-y-2 text-xs text-slate-300 mb-4">
+              <li><strong>Directed Acyclic Graph (DAG):</strong> Nodes represent random variables (features, disease, symptoms). Directed arcs represent direct causal influences ($A \to B$ means $A$ has a direct effect on $B$).</li>
+              <li><strong>Conditional Probability Tables (CPT):</strong> For every node $Y$, a table specifies the conditional distribution $P(Y \mid \text{Parents}(Y))$.</li>
+            </ol>
+            <div class="p-3 bg-slate-900 border border-slate-700 rounded-xl mb-3 font-mono text-xs text-indigo-300 text-center">
+              Joint Probability: $P(x_1, \dots, x_n) = \prod_{i=1}^n P(x_i \mid \text{Parents}(X_i))$
+            </div>
+            <p class="text-xs text-slate-400">If a node has no parents, its CPT is just its prior probability $P(X)$. This factorization radically reduces the number of probabilities required from $2^n$ to a small polynomial!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 6: Interactive BBN Simulator -->
+      <div class="card-container" id="card-6">
+        <div class="card">
+          <div class="card-tag">Section 2: Interactive Sandbox • Card 7 of 30</div>
+          <h2 class="card-header">Interactive BBN: Lung Cancer Diagnostic Network</h2>
+          <div class="card-body">
+            <p class="text-xs text-slate-300 mb-3">Slide #16 Example: Observe how evidence propagates through the network to update the posterior probability of <strong>Lung Cancer</strong>:</p>
+            <div class="interactive-box">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <label class="flex items-center gap-2 text-xs bg-slate-900 p-2.5 rounded-lg border border-slate-800 cursor-pointer">
+                  <input type="checkbox" id="bbn-smoker" class="accent-indigo-500" onchange="calcBBN()"/>
+                  <span>🚬 Patient is a <strong>Smoker (S)</strong></span>
+                </label>
+                <label class="flex items-center gap-2 text-xs bg-slate-900 p-2.5 rounded-lg border border-slate-800 cursor-pointer">
+                  <input type="checkbox" id="bbn-family" class="accent-indigo-500" onchange="calcBBN()"/>
+                  <span>🧬 Family History of Cancer (FH)</span>
+                </label>
+                <label class="flex items-center gap-2 text-xs bg-slate-900 p-2.5 rounded-lg border border-slate-800 cursor-pointer">
+                  <input type="checkbox" id="bbn-xray" class="accent-indigo-500" onchange="calcBBN()"/>
+                  <span>🩻 Positive Chest X-Ray (XRay)</span>
+                </label>
+                <label class="flex items-center gap-2 text-xs bg-slate-900 p-2.5 rounded-lg border border-slate-800 cursor-pointer">
+                  <input type="checkbox" id="bbn-dyspnea" class="accent-indigo-500" onchange="calcBBN()"/>
+                  <span>🫁 Shortness of Breath (Dyspnea)</span>
+                </label>
+              </div>
+
+              <!-- Live Probability Meter -->
+              <div class="bg-slate-950 p-4 rounded-xl border border-indigo-900/50">
+                <div class="flex justify-between items-center mb-1 text-xs">
+                  <span class="font-bold text-white">Posterior Probability: P(Lung Cancer = True | Evidence)</span>
+                  <span id="bbn-prob-text" class="font-black text-indigo-400 text-sm">3.0%</span>
+                </div>
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+                  <div id="bbn-prob-bar" class="bg-gradient-to-r from-indigo-500 to-rose-500 h-full transition-all duration-300" style="width: 3%"></div>
+                </div>
+                <p id="bbn-explanation" class="text-[11px] text-slate-400 mt-2">Baseline risk without symptoms or risk factors.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 7: Training BBNs & Markov Chains -->
+      <div class="card-container" id="card-7">
+        <div class="card">
+          <div class="card-tag">Section 2: Bayesian Networks • Card 8 of 30</div>
+          <h2 class="card-header">Training Scenarios & Markov Chains</h2>
+          <div class="card-body">
+            <h4 class="font-bold text-white text-sm mb-2">How Do We Train a Bayesian Network? (Slide #20)</h4>
+            <div class="space-y-2 text-xs text-slate-300 mb-4">
+              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <strong>Scenario 1: Structure Known + All Variables Observable</strong><br/>
+                Straightforward! Simply count empirical frequencies in training tuples to fill CPT entries (just like Naive Bayes).
+              </div>
+              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <strong>Scenario 2: Structure Known + Hidden Variables Present</strong><br/>
+                Use <em>Gradient Descent</em> (hill-climbing) or the <em>Expectation-Maximization (EM)</em> algorithm to iteratively infer latent variables.
+              </div>
+            </div>
+            <h4 class="font-bold text-white text-sm mb-1">🔗 Markov Chains (Slide #21):</h4>
+            <p class="text-xs text-slate-300">A special memoryless stochastic process: the probability of the next event depends <em>only</em> on the current state, not historical states: $P(X_{t+1} \mid X_t, \dots, X_1) = P(X_{t+1} \mid X_t)$. Common example: Google Gmail Smart Compose autocomplete!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 8: SVM Introduction -->
+      <div class="card-container" id="card-8">
+        <div class="card">
+          <div class="card-tag">Section 3: Support Vector Machines • Card 9 of 30</div>
+          <h2 class="card-header">Support Vector Machines: The Maximum Margin Principle</h2>
+          <div class="card-body">
+            <p>Pioneered by <strong>Vladimir Vapnik</strong> in 1992, SVM is one of the most mathematically rigorous and robust classification algorithms in computer science.</p>
+            <p>Imagine you have two classes (circles and squares) separated by a blank corridor. Many lines could separate them. Which one is best?</p>
+            <p><strong>The Core Philosophy:</strong> Pick the hyperplane that leaves the <strong>largest possible safety margin</strong> on both sides! A decision boundary that hugs training points closely will misclassify slightly noisy new test points. A wide margin maximizes generalization.</p>
+            <div class="p-3 bg-indigo-950/40 border border-indigo-800 rounded-xl text-xs text-slate-300">
+              <strong>⭐ Support Vectors:</strong> Only the training points lying directly on the margin boundaries determine the decision boundary! If you remove all other non-boundary points from the training set, <em>the decision boundary does not change at all!</em>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 9: Maximum Margin Hyperplane -->
+      <div class="card-container" id="card-9">
+        <div class="card">
+          <div class="card-tag">Section 3: Support Vector Machines • Card 10 of 30</div>
+          <h2 class="card-header">Mathematical Formulation of the MMH</h2>
+          <div class="card-body">
+            <p>For linearly separable data where labels $y_i \in \{-1, +1\}$:</p>
+            <p>Any separating hyperplane is written as: $$\mathbf{w} \cdot \mathbf{x} + b = 0$$</p>
+            <p>The two bounding margin planes are:</p>
+            <p>$$\mathbf{w} \cdot \mathbf{x} + b \ge +1 \quad (\text{for } y_i = +1)$$</p>
+            <p>$$\mathbf{w} \cdot \mathbf{x} + b \le -1 \quad (\text{for } y_i = -1)$$</p>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl font-mono text-xs text-indigo-300 text-center mb-3">
+              Margin Width = $\frac{2}{\|\mathbf{w}\|}$
+            </div>
+            <p class="text-xs text-slate-300">To <strong>maximize the margin</strong> $\frac{2}{\|\mathbf{w}\|}$, we must <strong>minimize</strong> $\frac{1}{2}\|\mathbf{w}\|^2$ subject to $y_i(\mathbf{w} \cdot \mathbf{x}_i + b) \ge 1$. This is solved using <em>Lagrange multipliers</em> ($\alpha_i$) via quadratic programming.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 10: Kernel Trick -->
+      <div class="card-container" id="card-10">
+        <div class="card">
+          <div class="card-tag">Section 3: Support Vector Machines • Card 11 of 30</div>
+          <h2 class="card-header">Non-Linear SVM & The "Kernel Trick"</h2>
+          <div class="card-body">
+            <p>What if the data is <strong>linearly inseparable</strong> in 2D (e.g., inner circle of red dots surrounded by outer ring of blue dots)?</p>
+            <p><strong>The Genius Insight:</strong> Project the data into a higher-dimensional space ($\Phi(\mathbf{x})$)! In 3D (e.g., adding $z = x^2 + y^2$), the inner circle pops up into a bowl, and a flat 2D plane can slice cleanly beneath it!</p>
+            <div class="p-4 rounded-xl bg-purple-950/40 border border-purple-800/60 mb-3">
+              <h4 class="font-bold text-purple-300 text-sm mb-1">🪄 The Kernel Trick ($K(\mathbf{x}_i, \mathbf{x}_j)$):</h4>
+              <p class="text-xs text-slate-300">We never actually need to calculate the expensive coordinates in high-dimensional space! We only need the dot product $\Phi(\mathbf{x}_i) \cdot \Phi(\mathbf{x}_j)$, which can be computed directly in low dimensions using a <strong>Kernel function</strong>:</p>
+              <ul class="text-xs text-slate-400 mt-2 space-y-1">
+                <li>• <strong>Polynomial Kernel:</strong> $K(\mathbf{x}, \mathbf{z}) = (\mathbf{x} \cdot \mathbf{z} + 1)^d$</li>
+                <li>• <strong>RBF (Radial Basis Function / Gaussian):</strong> $K(\mathbf{x}, \mathbf{z}) = \exp(-\gamma \|\mathbf{x} - \mathbf{z}\|^2)$</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 11: Interactive SVM 2D Sandbox -->
+      <div class="card-container" id="card-11">
+        <div class="card">
+          <div class="card-tag">Section 3: Interactive Sandbox • Card 12 of 30</div>
+          <h2 class="card-header">Interactive 2D SVM Playground</h2>
+          <div class="card-body">
+            <p class="text-xs text-slate-300 mb-2">Watch the Maximum Margin Hyperplane separate two classes. Switch between Linear and Non-Linear (RBF) decision boundaries:</p>
+            <div class="interactive-box text-center">
+              <div class="flex justify-center gap-3 mb-3">
+                <button class="btn-primary" onclick="setSVMKernel('linear')" id="svm-btn-lin">Linear Margin</button>
+                <button class="btn-secondary" onclick="setSVMKernel('rbf')" id="svm-btn-rbf">RBF Kernel</button>
+                <button class="btn-secondary" onclick="resetSVMSandbox()">Reset Points</button>
+              </div>
+              <canvas id="svmCanvas" width="560" height="260" class="mx-auto rounded-lg bg-slate-950 border border-slate-800 max-w-full"></canvas>
+              <div class="text-[11px] text-slate-400 mt-2 flex justify-around">
+                <span>Solid Line: Decision Boundary</span>
+                <span>Dashed Lines: Margin Boundaries</span>
+                <span class="text-amber-400">Circles with Rings: Support Vectors</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 12: SVM vs Neural Networks -->
+      <div class="card-container" id="card-12">
+        <div class="card">
+          <div class="card-tag">Section 3: Support Vector Machines • Card 13 of 30</div>
+          <h2 class="card-header">SVM vs Neural Networks (Slide #34)</h2>
+          <div class="card-body">
+            <table class="w-full text-xs text-left text-slate-300 border-collapse mb-4">
+              <thead>
+                <tr class="border-b border-slate-700 text-slate-400 uppercase text-[10px]">
+                  <th class="p-2">Property</th>
+                  <th class="p-2 text-indigo-400">Support Vector Machines (SVM)</th>
+                  <th class="p-2 text-purple-400">Deep Neural Networks</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800">
+                <tr>
+                  <td class="p-2 font-semibold text-white">Optimization</td>
+                  <td class="p-2">Convex Quadratic Programming (Guaranteed global minimum, zero local traps)</td>
+                  <td class="p-2">Non-convex Stochastic Gradient Descent (Can get stuck in local minima)</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-semibold text-white">Sample Efficiency</td>
+                  <td class="p-2">High: Works exceptionally well on small/medium high-dimensional data</td>
+                  <td class="p-2">Requires massive datasets to generalize without overfitting</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-semibold text-white">Complexity</td>
+                  <td class="p-2">Bound by # of Support Vectors (independent of dimension $d$)</td>
+                  <td class="p-2">Bound by number of weights and layers</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-semibold text-white">Interpretability</td>
+                  <td class="p-2">Support vectors highlight the boundary examples</td>
+                  <td class="p-2">Black-box uninterpretable weight matrices</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 13: Rule-Based Classification -->
+      <div class="card-container" id="card-13">
+        <div class="card">
+          <div class="card-tag">Section 4: Rule-Based Classification • Card 14 of 30</div>
+          <h2 class="card-header">Rule-Based Classifiers: IF-THEN Logic</h2>
+          <div class="card-body">
+            <p>Instead of continuous formulas, a rule-based classifier represents knowledge as a collection of human-readable <code>IF condition THEN conclusion</code> rules:</p>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg font-mono text-xs text-emerald-400 mb-3">
+              R1: IF age = youth AND student = yes THEN buys_computer = yes<br/>
+              R2: IF credit_rating = excellent THEN buys_computer = no
+            </div>
+            <p><strong>Two Key Metrics for Rule Evaluation (Slide #38):</strong></p>
+            <ul class="text-xs space-y-1.5 text-slate-300 list-disc list-inside mb-4">
+              <li><strong>Coverage:</strong> Fraction of tuples that satisfy the IF condition. $\text{Coverage} = \frac{n_{\text{covers}}}{|D|}$.</li>
+              <li><strong>Accuracy:</strong> Fraction of covered tuples where the rule's prediction matches the true label. $\text{Accuracy} = \frac{n_{\text{correct}}}{n_{\text{covers}}}$.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 14: Sequential Covering -->
+      <div class="card-container" id="card-14">
+        <div class="card">
+          <div class="card-tag">Section 4: Rule Induction • Card 15 of 30</div>
+          <h2 class="card-header">Sequential Covering Algorithm (FOIL, RIPPER)</h2>
+          <div class="card-body">
+            <p>How do we learn rules directly from raw training data without human programming?</p>
+            <p><strong>The "Separate-and-Conquer" Strategy (Slide #41):</strong></p>
+            <div class="interactive-box text-xs space-y-2">
+              <div class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white">1</span> <strong>Learn-One-Rule:</strong> Start with an empty condition and greedily add attribute predicates that maximize rule purity.</div>
+              <div class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white">2</span> <strong>Filter / Remove:</strong> Remove all positive training tuples covered by this newly learned rule from dataset $D$.</div>
+              <div class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white">3</span> <strong>Repeat:</strong> Iterate until remaining tuples belong to the majority/default negative class.</div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">Widely implemented in algorithms like <strong>FOIL</strong> (First-Order Inductive Learner) and <strong>RIPPER</strong> (Repeated Incremental Pruning to Produce Error Reduction).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 15: Associative Classification (CBA) -->
+      <div class="card-container" id="card-15">
+        <div class="card">
+          <div class="card-tag">Section 4: Associative Mining • Card 16 of 30</div>
+          <h2 class="card-header">Associative Classification & CBA (KDD 1998)</h2>
+          <div class="card-body">
+            <p>Why build decision trees or sequential rules when we already have powerful frequent pattern mining algorithms like <strong>Apriori</strong> and <strong>FP-Growth</strong>?</p>
+            <p><strong>Associative Classification:</strong> Mines association rules where the consequent (right-hand side) is restricted strictly to the <strong>class label</strong>:</p>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg font-mono text-xs text-pink-400 text-center mb-3">
+              $p_1 \wedge p_2 \wedge \dots \wedge p_k \longrightarrow \text{Class} = C_i$
+            </div>
+            <p><strong>CBA (Classification Based on Associations - Liu, Hsu, Ma 1998):</strong></p>
+            <ol class="text-xs space-y-1.5 text-slate-300 list-decimal list-inside">
+              <li>Mine all frequent association rules with minimum support and confidence.</li>
+              <li>Sort rules by confidence (higher confidence first), then support, then shorter rule length.</li>
+              <li>Greedily select the top rules that correctly classify training instances, discarding redundant rules.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 16: The Labeling Bottleneck -->
+      <div class="card-container" id="card-16">
+        <div class="card">
+          <div class="card-tag">Section 5: Weak Supervision • Card 17 of 30</div>
+          <h2 class="card-header">Weak Supervision: The Data Labeling Crisis (Slide #48)</h2>
+          <div class="card-body">
+            <p>So far, algorithms (Decision Trees, SVM, Naive Bayes) assumed <strong>Strong Supervision</strong>: thousands of pristine, expert-annotated labels.</p>
+            <div class="p-3.5 bg-rose-950/40 border border-rose-800/60 rounded-xl mb-3 text-xs text-slate-300">
+              <strong>The Reality Bottleneck:</strong>
+              <ul class="list-disc list-inside mt-1 space-y-1 text-slate-400">
+                <li>Annotating 1 minute of human speech requires <strong>10 minutes</strong> of human labor.</li>
+                <li>Annotating environmental audio sounds takes <strong>400 times</strong> longer than real time!</li>
+                <li>Medical pathology image annotation requires certified oncologists ($200+/hr).</li>
+              </ul>
+            </div>
+            <p>Modern machine learning must classify data using <strong>Weak Supervision</strong>: partial, noisy, or zero training labels!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 17: Semi-Supervised Self-Training -->
+      <div class="card-container" id="card-17">
+        <div class="card">
+          <div class="card-tag">Section 5: Weak Supervision • Card 18 of 30</div>
+          <h2 class="card-header">Semi-Supervised Learning & Self-Training</h2>
+          <div class="card-body">
+            <p>Suppose you have <strong>100 labeled tuples</strong> and <strong>100,000 unlabeled tuples</strong>.</p>
+            <h4 class="font-bold text-white text-sm mb-2">Self-Training Procedure (Slide #49):</h4>
+            <div class="interactive-box text-xs space-y-2">
+              <div>1. Train an initial classifier on the 100 labeled tuples.</div>
+              <div>2. Use the classifier to predict labels for all 100,000 unlabeled tuples.</div>
+              <div>3. Select the tuples with the <strong>highest confidence scores</strong> (e.g. probability $\ge 0.98$).</div>
+              <div>4. Add these pseudo-labeled tuples to the training set.</div>
+              <div>5. Retrain the model and repeat until convergence!</div>
+            </div>
+            <p class="text-xs text-amber-300 mt-2">⚠️ <strong>Risk (Error Propagation):</strong> If early pseudo-labels are incorrect, errors compound with each iteration. Fix with consensus voting or co-training.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 18: Active Learning -->
+      <div class="card-container" id="card-18">
+        <div class="card">
+          <div class="card-tag">Section 5: Weak Supervision • Card 19 of 30</div>
+          <h2 class="card-header">Active Learning: Asking the Oracle Smart Questions</h2>
+          <div class="card-body">
+            <p>Instead of passively accepting random labels, the <strong>Active Learner</strong> actively queries a human expert (an "Oracle") only for the hardest, most ambiguous examples (Slide #51).</p>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl mb-3 text-xs">
+              <strong class="text-indigo-400">Uncertainty Sampling:</strong>
+              <p class="text-slate-300 mt-1">If the model predicts an image is 99% a dog, querying the human wastes money. But if the model is 50.1% cat vs 49.9% dog, querying the human provides maximum information gain!</p>
+            </div>
+            <p class="text-xs text-slate-300"><strong>Result:</strong> Active learning frequently reaches the same accuracy as full supervised learning using only <strong>10% to 20%</strong> of the labeling budget!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 19: Transfer Learning & TrAdaBoost -->
+      <div class="card-container" id="card-19">
+        <div class="card">
+          <div class="card-tag">Section 5: Weak Supervision • Card 20 of 30</div>
+          <h2 class="card-header">Transfer Learning & TrAdaBoost (Slide #52)</h2>
+          <div class="card-body">
+            <p><strong>Traditional ML:</strong> Starts from scratch for every task. A classifier trained on camera reviews knows nothing about TV reviews.</p>
+            <p><strong>Transfer Learning:</strong> Extracts features and representations learned from a rich <em>Source Task</em> and applies them to a data-sparse <em>Target Task</em>.</p>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl mb-3 text-xs">
+              <strong class="text-purple-300">TrAdaBoost (Transfer AdaBoost - Slide #53):</strong>
+              <p class="text-slate-300 mt-1">When source and target data share the same feature space but differ in distribution, TrAdaBoost re-weights source samples. It lowers weights of source samples that conflict with target data while boosting helpful ones!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 20: Zero-Shot Learning -->
+      <div class="card-container" id="card-20">
+        <div class="card">
+          <div class="card-tag">Section 5: Weak Supervision • Card 21 of 30</div>
+          <h2 class="card-header">Zero-Shot Learning: Classifying Unseen Classes</h2>
+          <div class="card-body">
+            <p><strong>The Ultimate Challenge:</strong> Can an algorithm classify an object into a class it has <em>never seen a single training example of</em>? YES, through <strong>Zero-Shot Learning (ZSL)</strong>!</p>
+            <p><strong>Slide #56 Semantic Attribute Paradigm:</strong></p>
+            <p class="text-xs text-slate-300 mb-2">We define high-level semantic attributes: <code>[4_legs, wings, claws, night_vision]</code>.</p>
+            <ul class="text-xs space-y-1 text-slate-400 mb-3 list-disc list-inside">
+              <li>Known training class: <strong>Dog</strong> $= [1, 0, 0, 0]$</li>
+              <li>Known training class: <strong>Owl</strong> $= [0, 1, 0, 1]$</li>
+              <li>Known training class: <strong>Fish</strong> $= [0, 0, 0, 0]$</li>
+            </ul>
+            <p class="text-xs text-slate-300">During testing, a new image appears. The semantic attribute predictor outputs: $[1, 0, 1, 1]$. Even though the classifier never saw a <strong>Cat</strong> during training, the knowledge base defines <em>Cat</em> as $[1, 0, 1, 1]$. The model predicts "Cat" with zero training images!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 21: Interactive Zero-Shot Classifier -->
+      <div class="card-container" id="card-21">
+        <div class="card">
+          <div class="card-tag">Section 5: Interactive Sandbox • Card 22 of 30</div>
+          <h2 class="card-header">Interactive Zero-Shot Semantic Animal Classifier</h2>
+          <div class="card-body">
+            <p class="text-xs text-slate-300 mb-3">Toggle semantic attributes below. Watch the zero-shot classifier map the semantic vector to the nearest class using cosine similarity:</p>
+            <div class="interactive-box">
+              <div class="grid grid-cols-2 gap-2 mb-3">
+                <label class="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" id="zsl-legs" class="accent-indigo-500" onchange="runZeroShot()"/> Has 4 Legs</label>
+                <label class="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" id="zsl-wings" class="accent-indigo-500" onchange="runZeroShot()"/> Has Wings</label>
+                <label class="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" id="zsl-claws" class="accent-indigo-500" onchange="runZeroShot()"/> Retractable Claws</label>
+                <label class="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" id="zsl-vision" class="accent-indigo-500" onchange="runZeroShot()"/> Super Night Vision</label>
+              </div>
+
+              <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-center">
+                <div class="text-xs text-slate-400 mb-1">Zero-Shot Predicted Class:</div>
+                <div id="zsl-result" class="text-xl font-black text-emerald-400">🐟 Fish (or Aquatic)</div>
+                <div id="zsl-vector" class="text-[11px] font-mono text-indigo-400 mt-1">Vector: [0, 0, 0, 0]</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 22: Streams, Sequences & Graphs -->
+      <div class="card-container" id="card-22">
+        <div class="card">
+          <div class="card-tag">Section 6: Rich Data Types • Card 23 of 30</div>
+          <h2 class="card-header">Classification with Rich Data Types (Slide #59)</h2>
+          <div class="card-body">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                <h4 class="font-bold text-indigo-400 text-xs mb-1">🌊 Stream Data</h4>
+                <p class="text-xs text-slate-300">Continuous arrival (credit card transactions). Impossible to store in memory. Must classify in one single pass and handle concept drift (VFDT / Hoeffding trees).</p>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                <h4 class="font-bold text-purple-400 text-xs mb-1">🧬 Sequence Data</h4>
+                <p class="text-xs text-slate-300">Ordered values (DNA codons: A, C, G, T; sentence text). Predict sequence properties like sentiment or coding regions using sequence kernels or LSTMs.</p>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                <h4 class="font-bold text-pink-400 text-xs mb-1">🕸️ Graph Data</h4>
+                <p class="text-xs text-slate-300"><strong>Node-level:</strong> Classify web pages or social users. <strong>Graph-level:</strong> Classify chemical molecules (toxic vs non-toxic) using Graph Neural Networks (GNNs).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 23: Multiclass: OVA & ECOC -->
+      <div class="card-container" id="card-23">
+        <div class="card">
+          <div class="card-tag">Section 6: Advanced Paradigms • Card 24 of 30</div>
+          <h2 class="card-header">Multiclass Classification: OVA & ECOC Codes</h2>
+          <div class="card-body">
+            <p>Binary classifiers (like basic SVM) only distinguish between 2 classes. How do we classify $m$ classes ($m > 2$)?</p>
+            <div class="space-y-3 text-xs mb-4">
+              <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                <strong class="text-white">1. One-vs-All (OVA / One-vs-Rest):</strong> Train $m$ binary classifiers. Classifier $j$ treats class $j$ as positive and all other $m-1$ classes as negative. Predict with the classifier outputting highest confidence.
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                <strong class="text-white">2. Error-Correcting Output Codes (ECOC - Slide #67):</strong> Borrowed from telecommunications! Assign each class a unique $n$-bit binary codeword. Train $n$ independent binary classifiers (one per bit). Even if 1 or 2 classifiers predict wrong bits, Hamming distance error-correction correctly recovers the true class!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 24: Model Interpretability & LIME -->
+      <div class="card-container" id="card-24">
+        <div class="card">
+          <div class="card-tag">Section 6: Interpretability • Card 25 of 30</div>
+          <h2 class="card-header">Model Interpretability & LIME (Slide #68)</h2>
+          <div class="card-body">
+            <p>In high-stakes applications (medicine, loan approvals, criminal justice), high accuracy is not enough: <strong>we must know WHY a model made a decision</strong>.</p>
+            <div class="p-4 rounded-xl bg-indigo-950/40 border border-indigo-800/60 mb-3">
+              <h4 class="font-bold text-indigo-300 text-sm mb-1">🍋 LIME (Local Interpretable Model-agnostic Explanations):</h4>
+              <p class="text-xs text-slate-300">Even if a global deep network or SVM is wildly complex, <em>in the tiny neighborhood right around a single prediction</em>, the decision boundary looks almost flat (linear)!</p>
+              <p class="text-xs text-slate-400 mt-2">LIME perturbs the input, sees how predictions change, and fits a simple linear surrogate model locally to explain which features contributed positively or negatively to that specific decision.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 25: Rough Sets -->
+      <div class="card-container" id="card-25">
+        <div class="card">
+          <div class="card-tag">Section 6: Soft Computing • Card 26 of 30</div>
+          <h2 class="card-header">Rough Sets: Lower & Upper Approximations (Slide #73)</h2>
+          <div class="card-body">
+            <p>Introduced by Zdzisław Pawlak, <strong>Rough Set Theory</strong> handles uncertainty caused by imperfect information where two different instances have identical feature values but different class labels.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-emerald-500/40 rounded-xl">
+                <strong class="text-emerald-400">Lower Approximation $\underline{R}(C)$:</strong>
+                <p class="text-slate-300 mt-1">The set of objects that are <em>definitely and unambiguously</em> members of class $C$. (Zero doubt).</p>
+              </div>
+              <div class="p-3 bg-slate-900 border border-amber-500/40 rounded-xl">
+                <strong class="text-amber-400">Upper Approximation $\overline{R}(C)$:</strong>
+                <p class="text-slate-300 mt-1">The set of objects that <em>possibly</em> belong to class $C$.</p>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 font-mono text-center">Boundary Region = $\overline{R}(C) - \underline{R}(C)$ (The region of vagueness).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 26: Fuzzy Sets -->
+      <div class="card-container" id="card-26">
+        <div class="card">
+          <div class="card-tag">Section 6: Soft Computing • Card 27 of 30</div>
+          <h2 class="card-header">Fuzzy Sets & Membership Functions (Slides #74–87)</h2>
+          <div class="card-body">
+            <p><strong>Classical Logic (Crisp):</strong> An element belongs to a set ($1$) or it does not ($0$). If "Young" is defined as $\le 30$, a person on their 30th birthday is young, but on their 30th birthday + 1 day they are old!</p>
+            <p><strong>Fuzzy Logic (Lotfi Zadeh):</strong> Objects have a <strong>degree of membership</strong> $\mu_A(x) \in [0.0, 1.0]$.</p>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-300 mb-3">
+              <strong>Example (Slide #87):</strong>
+              <ul class="list-disc list-inside mt-1 text-slate-400 space-y-1">
+                <li>Age 25: $\mu_{\text{Young}} = 1.0, \mu_{\text{MiddleAged}} = 0.0$</li>
+                <li>Age 35: $\mu_{\text{Young}} = 0.4, \mu_{\text{MiddleAged}} = 0.6$ (Transition state)</li>
+                <li>Age 55: $\mu_{\text{Young}} = 0.0, \mu_{\text{MiddleAged}} = 0.8, \mu_{\text{Senior}} = 0.2$</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 27: Interactive Fuzzy Explorer -->
+      <div class="card-container" id="card-27">
+        <div class="card">
+          <div class="card-tag">Section 6: Interactive Sandbox • Card 28 of 30</div>
+          <h2 class="card-header">Interactive Fuzzy Membership Explorer</h2>
+          <div class="card-body">
+            <p class="text-xs text-slate-300 mb-2">Move the slider to see how a person's age maps continuously across fuzzy categories:</p>
+            <div class="interactive-box">
+              <div class="flex items-center justify-between mb-3 text-xs">
+                <span class="text-white font-semibold">Test Age: <strong id="fuzzy-age-val" class="text-indigo-400 font-mono">35 yrs</strong></span>
+                <input type="range" min="15" max="80" value="35" id="fuzzy-slider" class="w-48 accent-indigo-500" oninput="updateFuzzyCurve()"/>
+              </div>
+              <canvas id="fuzzyCanvas" width="560" height="180" class="mx-auto rounded-lg bg-slate-950 border border-slate-800 max-w-full"></canvas>
+              <div class="grid grid-cols-3 gap-2 mt-3 text-center text-xs">
+                <div class="p-2 rounded bg-blue-950/40 border border-blue-800/40">
+                  <span class="text-blue-300 block font-semibold">μ(Young)</span>
+                  <span id="fuzzy-val-young" class="font-mono text-white text-sm">0.40</span>
+                </div>
+                <div class="p-2 rounded bg-amber-950/40 border border-amber-800/40">
+                  <span class="text-amber-300 block font-semibold">μ(Middle-Aged)</span>
+                  <span id="fuzzy-val-mid" class="font-mono text-white text-sm">0.60</span>
+                </div>
+                <div class="p-2 rounded bg-purple-950/40 border border-purple-800/40">
+                  <span class="text-purple-300 block font-semibold">μ(Senior)</span>
+                  <span id="fuzzy-val-senior" class="font-mono text-white text-sm">0.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 28: Comprehensive Mastery Quiz -->
+      <div class="card-container" id="card-28">
+        <div class="card">
+          <div class="card-tag">Section 7: Review • Card 29 of 30</div>
+          <h2 class="card-header">Module 09 Mastery Quiz</h2>
+          <div class="card-body">
+            <div class="space-y-4" id="quiz-container">
+              <!-- Q1 -->
+              <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl text-xs">
+                <p class="font-bold text-white mb-2">1. In SVM, what determines the mathematical complexity of the trained classifier?</p>
+                <div class="space-y-1.5 text-slate-300">
+                  <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q1" value="a" class="mr-2"/> A) The total number of input dimensions $d$</label>
+                  <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q1" value="b" class="mr-2"/> B) The number of support vectors lying on the margin</label>
+                  <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q1" value="c" class="mr-2"/> C) The learning rate of stochastic gradient descent</label>
+                </div>
+              </div>
+
+              <!-- Q2 -->
+              <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl text-xs">
+                <p class="font-bold text-white mb-2">2. What distinguishes Zero-Shot Learning from traditional classification?</p>
+                <div class="space-y-1.5 text-slate-300">
+                  <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q2" value="a" class="mr-2"/> A) It trains without any compute</label>
+                  <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q2" value="b" class="mr-2"/> B) It can classify test instances into classes that had zero training examples</label>
+                  <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q2" value="c" class="mr-2"/> C) It only works on 0-dimensional scalars</label>
+                </div>
+              </div>
+
+              <!-- Q3 -->
+              <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl text-xs">
+                <p class="font-bold text-white mb-2">3. What is the fundamental difference between Crisp Sets and Fuzzy Sets?</p>
+                <div class="space-y-1.5 text-slate-300">
+                  <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q3" value="a" class="mr-2"/> A) Crisp sets have degrees of membership between 0 and 1; fuzzy is binary</label>
+                  <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q3" value="b" class="mr-2"/> B) Crisp sets are binary ($0$ or $1$), while Fuzzy sets allow continuous membership $\mu \in [0.0, 1.0]$</label>
+                  <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q3" value="c" class="mr-2"/> C) Fuzzy sets cannot handle numerical data</label>
+                </div>
+              </div>
+
+              <button class="btn-primary w-full py-2.5" onclick="checkMasteryQuiz()">Submit Answers</button>
+              <div id="quiz-result" class="hidden text-center p-3 rounded-lg font-bold text-xs"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 29: Appendix & Slides Reference -->
+      <div class="card-container" id="card-29">
+        <div class="card">
+          <div class="card-tag">Section 7: Appendix • Card 30 of 30</div>
+          <h2 class="card-header">Course Slides Reference & Curriculum Map</h2>
+          <div class="card-body">
+            <p>Congratulations! You have completed all 30 visual study cards for <strong>Advanced Classification Methods</strong>.</p>
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl text-xs space-y-2 mb-4">
+              <div class="font-bold text-white text-sm">Official Slide Deck Mappings:</div>
+              <div>• <strong>Primary Lecture Deck:</strong> <code>09_AdvClassificationDA.pptx</code> (87 slides, Prof. P. Krishna Reddy)</div>
+              <div>• <strong>Foundational Classification:</strong> Module 08 (<code>08_IntroClassificationDA-2026.pptx</code>)</div>
+              <div>• <strong>Midsem Tested Papers:</strong> Papers 18, 20, 22, 23, 24, 25, 26, 27, 28</div>
+              <div>• <strong>Quiz 2 Coverage:</strong> Basic Concepts (Trees, Naive Bayes, k-NN) + Advanced Methods (Feature Selection, BBN, SVM, Weak Supervision)</div>
+            </div>
+            <div class="flex gap-3 justify-center">
+              <a href="00_home.html" class="btn-primary">Return to Hub</a>
+              <a href="08_classification.html" class="btn-secondary">Review Module 08</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM NAVIGATION BAR -->
+      <div class="max-w-[840px] mx-auto flex items-center justify-between pt-4 pb-12">
+        <button id="prev-btn" class="btn-secondary" onclick="prevCard()" disabled>← Previous</button>
+        <span class="text-xs text-slate-500 font-mono" id="card-counter">1 / 30</span>
+        <button id="next-btn" class="btn-primary" onclick="nextCard()">Next →</button>
+      </div>
+
+    </main>
+  </div>
+
+  <div id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    let currentCard = 0;
+    const totalCards = 30;
+
+    function goToCard(idx) {
+      if (idx < 0 || idx >= totalCards) return;
+      document.querySelectorAll('.card-container').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById('card-' + idx);
+      if (target) target.classList.add('active');
+
+      document.querySelectorAll('.sidebar-item').forEach((item, i) => {
+        if (i === idx) item.classList.add('active');
+        else item.classList.remove('active');
+      });
+
+      currentCard = idx;
+      document.getElementById('progress-bar').style.width = ((idx + 1) / totalCards * 100) + '%';
+      document.getElementById('progress-text').innerText = `Card ${idx + 1} / ${totalCards}`;
+      document.getElementById('card-counter').innerText = `${idx + 1} / ${totalCards}`;
+
+      document.getElementById('prev-btn').disabled = (idx === 0);
+      document.getElementById('next-btn').innerText = (idx === totalCards - 1) ? 'Finish 🎓' : 'Next →';
+
+      if (idx === 2) updateFeatureSandbox();
+      if (idx === 6) calcBBN();
+      if (idx === 11) drawSVM();
+      if (idx === 21) runZeroShot();
+      if (idx === 27) updateFuzzyCurve();
+
+      document.getElementById('main').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextCard() { if (currentCard < totalCards - 1) goToCard(currentCard + 1); }
+    function prevCard() { if (currentCard > 0) goToCard(currentCard - 1); }
+
+    // ── FEATURE SELECTION SANDBOX ──
+    const featuresData = [
+      { name: "Blood Glucose Level", score: 38.4, desc: "Strong biological indicator for diabetes" },
+      { name: "Patient BMI", score: 26.1, desc: "High correlation with metabolic class" },
+      { name: "Age", score: 17.5, desc: "Moderate linear correlation" },
+      { name: "Favorite Color", score: 1.2, desc: "Pure noise / uninformative" },
+      { name: "Hospital Bed Number", score: 0.4, desc: "Random administrative identifier" }
+    ];
+
+    function updateFeatureSandbox() {
+      const slider = document.getElementById('feat-slider');
+      if (!slider) return;
+      const thresh = parseFloat(slider.value);
+      document.getElementById('feat-thresh-val').innerText = thresh.toFixed(1);
+
+      let surviving = 0;
+      const html = featuresData.map(f => {
+        const keeps = f.score >= thresh;
+        if (keeps) surviving++;
+        return `
+          <div class="flex items-center justify-between p-2 rounded-lg ${keeps ? 'bg-indigo-950/40 border border-indigo-700/60' : 'bg-slate-900/40 border border-slate-800/40 opacity-40'}">
+            <div>
+              <span class="font-bold text-xs ${keeps ? 'text-white' : 'text-slate-400'}">${f.name}</span>
+              <span class="text-[10px] text-slate-400 block">${f.desc}</span>
+            </div>
+            <div class="text-right">
+              <span class="font-mono text-xs font-bold ${keeps ? 'text-indigo-400' : 'text-slate-500'}">χ² = ${f.score}</span>
+              <span class="text-[10px] block ${keeps ? 'text-emerald-400' : 'text-rose-400'}">${keeps ? '✓ Kept' : '✗ Pruned'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('feature-list').innerHTML = html;
+      document.getElementById('surviving-count').innerText = `${surviving} / ${featuresData.length}`;
+      document.getElementById('reduction-pct').innerText = `${Math.round((featuresData.length - surviving)/featuresData.length * 100)}%`;
+    }
+
+    // ── BBN SIMULATOR ──
+    function calcBBN() {
+      const smoker = document.getElementById('bbn-smoker')?.checked;
+      const family = document.getElementById('bbn-family')?.checked;
+      const xray = document.getElementById('bbn-xray')?.checked;
+      const dyspnea = document.getElementById('bbn-dyspnea')?.checked;
+
+      let p = 0.03; // baseline
+      if (smoker && family) p = 0.50;
+      else if (smoker) p = 0.25;
+      else if (family) p = 0.15;
+
+      if (xray) p = p * 0.90 / (p * 0.90 + (1 - p) * 0.05);
+      if (dyspnea) p = p * 0.80 / (p * 0.80 + (1 - p) * 0.20);
+
+      p = Math.min(Math.max(p, 0.01), 0.98);
+      const pct = (p * 100).toFixed(1);
+
+      document.getElementById('bbn-prob-text').innerText = pct + '%';
+      document.getElementById('bbn-prob-bar').style.width = pct + '%';
+
+      let expl = "Normal baseline risk.";
+      if (p > 0.7) expl = "🚨 High clinical urgency: Positive signs strongly reinforce malignant diagnosis.";
+      else if (p > 0.3) expl = "⚠️ Elevated risk: Recommended for secondary diagnostic screening.";
+      else if (smoker || family) expl = "Moderate risk factors present without confirmed scan discrepancies.";
+      document.getElementById('bbn-explanation').innerText = expl;
+    }
+
+    // ── SVM 2D PLAYGROUND ──
+    let svmKernel = 'linear';
+    function setSVMKernel(k) {
+      svmKernel = k;
+      document.getElementById('svm-btn-lin')?.classList.toggle('btn-primary', k==='linear');
+      document.getElementById('svm-btn-lin')?.classList.toggle('btn-secondary', k!=='linear');
+      document.getElementById('svm-btn-rbf')?.classList.toggle('btn-primary', k==='rbf');
+      document.getElementById('svm-btn-rbf')?.classList.toggle('btn-secondary', k!=='rbf');
+      drawSVM();
+    }
+    function resetSVMSandbox() { drawSVM(); }
+
+    function drawSVM() {
+      const cvs = document.getElementById('svmCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      // Points Class 1 (Red)
+      const c1 = [{x: 100, y: 70}, {x: 150, y: 120}, {x: 180, y: 80}, {x: 120, y: 160}];
+      // Points Class 2 (Blue)
+      const c2 = [{x: 350, y: 160}, {x: 400, y: 110}, {x: 440, y: 180}, {x: 380, y: 220}];
+
+      if (svmKernel === 'linear') {
+        // Hyperplane
+        ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(200, 20); ctx.lineTo(340, 240); ctx.stroke();
+
+        // Margins
+        ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(150, 20); ctx.lineTo(290, 240); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(250, 20); ctx.lineTo(390, 240); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Highlight SVs
+        [c1[1], c2[0]].forEach(pt => {
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(pt.x, pt.y, 11, 0, Math.PI*2); ctx.stroke();
+        });
+      } else {
+        // RBF Kernel non-linear curve
+        ctx.strokeStyle = '#ec4899'; ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(150, 110, 80, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.arc(150, 110, 95, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(150, 110, 65, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Draw points
+      c1.forEach(pt => {
+        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(pt.x, pt.y, 6, 0, Math.PI*2); ctx.fill();
+      });
+      c2.forEach(pt => {
+        ctx.fillStyle = '#3b82f6'; ctx.beginPath(); ctx.arc(pt.x, pt.y, 6, 0, Math.PI*2); ctx.fill();
+      });
+    }
+
+    // ── ZERO-SHOT CLASSIFIER ──
+    const zslKnowledge = [
+      { name: "🦉 Owl", vec: [0, 1, 0, 1] },
+      { name: "🐶 Dog", vec: [1, 0, 0, 0] },
+      { name: "🐱 Cat (Novel Class!)", vec: [1, 0, 1, 1] },
+      { name: "🦅 Eagle", vec: [0, 1, 1, 0] },
+      { name: "🐟 Fish (or Aquatic)", vec: [0, 0, 0, 0] }
+    ];
+
+    function runZeroShot() {
+      const v = [
+        document.getElementById('zsl-legs')?.checked ? 1 : 0,
+        document.getElementById('zsl-wings')?.checked ? 1 : 0,
+        document.getElementById('zsl-claws')?.checked ? 1 : 0,
+        document.getElementById('zsl-vision')?.checked ? 1 : 0
+      ];
+
+      document.getElementById('zsl-vector').innerText = `Vector: [${v.join(', ')}]`;
+
+      let bestScore = -1;
+      let bestClass = "Unknown Creature";
+
+      zslKnowledge.forEach(k => {
+        let dot = 0, mA = 0, mB = 0;
+        for (let i = 0; i < 4; i++) {
+          dot += v[i] * k.vec[i];
+          mA += v[i] * v[i];
+          mB += k.vec[i] * k.vec[i];
+        }
+        let sim = 0;
+        if (mA === 0 && mB === 0) sim = 1.0;
+        else if (mA > 0 && mB > 0) sim = dot / (Math.sqrt(mA) * Math.sqrt(mB));
+        else if (mA === 0 && mB === 0) sim = 1.0;
+
+        if (sim > bestScore) {
+          bestScore = sim;
+          bestClass = k.name;
+        }
+      });
+
+      document.getElementById('zsl-result').innerText = bestClass;
+    }
+
+    // ── FUZZY MEMBERSHIP CURVE ──
+    function updateFuzzyCurve() {
+      const slider = document.getElementById('fuzzy-slider');
+      if (!slider) return;
+      const age = parseFloat(slider.value);
+      document.getElementById('fuzzy-age-val').innerText = age + ' yrs';
+
+      // Membership calculations
+      let y = 0, m = 0, s = 0;
+      if (age <= 25) y = 1.0;
+      else if (age < 40) y = (40 - age) / 15;
+
+      if (age >= 25 && age <= 40) m = (age - 25) / 15;
+      else if (age > 40 && age < 60) m = (60 - age) / 20;
+
+      if (age >= 50 && age <= 65) s = (age - 50) / 15;
+      else if (age > 65) s = 1.0;
+
+      document.getElementById('fuzzy-val-young').innerText = y.toFixed(2);
+      document.getElementById('fuzzy-val-mid').innerText = m.toFixed(2);
+      document.getElementById('fuzzy-val-senior').innerText = s.toFixed(2);
+
+      const cvs = document.getElementById('fuzzyCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      const pad = { l: 40, r: 20, t: 20, b: 25 };
+      const w = cvs.width - pad.l - pad.r;
+      const h = cvs.height - pad.t - pad.b;
+
+      // Axes
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + h);
+      ctx.lineTo(pad.l + w, pad.t + h);
+      ctx.stroke();
+
+      function mapX(a) { return pad.l + (a - 15) / 65 * w; }
+      function mapY(val) { return pad.t + h * (1 - val); }
+
+      // Young (Blue)
+      ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(mapX(15), mapY(1)); ctx.lineTo(mapX(25), mapY(1)); ctx.lineTo(mapX(40), mapY(0));
+      ctx.stroke();
+
+      // Middle (Amber)
+      ctx.strokeStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(mapX(25), mapY(0)); ctx.lineTo(mapX(40), mapY(1)); ctx.lineTo(mapX(60), mapY(0));
+      ctx.stroke();
+
+      // Senior (Purple)
+      ctx.strokeStyle = '#a855f7';
+      ctx.beginPath();
+      ctx.moveTo(mapX(50), mapY(0)); ctx.lineTo(mapX(65), mapY(1)); ctx.lineTo(mapX(80), mapY(1));
+      ctx.stroke();
+
+      // Age marker line
+      const curX = mapX(age);
+      ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 2; ctx.setLineDash([4, 3]);
+      ctx.beginPath(); ctx.moveTo(curX, pad.t); ctx.lineTo(curX, pad.t + h); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#f43f5e'; ctx.beginPath(); ctx.arc(curX, pad.t + h, 4, 0, Math.PI*2); ctx.fill();
+    }
+
+    // ── MASTERY QUIZ ──
+    function checkMasteryQuiz() {
+      const q1 = document.querySelector('input[name="q1"]:checked')?.value;
+      const q2 = document.querySelector('input[name="q2"]:checked')?.value;
+      const q3 = document.querySelector('input[name="q3"]:checked')?.value;
+
+      if (!q1 || !q2 || !q3) {
+        alert("Please answer all 3 questions before submitting!");
+        return;
+      }
+
+      let score = 0;
+      if (q1 === 'b') score++;
+      if (q2 === 'b') score++;
+      if (q3 === 'b') score++;
+
+      const resBox = document.getElementById('quiz-result');
+      resBox.classList.remove('hidden', 'bg-emerald-950/80', 'text-emerald-300', 'bg-rose-950/80', 'text-rose-300');
+
+      if (score === 3) {
+        resBox.classList.add('bg-emerald-950/80', 'text-emerald-300', 'border', 'border-emerald-700');
+        resBox.innerHTML = `🎉 Perfect Score! 3 / 3 correct! You have mastered Advanced Classification concepts.`;
+      } else {
+        resBox.classList.add('bg-rose-950/80', 'text-rose-300', 'border', 'border-rose-700');
+        resBox.innerHTML = `Score: ${score} / 3. Review the SVM support vector properties and Zero-Shot attribute vectors!`;
+      }
+    }
+
+    // ── POMODORO TIMER ──
+    let timerSeconds = 900;
+    let timerRunning = false;
+    let timerInterval = null;
+
+    function toggleTimer() {
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+      } else {
+        timerRunning = true;
+        timerInterval = setInterval(() => {
+          if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            alert("⏰ Pomodoro session complete! Take a 5-minute breather.");
+          } else {
+            timerSeconds--;
+            const m = Math.floor(timerSeconds / 60);
+            const s = timerSeconds % 60;
+            document.getElementById('timer').innerText = `⏱ ${m}:${s < 10 ? '0' : ''}${s}`;
+          }
+        }, 1000);
+      }
+    }
+
+    // ── MOBILE SIDEBAR ──
+    function toggleMobileSidebar() {
+      const sb = document.getElementById('sidebar');
+      const bd = document.getElementById('sidebar-backdrop');
+      if (sb) sb.classList.toggle('mobile-open');
+      if (bd) bd.classList.toggle('active');
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+      goToCard(0);
+    });
+  </script>
+</body>
+</html>

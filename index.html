@@ -100,7 +100,7 @@
         <!-- STATS BAR -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div class="stat-box bg-[#090d16]/70 border border-[var(--border)] rounded-xl p-3 text-center">
-            <div class="text-xl md:text-2xl font-black text-indigo-400">8</div>
+            <div class="text-xl md:text-2xl font-black text-indigo-400">9</div>
             <div class="text-[11px] text-slate-400 uppercase font-semibold">Lecture Modules</div>
           </div>
           <div class="stat-box bg-[#090d16]/70 border border-[var(--border)] rounded-xl p-3 text-center">
@@ -112,7 +112,7 @@
             <div class="text-[11px] text-slate-400 uppercase font-semibold">Midsem Papers</div>
           </div>
           <div class="stat-box bg-[#090d16]/70 border border-[var(--border)] rounded-xl p-3 text-center">
-            <div class="text-xl md:text-2xl font-black text-emerald-400">4</div>
+            <div class="text-xl md:text-2xl font-black text-emerald-400">6</div>
             <div class="text-[11px] text-slate-400 uppercase font-semibold">Assignments</div>
           </div>
         </div>
@@ -129,7 +129,7 @@
         <input 
           type="text" 
           id="search-input" 
-          placeholder="Search any topic, paper, or algorithm (e.g., Apriori, BUC, Decision Tree, COVID, OLAP, Midsem)..."
+          placeholder="Search any topic, paper, or algorithm (e.g., Apriori, BUC, SVM, BBN, Decision Tree, COVID, OLAP, Quiz 2)..."
           class="w-full bg-[#131b2e] border border-[var(--border)] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
           oninput="handleSearch()"
         />
@@ -137,11 +137,11 @@
 
       <!-- Category Filter Pills -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none" id="filter-pills">
-        <button onclick="setFilter('all')" class="filter-pill active px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white border border-indigo-500" data-filter="all">All (43)</button>
-        <button onclick="setFilter('lecture')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-indigo-500" data-filter="lecture">Lectures (8)</button>
+        <button onclick="setFilter('all')" class="filter-pill active px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white border border-indigo-500" data-filter="all">All (44)</button>
+        <button onclick="setFilter('lecture')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-indigo-500" data-filter="lecture">Lectures (9)</button>
         <button onclick="setFilter('paper')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-purple-500" data-filter="paper">Papers (35)</button>
         <button onclick="setFilter('moodle')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-amber-500" data-filter="moodle">🏛️ Moodle & Exams</button>
-        <button onclick="setFilter('assignment')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-emerald-500" data-filter="assignment">📝 Assignments (4)</button>
+        <button onclick="setFilter('assignment')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-emerald-500" data-filter="assignment">📝 Assignments (6)</button>
       </div>
     </div>
   </section>
@@ -426,6 +426,19 @@
           <h3 class="font-bold text-white text-base group-hover:text-indigo-300 transition-colors mb-1.5">🏷️ Classification</h3>
           <p class="text-xs text-slate-400 leading-relaxed mb-3">Decision Trees (Entropy/Gini), Naive Bayes spam filter, k-NN scatter, ROC curves & Ensembles.</p>
           <div class="text-[11px] font-semibold text-indigo-400 flex items-center gap-1">
+            Start Lesson <span>→</span>
+          </div>
+        </a>
+
+        <!-- Mod 9 -->
+        <a href="Study_Material/09_advanced_classification.html" class="module-item group block bg-[#131b2e] border border-purple-500/40 rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Advanced Classification Feature Selection BBN Bayesian Belief Network SVM Support Vector Machine Weak Supervision Zero Shot LIME Rough Sets Fuzzy AdvClassificationDA Quiz 2">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-purple-500/20 text-purple-300 border border-purple-500/30">Module 09 (NEW)</span>
+            <span class="text-xs text-purple-400 font-mono">~75 min</span>
+          </div>
+          <h3 class="font-bold text-white text-base group-hover:text-purple-300 transition-colors mb-1.5">🧠 Advanced Classification</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3">Feature selection (Filter/Wrapper/Embedded), Bayesian Belief Networks (CPT), SVM kernels, Weak supervision, Zero-shot, and Fuzzy logic.</p>
+          <div class="text-[11px] font-semibold text-purple-400 flex items-center gap-1">
             Start Lesson <span>→</span>
           </div>
         </a>

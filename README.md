@@ -5,7 +5,7 @@
 [![Moodle Course](https://img.shields.io/badge/IIIT%20Moodle-Course%205977-orange?logo=moodle&style=flat-square)](https://courses.iiit.ac.in/course/view.php?id=5977)
 [![Mobile Optimized](https://img.shields.io/badge/Mobile-Optimized%20📱-blue?style=flat-square)](https://vivek-r-2000.github.io/da1-interactive-study/)
 [![Math](https://img.shields.io/badge/LaTeX-KaTeX%20Rendered-orange?style=flat-square)](https://vivek-r-2000.github.io/da1-interactive-study/)
-[![Modules](https://img.shields.io/badge/Modules-8%20Course%20+%2035%20Papers-purple?style=flat-square)](https://vivek-r-2000.github.io/da1-interactive-study/)
+[![Modules](https://img.shields.io/badge/Modules-9%20Course%20+%2035%20Papers-purple?style=flat-square)](https://vivek-r-2000.github.io/da1-interactive-study/)
 
 > **🌐 Live Permanent Web Application:**  
 > ### 👉 **[https://vivek-r-2000.github.io/da1-interactive-study/](https://vivek-r-2000.github.io/da1-interactive-study/)**
@@ -86,7 +86,7 @@ All practical and theoretical course assignments are organized and cross-referen
 
 ## 📚 Curriculum Structure & Slide Decks
 
-### 📘 8 Core Lecture Course Modules
+### 📘 9 Core Lecture Course Modules
 
 Each interactive module directly corresponds to the official professor slide decks:
 
@@ -121,6 +121,10 @@ Each interactive module directly corresponds to the official professor slide dec
 8. **[Module 08: Introduction to Classification](https://vivek-r-2000.github.io/da1-interactive-study/Study_Material/08_classification.html)**  
    *Moodle Slide Deck:* `08_IntroClassificationDA-2026.pptx`  
    *Content:* Decision Trees (Information Gain/Entropy/Gini), Naive Bayes spam filter, k-NN playground, interactive Confusion Matrix, ROC curves, and Ensembles.
+
+9. **[Module 09: Advanced Classification Methods](https://vivek-r-2000.github.io/da1-interactive-study/Study_Material/09_advanced_classification.html)** *(NEW)*  
+   *Moodle Slide Deck:* `09_AdvClassificationDA.pptx` (Section 11, Class #20 & #22)  
+   *Content:* Feature selection (Filter, Wrapper, Embedded), Bayesian Belief Networks (DAGs & CPTs), Support Vector Machines (MMH, Support Vectors, Kernel trick), Sequential covering (FOIL/RIPPER), Associative classification (CBA), Weak supervision (Self-training, Active learning, Transfer learning, Zero-shot learning), Multiclass OVA/ECOC, LIME, Rough sets, and Fuzzy logic.
 
 ---
 

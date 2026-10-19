@@ -59,8 +59,13 @@ The platform incorporates all official course notices, exam syllabi, and assignm
 - **Core Papers:** Cao (Data Science Overview), Han & Cai (Attribute-Oriented Approach), Jim Gray (Data Cube Operator), Multidimensional Aggregates.
 - **Explicit Exclusions:** MultiWay Array (Paper 19) and BUC (Paper 20) were excluded from Quiz 1 and tested in Midsem.
 
+### 🎯 Quiz 2 Topics (Newly Announced)
+- **Topic 1:** Chapter: *Classification: Basic Concepts* (refer lecture presentations and Module 08).
+- **Topic 2:** Chapter: *Classification: Advanced Methods* (covers topics from `AdvClassificationDA.pptx` / lecture on Oct 19).
+
 ### 💼 Course Grading & Theory Assignment Policy
-- **Theory Assignments:** Optional but strongly recommended. Submitting two theory assignments unlocks a favorable grading weight: **Endsem: 35% + Theory Assignments: 5%**.
+- **Theory Assignments:** Optional but strongly recommended. Submitting theory assignments unlocks favorable grading: **Endsem: 35% + Theory Assignments: 5%**.
+- **New Idea Assignment:** 5% of Endsem devoted to this assignment (best of Endsem vs New Idea).
 
 ---
 
@@ -68,12 +73,14 @@ The platform incorporates all official course notices, exam syllabi, and assignm
 
 All practical and theoretical course assignments are organized and cross-referenced in the repository:
 
-| Assignment | Key Topics & Tools | Location |
-| :--- | :--- | :--- |
-| **Assignment 1** | Exploratory Data Analysis, missing value imputation, statistical distributions, correlation, and boxplots | [`Assignments/A1/`](./Assignments/A1/) |
-| **Assignment 2** | Data Warehousing, Star/Snowflake schemas, Cube computation, Attribute-Oriented Induction (AOI), and large dataset benchmarking | [`Assignments/A2/`](./Assignments/A2/) |
-| **Assignment 3** | Frequent pattern mining, Apriori, FP-Growth, and classification models | [`Assignments/A3/`](./Assignments/A3/) |
-| **Research Paper Assignment 1** | Critical engineering review and comparative analysis of seminal papers in spatial pattern mining and legal OLAP | [`Research_Paper_Assignment_1_Summary.md`](./Research_Paper_Assignment_1_Summary.md) |
+| Assignment | Key Topics & Guidelines | Deadline & Weight | Location |
+| :--- | :--- | :--- | :--- |
+| **Assignment 1** | Exploratory Data Analysis, missing value imputation, statistical distributions, correlation, and boxplots | Completed | [`Assignments/A1/`](./Assignments/A1/) |
+| **Assignment 2** | Data Warehousing, Star/Snowflake schemas, Cube computation, Attribute-Oriented Induction (AOI), and large dataset benchmarking | Completed | [`Assignments/A2/`](./Assignments/A2/) |
+| **Assignment 3** | Frequent pattern mining, Apriori, FP-Growth, and classification models | Completed | [`Assignments/A3/`](./Assignments/A3/) |
+| **Research Paper Assignment 1** | Critical engineering review and comparative analysis of seminal papers in spatial pattern mining and legal OLAP | Completed (5% Endsem Weight) | [`Research_Paper_Assignment_1_Summary.md`](./Research_Paper_Assignment_1_Summary.md) |
+| **Assignment: New Idea** | Original research proposal formulating 1-2 new ideas or improvements using course insights (8-point structure) | **Nov 7, 2026 (5 PM)** • 5% Endsem | [`Discussions/Announcements/02_New Idea_ Assignment.md`](./Discussions/Announcements/) |
+| **Research Paper Assignment 2** | Critical summary of Human-in-the-Loop Recognition (`2020-C1-Vyshnavi`) & Document Embeddings (`2020-Narendra`) + KDD paper | **Nov 13, 2026 (5 PM)** • Theory Track | [`Discussions/Announcements/03_Research Paper Assignment 2.md`](./Discussions/Announcements/) |
 
 ---
 

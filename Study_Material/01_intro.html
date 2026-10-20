@@ -1758,8 +1758,9 @@ function showDiscInfo(key) {
 function toggleAppendix(id) {
   const content = document.getElementById(id+'-content');
   const arrow = document.getElementById(id+'-arrow');
+  if (!content) return;
   content.classList.toggle('open');
-  arrow.textContent = content.classList.contains('open') ? '▲' : '▼';
+  if (arrow) arrow.textContent = content.classList.contains('open') ? '▲' : '▼';
 }
 
 // ─────────────── QUIZ ENGINE ───────────────

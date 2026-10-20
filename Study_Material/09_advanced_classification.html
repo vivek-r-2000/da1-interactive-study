@@ -1216,7 +1216,10 @@
       const q3 = document.querySelector('input[name="q3"]:checked')?.value;
 
       if (!q1 || !q2 || !q3) {
-        alert("Please answer all 3 questions before submitting!");
+        const resBox = document.getElementById('quiz-result');
+        resBox.classList.remove('hidden', 'bg-emerald-950/80', 'text-emerald-300', 'bg-rose-950/80', 'text-rose-300');
+        resBox.classList.add('bg-amber-950/80', 'text-amber-300', 'border', 'border-amber-700');
+        resBox.innerHTML = `⚠️ Please select an answer for all 3 questions before submitting.`;
         return;
       }
 

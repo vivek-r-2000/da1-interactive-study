@@ -1651,7 +1651,7 @@ const QUIZ_DATA = [
 let quizState = { current: 0, score: 0, answered: false };
 
 function initQuiz() {
-  if (document.getElementById('q-block-0')) return;
+  const container = document.getElementById('quiz-container'); if (container && container.children.length > 0 && quizState.current > 0) return;
   quizState = { current: 0, score: 0, answered: false };
   renderQuiz();
 }
@@ -1716,62 +1716,7 @@ function selectAnswer(chosen, q, wrap, explainWrap, btn) {
   explainWrap.innerHTML = `
     <div class="callout ${isRight ? 'callout-tip' : 'callout-warn'}" style="margin-top:12px">
       <strong>${isRight ? '✅ Correct!' : '❌ Not quite.'}</strong> ${q.explain}
-    
-        <div class="mt-8 border-t border-[var(--border)] pt-6">
-          <h3 class="text-xl font-bold text-[#ec4899] mb-4">📚 Complete Research Paper Foundations</h3>
-
-          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
-            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🏪 Multi-Level Rules: Encoded Tables &amp; Redundancy (Han &amp; Fu TKDE 1999)</summary>
-            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
-              <p>• <strong>Encoded Transaction Tables ($T[1], T[2], \dots$):</strong> Item hierarchies are encoded directly into item codes (e.g. <code>112</code> = Food [1] → Milk [1] → 2% Foremost [2]). At level 1, transactions retain only the first digit; at level 2, the first two digits, etc.</p>
-              <p>• <strong>Level-by-Level Filtering:</strong> Items infrequent at level 1 are pruned from $T[2]$, dramatically reducing table size for deeper scans.</p>
-              <p>• <strong>Redundancy Filtering:</strong> If rule $R_1$: <code>milk → bread</code> has confidence 80%, and rule $R_2$: <code>2% milk → bread</code> has confidence 81%, $R_2$ is considered redundant and filtered out unless its confidence is significantly higher than expected.</p>
-            </div>
-          </details>
-
-          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
-            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🔢 Quantitative Rules: Catch-22 &amp; Dynamic Discretization (Srikant &amp; Agrawal SIGMOD 1996)</summary>
-            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
-              <p>• <strong>The Catch-22 Dilemma:</strong> Mapping quantitative attributes (Age, Income) to fixed intervals creates a conflict:<br/>
-              - <em>Intervals too narrow:</em> Support drops below minsup, and rules are missed.<br/>
-              - <em>Intervals too wide:</em> Information is lost and confidence drops below minconf.</p>
-              <p>• <strong>Dynamic Discretization:</strong> Combines adjacent quantitative intervals dynamically based on data distribution until minimum support is satisfied, and then prunes uninteresting or redundant wider intervals.</p>
-              <p>• <strong>Multi-Dimensional Associations:</strong> Extends beyond transaction itemsets to relational predicates (e.g. <code>age(X, "20..29") ∧ income(X, "40K..60K") ⇒ buys(X, "HDTV")</code>).</p>
-            </div>
-          </details>
-
-          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
-            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🌿 Diverse Frequent Patterns: Concept Projections &amp; drank (IIIT-H Research)</summary>
-            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
-              <p>• <strong>Motivation:</strong> Patterns with items spanning multiple distinct branches of a concept hierarchy (e.g., <code>{beer, diaper}</code>) are more diverse and interesting than patterns of items from the same category (e.g., <code>{bread, butter}</code>).</p>
-              <p>• <strong>Balanced vs Unbalanced Hierarchies:</strong> Balanced hierarchies have all leaf items at equal depth; unbalanced hierarchies handle categories of varying granularity.</p>
-              <p>• <strong>Diverse Rank ($drank$):</strong> Let $\pi(Y/C)$ be the minimal subtree projection covering all items in pattern $Y$, and $m(Y/C)$ be the maximal possible projection. Then: $\text{drank}(Y) = \frac{|\text{edges}(\pi(Y/C))|}{|\text{edges}(m(Y/C))|} \in [0, 1]$. Higher $drank$ signifies greater item diversity.</p>
-            </div>
-          </details>
-
-          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
-            <summary class="font-bold text-[var(--foreground)] cursor-pointer">💎 High-Utility Mining: TWU &amp; Two-Phase Algorithm (Liu et al. PAKDD 2005)</summary>
-            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
-              <p>• <strong>Why Apriori Fails:</strong> Adding items to an itemset can INCREASE total profit, violating the anti-monotone property of support.</p>
-              <p>• <strong>Transaction-Weighted Utilization (TWU):</strong> For itemset $X$, $TWU(X)$ is the sum of total transaction utilities for all transactions containing $X$.</p>
-              <p>• <strong>TWDC Property:</strong> If $TWU(X) < \text{min\_util}$, no superset of $X$ can be high-utility. Because $TWU$ is anti-monotonic, Apriori pruning is restored!</p>
-              <p>• <strong>Two-Phase Algorithm:</strong><br/>
-              - <em>Phase 1:</em> Uses $TWU$ to generate a small set of candidate high-utility itemsets.<br/>
-              - <em>Phase 2:</em> Scans database once to calculate exact utilities and prune false positives.</p>
-            </div>
-          </details>
-
-          <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
-            <summary class="font-bold text-[var(--foreground)] cursor-pointer">🎯 Constraint-Based Frequent Pattern Mining (Anti-monotone, Monotone, Succinct, Convertible)</summary>
-            <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
-              <p>• <strong>Anti-Monotone Constraints:</strong> If violated, further mining of all supersets is terminated (e.g., $\text{sum}(\text{price}) \le 100$, $\min(\text{price}) \ge 20$).</p>
-              <p>• <strong>Monotone Constraints:</strong> If satisfied, all supersets also satisfy it (e.g., $\text{sum}(\text{price}) \ge 100$, $\max(\text{price}) \ge 50$).</p>
-              <p>• <strong>Succinct Constraints:</strong> All itemsets satisfying the constraint can be pre-generated directly without candidate testing (e.g., $\text{itemset} \subseteq \{\text{Dairy items}\}$).</p>
-              <p>• <strong>Convertible Constraints:</strong> Constraints on non-monotonic measures (like $\text{avg}(\text{price}) \le 50$) that become anti-monotonic when items are processed in sorted order of price.</p>
-            </div>
-          </details>
-        </div>
-</div>
+    </div>
     <button class="btn btn-primary" style="margin-top:12px" onclick="nextQuestion()">
       ${quizState.current + 1 < QUIZ_DATA.length ? 'Next Question →' : 'See Results 🏆'}
     </button>

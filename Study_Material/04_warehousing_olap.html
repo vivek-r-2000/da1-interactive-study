@@ -1661,7 +1661,7 @@ function submitQuiz() {
     }
     fb.classList.add('show');
   });
-  document.getElementById('submit-quiz-btn').style.display='none';
+  const sbtn = document.getElementById('submit-quiz-btn'); if (sbtn) sbtn.style.display='none';
   const msgs = ['Keep studying! You\'ve got this! 💪','Good effort! Review the missed sections! 🔍','Well done! Solid understanding! 👍','Great work! Almost perfect! 🌟','Perfect score! You\'re a data warehouse expert! 🏆'];
   const msgIdx = Math.min(Math.floor(score/5*5), 4);
   const sd = document.getElementById('score-display');

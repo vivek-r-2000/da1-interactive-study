@@ -1556,7 +1556,7 @@ const aprioriDB = [
   { id:'T6', items: ['B','D','E'] },
 ];
 const MIN_SUP_APRIORI = 2; // out of 6
-let aprioriStep = 0;
+let aprioriStepNum = 0;
 let aprioriFreq1, aprioriFreq2, aprioriFreq3;
 let aprioriCandidates2, aprioriCandidates3;
 let aprioriInitDone = false;
@@ -1572,14 +1572,14 @@ function initApriori() {
     tr.innerHTML = `<td>${t.id}</td><td>${t.items.join(', ')}</td>`;
     tbody.appendChild(tr);
   });
-  aprioriStep = 0;
+  aprioriStepNum = 0;
   document.getElementById('apriori-step-label').textContent = 'Step 0 of 5';
   document.getElementById('apriori-candidates').innerHTML = '';
   document.getElementById('apriori-stats').textContent = '';
 }
 
 function aprioriReset() {
-  aprioriStep = 0;
+  aprioriStepNum = 0;
   document.getElementById('apriori-step-label').textContent = 'Step 0 of 5';
   document.getElementById('apriori-candidates').innerHTML = '';
   document.getElementById('apriori-desc').textContent = 'Press "Next Step" to begin the Apriori algorithm.';
@@ -1591,14 +1591,14 @@ function countSupport(db, itemset) {
   return db.filter(t => itemset.every(item => t.items.includes(item))).length;
 }
 
-function aprioriStepFn() {
-  aprioriStep++;
-  document.getElementById('apriori-step-label').textContent = `Step ${aprioriStep} of 5`;
+function aprioriStep() {
+  aprioriStepNum++;
+  document.getElementById('apriori-step-label').textContent = `Step ${aprioriStepNum} of 5`;
   const container = document.getElementById('apriori-candidates');
   const desc = document.getElementById('apriori-desc');
   const stats = document.getElementById('apriori-stats');
 
-  if (aprioriStep === 1) {
+  if (aprioriStepNum === 1) {
     // Count 1-itemsets
     const allItems = ['A','B','C','D','E'];
     const counts = {};
@@ -1617,7 +1617,7 @@ function aprioriStepFn() {
     desc.innerHTML = `<strong>Step 1:</strong> Scan DB, count every single item. Grey out items with support < ${MIN_SUP_APRIORI}. Frequent 1-itemsets (L₁): {${aprioriFreq1.join(', ')}}`;
     stats.textContent = `${allItems.length} candidates → ${aprioriFreq1.length} frequent 1-itemsets`;
   }
-  else if (aprioriStep === 2) {
+  else if (aprioriStepNum === 2) {
     // Generate C2 from L1
     aprioriCandidates2 = [];
     for (let i = 0; i < aprioriFreq1.length; i++) {
@@ -1633,7 +1633,7 @@ function aprioriStepFn() {
     desc.innerHTML = `<strong>Step 2:</strong> Join all pairs from L₁ to generate ${aprioriCandidates2.length} candidate 2-itemsets (C₂). All subsets of any pair are in L₁, so no pruning needed for 2-itemsets.`;
     stats.textContent = `${aprioriCandidates2.length} candidate 2-itemsets generated`;
   }
-  else if (aprioriStep === 3) {
+  else if (aprioriStepNum === 3) {
     // Count C2, find L2
     const counts = {};
     aprioriCandidates2.forEach(pair => {
@@ -1654,7 +1654,7 @@ function aprioriStepFn() {
     desc.innerHTML = `<strong>Step 3:</strong> Scan DB, count C₂. Frequent 2-itemsets (L₂): {${aprioriFreq2.map(p=>p.join(',')).join('}, {')}}`;
     stats.textContent = `${aprioriCandidates2.length} candidates → ${aprioriFreq2.length} frequent 2-itemsets`;
   }
-  else if (aprioriStep === 4) {
+  else if (aprioriStepNum === 4) {
     // Generate C3, with pruning
     const freq2Set = new Set(aprioriFreq2.map(p => p.join(',')));
     aprioriCandidates3 = [];
@@ -1694,7 +1694,7 @@ function aprioriStepFn() {
     desc.innerHTML = `<strong>Step 4:</strong> Generate C₃ by joining L₂ pairs sharing first item. PRUNE any candidate with an infrequent 2-subset. Saved ${pruned} DB lookups!`;
     stats.textContent = `${generated} generated, ${pruned} pruned → ${aprioriCandidates3.length} candidates in C₃`;
   }
-  else if (aprioriStep === 5) {
+  else if (aprioriStepNum === 5) {
     // Count C3, find L3
     let html = `<div style="font-size:11px;font-weight:700;color:var(--muted-foreground);margin-bottom:6px;">C₃ → L₃ (final)</div>`;
     if (aprioriCandidates3.length === 0) {
@@ -1719,7 +1719,7 @@ function aprioriStepFn() {
   }
 }
 // Expose as global
-window.aprioriStep = aprioriStepFn;
+// aprioriStep is declared globally above
 
 // =========================================================
 // VISUALIZATION 3: FP-TREE BUILDER
@@ -1750,7 +1750,7 @@ const fpSortedTxns = fpTransactions.map(t => ({
 }));
 
 // FP-Tree structure
-let fpRoot = null;
+let fpRoot = { label: 'null', count: 0, children: {}, parent: null, x:0, y:0, id:'root' };
 let fpInsertIdx = 0;
 let fpTreeInitDone = false;
 let fpHighlightPath = [];

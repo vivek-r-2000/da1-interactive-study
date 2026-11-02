@@ -79,7 +79,7 @@ All practical and theoretical course assignments are organized and cross-referen
 | **Assignment 2** | Data Warehousing, Star/Snowflake schemas, Cube computation, Attribute-Oriented Induction (AOI), and large dataset benchmarking | Completed | [`Assignments/A2/`](./Assignments/A2/) |
 | **Assignment 3** | Frequent pattern mining, Apriori, FP-Growth, and classification models | Completed | [`Assignments/A3/`](./Assignments/A3/) |
 | **Research Paper Assignment 1** | Critical engineering review and comparative analysis of seminal papers in spatial pattern mining and legal OLAP | Completed (5% Endsem Weight) | [`Research_Paper_Assignment_1_Summary.md`](./Research_Paper_Assignment_1_Summary.md) |
-| **Assignment: New Idea** | Original research proposal formulating 1-2 new ideas or improvements using course insights (8-point structure) | **Nov 7, 2026 (5 PM)** • 5% Endsem | [`Discussions/Announcements/02_New Idea_ Assignment.md`](./Discussions/Announcements/) |
+| **Assignment: New Idea** | Original research proposal formulating 1-2 new ideas or improvements using course insights (8-point structure). [Prof. Reddy's Research Issues Ref](https://phdprojects.org/data-mining-research-issues/) | **Nov 7, 2026 (5 PM)** • 5% Endsem | [`Discussions/Announcements/02_New Idea_ Assignment.md`](./Discussions/Announcements/) |
 | **Research Paper Assignment 2** | Critical summary of Human-in-the-Loop Recognition (`2020-C1-Vyshnavi`) & Document Embeddings (`2020-Narendra`) + KDD paper | **Nov 13, 2026 (5 PM)** • Theory Track | [`Discussions/Announcements/03_Research Paper Assignment 2.md`](./Discussions/Announcements/) |
 
 ---

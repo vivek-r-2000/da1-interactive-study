@@ -589,43 +589,67 @@
         </div>
       </div>
 
-      <!-- CARD 15: Associative Classification (CBA) -->
+      <!-- CARD 15: Associative Classification & Lazy Learners -->
       <div class="card-container" id="card-15">
         <div class="card">
-          <div class="card-tag">Section 4: Associative Mining • Card 16 of 30</div>
-          <h2 class="card-header">Associative Classification & CBA (KDD 1998)</h2>
+          <div class="card-tag">Section 4: Associative & Lazy Learners • Card 16 of 30</div>
+          <h2 class="card-header">Associative Classification & Lazy Learners (k-NN & CBR)</h2>
           <div class="card-body">
-            <p>Why build decision trees or sequential rules when we already have powerful frequent pattern mining algorithms like <strong>Apriori</strong> and <strong>FP-Growth</strong>?</p>
-            <p><strong>Associative Classification:</strong> Mines association rules where the consequent (right-hand side) is restricted strictly to the <strong>class label</strong>:</p>
-            <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg font-mono text-xs text-pink-400 text-center mb-3">
-              $p_1 \wedge p_2 \wedge \dots \wedge p_k \longrightarrow \text{Class} = C_i$
+            <h3 class="font-bold text-white text-sm mb-1">1. Associative Classification (CBA - Liu, Hsu, Ma 1998)</h3>
+            <p>Mines association rules where the consequent is restricted strictly to the <strong>class label</strong> ($p_1 \wedge p_2 \wedge \dots \wedge p_k \longrightarrow \text{Class} = C_i$). Sorts rules by confidence, then support, then rule length, and builds a greedy classifier that outperforms traditional decision trees on transaction and text data.</p>
+
+            <div class="my-4 border-t border-slate-700/60"></div>
+
+            <h3 class="font-bold text-white text-sm mb-1">2. Lazy Learners vs. Eager Learners (Slide #40)</h3>
+            <p><strong>Eager Learners</strong> (Decision Trees, Naive Bayes, SVM) build an explicit generalization model during training before seeing any test queries. In contrast, <strong>Lazy Learners</strong> (Instance-Based Learners) simply store training instances and defer generalization until a query tuple arrives.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 my-3">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs space-y-1">
+                <span class="text-indigo-400 font-bold block">k-Nearest Neighbor (k-NN):</span>
+                <p class="text-slate-300">• Computes distance to all stored instances: $d(x, y) = \sqrt{\sum (x_i - y_i)^2}$.</p>
+                <p class="text-slate-300">• <strong>Normalization:</strong> Continuous features must be min-max or z-score normalized to prevent large-magnitude features from dominating.</p>
+                <p class="text-slate-300">• <strong>Distance-Weighted Voting:</strong> Weight neighbor $i$ by $w_i = \frac{1}{d(x_q, x_i)^2}$ to let closer points exert stronger votes.</p>
+                <p class="text-slate-300">• <strong>Cover-Hart Theorem (1967):</strong> As $N \to \infty$, the 1-NN error rate is bounded by $R^* \le R_{\text{1-NN}} \le 2R^*(1 - R^*)$, at most twice the Bayes optimal error!</p>
+                <p class="text-slate-400">• Query cost is high ($O(Nd)$ per query), mitigated using kd-trees or ball-trees.</p>
+              </div>
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs space-y-1">
+                <span class="text-pink-400 font-bold block">Case-Based Reasoning (CBR):</span>
+                <p class="text-slate-300">• Handles complex, semi-structured instances (graphs, medical patient histories, legal contracts) where Euclidean vector representations fail.</p>
+                <p class="text-slate-300 font-semibold">• The 4R Problem-Solving Cycle:</p>
+                <ol class="list-decimal list-inside text-slate-300 space-y-0.5">
+                  <li><strong>Retrieve:</strong> Find most similar past case(s) from memory.</li>
+                  <li><strong>Reuse:</strong> Adapt the retrieved solution to the new problem.</li>
+                  <li><strong>Revise:</strong> Test and repair proposed solution in the real world.</li>
+                  <li><strong>Retain:</strong> Save validated solution back into case base.</li>
+                </ol>
+              </div>
             </div>
-            <p><strong>CBA (Classification Based on Associations - Liu, Hsu, Ma 1998):</strong></p>
-            <ol class="text-xs space-y-1.5 text-slate-300 list-decimal list-inside">
-              <li>Mine all frequent association rules with minimum support and confidence.</li>
-              <li>Sort rules by confidence (higher confidence first), then support, then shorter rule length.</li>
-              <li>Greedily select the top rules that correctly classify training instances, discarding redundant rules.</li>
-            </ol>
           </div>
         </div>
       </div>
 
-      <!-- CARD 16: The Labeling Bottleneck -->
+      <!-- CARD 16: The Labeling Bottleneck & Distant Supervision -->
       <div class="card-container" id="card-16">
         <div class="card">
           <div class="card-tag">Section 5: Weak Supervision • Card 17 of 30</div>
-          <h2 class="card-header">Weak Supervision: The Data Labeling Crisis (Slide #48)</h2>
+          <h2 class="card-header">Weak Supervision: The Labeling Crisis & Distant Supervision (Slide #48, #54)</h2>
           <div class="card-body">
-            <p>So far, algorithms (Decision Trees, SVM, Naive Bayes) assumed <strong>Strong Supervision</strong>: thousands of pristine, expert-annotated labels.</p>
-            <div class="p-3.5 bg-rose-950/40 border border-rose-800/60 rounded-xl mb-3 text-xs text-slate-300">
-              <strong>The Reality Bottleneck:</strong>
-              <ul class="list-disc list-inside mt-1 space-y-1 text-slate-400">
+            <p>Traditional algorithms assume <strong>Strong Supervision</strong>: thousands of pristine, expert-annotated labels.</p>
+            <div class="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl mb-3 text-xs text-slate-300">
+              <strong>The Annotation Bottleneck:</strong>
+              <ul class="list-disc list-inside mt-1 space-y-0.5 text-slate-400">
                 <li>Annotating 1 minute of human speech requires <strong>10 minutes</strong> of human labor.</li>
                 <li>Annotating environmental audio sounds takes <strong>400 times</strong> longer than real time!</li>
                 <li>Medical pathology image annotation requires certified oncologists ($200+/hr).</li>
               </ul>
             </div>
-            <p>Modern machine learning must classify data using <strong>Weak Supervision</strong>: partial, noisy, or zero training labels!</p>
+            
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs space-y-1 mt-2">
+              <span class="text-amber-400 font-bold block">Distant Supervision (Mintz et al. 2009 - Slide #54):</span>
+              <p class="text-slate-300">Automatically creates massive amounts of training labels by linking unstructured text to an external structured knowledge base (Freebase, Wikidata, UMLS).</p>
+              <p class="text-slate-300"><strong>The Heuristic:</strong> If knowledge base states $(E_1, \text{founded\_by}, E_2)$, then <em>any sentence</em> containing both $E_1$ and $E_2$ is weakly assumed to express relation $\text{founded\_by}$.</p>
+              <p class="text-slate-400">Yields millions of labeled pairs at zero human cost; label noise is cleaned using multi-instance learning.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -762,7 +786,24 @@
                 <strong class="text-white">1. One-vs-All (OVA / One-vs-Rest):</strong> Train $m$ binary classifiers. Classifier $j$ treats class $j$ as positive and all other $m-1$ classes as negative. Predict with the classifier outputting highest confidence.
               </div>
               <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <strong class="text-white">2. Error-Correcting Output Codes (ECOC - Slide #67):</strong> Borrowed from telecommunications! Assign each class a unique $n$-bit binary codeword. Train $n$ independent binary classifiers (one per bit). Even if 1 or 2 classifiers predict wrong bits, Hamming distance error-correction correctly recovers the true class!
+                <strong class="text-white block mb-1">2. Error-Correcting Output Codes (ECOC - Slide #67):</strong>
+                <p class="text-slate-300 mb-2">Inspired by telecommunication error-correcting codes! Assign each class a distinct $B$-bit codeword. Train $B$ separate binary classifiers $f_1, \dots, f_B$. For a query $x$, classifiers predict bitstring $\vec{y} = (f_1(x), \dots, f_B(x))$. We assign $x$ to the class whose codeword minimizes the <strong>Hamming Distance</strong>:</p>
+                <div class="overflow-x-auto my-2">
+                  <table class="w-full text-center border-collapse text-[11px]">
+                    <thead>
+                      <tr class="border-b border-slate-700 text-slate-400">
+                        <th class="py-1 px-2 text-left">Class</th><th>$f_1$</th><th>$f_2$</th><th>$f_3$</th><th>$f_4$</th><th>$f_5$</th><th>$f_6$</th><th>$f_7$</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-slate-300 divide-y divide-slate-800 font-mono">
+                      <tr><td class="text-left font-sans text-indigo-400 font-bold py-1 px-2">$C_1$</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+                      <tr><td class="text-left font-sans text-pink-400 font-bold py-1 px-2">$C_2$</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td></tr>
+                      <tr><td class="text-left font-sans text-emerald-400 font-bold py-1 px-2">$C_3$</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+                      <tr><td class="text-left font-sans text-amber-400 font-bold py-1 px-2">$C_4$</td><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p class="text-slate-400">With minimum pairwise Hamming distance $d_{\min} = 3$, ECOC tolerates up to $\lfloor (d_{\min} - 1) / 2 \rfloor = 1$ classifier error without affecting final classification!</p>
               </div>
             </div>
           </div>
@@ -917,9 +958,10 @@
               <div>• <strong>Midsem Tested Papers:</strong> Papers 18, 20, 22, 23, 24, 25, 26, 27, 28</div>
               <div>• <strong>Quiz 2 Coverage:</strong> Basic Concepts (Trees, Naive Bayes, k-NN) + Advanced Methods (Feature Selection, BBN, SVM, Weak Supervision)</div>
             </div>
-            <div class="flex gap-3 justify-center">
-              <a href="00_home.html" class="btn-primary">Return to Hub</a>
-              <a href="08_classification.html" class="btn-secondary">Review Module 08</a>
+            <div class="flex gap-3 justify-center flex-wrap">
+              <a href="08_classification.html" class="btn-secondary">← Module 08</a>
+              <a href="00_home.html" class="btn-secondary">Hub</a>
+              <a href="10_clustering.html" class="btn-primary">Next: Module 10 (Cluster Analysis) →</a>
             </div>
           </div>
         </div>

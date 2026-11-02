@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 10 — Cluster Analysis: Basic Concepts & Advanced Methods | DA-I</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"/>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  :root {
+    --background: #0f172a;
+    --card: #1e293b;
+    --sidebar: #0f172a;
+    --foreground: #f1f5f9;
+    --muted-foreground: #94a3b8;
+    --border: #334155;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #0ea5e9;
+    --accent: #8b5cf6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top Bar ── */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+    display: flex; align-items: center; padding: 0 16px; gap: 12px;
+  }
+  #topbar .title { font-weight: 700; font-size: 15px; white-space: nowrap; color: var(--foreground); }
+  #progress-bar-wrap { flex: 1; background: var(--border); border-radius: 9999px; height: 8px; min-width: 80px; }
+  #progress-bar { height: 100%; border-radius: 9999px; background: var(--primary); transition: width .4s ease; }
+  #progress-text { font-size: 12px; color: var(--muted-foreground); white-space: nowrap; }
+  #timer {
+    font-size: 14px; font-weight: 700; color: var(--primary);
+    background: rgba(99,102,241,.15); padding: 4px 10px; border-radius: 8px;
+    cursor: pointer; white-space: nowrap;
+  }
+  #home-btn {
+    font-size: 12px; padding: 4px 10px; border-radius: 8px;
+    background: rgba(255,255,255,.07); color: var(--foreground); text-decoration: none;
+    border: 1px solid var(--border); white-space: nowrap;
+  }
+
+  /* ── Layout ── */
+  #layout { display: flex; margin-top: 56px; height: calc(100vh - 56px); }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 250px; min-width: 250px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 12px 0;
+  }
+  .sidebar-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em;
+    color: var(--muted-foreground); padding: 10px 16px 4px;
+    text-transform: uppercase;
+  }
+  .sidebar-item {
+    display: block; padding: 7px 16px; font-size: 12px;
+    color: var(--muted-foreground); cursor: pointer; border-radius: 6px;
+    margin: 1px 6px; transition: background .15s, color .15s;
+    border: none; background: none; text-align: left; width: calc(100% - 12px);
+  }
+  .sidebar-item:hover { background: rgba(255,255,255,.06); color: var(--foreground); }
+  .sidebar-item.active { background: rgba(99,102,241,.2); color: var(--primary); font-weight: 600; }
+
+  /* ── Main Content ── */
+  #main { flex: 1; overflow-y: auto; padding: 28px 32px; position: relative; }
+
+  /* ── Cards ── */
+  .card-container { display: none; animation: fadeIn .35s ease; }
+  .card-container.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    max-width: 840px; margin: 0 auto 20px;
+  }
+  .card-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    color: var(--muted-foreground); text-transform: uppercase; margin-bottom: 12px;
+  }
+  .card-header { font-size: 22px; font-weight: 800; margin-bottom: 16px; line-height: 1.3; }
+  .card-body { font-size: 13.5px; line-height: 1.7; color: #cbd5e1; }
+  .card-body p { margin-bottom: 12px; }
+  .card-body ul, .card-body ol { margin-left: 20px; margin-bottom: 12px; }
+  .card-body li { margin-bottom: 6px; }
+
+  /* ── Interactive Elements ── */
+  .interactive-box {
+    background: rgba(15,23,42,.7);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .btn-primary {
+    background: var(--primary); color: #fff;
+    padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13px;
+    border: none; cursor: pointer; transition: opacity .15s; text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { opacity: .9; }
+  .btn-secondary {
+    background: rgba(255,255,255,.08); color: var(--foreground);
+    padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13px;
+    border: 1px solid var(--border); cursor: pointer; transition: background .15s; text-decoration: none; display: inline-block;
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,.14); }
+
+  /* ── Flip Card ── */
+  .flip-card {
+    background: transparent;
+    perspective: 1000px;
+    min-height: 170px;
+    margin: 14px 0;
+    cursor: pointer;
+  }
+  .flip-card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 170px;
+    text-align: left; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+  .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+  .flip-card-front, .flip-card-back {
+    position: absolute; width: 100%; height: 100%; min-height: 170px;
+    -webkit-backface-visibility: hidden; backface-visibility: hidden;
+    border-radius: 12px; padding: 20px 24px;
+    display: flex; flex-direction: column; justify-content: center;
+    border: 1px solid var(--border);
+  }
+  .flip-card-front { background: #1e293b; color: #f8fafc; }
+  .flip-card-back { background: #312e81; color: #e0e7ff; transform: rotateY(180deg); }
+
+  /* ── Canvas Simulator ── */
+  canvas { background: #0b1120; border: 1px solid #334155; border-radius: 8px; display: block; }
+
+  /* ── Responsive Mobile ── */
+  @media (max-width: 768px) {
+    #sidebar {
+      position: fixed; left: -250px; top: 56px; bottom: 0; z-index: 40;
+      transition: left .3s ease;
+    }
+    #sidebar.mobile-open { left: 0; }
+    #main { padding: 16px; }
+    .card { padding: 20px; }
+    #sidebar-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 35;
+    }
+    #sidebar-backdrop.mobile-open { display: block; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <button id="mobile-toggle" onclick="toggleMobileSidebar()" class="p-1.5 text-slate-300 hover:text-white bg-slate-800 rounded-lg">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <a href="00_home.html" id="home-btn">← Hub</a>
+    <span class="title hidden sm:inline">Module 10: Cluster Analysis</span>
+    <div id="progress-bar-wrap">
+      <div id="progress-bar" style="width: 3.3%"></div>
+    </div>
+    <span id="progress-text">Card 1 / 30</span>
+    <span id="timer" onclick="toggleTimer()">⏱ 15:00</span>
+  </header>
+
+  <div id="layout">
+
+    <!-- SIDEBAR -->
+    <nav id="sidebar">
+      <div class="sidebar-section-label">1. Cluster Fundamentals</div>
+      <button class="sidebar-item active" onclick="goToCard(0)">01. What is Cluster Analysis?</button>
+      <button class="sidebar-item" onclick="goToCard(1)">02. Quality & Requirements</button>
+      <button class="sidebar-item" onclick="goToCard(2)">03. Minkowski & Numerical Metrics</button>
+      <button class="sidebar-item" onclick="goToCard(3)">04. Non-Numeric & Mixed Attributes</button>
+      <button class="sidebar-item" onclick="goToCard(4)">05. Interactive Distance Sandbox</button>
+      <button class="sidebar-item" onclick="goToCard(5)">06. Recall: Proximity Metrics</button>
+
+      <div class="sidebar-section-label">2. Partitioning Methods</div>
+      <button class="sidebar-item" onclick="goToCard(6)">07. K-Means: The Centroid Workhorse</button>
+      <button class="sidebar-item" onclick="goToCard(7)">08. K-Means++ & Bisecting K-Means</button>
+      <button class="sidebar-item" onclick="goToCard(8)">09. K-Medoids & PAM Algorithm</button>
+      <button class="sidebar-item" onclick="goToCard(9)">10. Scaling K-Medoids: CLARA & CLARANS</button>
+      <button class="sidebar-item" onclick="goToCard(10)">11. Categorical: K-Modes & K-Prototypes</button>
+      <button class="sidebar-item" onclick="goToCard(11)">12. Interactive Partitioning Engine</button>
+
+      <div class="sidebar-section-label">3. Hierarchical Methods</div>
+      <button class="sidebar-item" onclick="goToCard(12)">13. Agglomerative vs Divisive</button>
+      <button class="sidebar-item" onclick="goToCard(13)">14. Linkage Criteria: Single, Complete, Avg</button>
+      <button class="sidebar-item" onclick="goToCard(14)">15. BIRCH: CF-Vectors & CF-Tree</button>
+      <button class="sidebar-item" onclick="goToCard(15)">16. CURE: Representative Points</button>
+      <button class="sidebar-item" onclick="goToCard(16)">17. CHAMELEON & ROCK</button>
+      <button class="sidebar-item" onclick="goToCard(17)">18. Interactive Dendrogram Simulator</button>
+
+      <div class="sidebar-section-label">4. Density-Based Methods</div>
+      <button class="sidebar-item" onclick="goToCard(18)">19. Density Concepts: Core, Border, Noise</button>
+      <button class="sidebar-item" onclick="goToCard(19)">20. DBSCAN Algorithm</button>
+      <button class="sidebar-item" onclick="goToCard(20)">21. OPTICS: Cluster Ordering & Valleys</button>
+      <button class="sidebar-item" onclick="goToCard(21)">22. DENCLUE: Kernel Density Attractors</button>
+      <button class="sidebar-item" onclick="goToCard(22)">23. Interactive DBSCAN Simulator</button>
+
+      <div class="sidebar-section-label">5. Grid-Based Methods</div>
+      <button class="sidebar-item" onclick="goToCard(23)">24. STING: Statistical Information Grid</button>
+      <button class="sidebar-item" onclick="goToCard(24)">25. CLIQUE: Subspace Clustering</button>
+
+      <div class="sidebar-section-label">6. Cluster Validation</div>
+      <button class="sidebar-item" onclick="goToCard(25)">26. Clustering Tendency: Hopkins Stat</button>
+      <button class="sidebar-item" onclick="goToCard(26)">27. Determining Optimal k & Elbow</button>
+      <button class="sidebar-item" onclick="goToCard(27)">28. Extrinsic Quality: BCubed, NMI, ARI</button>
+      <button class="sidebar-item" onclick="goToCard(28)">29. Intrinsic Quality: Silhouette Score</button>
+      <button class="sidebar-item" onclick="goToCard(29)">30. Interactive Silhouette Validator</button>
+
+      <div class="sidebar-section-label">7. Review & Mastery</div>
+      <button class="sidebar-item" onclick="goToCard(30)">31. Comprehensive Mastery Quiz</button>
+      <button class="sidebar-item" onclick="goToCard(31)">32. Appendix & Slide References</button>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main id="main">
+
+      <!-- CARD 0: What is Cluster Analysis -->
+      <div class="card-container active" id="card-0">
+        <div class="card">
+          <div class="card-tag">Section 1: Fundamentals • Card 1 of 32</div>
+          <h2 class="card-header">What is Cluster Analysis? (Slide #3-10)</h2>
+          <div class="card-body">
+            <p><strong>Cluster analysis</strong> (or clustering) is the process of partitioning a set of data objects into subsets called <strong>clusters</strong>. Unlike classification, clustering is fundamentally <strong>unsupervised</strong>: there are no predefined class labels or training teacher.</p>
+
+            <div class="p-3.5 bg-indigo-950/40 border border-indigo-800/60 rounded-xl mb-3 text-xs text-slate-300">
+              <strong class="text-indigo-300 text-sm block mb-1">🎯 Core Objective:</strong>
+              Objects within the same cluster must have <strong>high intra-class similarity</strong> (cohesion), while objects in different clusters must have <strong>low inter-class similarity</strong> (distinctness).
+            </div>
+
+            <h3 class="font-bold text-white text-sm mb-1">Clustering as Both Insight and Utility:</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 my-2 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <span class="text-sky-400 font-bold block mb-1">🔍 Understanding & Insight:</span>
+                <p class="text-slate-300">• Biology: taxonomies of living organisms, functional gene groups.</p>
+                <p class="text-slate-300">• Information Retrieval: grouping search queries and documents.</p>
+                <p class="text-slate-300">• Marketing: finding distinct customer behavior segments.</p>
+              </div>
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <span class="text-emerald-400 font-bold block mb-1">⚡ Data Utility & Summarization:</span>
+                <p class="text-slate-300">• Data Reduction: represent millions of raw points by cluster prototypes.</p>
+                <p class="text-slate-300">• Image Compression: vector quantization of color palettes.</p>
+                <p class="text-slate-300">• Outlier Detection: objects not fitting any cluster signal anomalies.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 1: Quality & Requirements -->
+      <div class="card-container" id="card-1">
+        <div class="card">
+          <div class="card-tag">Section 1: Fundamentals • Card 2 of 32</div>
+          <h2 class="card-header">Quality & Requirements in Data Mining (Slide #11, 29)</h2>
+          <div class="card-body">
+            <p>Clustering algorithms in large-scale data mining must satisfy rigorous practical requirements beyond toy benchmark datasets:</p>
+            
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <strong class="text-indigo-400">1. Scalability:</strong> Datasets contain millions of tuples. Algorithms must run in linear $O(n)$ or near-linear $O(n \log n)$ time and perform minimal disk scans.
+              </div>
+              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <strong class="text-purple-400">2. Diverse Attribute Types:</strong> Real data blends numeric (interval/ratio), binary, nominal, ordinal, and spatial/text attributes.
+              </div>
+              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <strong class="text-pink-400">3. Discovery of Arbitrary Shapes:</strong> Spherical clusters (assumed by K-Means) fail on concentric rings, serpentine shapes, or elongated density flows.
+              </div>
+              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <strong class="text-emerald-400">4. Robustness to Noise & Outliers:</strong> Missing data, sensor spikes, and background noise must not distort cluster centroids.
+              </div>
+              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <strong class="text-amber-400">5. Insensitivity to Input Order:</strong> The final clustering structure should not change if the database rows are permuted.
+              </div>
+              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <strong class="text-cyan-400">6. High Dimensionality:</strong> Handle the "curse of dimensionality" where distance metrics lose contrast as dimension $p 	o \infty$.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2: Minkowski & Numerical Metrics -->
+      <div class="card-container" id="card-2">
+        <div class="card">
+          <div class="card-tag">Section 1: Proximity Metrics • Card 3 of 32</div>
+          <h2 class="card-header">Minkowski Distance & Data Standardization (Slide #19-23)</h2>
+          <div class="card-body">
+            <p>For two $p$-dimensional numerical objects $i = (x_{i1}, \dots, x_{ip})$ and $j = (x_{j1}, \dots, x_{jp})$, the general <strong>Minkowski Distance</strong> ($L_h$ norm) is:</p>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg text-center font-mono text-xs text-indigo-400 mb-3">
+              $$d(i, j) = \left( \sum_{f=1}^p |x_{if} - x_{jf}|^h \right)^{1/h}$$
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs mb-3">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-indigo-400 block">$h = 1$: Manhattan ($L_1$)</strong>
+                <p class="text-slate-300">City-block distance: sum of absolute differences. Equivalent to Hamming distance on binary data.</p>
+              </div>
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-pink-400 block">$h = 2$: Euclidean ($L_2$)</strong>
+                <p class="text-slate-300">Straight-line Euclidean distance: rotationally invariant, sensitive to large outliers.</p>
+              </div>
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block">$h \to \infty$: Supremum ($L_\infty$)</strong>
+                <p class="text-slate-300">Chebyshev distance: $d(i, j) = \max_{f=1}^p |x_{if} - x_{jf}|$. Driven by maximal single dimension.</p>
+              </div>
+            </div>
+
+            <h3 class="font-bold text-white text-sm mb-1">The Necessity of Normalization (Slide #19):</h3>
+            <p>If salary is measured in \$100,000s and age in years (18-80), unscaled Euclidean distance is 99.9% dominated by salary! <strong>Z-score normalization</strong> rescales features to zero mean and unit variance:</p>
+            <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-center font-mono text-xs text-sky-400">
+              $$z_{if} = \frac{x_{if} - \mu_f}{\sigma_f} \quad \text{or using Mean Absolute Deviation: } s_f = \frac{1}{n} \sum_{i=1}^n |x_{if} - \mu_f|$$
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 3: Non-Numeric & Mixed Attributes -->
+      <div class="card-container" id="card-3">
+        <div class="card">
+          <div class="card-tag">Section 1: Proximity Metrics • Card 4 of 32</div>
+          <h2 class="card-header">Non-Numeric, Binary & Mixed Attributes (Slide #16-28)</h2>
+          <div class="card-body">
+            <p>Real databases rarely contain purely continuous values. Han & Kamber define exact proximity formulas for heterogeneous types:</p>
+
+            <div class="space-y-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-indigo-400 block mb-1">1. Binary Attributes (Contingency Table):</strong>
+                <p class="text-slate-300 mb-1">Let $q$ be count where both $i, j = 1$; $t$ where both $= 0$; $r$ where $i=1, j=0$; $s$ where $i=0, j=1$.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                  <div class="p-2 bg-slate-950 rounded border border-slate-800">
+                    <span class="text-white font-semibold">Symmetric Binary (e.g. Gender):</span>
+                    <p class="text-slate-400 font-mono mt-1">$$d(i, j) = \frac{r + s}{q + r + s + t}$$</p>
+                  </div>
+                  <div class="p-2 bg-slate-950 rounded border border-slate-800">
+                    <span class="text-white font-semibold">Asymmetric Binary (Jaccard Distance):</span>
+                    <p class="text-slate-400 font-mono mt-1">$$d(i, j) = \frac{r + s}{q + r + s}$$ (ignores $t$ mutual absence)</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-purple-400 block mb-1">2. Nominal & Ordinal Attributes:</strong>
+                <p class="text-slate-300">• <strong>Nominal (States $>2$):</strong> Simple matching dissimilarity $d(i, j) = \frac{p - m}{p}$, where $m$ is number of matches.</p>
+                <p class="text-slate-300">• <strong>Ordinal (Ranks $1, \dots, M_f$):</strong> Map rank to normalized range $[0, 1]$ via $z_{if} = \frac{r_{if} - 1}{M_f - 1}$, then apply Minkowski distance.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-pink-400 block mb-1">3. Mixed Types: Gower's General Dissimilarity Coefficient (Slide #26):</strong>
+                <p class="text-slate-300">Blends all attribute types into a single distance: $$d(i, j) = \frac{\sum_{f=1}^p \delta_{ij}^{(f)} d_{ij}^{(f)}}{\sum_{f=1}^p \delta_{ij}^{(f)}}$$ where $\delta_{ij}^{(f)} = 0$ if values are missing or asymmetric binary mutual zeros ($0-0$), and $1$ otherwise.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-emerald-400 block mb-1">4. Cosine Similarity for Sparse Text Vectors (Slide #27):</strong>
+                <p class="text-slate-300 font-mono">$$\cos(\vec{d}_1, \vec{d}_2) = \frac{\vec{d}_1 \cdot \vec{d}_2}{\|\vec{d}_1\| \|\vec{d}_2\|}$$ Computes angular alignment, completely invariant to document length!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 4: Interactive Distance Sandbox -->
+      <div class="card-container" id="card-4">
+        <div class="card">
+          <div class="card-tag">Section 1: Interactive Sandbox • Card 5 of 32</div>
+          <h2 class="card-header">Interactive 2D Proximity & Metric Sandbox</h2>
+          <div class="card-body">
+            <p>Click on the canvas below to set Point A (blue) and Point B (rose). Watch how Euclidean ($L_2$), Manhattan ($L_1$), Chebyshev ($L_\infty$), and Cosine similarity respond instantly.</p>
+            <div class="interactive-box">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs text-slate-400">Click to reposition Point B (Rose)</span>
+                <button class="btn-secondary text-xs py-1" onclick="resetMetricSandbox()">Reset Points</button>
+              </div>
+              <canvas id="metricCanvas" width="560" height="260" class="w-full cursor-crosshair"></canvas>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 text-center text-xs">
+                <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                  <div class="text-slate-400 text-[10px]">Euclidean ($L_2$)</div>
+                  <div id="val-l2" class="text-indigo-400 font-bold font-mono text-sm">0.00</div>
+                </div>
+                <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                  <div class="text-slate-400 text-[10px]">Manhattan ($L_1$)</div>
+                  <div id="val-l1" class="text-pink-400 font-bold font-mono text-sm">0.00</div>
+                </div>
+                <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                  <div class="text-slate-400 text-[10px]">Supremum ($L_\infty$)</div>
+                  <div id="val-linf" class="text-amber-400 font-bold font-mono text-sm">0.00</div>
+                </div>
+                <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                  <div class="text-slate-400 text-[10px]">Cosine Similarity</div>
+                  <div id="val-cos" class="text-emerald-400 font-bold font-mono text-sm">0.00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 5: Active Recall: Proximity Metrics -->
+      <div class="card-container" id="card-5">
+        <div class="card">
+          <div class="card-tag">Section 1: Active Recall • Card 6 of 32</div>
+          <h2 class="card-header">Active Recall: Binary Proximity & The Scaling Trap</h2>
+          <div class="card-body">
+            <p>Test your conceptual understanding before moving to partitioning algorithms.</p>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front">
+                  <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">Question (Click to Flip):</span>
+                  <p class="font-semibold text-white">Why is Jaccard distance strictly preferred over Simple Matching distance when clustering medical patients on rare clinical symptoms?</p>
+                </div>
+                <div class="flip-card-back">
+                  <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2">Answer:</span>
+                  <p class="text-xs leading-relaxed text-indigo-100">Most diseases and symptoms are rare: two healthy patients both lacking 999 diseases out of 1000 would have a Simple Matching similarity of 99.9%! In asymmetric binary data, mutual negative absence ($0-0$) carries zero clinical meaning. Jaccard distance eliminates mutual zeros ($t$) from the denominator: $d = \frac{r+s}{q+r+s}$.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 6: K-Means -->
+      <div class="card-container" id="card-6">
+        <div class="card">
+          <div class="card-tag">Section 2: Partitioning • Card 7 of 32</div>
+          <h2 class="card-header">K-Means: Centroid Partitioning (Slide #38-48)</h2>
+          <div class="card-body">
+            <p>Given dataset $D$ of $n$ objects and integer $k$, <strong>K-Means</strong> partitions data into $k$ disjoint clusters $C_1, \dots, C_k$ such that the <strong>Sum of Squared Errors (SSE)</strong> is minimized:</p>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg text-center font-mono text-xs text-indigo-400 mb-3">
+              $$SSE = \sum_{i=1}^k \sum_{p \in C_i} \|p - \vec{c}_i\|^2 \quad \text{where } \vec{c}_i = \frac{1}{|C_i|} \sum_{p \in C_i} p$$
+            </div>
+
+            <h3 class="font-bold text-white text-sm mb-1">Lloyd's Algorithm (Iterative Relocation):</h3>
+            <ol class="list-decimal list-inside text-xs space-y-1.5 text-slate-300 mb-3">
+              <li><strong>Initialize:</strong> Arbitrarily select $k$ objects as initial cluster centers (centroids).</li>
+              <li><strong>Assignment:</strong> Assign each object $p$ to the nearest centroid based on Euclidean distance.</li>
+              <li><strong>Update:</strong> Recompute the centroid of each cluster as the mean of all points assigned to it.</li>
+              <li><strong>Convergence:</strong> Repeat steps 2-3 until centroids do not move or SSE stabilizes.</li>
+            </ol>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-1">✅ Strengths:</strong>
+                <p class="text-slate-300">• Efficient: $O(t \cdot k \cdot n \cdot d)$ where $t$ is iterations, $k \ll n$.</p>
+                <p class="text-slate-300">• Guaranteed to converge to a local minimum.</p>
+              </div>
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-rose-400 block mb-1">⚠️ Critical Weaknesses:</strong>
+                <p class="text-slate-300">• Highly sensitive to outliers (squaring error heavily pulls centroids).</p>
+                <p class="text-slate-300">• Only finds spherical, convex clusters of similar size.</p>
+                <p class="text-slate-300">• Highly dependent on initial random seeds.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 7: K-Means++ & Bisecting K-Means -->
+      <div class="card-container" id="card-7">
+        <div class="card">
+          <div class="card-tag">Section 2: Partitioning • Card 8 of 32</div>
+          <h2 class="card-header">K-Means++ & Bisecting K-Means (Slide #48-52)</h2>
+          <div class="card-body">
+            <h3 class="font-bold text-indigo-400 text-sm mb-1">1. K-Means++ (Arthur & Vassilvitskii 2007)</h3>
+            <p>Standard K-Means picks initial seeds uniformly at random, often causing clusters to get stuck in poor local minima. <strong>K-Means++</strong> seeds centroids sequentially with probability proportional to their squared distance to the nearest existing centroid:</p>
+            <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-center font-mono text-xs text-sky-400 my-2">
+              $$P(x) = \frac{D(x)^2}{\sum_{x' \in D} D(x')^2}$$
+            </div>
+            <p class="text-xs text-slate-300 mb-3"><strong>Mathematical Guarantee:</strong> K-Means++ provides an expected approximation ratio $O(\log k)$ competitive with the optimal clustering!</p>
+
+            <div class="my-3 border-t border-slate-700/60"></div>
+
+            <h3 class="font-bold text-pink-400 text-sm mb-1">2. Bisecting K-Means</h3>
+            <p class="text-xs text-slate-300">A divisive hierarchical approach that repeatedly splits clusters: starts with 1 cluster containing all data, chooses the cluster with largest SSE, and bisects it using 2-Means until $k$ clusters are reached. Less susceptible to initialization traps than standard K-Means!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 8: K-Medoids & PAM Algorithm -->
+      <div class="card-container" id="card-8">
+        <div class="card">
+          <div class="card-tag">Section 2: Partitioning • Card 9 of 32</div>
+          <h2 class="card-header">K-Medoids & The PAM Algorithm (Slide #53-62)</h2>
+          <div class="card-body">
+            <p>Instead of taking the mean value of points in a cluster (which may be an artificial point sensitive to outliers), <strong>K-Medoids</strong> selects <strong>actual representative data objects</strong> (medoids) located centrally within the cluster.</p>
+
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg text-center font-mono text-xs text-indigo-400 mb-3">
+              $$\text{Absolute Error Criterion: } E = \sum_{i=1}^k \sum_{p \in C_i} \|p - o_i\|$$
+            </div>
+
+            <h3 class="font-bold text-white text-sm mb-1">PAM (Partitioning Around Medoids - Kaufman & Rousseeuw 1990):</h3>
+            <p class="text-xs text-slate-300 mb-2">PAM checks whether replacing an existing medoid $o_i$ with a non-medoid candidate $o_{\text{random}}$ reduces total cost. Total swap cost: $$TC_{ih} = \sum_{j} C_{jih}$$</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mb-3">
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-indigo-400">Case 1:</strong> $p$ currently belongs to $o_i$. If $o_i$ is replaced by $o_h$, and $p$ is closest to another medoid $o_2$: $p$ reassigns to $o_2$.
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-pink-400">Case 2:</strong> $p$ currently belongs to $o_i$. If $p$ is closest to new candidate $o_h$: $p$ reassigns to $o_h$.
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-emerald-400">Case 3:</strong> $p$ belongs to $o_2 \neq o_i$. If $p$ remains closest to $o_2$: no change ($C_{jih} = 0$).
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-amber-400">Case 4:</strong> $p$ belongs to $o_2 \neq o_i$. If $p$ is closer to new candidate $o_h$: $p$ reassigns to $o_h$.
+              </div>
+            </div>
+            <p class="text-xs text-rose-400 font-semibold">PAM Complexity: $O(k(n-k)^2)$ per iteration — extremely robust against outliers, but prohibitively slow for large $n$!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 9: Scaling K-Medoids: CLARA & CLARANS -->
+      <div class="card-container" id="card-9">
+        <div class="card">
+          <div class="card-tag">Section 2: Partitioning • Card 10 of 32</div>
+          <h2 class="card-header">Scaling K-Medoids: CLARA & CLARANS (Slide #63-71)</h2>
+          <div class="card-body">
+            <h3 class="font-bold text-sky-400 text-sm mb-1">1. CLARA (Clustering LARge Applications - Kaufman & Rousseeuw 1990)</h3>
+            <p class="text-xs text-slate-300 mb-2">Draws multiple random samples (typically 5 samples of size $40 + 2k$), applies PAM on each sample to find the best $k$ medoids, and assigns the entire dataset to the best sample medoids.</p>
+            <p class="text-xs text-slate-400 mb-3"><strong>Limitation:</strong> If the true medoids are missed in the sample, CLARA can never find them!</p>
+
+            <div class="my-3 border-t border-slate-700/60"></div>
+
+            <h3 class="font-bold text-indigo-400 text-sm mb-1">2. CLARANS (Clustering Large Applications based on RANdomized Search - Ng & Han 2002)</h3>
+            <p class="text-xs text-slate-300">Models the search space as a <strong>graph</strong>: each node is a collection of $k$ medoids. Two nodes are neighbors if they differ by exactly 1 medoid.</p>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg text-xs space-y-1.5 my-2">
+              <p class="text-slate-300">• Instead of examining all $k(n-k)$ neighbors (like PAM), CLARANS samples a maximum of <code>maxneighbor</code> randomized neighbors.</p>
+              <p class="text-slate-300">• If a neighbor improves cost, move there immediately; otherwise, declare local minimum after <code>maxneighbor</code> failed attempts.</p>
+              <p class="text-slate-300">• Repeats search <code>numlocal</code> times to find the best global local minimum.</p>
+            </div>
+            <p class="text-xs text-emerald-400 font-semibold">CLARANS is asymptotically faster than PAM and consistently discovers higher-quality clusters than CLARA!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 10: K-Modes & K-Prototypes -->
+      <div class="card-container" id="card-10">
+        <div class="card">
+          <div class="card-tag">Section 2: Partitioning • Card 11 of 32</div>
+          <h2 class="card-header">Categorical Partitioning: K-Modes & K-Prototypes (Slide #72-74)</h2>
+          <div class="card-body">
+            <p>How do we cluster categorical or transactional data where means and Euclidean distances are meaningless? (Zhexue Huang, 1998)</p>
+
+            <div class="space-y-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-pink-400 block mb-1">1. K-Modes for Categorical Data:</strong>
+                <p class="text-slate-300">• Replaces cluster <strong>means</strong> with cluster <strong>modes</strong> (the most frequent category per attribute).</p>
+                <p class="text-slate-300">• Replaces Euclidean distance with <strong>simple matching dissimilarity</strong>: $d(x, y) = \sum_{j=1}^p \delta(x_j, y_j)$ where $\delta(a,b) = 0$ if equal, $1$ if different.</p>
+                <p class="text-slate-300">• Updates modes on the fly using category frequencies.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-indigo-400 block mb-1">2. K-Prototypes for Mixed Data:</strong>
+                <p class="text-slate-300">Integrates numeric and categorical variables by weighting the categorical dissimilarity with parameter $\gamma$:</p>
+                <div class="p-2 bg-slate-950 rounded font-mono text-center text-sky-400 my-1">
+                  $$d(x, y) = \sum_{j=1}^{p_r} (x_j - y_j)^2 + \gamma \sum_{j=p_r+1}^p \delta(x_j, y_j)$$
+                </div>
+                <p class="text-slate-400">When $\gamma = 0$, reduces to K-Means; when $\gamma \to \infty$, categorical matching dominates.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 11: Interactive Partitioning Engine -->
+      <div class="card-container" id="card-11">
+        <div class="card">
+          <div class="card-tag">Section 2: Interactive Simulation • Card 12 of 32</div>
+          <h2 class="card-header">Interactive 2D K-Means & K-Medoids Engine</h2>
+          <div class="card-body">
+            <p>Explore partitioning in action. Add points by clicking on the canvas, select algorithm and $k$, then step through Lloyd's updates or run until convergence.</p>
+            <div class="interactive-box">
+              <div class="flex flex-wrap gap-2 items-center justify-between mb-3 text-xs">
+                <div class="flex gap-2 items-center">
+                  <label class="text-slate-400">Algorithm:</label>
+                  <select id="partAlgo" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white" onchange="resetPartitioning()">
+                    <option value="kmeans">K-Means (Lloyd)</option>
+                    <option value="kmedoids">K-Medoids (PAM)</option>
+                  </select>
+                  <label class="text-slate-400 ml-2">k:</label>
+                  <select id="partK" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white" onchange="resetPartitioning()">
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                  </select>
+                </div>
+                <div class="flex gap-2">
+                  <button class="btn-primary text-xs py-1" onclick="stepPartitioning()">Step →</button>
+                  <button class="btn-primary text-xs py-1" onclick="runPartitioning()">Run All</button>
+                  <button class="btn-secondary text-xs py-1" onclick="generateRandomClusters()">New Points</button>
+                </div>
+              </div>
+
+              <canvas id="partCanvas" width="560" height="260" class="w-full"></canvas>
+
+              <div class="flex justify-between items-center mt-3 text-xs font-mono">
+                <span class="text-slate-400">Status: <span id="partStatus" class="text-indigo-400 font-bold">Ready</span></span>
+                <span class="text-slate-400">Total SSE: <span id="partSSE" class="text-pink-400 font-bold">0.00</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 12: Agglomerative vs Divisive -->
+      <div class="card-container" id="card-12">
+        <div class="card">
+          <div class="card-tag">Section 3: Hierarchical • Card 13 of 32</div>
+          <h2 class="card-header">Hierarchical Clustering: Agglomerative vs Divisive (Slide #75-81)</h2>
+          <div class="card-body">
+            <p><strong>Hierarchical clustering</strong> groups objects into a tree or nested hierarchy of clusters called a <strong>dendrogram</strong>. Does not require specifying $k$ in advance: users cut the dendrogram at any desired similarity threshold.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs mb-3">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-sky-400 block mb-1">AGNES (Agglomerative - Bottom-Up):</strong>
+                <p class="text-slate-300">• Starts with $n$ individual single-point clusters.</p>
+                <p class="text-slate-300">• At each step, merges the two clusters with the minimum inter-cluster distance.</p>
+                <p class="text-slate-300">• Terminates when all points merge into a single root cluster.</p>
+              </div>
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-purple-400 block mb-1">DIANA (Divisive - Top-Down):</strong>
+                <p class="text-slate-300">• Starts with all $n$ points in one master cluster.</p>
+                <p class="text-slate-300">• At each step, splits the cluster with the highest diameter into two subclusters.</p>
+                <p class="text-slate-300">• Terminates when every object forms its own leaf cluster.</p>
+              </div>
+            </div>
+
+            <div class="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl text-xs text-slate-300">
+              <strong class="text-rose-300 block mb-1">⚠️ The Rigid Merge Trap:</strong>
+              Once two clusters are merged in AGNES (or split in DIANA), <strong>the decision can never be undone</strong>! Mistakes made in early iterations propagate through all subsequent levels.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 13: Linkage Criteria -->
+      <div class="card-container" id="card-13">
+        <div class="card">
+          <div class="card-tag">Section 3: Hierarchical • Card 14 of 32</div>
+          <h2 class="card-header">Inter-Cluster Linkage Criteria (Slide #82-90)</h2>
+          <div class="card-body">
+            <p>How do we measure the distance between two clusters $A$ and $B$ containing multiple points?</p>
+
+            <div class="space-y-2.5 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-indigo-400 block mb-0.5">1. Single Link (Minimum Distance / MIN):</strong>
+                <p class="font-mono text-slate-400 mb-1">$$d(A, B) = \min_{p \in A, q \in B} d(p, q)$$</p>
+                <p class="text-slate-300">Can handle non-elliptical, elongated shapes. <strong>Fatal weakness:</strong> Susceptible to <em>chaining effect</em> where a single noisy bridge of points connects two distinct clusters.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-pink-400 block mb-0.5">2. Complete Link (Maximum Distance / MAX):</strong>
+                <p class="font-mono text-slate-400 mb-1">$$d(A, B) = \max_{p \in A, q \in B} d(p, q)$$</p>
+                <p class="text-slate-300">Avoids chaining; produces compact, spherical clusters. <strong>Weakness:</strong> Sensitive to outliers and tends to break large natural clusters.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-0.5">3. Average Link (Mean Distance):</strong>
+                <p class="font-mono text-slate-400 mb-1">$$d(A, B) = \frac{1}{|A||B|} \sum_{p \in A} \sum_{q \in B} d(p, q)$$</p>
+                <p class="text-slate-300">A robust compromise between single and complete link; less sensitive to noise.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-amber-400 block mb-0.5">4. Ward's Minimum Variance Method:</strong>
+                <p class="font-mono text-slate-400 mb-1">$$\Delta ESS(A, B) = \frac{|A||B|}{|A| + |B|} \|\vec{c}_A - \vec{c}_B\|^2$$</p>
+                <p class="text-slate-300">Merges clusters that cause the smallest increase in total within-cluster sum of squares. Highly popular in practice.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 14: BIRCH: CF-Vectors & CF-Tree -->
+      <div class="card-container" id="card-14">
+        <div class="card">
+          <div class="card-tag">Section 3: Advanced Hierarchical • Card 15 of 32</div>
+          <h2 class="card-header">BIRCH: CF-Vectors & CF-Tree (Zhang et al. 1996 - Slide #91-99)</h2>
+          <div class="card-body">
+            <p><strong>BIRCH</strong> (Balanced Iterative Reducing and Clustering using Hierarchies) achieves $O(n)$ scalability by summarizing large datasets in a height-balanced in-memory <strong>CF-Tree</strong> with a single data scan.</p>
+
+            <div class="p-3 bg-indigo-950/40 border border-indigo-800/60 rounded-xl mb-3 text-xs text-slate-300">
+              <strong class="text-indigo-300 text-sm block mb-1">The Clustering Feature (CF) Vector:</strong>
+              A cluster of $N$ $d$-dimensional points is compressed into a 3-tuple:
+              $$CF = (N, \vec{LS}, SS)$$
+              where $N$ is count, $\vec{LS} = \sum_{i=1}^N p_i$ (linear sum), and $SS = \sum_{i=1}^N p_i^2$ (square sum).
+            </div>
+
+            <h3 class="font-bold text-white text-sm mb-1">CF Additivity Theorem (The Core Power):</h3>
+            <p class="text-xs text-slate-300 mb-2">If clusters $C_1$ and $C_2$ are merged, the new CF is simply the component-wise sum:</p>
+            <div class="p-2.5 bg-slate-900 border border-slate-800 rounded font-mono text-center text-xs text-sky-400 mb-3">
+              $$CF_1 + CF_2 = (N_1 + N_2, \vec{LS}_1 + \vec{LS}_2, SS_1 + SS_2)$$
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs mb-3 text-center">
+              <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                <span class="text-slate-400 block">Centroid</span>
+                <span class="text-white font-mono font-bold">$x_0 = \frac{\vec{LS}}{N}$</span>
+              </div>
+              <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                <span class="text-slate-400 block">Radius</span>
+                <span class="text-white font-mono font-bold">$R = \sqrt{\frac{SS}{N} - (\frac{\vec{LS}}{N})^2}$</span>
+              </div>
+              <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                <span class="text-slate-400 block">Diameter</span>
+                <span class="text-white font-mono font-bold">$D = \sqrt{\frac{2N \cdot SS - 2\vec{LS}^2}{N(N-1)}}$</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-300"><strong>Phase 1:</strong> Scans data to build a CF-tree within memory limit using branching factor $B$ and diameter threshold $T$.<br/><strong>Phase 2:</strong> Applies global hierarchical or partitioning clustering directly on the compact leaf subclusters!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 15: CURE: Representative Points -->
+      <div class="card-container" id="card-15">
+        <div class="card">
+          <div class="card-tag">Section 3: Advanced Hierarchical • Card 16 of 32</div>
+          <h2 class="card-header">CURE: Representative Points & Shrinking (Guha et al. 1998 - Slide #100-104)</h2>
+          <div class="card-body">
+            <p><strong>CURE</strong> (Clustering Using REpresentatives) resolves the conflict between centroid methods (which only find spherical clusters) and all-points methods (which are slow and sensitive to chaining).</p>
+
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl mb-3 text-xs space-y-2">
+              <strong class="text-pink-400 text-sm block">How CURE Works:</strong>
+              <p class="text-slate-300">• Represents each cluster by a fixed number $c$ of <strong>well-scattered representative points</strong> (captures non-spherical shapes).</p>
+              <p class="text-slate-300">• <strong>Shrinking Step:</strong> Shrinks representative points toward the cluster centroid by a factor $\alpha \in [0, 1]$:</p>
+              <div class="p-2 bg-slate-950 rounded font-mono text-center text-sky-400">
+                $$p_{\text{shrunk}} = p + \alpha (\vec{c} - p)$$
+              </div>
+              <p class="text-slate-300">• Shrinking dampens the effects of extreme outliers and prevents single-link chaining.</p>
+              <p class="text-slate-300">• Distance between two clusters is the minimum distance between their shrunk representative points.</p>
+            </div>
+
+            <div class="p-2.5 bg-indigo-950/40 border border-indigo-800/60 rounded-lg text-xs text-slate-300">
+              <strong>Scalability via Sampling & Partitioning:</strong> CURE draws a random sample, partitions it into $p$ blocks, clusters each block in memory, then performs second-pass global clustering and assigns disk tuples to the nearest representative point.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 16: CHAMELEON & ROCK -->
+      <div class="card-container" id="card-16">
+        <div class="card">
+          <div class="card-tag">Section 3: Graph & Transactional • Card 17 of 32</div>
+          <h2 class="card-header">CHAMELEON & ROCK (Slide #105-108)</h2>
+          <div class="card-body">
+            <h3 class="font-bold text-sky-400 text-sm mb-1">1. CHAMELEON: Graph Partitioning & Dynamic Modeling (Karypis et al. 1999)</h3>
+            <p class="text-xs text-slate-300 mb-2">Builds a <strong>k-nearest neighbor (k-NN) graph</strong> of objects, then partitions it into many tiny subclusters using multi-level graph bisection (hMETIS). Subclusters are merged only if they have high:</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mb-3">
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-indigo-400">Relative Interconnectivity (RI):</strong>
+                <p class="text-slate-300 mt-1 font-mono text-[11px]">$$RI(C_i, C_j) = \frac{2 |EC_{C_i, C_j}|}{|EC_{C_i}| + |EC_{C_j}|}$$</p>
+                <p class="text-slate-400">Normalizes edge cuts connecting $C_i$ and $C_j$ by internal cuts.</p>
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-pink-400">Relative Closeness (RC):</strong>
+                <p class="text-slate-300 mt-1 font-mono text-[11px]">$$RC(C_i, C_j) = \frac{\bar{S}_{EC_{C_i, C_j}}}{\frac{|C_i|}{|C_i|+|C_j|}\bar{S}_{EC_{C_i}} + \dots}$$</p>
+                <p class="text-slate-400">Compares connection density against internal cluster density.</p>
+              </div>
+            </div>
+
+            <div class="my-3 border-t border-slate-700/60"></div>
+
+            <h3 class="font-bold text-emerald-400 text-sm mb-1">2. ROCK: Robust Clustering using Links (Guha et al. 2000)</h3>
+            <p class="text-xs text-slate-300">Designed for categorical and market-basket transaction data. Standard Jaccard distance fails when transactions share few items. ROCK defines <strong>links</strong>: the number of common shared neighbors between two points:</p>
+            <div class="p-2 bg-slate-900 border border-slate-800 rounded font-mono text-center text-xs text-amber-400 my-1">
+              $$link(p_i, p_j) = \sum_x \text{sim}(p_i, x) \cdot \text{sim}(p_j, x)$$
+            </div>
+            <p class="text-xs text-slate-400">Pairs with high shared neighbors are clustered, even if their direct similarity is weak!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 17: Interactive Dendrogram Simulator -->
+      <div class="card-container" id="card-17">
+        <div class="card">
+          <div class="card-tag">Section 3: Interactive Simulation • Card 18 of 32</div>
+          <h2 class="card-header">Interactive Dendrogram & Linkage Simulator</h2>
+          <div class="card-body">
+            <p>Observe how different linkage metrics alter the hierarchical merge order. Toggle between Single Link, Complete Link, and Average Link on 6 sample data points.</p>
+            <div class="interactive-box">
+              <div class="flex justify-between items-center mb-3 text-xs">
+                <div class="flex gap-2 items-center">
+                  <label class="text-slate-400">Linkage Method:</label>
+                  <select id="linkageSelect" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white" onchange="drawDendrogram()">
+                    <option value="single">Single Link (MIN)</option>
+                    <option value="complete">Complete Link (MAX)</option>
+                    <option value="average">Average Link</option>
+                  </select>
+                </div>
+                <button class="btn-secondary text-xs py-1" onclick="drawDendrogram()">Recompute Tree</button>
+              </div>
+
+              <canvas id="dendroCanvas" width="560" height="240" class="w-full"></canvas>
+
+              <div class="mt-2 text-xs text-slate-400 flex justify-between">
+                <span>Cut Threshold: <span id="cutVal" class="text-indigo-400 font-bold">120 px</span></span>
+                <span class="text-emerald-400">Resulting Flat Clusters: <strong id="clusterCount">3</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 18: Density Concepts: Core, Border, Noise -->
+      <div class="card-container" id="card-18">
+        <div class="card">
+          <div class="card-tag">Section 4: Density-Based • Card 19 of 32</div>
+          <h2 class="card-header">Density-Based Fundamentals: Core, Border & Noise (Slide #109-112)</h2>
+          <div class="card-body">
+            <p>Density-based clustering discovers clusters of arbitrary non-spherical shapes (rings, snakes, dense blobs) and isolates noise. Given two parameters: radius $\epsilon$ (Eps) and minimum points $MinPts$:</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs mb-3">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-emerald-400 block mb-1">🟢 Core Point:</strong>
+                <p class="text-slate-300">Its $\epsilon$-neighborhood contains at least $MinPts$ points: $$|N_\epsilon(p)| \ge MinPts$$</p>
+              </div>
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-amber-400 block mb-1">🟡 Border Point:</strong>
+                <p class="text-slate-300">Not a core point, but lies within the $\epsilon$-neighborhood of a core point ($|N_\epsilon(p)| < MinPts$).</p>
+              </div>
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-rose-400 block mb-1">🔴 Noise Point:</strong>
+                <p class="text-slate-300">Neither a core point nor a border point. Categorized as an outlier.</p>
+              </div>
+            </div>
+
+            <h3 class="font-bold text-white text-sm mb-1">Density Connectivity Definitions:</h3>
+            <div class="space-y-1.5 text-xs text-slate-300">
+              <p>• <strong>Directly Density-Reachable:</strong> $p$ is directly reachable from $q$ if $q$ is a core point and $p \in N_\epsilon(q)$ (asymmetric).</p>
+              <p>• <strong>Density-Reachable:</strong> $p$ is reachable from $q$ via a chain of core points $p_1, \dots, p_n$ where $p_1 = q, p_n = p$ (transitive, asymmetric).</p>
+              <p>• <strong>Density-Connected:</strong> $p$ and $q$ are density-connected if there exists an intermediate point $o$ such that <em>both $p$ and $q$ are density-reachable from $o$</em> (symmetric!).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 19: DBSCAN Algorithm -->
+      <div class="card-container" id="card-19">
+        <div class="card">
+          <div class="card-tag">Section 4: Density-Based • Card 20 of 32</div>
+          <h2 class="card-header">DBSCAN Algorithm & Mechanics (Ester et al. 1996 - Slide #110-112)</h2>
+          <div class="card-body">
+            <p><strong>DBSCAN</strong> (Density-Based Spatial Clustering of Applications with Noise) defines a cluster as a <strong>maximal set of density-connected points</strong>.</p>
+
+            <h3 class="font-bold text-white text-sm mb-1">Algorithm Step-by-Step:</h3>
+            <ol class="list-decimal list-inside text-xs space-y-1.5 text-slate-300 mb-3">
+              <li>Mark all points as unvisited.</li>
+              <li>Arbitrarily pick an unvisited point $p$ and mark it as visited.</li>
+              <li>Retrieve its $\epsilon$-neighborhood $N_\epsilon(p)$.</li>
+              <li>If $|N_\epsilon(p)| < MinPts$, tentatively label $p$ as NOISE (may later become a border point).</li>
+              <li>If $|N_\epsilon(p)| \ge MinPts$, create a new cluster $C$ containing $p$. Expand cluster by visiting all unvisited points in $N_\epsilon(p)$; if they are core points, expand their neighborhoods recursively.</li>
+              <li>Repeat until all points are processed.</li>
+            </ol>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-1">✅ Advantages:</strong>
+                <p class="text-slate-300">• Discovers arbitrary shapes (crescents, rings).</p>
+                <p class="text-slate-300">• No need to specify cluster count $k$.</p>
+                <p class="text-slate-300">• Highly robust against background noise.</p>
+              </div>
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-rose-400 block mb-1">⚠️ Bottlenecks:</strong>
+                <p class="text-slate-300">• Fails when clusters have drastically varying densities.</p>
+                <p class="text-slate-300">• Highly sensitive to $\epsilon$ and $MinPts$.</p>
+                <p class="text-slate-300">• $O(n^2)$ worst-case; $O(n \log n)$ with spatial index (R*-tree).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 20: OPTICS: Cluster Ordering & Valleys -->
+      <div class="card-container" id="card-20">
+        <div class="card">
+          <div class="card-tag">Section 4: Density-Based • Card 21 of 32</div>
+          <h2 class="card-header">OPTICS: Overcoming Varying Densities (Ankerst et al. 1999 - Slide #113-118)</h2>
+          <div class="card-body">
+            <p>DBSCAN cannot cluster datasets containing both sparse and dense clusters simultaneously because a single global $\epsilon$ either merges dense clusters or splits sparse ones. <strong>OPTICS</strong> (Ordering Points To Identify the Clustering Structure) solves this without requiring a rigid global density cutoff.</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-sky-400 block mb-1">1. Core Distance of $p$:</strong>
+                <p class="text-slate-300">The smallest radius $\epsilon'$ such that $p$ is a core point w.r.t. $MinPts$. Undefined if $|N_\epsilon(p)| < MinPts$.</p>
+              </div>
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-indigo-400 block mb-1">2. Reachability Distance of $p$ from $o$:</strong>
+                <p class="text-slate-300 font-mono text-[11px]">$$\text{reach-dist}_\epsilon(p, o) = \max(\text{core-dist}_\epsilon(o), d(o, p))$$</p>
+                <p class="text-slate-400">Undefined if $o$ is not a core point.</p>
+              </div>
+            </div>
+
+            <div class="p-3.5 bg-indigo-950/40 border border-indigo-800/60 rounded-xl text-xs text-slate-300">
+              <strong class="text-indigo-300 text-sm block mb-1">📈 The Reachability Plot:</strong>
+              OPTICS outputs a linear cluster ordering of data points alongside their reachability distances. When plotted, <strong>valleys and troughs represent clusters</strong>! Deep valleys correspond to dense clusters; shallow wide valleys correspond to sparse clusters.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 21: DENCLUE: Kernel Density Attractors -->
+      <div class="card-container" id="card-21">
+        <div class="card">
+          <div class="card-tag">Section 4: Density-Based • Card 22 of 32</div>
+          <h2 class="card-header">DENCLUE: Kernel Density Functions (Hinneburg & Keim 1998 - Slide #119-122)</h2>
+          <div class="card-body">
+            <p><strong>DENCLUE</strong> (DENsity-based CLUstEring) provides a rigorous mathematical foundation using non-parametric kernel density estimation (Parzen window):</p>
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg text-center font-mono text-xs text-indigo-400 mb-3">
+              $$f_K(x) = \frac{1}{n h^d} \sum_{i=1}^n K\left( \frac{x - x_i}{h} \right) \quad \text{e.g. Gaussian Kernel: } K(z) = \frac{1}{(2\pi)^{d/2}} e^{-\frac{\|z\|^2}{2}}$$
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400">Density Attractor:</strong> Local maxima of the density function found via gradient hill-climbing: $\nabla f(x)$.
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-amber-400">Center-Defined Clusters:</strong> All points that climb to the same density attractor with density $\ge \xi$ form a cluster.
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-pink-400">Arbitrary-Shape Clusters:</strong> Connected paths of density attractors whose bridge densities exceed threshold $\xi$ merge into complex shapes.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 22: Interactive DBSCAN Simulator -->
+      <div class="card-container" id="card-22">
+        <div class="card">
+          <div class="card-tag">Section 4: Interactive Simulation • Card 23 of 32</div>
+          <h2 class="card-header">Interactive DBSCAN Density Explorer</h2>
+          <div class="card-body">
+            <p>Adjust $\epsilon$ and $MinPts$ to see DBSCAN discover non-linear concentric rings and isolate noise points dynamically.</p>
+            <div class="interactive-box">
+              <div class="flex flex-wrap gap-4 items-center justify-between mb-3 text-xs">
+                <div class="flex gap-3 items-center">
+                  <label class="text-slate-400">Eps ($\epsilon$): <span id="epsLabel" class="text-white font-bold">25</span></label>
+                  <input type="range" id="epsRange" min="10" max="60" value="25" class="w-24" oninput="runDBSCAN()"/>
+                  <label class="text-slate-400 ml-2">MinPts: <span id="minPtsLabel" class="text-white font-bold">4</span></label>
+                  <input type="range" id="minPtsRange" min="2" max="10" value="4" class="w-20" oninput="runDBSCAN()"/>
+                </div>
+                <button class="btn-secondary text-xs py-1" onclick="generateDBSCANPoints()">New Noisy Rings</button>
+              </div>
+
+              <canvas id="dbscanCanvas" width="560" height="260" class="w-full"></canvas>
+
+              <div class="flex flex-wrap gap-4 justify-between items-center mt-3 text-xs">
+                <span>🟢 Core: <strong id="coreCount" class="text-emerald-400">0</strong></span>
+                <span>🟡 Border: <strong id="borderCount" class="text-amber-400">0</strong></span>
+                <span>🔴 Noise: <strong id="noiseCount" class="text-rose-400">0</strong></span>
+                <span>Clusters Discovered: <strong id="dbscanClusterCount" class="text-indigo-400">0</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 23: STING: Statistical Information Grid -->
+      <div class="card-container" id="card-23">
+        <div class="card">
+          <div class="card-tag">Section 5: Grid-Based • Card 24 of 32</div>
+          <h2 class="card-header">STING: Statistical Information Grid (Wang et al. 1997 - Slide #124-127)</h2>
+          <div class="card-body">
+            <p><strong>STING</strong> divides the spatial area into rectangular cells in a multi-resolution hierarchical pyramid. Each cell at a higher level is partitioned into a number of smaller cells (typically 4) at the next lower level.</p>
+
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl mb-3 text-xs space-y-1.5">
+              <strong class="text-indigo-400 text-sm block">Precomputed Cell Statistics:</strong>
+              <p class="text-slate-300">• Attribute-independent: point count $n$.</p>
+              <p class="text-slate-300">• Attribute-dependent: mean $m$, standard deviation $s$, min, max.</p>
+              <p class="text-slate-300">• Distribution type: Normal, Uniform, Exponential, or NONE.</p>
+            </div>
+
+            <h3 class="font-bold text-white text-sm mb-1">Top-Down Query Processing:</h3>
+            <ol class="list-decimal list-inside text-xs space-y-1 text-slate-300 mb-3">
+              <li>Start at root layer; calculate probability that each cell satisfies query condition.</li>
+              <li>Prune irrelevant cells immediately; traverse children of relevant cells only.</li>
+              <li>Repeat downward to the leaf level; assemble contiguous dense cells into final clusters.</li>
+            </ol>
+            <div class="p-2.5 bg-emerald-950/40 border border-emerald-800/60 rounded-lg text-xs text-emerald-300">
+              ⚡ <strong>Time Complexity:</strong> Query time is $O(K)$ where $K$ is the number of grid cells at the bottom layer — <em>completely independent of data count $N$</em>!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 24: CLIQUE: Subspace Clustering -->
+      <div class="card-container" id="card-24">
+        <div class="card">
+          <div class="card-tag">Section 5: Grid & Subspace • Card 25 of 32</div>
+          <h2 class="card-header">CLIQUE: High-Dimensional Subspace Clustering (Agrawal et al. 1998 - Slide #128-131)</h2>
+          <div class="card-body">
+            <p>In high dimensions ($d > 50$), data becomes sparse and almost all points are equidistant (curse of dimensionality). Real clusters exist only in <strong>subspaces</strong> of lower dimensionality. <strong>CLIQUE</strong> (Clustering In QUEst) automatically identifies dense units in subspaces.</p>
+
+            <div class="p-3 bg-indigo-950/40 border border-indigo-800/60 rounded-xl mb-3 text-xs text-slate-300">
+              <strong class="text-indigo-300 text-sm block mb-1">The Apriori Property of Dense Subspaces:</strong>
+              If a $k$-dimensional grid cell is dense (density $> \tau$), then each of its $(k-1)$-dimensional projections must also be dense!
+            </div>
+
+            <h3 class="font-bold text-white text-sm mb-1">The 3 Major Steps of CLIQUE:</h3>
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-sky-400">1. Subspace Identification:</strong> Partitions each dimension into intervals and finds 1-D dense units. Uses the Apriori property to join $(k-1)$-D dense units into $k$-D candidate units.
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-pink-400">2. Cluster Assembly:</strong> Merges adjacent dense units in the identified subspace to form maximal connected clusters.
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-emerald-400">3. Rule Generation:</strong> Translates dense units into minimal Disjunctive Normal Form (DNF) boolean rules for human interpretability.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 25: Clustering Tendency: Hopkins Stat -->
+      <div class="card-container" id="card-25">
+        <div class="card">
+          <div class="card-tag">Section 6: Cluster Validation • Card 26 of 32</div>
+          <h2 class="card-header">Clustering Tendency & Hopkins Statistic (Slide #133-134)</h2>
+          <div class="card-body">
+            <p>Before running any clustering algorithm, you must assess <strong>clustering tendency</strong>: does the dataset possess non-random structure, or is it merely uniform noise? (Algorithms will force clusters even on pure noise!)</p>
+
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg text-center font-mono text-xs text-indigo-400 mb-3">
+              $$H = \frac{\sum_{i=1}^p y_i}{\sum_{i=1}^p x_i + \sum_{i=1}^p y_i}$$
+            </div>
+
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs space-y-1.5 mb-3">
+              <p class="text-slate-300">• Sample $p$ points $q_1, \dots, q_p$ uniformly at random from the entire data space (artificial points). Let $y_i$ be distance from $q_i$ to its nearest neighbor in dataset $D$.</p>
+              <p class="text-slate-300">• Sample $p$ real points $x_1, \dots, x_p$ from dataset $D$. Let $x_i$ be distance from $x_i$ to its nearest neighbor in $D$.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-rose-400">If $H \approx 0.5$:</strong>
+                <p class="text-slate-300 mt-1">Data is uniformly distributed. Zero clustering tendency! Clustering will produce misleading artifacts.</p>
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-emerald-400">If $H \to 1.0$:</strong>
+                <p class="text-slate-300 mt-1">Real points are tightly clustered while artificial points lie far from data. Strong cluster structure exists!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 26: Determining Optimal k & Elbow -->
+      <div class="card-container" id="card-26">
+        <div class="card">
+          <div class="card-tag">Section 6: Cluster Validation • Card 27 of 32</div>
+          <h2 class="card-header">Determining the Number of Clusters k (Slide #135-136)</h2>
+          <div class="card-body">
+            <p>Specifying $k$ is often an arbitrary guess. Han & Kamber detail 3 empirical and quantitative strategies to choose $k$:</p>
+
+            <div class="space-y-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-sky-400 block mb-1">1. Empirical Rule of Thumb:</strong>
+                <div class="p-2 bg-slate-950 rounded font-mono text-center text-xs text-indigo-400 my-1">$$k \approx \sqrt{n / 2}$$</div>
+                <p class="text-slate-400">Quick estimate for dataset of $n$ points (e.g. for $n=200$, $k \approx 10$).</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-pink-400 block mb-1">2. The Elbow Method (Knee Point):</strong>
+                <p class="text-slate-300">Run K-Means for $k = 2, 3, \dots, 10$ and plot $SSE$ versus $k$. SSE drops sharply while splitting true clusters, but levels off once splitting homogeneous clusters. The turning point ("elbow") is the optimal $k$.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-emerald-400 block mb-1">3. Cross-Validation Stability:</strong>
+                <p class="text-slate-300">Split dataset into $m$ subsets. Cluster $m-1$ subsets and project the held-out fold into the clusters. If cluster assignments remain stable across random splits (measured via Adjusted Rand Index), $k$ is genuine.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 27: Extrinsic Quality: BCubed, NMI, ARI -->
+      <div class="card-container" id="card-27">
+        <div class="card">
+          <div class="card-tag">Section 6: Cluster Validation • Card 28 of 32</div>
+          <h2 class="card-header">Extrinsic Quality: BCubed, NMI & ARI (Slide #137-140)</h2>
+          <div class="card-body">
+            <p>When ground-truth labels $C_g$ are available for benchmark validation, <strong>extrinsic methods</strong> compare the discovered clustering $C$ against $C_g$:</p>
+
+            <div class="space-y-2.5 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-indigo-400 block mb-1">1. BCubed Precision & Recall Metrics (Slide #139):</strong>
+                <p class="text-slate-300">Evaluates precision and recall for every individual data point $o$:</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1 font-mono text-[11px]">
+                  <div class="p-2 bg-slate-950 rounded">$$Precision(o) = \frac{|C(o) \cap C_g(o)|}{|C(o)|}$$</div>
+                  <div class="p-2 bg-slate-950 rounded">$$Recall(o) = \frac{|C(o) \cap C_g(o)|}{|C_g(o)|}$$</div>
+                </div>
+                <p class="text-slate-400 mt-1">Averages over all objects; satisfies cluster homogeneity and completeness!</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-pink-400 block mb-1">2. Rand Index (RI) & Adjusted Rand Index (ARI):</strong>
+                <p class="text-slate-300 font-mono text-[11px] mb-1">$$RI = \frac{TP + TN}{TP + FP + FN + TN}$$</p>
+                <p class="text-slate-300">• $TP$: pair in same cluster in both $C$ and $C_g$.</p>
+                <p class="text-slate-300">• <strong>ARI corrects for chance:</strong> $ARI = \frac{RI - E[RI]}{\max(RI) - E[RI]} \in [-1, 1]$. Value near $0$ indicates random chance; $1.0$ indicates perfect agreement.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 28: Intrinsic Quality: Silhouette Score -->
+      <div class="card-container" id="card-28">
+        <div class="card">
+          <div class="card-tag">Section 6: Cluster Validation • Card 29 of 32</div>
+          <h2 class="card-header">Intrinsic Quality: The Silhouette Coefficient (Slide #141)</h2>
+          <div class="card-body">
+            <p>In real unsupervised mining, ground truth is absent. <strong>Intrinsic measures</strong> evaluate clustering quality using internal separation and cohesion. The <strong>Silhouette Coefficient</strong> is the industry standard:</p>
+
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg text-center font-mono text-xs text-indigo-400 mb-3">
+              $$s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))} \quad \in [-1, +1]$$
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3">
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-sky-400">$a(i)$: Within-Cluster Cohesion</strong>
+                <p class="text-slate-300 mt-1">Average distance from object $i$ to all other points in its own cluster.</p>
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-pink-400">$b(i)$: Nearest-Cluster Separation</strong>
+                <p class="text-slate-300 mt-1">Minimum average distance from object $i$ to points in any neighboring cluster.</p>
+              </div>
+            </div>
+
+            <div class="space-y-1.5 text-xs">
+              <div class="p-2 bg-emerald-950/40 border border-emerald-800/60 rounded text-emerald-300">
+                • <strong>$s(i) \approx +1$:</strong> $a(i) \ll b(i)$. Object is tightly matched to its own cluster and far from neighbors. Excellent!
+              </div>
+              <div class="p-2 bg-slate-900 border border-slate-800 rounded text-slate-300">
+                • <strong>$s(i) \approx 0$:</strong> $a(i) \approx b(i)$. Object lies right on the boundary between two clusters.
+              </div>
+              <div class="p-2 bg-rose-950/40 border border-rose-800/60 rounded text-rose-300">
+                • <strong>$s(i) < 0$:</strong> Object is closer to neighboring cluster than its own. Misassigned point!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 29: Interactive Silhouette Validator -->
+      <div class="card-container" id="card-29">
+        <div class="card">
+          <div class="card-tag">Section 6: Interactive Simulation • Card 30 of 32</div>
+          <h2 class="card-header">Interactive Silhouette Score Validator</h2>
+          <div class="card-body">
+            <p>Drag the slider below to separate Cluster 1 (Cyan) and Cluster 2 (Pink). Watch individual silhouette values $s(i)$ and the mean silhouette score update dynamically.</p>
+            <div class="interactive-box">
+              <div class="flex justify-between items-center mb-3 text-xs">
+                <div class="flex gap-2 items-center">
+                  <label class="text-slate-400">Cluster Separation Distance:</label>
+                  <input type="range" id="sepRange" min="20" max="220" value="90" class="w-36" oninput="drawSilhouetteSandbox()"/>
+                </div>
+                <span class="text-xs font-mono">Mean Score: <strong id="meanSilScore" class="text-emerald-400 font-bold text-sm">+0.54</strong></span>
+              </div>
+
+              <canvas id="silCanvas" width="560" height="230" class="w-full"></canvas>
+
+              <div class="mt-2 text-xs text-slate-400 text-center">
+                Interpretation: <span id="silInterp" class="text-white font-bold">Reasonable Cluster Structure (0.50 - 0.70)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 30: Comprehensive Mastery Quiz -->
+      <div class="card-container" id="card-30">
+        <div class="card">
+          <div class="card-tag">Section 7: Review & Mastery • Card 31 of 32</div>
+          <h2 class="card-header">Module 10 Comprehensive Mastery Quiz</h2>
+          <div class="card-body">
+            <p>Verify your knowledge before proceeding. Immediate feedback is given upon submitting.</p>
+
+            <div class="space-y-4 text-xs mt-3">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <div class="font-bold text-white mb-2">Q1. Why does K-Means fail on concentric circular ring clusters?</div>
+                <div class="space-y-1.5 text-slate-300">
+                  <label class="block p-1.5 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="cq1" value="a" class="mr-2"/> A) Because its time complexity is exponential in $d$</label>
+                  <label class="block p-1.5 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="cq1" value="b" class="mr-2"/> B) Because it assumes convex, spherical clusters and partitions space linearly via Voronoi cells</label>
+                  <label class="block p-1.5 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="cq1" value="c" class="mr-2"/> C) Because it cannot normalize numerical features</label>
+                </div>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <div class="font-bold text-white mb-2">Q2. What is the key mathematical property that makes BIRCH scalable to millions of records in a single scan?</div>
+                <div class="space-y-1.5 text-slate-300">
+                  <label class="block p-1.5 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="cq2" value="a" class="mr-2"/> A) The CF Additivity Theorem: $CF_1 + CF_2 = (N_1+N_2, LS_1+LS_2, SS_1+SS_2)$</label>
+                  <label class="block p-1.5 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="cq2" value="b" class="mr-2"/> B) The Apriori subspace pruning property</label>
+                  <label class="block p-1.5 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="cq2" value="c" class="mr-2"/> C) Jaccard asymmetric binary scaling</label>
+                </div>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <div class="font-bold text-white mb-2">Q3. If the Hopkins statistic $H$ computed on a dataset is $0.51$, what action should the data analyst take?</div>
+                <div class="space-y-1.5 text-slate-300">
+                  <label class="block p-1.5 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="cq3" value="a" class="mr-2"/> A) Proceed with K-Means with $k=5$</label>
+                  <label class="block p-1.5 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="cq3" value="b" class="mr-2"/> B) Conclude that data is uniformly distributed (random noise) and contains no genuine clusters</label>
+                  <label class="block p-1.5 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="cq3" value="c" class="mr-2"/> C) Run DBSCAN with $\epsilon = 0.51$</label>
+                </div>
+              </div>
+
+              <button class="btn-primary w-full py-2.5" onclick="checkClusterQuiz()">Submit Answers</button>
+              <div id="cluster-quiz-result" class="hidden text-center p-3 rounded-lg font-bold text-xs mt-2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 31: Appendix & Slide References -->
+      <div class="card-container" id="card-31">
+        <div class="card">
+          <div class="card-tag">Section 7: Curriculum Map • Card 32 of 32</div>
+          <h2 class="card-header">Course Slides Reference & Curriculum Map</h2>
+          <div class="card-body">
+            <p>Congratulations! You have completed all 32 visual study cards for <strong>Cluster Analysis: Basic Concepts and Advanced Methods</strong>.</p>
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl text-xs space-y-2 mb-4">
+              <div class="font-bold text-white text-sm">Official Slide Deck & Classic Paper References:</div>
+              <div>• <strong>Primary Lecture Deck:</strong> <code>IntroClusteringDA.pptx</code> (143 slides, Prof. P. Krishna Reddy)</div>
+              <div>• <strong>K-Modes & K-Prototypes:</strong> Huang (1998) <code>KmodesAndKprototype.pdf</code></div>
+              <div>• <strong>CLARANS:</strong> Ng & Han (2002) <code>CLARANS.pdf</code></div>
+              <div>• <strong>BIRCH:</strong> Zhang, Ramakrishnan, Livny (1996) <code>BIRCHzhang.pdf</code></div>
+              <div>• <strong>CURE:</strong> Guha, Rastogi, Shim (1998) <code>CUREguha98.pdf</code></div>
+              <div>• <strong>CHAMELEON:</strong> Karypis, Han, Kumar (1999) <code>chameleon.pdf</code></div>
+              <div>• <strong>ROCK:</strong> Guha, Rastogi, Shim (2000) <code>ROCKcategorical.pdf</code></div>
+              <div>• <strong>DBSCAN:</strong> Ester, Kriegel, Sander, Xu (1996) <code>DBSCAN-KDD96.pdf</code></div>
+              <div>• <strong>Assignment 4 Coverage:</strong> Customer Segmentation via K-Means from scratch, scaling, elbow method, and silhouette evaluation.</div>
+            </div>
+            <div class="flex gap-3 justify-center flex-wrap">
+              <a href="09_advanced_classification.html" class="btn-secondary">← Module 09</a>
+              <a href="00_home.html" class="btn-primary">Return to Course Hub</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM NAVIGATION BAR -->
+      <div class="max-w-[840px] mx-auto flex items-center justify-between pt-4 pb-12">
+        <button id="prev-btn" class="btn-secondary" onclick="prevCard()" disabled>← Previous</button>
+        <span class="text-xs text-slate-500 font-mono" id="card-counter">1 / 32</span>
+        <button id="next-btn" class="btn-primary" onclick="nextCard()">Next →</button>
+      </div>
+
+    </main>
+  </div>
+
+  <div id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    let currentCard = 0;
+    const totalCards = 32;
+
+    function goToCard(idx) {
+      if (idx < 0 || idx >= totalCards) return;
+      document.querySelectorAll('.card-container').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById('card-' + idx);
+      if (target) target.classList.add('active');
+
+      document.querySelectorAll('.sidebar-item').forEach((item, i) => {
+        if (i === idx) item.classList.add('active');
+        else item.classList.remove('active');
+      });
+
+      currentCard = idx;
+      document.getElementById('progress-bar').style.width = ((idx + 1) / totalCards * 100) + '%';
+      document.getElementById('progress-text').innerText = `Card ${idx + 1} / ${totalCards}`;
+      document.getElementById('card-counter').innerText = `${idx + 1} / ${totalCards}`;
+
+      document.getElementById('prev-btn').disabled = (idx === 0);
+      document.getElementById('next-btn').innerText = (idx === totalCards - 1) ? 'Finish 🎓' : 'Next →';
+
+      if (idx === 4) drawMetricSandbox();
+      if (idx === 11) initPartitioningCanvas();
+      if (idx === 17) drawDendrogram();
+      if (idx === 22) runDBSCAN();
+      if (idx === 29) drawSilhouetteSandbox();
+
+      document.getElementById('main').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextCard() { if (currentCard < totalCards - 1) goToCard(currentCard + 1); }
+    function prevCard() { if (currentCard > 0) goToCard(currentCard - 1); }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextCard();
+      if (e.key === 'ArrowLeft') prevCard();
+    });
+
+    // Mobile Sidebar
+    function toggleMobileSidebar() {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+      document.getElementById('sidebar-backdrop').classList.toggle('mobile-open');
+    }
+
+    // Pomodoro Timer
+    let timerSeconds = 15 * 60;
+    let timerRunning = false;
+    let timerInterval = null;
+
+    function toggleTimer() {
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+      } else {
+        timerRunning = true;
+        timerInterval = setInterval(() => {
+          if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            alert('Pomodoro completed! Time for a 5-minute break.');
+            timerSeconds = 15 * 60;
+          } else {
+            timerSeconds--;
+          }
+          const m = Math.floor(timerSeconds / 60);
+          const s = timerSeconds % 60;
+          document.getElementById('timer').innerText = `⏱ ${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        }, 1000);
+      }
+    }
+
+    // ── SIMULATOR 1: DISTANCE METRIC SANDBOX ──
+    let ptA = { x: 120, y: 160 };
+    let ptB = { x: 380, y: 80 };
+
+    function initMetricSandbox() {
+      const cvs = document.getElementById('metricCanvas');
+      if (!cvs) return;
+      cvs.addEventListener('click', (e) => {
+        const rect = cvs.getBoundingClientRect();
+        ptB.x = (e.clientX - rect.left) * (cvs.width / rect.width);
+        ptB.y = (e.clientY - rect.top) * (cvs.height / rect.height);
+        drawMetricSandbox();
+      });
+      drawMetricSandbox();
+    }
+
+    function resetMetricSandbox() {
+      ptA = { x: 120, y: 160 };
+      ptB = { x: 380, y: 80 };
+      drawMetricSandbox();
+    }
+
+    function drawMetricSandbox() {
+      const cvs = document.getElementById('metricCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      // Grid lines
+      ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1;
+      for (let x = 0; x < cvs.width; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cvs.height); ctx.stroke(); }
+      for (let y = 0; y < cvs.height; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cvs.width, y); ctx.stroke(); }
+
+      // Manhattan path
+      ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(ptA.x, ptA.y); ctx.lineTo(ptB.x, ptA.y); ctx.lineTo(ptB.x, ptB.y); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Euclidean path
+      ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(ptA.x, ptA.y); ctx.lineTo(ptB.x, ptB.y); ctx.stroke();
+
+      // Draw Points
+      ctx.fillStyle = '#6366f1'; ctx.beginPath(); ctx.arc(ptA.x, ptA.y, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.fillText('Point A', ptA.x - 18, ptA.y - 10);
+
+      ctx.fillStyle = '#f43f5e'; ctx.beginPath(); ctx.arc(ptB.x, ptB.y, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.fillText('Point B', ptB.x + 8, ptB.y - 10);
+
+      // Calculations
+      const dx = Math.abs(ptA.x - ptB.x);
+      const dy = Math.abs(ptA.y - ptB.y);
+      const l2 = Math.sqrt(dx * dx + dy * dy);
+      const l1 = dx + dy;
+      const linf = Math.max(dx, dy);
+
+      // Cosine from origin (0, 260)
+      const ax = ptA.x, ay = cvs.height - ptA.y;
+      const bx = ptB.x, by = cvs.height - ptB.y;
+      const dot = ax * bx + ay * by;
+      const magA = Math.sqrt(ax * ax + ay * ay);
+      const magB = Math.sqrt(bx * bx + by * by);
+      const cosSim = magA * magB === 0 ? 0 : (dot / (magA * magB));
+
+      document.getElementById('val-l2').innerText = l2.toFixed(1);
+      document.getElementById('val-l1').innerText = l1.toFixed(1);
+      document.getElementById('val-linf').innerText = linf.toFixed(1);
+      document.getElementById('val-cos').innerText = cosSim.toFixed(3);
+    }
+
+    // ── SIMULATOR 2: PARTITIONING ENGINE ──
+    let partPoints = [];
+    let centroids = [];
+    let clusterAssignments = [];
+    const clusterColors = ['#6366f1', '#ec4899', '#10b981', '#f59e0b'];
+
+    function generateRandomClusters() {
+      partPoints = [];
+      const centers = [{ x: 140, y: 90 }, { x: 380, y: 80 }, { x: 260, y: 190 }, { x: 420, y: 200 }];
+      const k = parseInt(document.getElementById('partK').value);
+      for (let c = 0; c < k; c++) {
+        for (let i = 0; i < 18; i++) {
+          partPoints.push({
+            x: Math.max(20, Math.min(540, centers[c].x + (Math.random() - 0.5) * 80)),
+            y: Math.max(20, Math.min(240, centers[c].y + (Math.random() - 0.5) * 60))
+          });
+        }
+      }
+      resetPartitioning();
+    }
+
+    function resetPartitioning() {
+      const k = parseInt(document.getElementById('partK').value);
+      if (partPoints.length === 0) generateRandomClusters();
+      centroids = [];
+      clusterAssignments = new Array(partPoints.length).fill(-1);
+
+      // Initialize centroids randomly from points
+      const perm = [...Array(partPoints.length).keys()].sort(() => Math.random() - 0.5);
+      for (let i = 0; i < k; i++) {
+        centroids.push({ x: partPoints[perm[i]].x, y: partPoints[perm[i]].y });
+      }
+
+      document.getElementById('partStatus').innerText = 'Initialized seeds';
+      document.getElementById('partSSE').innerText = '---';
+      drawPartitioningCanvas();
+    }
+
+    function initPartitioningCanvas() {
+      if (partPoints.length === 0) generateRandomClusters();
+      const cvs = document.getElementById('partCanvas');
+      if (cvs && !cvs.dataset.bound) {
+        cvs.dataset.bound = 'true';
+        cvs.addEventListener('click', (e) => {
+          const rect = cvs.getBoundingClientRect();
+          partPoints.push({
+            x: (e.clientX - rect.left) * (cvs.width / rect.width),
+            y: (e.clientY - rect.top) * (cvs.height / rect.height)
+          });
+          clusterAssignments.push(-1);
+          drawPartitioningCanvas();
+        });
+      }
+      drawPartitioningCanvas();
+    }
+
+    function stepPartitioning() {
+      const algo = document.getElementById('partAlgo').value;
+      const k = centroids.length;
+      let totalSSE = 0;
+
+      // 1. Assignment step
+      for (let i = 0; i < partPoints.length; i++) {
+        let minDist = Infinity;
+        let bestC = 0;
+        for (let c = 0; c < k; c++) {
+          const d2 = Math.pow(partPoints[i].x - centroids[c].x, 2) + Math.pow(partPoints[i].y - centroids[c].y, 2);
+          if (d2 < minDist) { minDist = d2; bestC = c; }
+        }
+        clusterAssignments[i] = bestC;
+        totalSSE += minDist;
+      }
+
+      // 2. Update step
+      if (algo === 'kmeans') {
+        for (let c = 0; c < k; c++) {
+          const pts = partPoints.filter((_, idx) => clusterAssignments[idx] === c);
+          if (pts.length > 0) {
+            centroids[c].x = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+            centroids[c].y = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+          }
+        }
+      } else {
+        // K-Medoids: pick member point that minimizes sum of distances
+        for (let c = 0; c < k; c++) {
+          const indices = partPoints.map((_, idx) => idx).filter(idx => clusterAssignments[idx] === c);
+          if (indices.length > 0) {
+            let bestMed = centroids[c];
+            let minSum = Infinity;
+            for (let cand of indices) {
+              let curSum = 0;
+              for (let other of indices) {
+                curSum += Math.sqrt(Math.pow(partPoints[cand].x - partPoints[other].x, 2) + Math.pow(partPoints[cand].y - partPoints[other].y, 2));
+              }
+              if (curSum < minSum) { minSum = curSum; bestMed = { x: partPoints[cand].x, y: partPoints[cand].y }; }
+            }
+            centroids[c] = bestMed;
+          }
+        }
+      }
+
+      document.getElementById('partStatus').innerText = 'Step updated';
+      document.getElementById('partSSE').innerText = totalSSE.toFixed(1);
+      drawPartitioningCanvas();
+    }
+
+    function runPartitioning() {
+      for (let i = 0; i < 15; i++) stepPartitioning();
+      document.getElementById('partStatus').innerText = 'Converged! ✓';
+    }
+
+    function drawPartitioningCanvas() {
+      const cvs = document.getElementById('partCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      // Points
+      for (let i = 0; i < partPoints.length; i++) {
+        const c = clusterAssignments[i];
+        ctx.fillStyle = c >= 0 ? clusterColors[c % clusterColors.length] : '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(partPoints[i].x, partPoints[i].y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Centroids
+      for (let c = 0; c < centroids.length; c++) {
+        ctx.fillStyle = clusterColors[c % clusterColors.length];
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(centroids[c].x, centroids[c].y, 9, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+
+        ctx.fillStyle = '#000'; ctx.font = 'bold 9px sans-serif';
+        ctx.fillText('C' + (c + 1), centroids[c].x - 6, centroids[c].y + 3);
+      }
+    }
+
+    // ── SIMULATOR 3: DENDROGRAM SIMULATOR ──
+    function drawDendrogram() {
+      const cvs = document.getElementById('dendroCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      const items = ['Obj A', 'Obj B', 'Obj C', 'Obj D', 'Obj E', 'Obj F'];
+      const xs = [50, 130, 210, 310, 390, 480];
+      const method = document.getElementById('linkageSelect').value;
+
+      ctx.fillStyle = '#94a3b8'; ctx.font = '11px monospace';
+      xs.forEach((x, i) => { ctx.fillText(items[i], x - 18, 225); });
+
+      ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 2;
+
+      // Tree branches
+      ctx.beginPath();
+      // Merge A and B
+      ctx.moveTo(50, 210); ctx.lineTo(50, 170); ctx.lineTo(130, 170); ctx.lineTo(130, 210);
+      // Merge D and E
+      const hDE = method === 'single' ? 180 : 160;
+      ctx.moveTo(310, 210); ctx.lineTo(310, hDE); ctx.lineTo(390, hDE); ctx.lineTo(390, 210);
+      // Merge C into (AB)
+      const hABC = method === 'complete' ? 120 : (method === 'single' ? 140 : 130);
+      ctx.moveTo(90, 170); ctx.lineTo(90, hABC); ctx.lineTo(210, hABC); ctx.lineTo(210, 210);
+      // Merge F into (DE)
+      const hDEF = method === 'single' ? 130 : 110;
+      ctx.moveTo(350, hDE); ctx.lineTo(350, hDEF); ctx.lineTo(480, hDEF); ctx.lineTo(480, 210);
+      // Root merge
+      const hRoot = method === 'single' ? 70 : 50;
+      ctx.moveTo(150, hABC); ctx.lineTo(150, hRoot); ctx.lineTo(415, hRoot); ctx.lineTo(415, hDEF);
+      ctx.stroke();
+
+      // Cut threshold dashed line
+      const cutY = 120;
+      ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
+      ctx.beginPath(); ctx.moveTo(20, cutY); ctx.lineTo(540, cutY); ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#f43f5e'; ctx.font = 'bold 11px sans-serif';
+      ctx.fillText('Cut Threshold Line', 420, cutY - 6);
+    }
+
+    // ── SIMULATOR 4: DBSCAN DENSITY SIMULATOR ──
+    let dbPoints = [];
+
+    function generateDBSCANPoints() {
+      dbPoints = [];
+      // Outer ring
+      for (let i = 0; i < 40; i++) {
+        const theta = (i / 40) * Math.PI * 2;
+        const r = 90 + (Math.random() - 0.5) * 16;
+        dbPoints.push({ x: 280 + r * Math.cos(theta), y: 130 + r * Math.sin(theta) });
+      }
+      // Inner circle
+      for (let i = 0; i < 24; i++) {
+        const theta = (i / 24) * Math.PI * 2;
+        const r = 35 + (Math.random() - 0.5) * 14;
+        dbPoints.push({ x: 280 + r * Math.cos(theta), y: 130 + r * Math.sin(theta) });
+      }
+      // Random noise
+      for (let i = 0; i < 15; i++) {
+        dbPoints.push({ x: 30 + Math.random() * 500, y: 20 + Math.random() * 220 });
+      }
+      runDBSCAN();
+    }
+
+    function runDBSCAN() {
+      const eps = parseFloat(document.getElementById('epsRange').value);
+      const minPts = parseInt(document.getElementById('minPtsRange').value);
+      document.getElementById('epsLabel').innerText = eps;
+      document.getElementById('minPtsLabel').innerText = minPts;
+
+      if (dbPoints.length === 0) generateDBSCANPoints();
+
+      const n = dbPoints.length;
+      const neighbors = [];
+      const core = new Array(n).fill(false);
+      const border = new Array(n).fill(false);
+      const cluster = new Array(n).fill(-1);
+      let curCluster = 0;
+
+      for (let i = 0; i < n; i++) {
+        neighbors[i] = [];
+        for (let j = 0; j < n; j++) {
+          const d = Math.sqrt(Math.pow(dbPoints[i].x - dbPoints[j].x, 2) + Math.pow(dbPoints[i].y - dbPoints[j].y, 2));
+          if (d <= eps) neighbors[i].push(j);
+        }
+        if (neighbors[i].length >= minPts) core[i] = true;
+      }
+
+      const visited = new Array(n).fill(false);
+      for (let i = 0; i < n; i++) {
+        if (!visited[i] && core[i]) {
+          visited[i] = true;
+          cluster[i] = curCluster;
+          const queue = [...neighbors[i]];
+          while (queue.length > 0) {
+            const q = queue.pop();
+            if (!visited[q]) {
+              visited[q] = true;
+              cluster[q] = curCluster;
+              if (core[q]) queue.push(...neighbors[q]);
+              else border[q] = true;
+            } else if (cluster[q] === -1) {
+              cluster[q] = curCluster;
+              if (!core[q]) border[q] = true;
+            }
+          }
+          curCluster++;
+        }
+      }
+
+      let cCount = 0, bCount = 0, nCount = 0;
+      for (let i = 0; i < n; i++) {
+        if (core[i]) cCount++;
+        else if (cluster[i] >= 0) bCount++;
+        else nCount++;
+      }
+
+      document.getElementById('coreCount').innerText = cCount;
+      document.getElementById('borderCount').innerText = bCount;
+      document.getElementById('noiseCount').innerText = nCount;
+      document.getElementById('dbscanClusterCount').innerText = curCluster;
+
+      // Draw DBSCAN canvas
+      const cvs = document.getElementById('dbscanCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      const colors = ['#6366f1', '#ec4899', '#10b981', '#06b6d4', '#f59e0b'];
+
+      for (let i = 0; i < n; i++) {
+        if (cluster[i] === -1) {
+          // Noise
+          ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(dbPoints[i].x - 4, dbPoints[i].y - 4); ctx.lineTo(dbPoints[i].x + 4, dbPoints[i].y + 4);
+          ctx.moveTo(dbPoints[i].x + 4, dbPoints[i].y - 4); ctx.lineTo(dbPoints[i].x - 4, dbPoints[i].y + 4);
+          ctx.stroke();
+        } else {
+          ctx.fillStyle = colors[cluster[i] % colors.length];
+          ctx.beginPath();
+          ctx.arc(dbPoints[i].x, dbPoints[i].y, core[i] ? 5.5 : 3.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (core[i]) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(dbPoints[i].x, dbPoints[i].y, eps, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    // ── SIMULATOR 5: SILHOUETTE SANDBOX ──
+    function drawSilhouetteSandbox() {
+      const cvs = document.getElementById('silCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      const sep = parseFloat(document.getElementById('sepRange').value);
+      const c1X = 160, c2X = 160 + sep;
+
+      // Generate 12 fixed relative points per cluster
+      const c1Points = [
+        { dx: -25, dy: -20 }, { dx: 15, dy: -30 }, { dx: -10, dy: 15 },
+        { dx: 25, dy: 25 }, { dx: -35, dy: 5 }, { dx: 10, dy: -10 }
+      ].map(p => ({ x: c1X + p.dx, y: 110 + p.dy, c: 0 }));
+
+      const c2Points = [
+        { dx: -20, dy: -25 }, { dx: 25, dy: -15 }, { dx: -15, dy: 20 },
+        { dx: 20, dy: 15 }, { dx: 5, dy: -5 }, { dx: -30, dy: 0 }
+      ].map(p => ({ x: c2X + p.dx, y: 110 + p.dy, c: 1 }));
+
+      const all = [...c1Points, ...c2Points];
+
+      // Draw cluster blobs
+      ctx.fillStyle = '#06b6d4';
+      c1Points.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2); ctx.fill(); });
+
+      ctx.fillStyle = '#ec4899';
+      c2Points.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2); ctx.fill(); });
+
+      // Compute silhouette scores
+      let silSum = 0;
+      all.forEach((p, i) => {
+        const same = all.filter((o, idx) => o.c === p.c && idx !== i);
+        const diff = all.filter(o => o.c !== p.c);
+
+        const a = same.reduce((s, o) => s + Math.hypot(p.x - o.x, p.y - o.y), 0) / same.length;
+        const b = diff.reduce((s, o) => s + Math.hypot(p.x - o.x, p.y - o.y), 0) / diff.length;
+        const s = (b - a) / Math.max(a, b);
+        silSum += s;
+      });
+
+      const meanSil = silSum / all.length;
+      document.getElementById('meanSilScore').innerText = (meanSil >= 0 ? '+' : '') + meanSil.toFixed(2);
+
+      let interp = 'Weak / Artificial Structure (< 0.25)';
+      if (meanSil >= 0.7) interp = 'Strong Cluster Structure (> 0.70) ✓';
+      else if (meanSil >= 0.5) interp = 'Reasonable Structure (0.50 - 0.70)';
+      else if (meanSil >= 0.25) interp = 'Weak Structure (0.25 - 0.50)';
+      document.getElementById('silInterp').innerText = interp;
+
+      // Draw Mini Silhouette Bar Chart on the right
+      const barX = 420;
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(barX, 30); ctx.lineTo(barX, 190); ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8'; ctx.font = '10px monospace';
+      ctx.fillText('-1.0', barX - 35, 190);
+      ctx.fillText('0.0', barX - 10, 190);
+      ctx.fillText('+1.0', barX + 25, 190);
+
+      const barWidth = meanSil * 45;
+      ctx.fillStyle = meanSil >= 0.5 ? '#10b981' : (meanSil >= 0.25 ? '#f59e0b' : '#f43f5e');
+      ctx.fillRect(barX, 70, barWidth, 40);
+    }
+
+    // ── QUIZ LOGIC ──
+    function checkClusterQuiz() {
+      const q1 = document.querySelector('input[name="cq1"]:checked');
+      const q2 = document.querySelector('input[name="cq2"]:checked');
+      const q3 = document.querySelector('input[name="cq3"]:checked');
+
+      const res = document.getElementById('cluster-quiz-result');
+      res.classList.remove('hidden');
+
+      if (!q1 || !q2 || !q3) {
+        res.className = 'text-center p-3 rounded-lg font-bold text-xs mt-2 bg-amber-950/60 border border-amber-800 text-amber-200';
+        res.innerText = 'Please answer all questions before submitting!';
+        return;
+      }
+
+      let score = 0;
+      if (q1.value === 'b') score++;
+      if (q2.value === 'a') score++;
+      if (q3.value === 'b') score++;
+
+      if (score === 3) {
+        res.className = 'text-center p-3 rounded-lg font-bold text-xs mt-2 bg-emerald-950/60 border border-emerald-800 text-emerald-200';
+        res.innerHTML = `🎉 Outstanding! 3/3 Correct. You have mastered core clustering essentials!`;
+      } else {
+        res.className = 'text-center p-3 rounded-lg font-bold text-xs mt-2 bg-rose-950/60 border border-rose-800 text-rose-200';
+        res.innerHTML = `Score: ${score}/3. Review Q1 (Voronoi partitions), Q2 (CF additivity), and Q3 (Hopkins statistic).`;
+      }
+    }
+
+    // Initialize on page load
+    window.onload = function() {
+      initMetricSandbox();
+      initPartitioningCanvas();
+      drawDendrogram();
+      generateDBSCANPoints();
+      drawSilhouetteSandbox();
+    };
+  </script>
+</body>
+</html>

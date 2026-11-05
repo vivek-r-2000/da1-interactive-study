@@ -271,7 +271,7 @@
               <div class="p-3.5 rounded-xl bg-[#090d16] border border-emerald-500/40">
                 <span class="badge bg-emerald-500/20 text-emerald-300">2. Wrapper Methods</span>
                 <h4 class="font-bold text-white text-sm my-1.5">Model as Evaluator</h4>
-                <p class="text-xs text-slate-400">Uses the classifier itself to test feature subsets (Forward Selection, Backward Elimination). Very accurate, but computationally expensive ($2^p - 1$ subsets).</p>
+                <p class="text-xs text-slate-400">Uses the classifier itself to test feature subsets (Forward Selection, Backward Elimination). Very accurate, but computationally expensive (\$2^p - 1$ subsets).</p>
               </div>
               <div class="p-3.5 rounded-xl bg-[#090d16] border border-purple-500/40">
                 <span class="badge bg-purple-500/20 text-purple-300">3. Embedded Methods</span>
@@ -279,7 +279,7 @@
                 <p class="text-xs text-slate-400">Feature selection happens simultaneously during model training. E.g., Decision Tree node splits, LASSO ($L_1$ penalty forcing zero coefficients).</p>
               </div>
             </div>
-            <p><strong>Slide Rule of Thumb:</strong> When you have $100,000$ features, run a fast <em>Filter</em> first to drop to $500$, then use a <em>Wrapper</em> or <em>Embedded</em> model for final optimization!</p>
+            <p><strong>Slide Rule of Thumb:</strong> When you have \$100,000$ features, run a fast <em>Filter</em> first to drop to \$500$, then use a <em>Wrapper</em> or <em>Embedded</em> model for final optimization!</p>
           </div>
         </div>
       </div>
@@ -324,7 +324,7 @@
                 <div class="flip-back">
                   <div class="text-2xl mb-2">✅</div>
                   <h3 class="font-bold text-base mb-2">The Exponential Wall!</h3>
-                  <p class="text-xs max-w-md">With $p = 5000$, testing all feature subsets requires $2^{5000} - 1$ model training evaluations—far greater than atoms in the known universe! Even greedy sequential search would require training thousands of full classifiers, leading to prohibitive runtime and severe overfitting.</p>
+                  <p class="text-xs max-w-md">With $p = 5000$, testing all feature subsets requires \$2^{5000} - 1$ model training evaluations—far greater than atoms in the known universe! Even greedy sequential search would require training thousands of full classifiers, leading to prohibitive runtime and severe overfitting.</p>
                 </div>
               </div>
             </div>
@@ -360,7 +360,7 @@
             <div class="p-3 bg-slate-900 border border-slate-700 rounded-xl mb-3 font-mono text-xs text-indigo-300 text-center">
               Joint Probability: $P(x_1, \dots, x_n) = \prod_{i=1}^n P(x_i \mid \text{Parents}(X_i))$
             </div>
-            <p class="text-xs text-slate-400">If a node has no parents, its CPT is just its prior probability $P(X)$. This factorization radically reduces the number of probabilities required from $2^n$ to a small polynomial!</p>
+            <p class="text-xs text-slate-400">If a node has no parents, its CPT is just its prior probability $P(X)$. This factorization radically reduces the number of probabilities required from \$2^n$ to a small polynomial!</p>
           </div>
         </div>
       </div>
@@ -640,7 +640,7 @@
               <ul class="list-disc list-inside mt-1 space-y-0.5 text-slate-400">
                 <li>Annotating 1 minute of human speech requires <strong>10 minutes</strong> of human labor.</li>
                 <li>Annotating environmental audio sounds takes <strong>400 times</strong> longer than real time!</li>
-                <li>Medical pathology image annotation requires certified oncologists ($200+/hr).</li>
+                <li>Medical pathology image annotation requires certified oncologists (\$200+/hr).</li>
               </ul>
             </div>
             
@@ -854,7 +854,7 @@
           <div class="card-tag">Section 6: Soft Computing • Card 27 of 30</div>
           <h2 class="card-header">Fuzzy Sets & Membership Functions (Slides #74–87)</h2>
           <div class="card-body">
-            <p><strong>Classical Logic (Crisp):</strong> An element belongs to a set ($1$) or it does not ($0$). If "Young" is defined as $\le 30$, a person on their 30th birthday is young, but on their 30th birthday + 1 day they are old!</p>
+            <p><strong>Classical Logic (Crisp):</strong> An element belongs to a set (\$1$) or it does not (\$0$). If "Young" is defined as $\le 30$, a person on their 30th birthday is young, but on their 30th birthday + 1 day they are old!</p>
             <p><strong>Fuzzy Logic (Lotfi Zadeh):</strong> Objects have a <strong>degree of membership</strong> $\mu_A(x) \in [0.0, 1.0]$.</p>
             <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-300 mb-3">
               <strong>Example (Slide #87):</strong>
@@ -932,7 +932,7 @@
                 <p class="font-bold text-white mb-2">3. What is the fundamental difference between Crisp Sets and Fuzzy Sets?</p>
                 <div class="space-y-1.5 text-slate-300">
                   <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q3" value="a" class="mr-2"/> A) Crisp sets have degrees of membership between 0 and 1; fuzzy is binary</label>
-                  <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q3" value="b" class="mr-2"/> B) Crisp sets are binary ($0$ or $1$), while Fuzzy sets allow continuous membership $\mu \in [0.0, 1.0]$</label>
+                  <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q3" value="b" class="mr-2"/> B) Crisp sets are binary (\$0$ or \$1$), while Fuzzy sets allow continuous membership $\mu \in [0.0, 1.0]$</label>
                   <label class="block p-2 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="q3" value="c" class="mr-2"/> C) Fuzzy sets cannot handle numerical data</label>
                 </div>
               </div>

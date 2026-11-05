@@ -296,7 +296,7 @@
                 <strong class="text-amber-400">5. Insensitivity to Input Order:</strong> The final clustering structure should not change if the database rows are permuted.
               </div>
               <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-                <strong class="text-cyan-400">6. High Dimensionality:</strong> Handle the "curse of dimensionality" where distance metrics lose contrast as dimension $p 	o \infty$.
+                <strong class="text-cyan-400">6. High Dimensionality:</strong> Handle the "curse of dimensionality" where distance metrics lose contrast as dimension $p \to \infty$.
               </div>
             </div>
           </div>
@@ -365,12 +365,12 @@
               <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                 <strong class="text-purple-400 block mb-1">2. Nominal & Ordinal Attributes:</strong>
                 <p class="text-slate-300">• <strong>Nominal (States $>2$):</strong> Simple matching dissimilarity $d(i, j) = \frac{p - m}{p}$, where $m$ is number of matches.</p>
-                <p class="text-slate-300">• <strong>Ordinal (Ranks $1, \dots, M_f$):</strong> Map rank to normalized range $[0, 1]$ via $z_{if} = \frac{r_{if} - 1}{M_f - 1}$, then apply Minkowski distance.</p>
+                <p class="text-slate-300">• <strong>Ordinal (Ranks \$1, \dots, M_f$):</strong> Map rank to normalized range $[0, 1]$ via $z_{if} = \frac{r_{if} - 1}{M_f - 1}$, then apply Minkowski distance.</p>
               </div>
 
               <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                 <strong class="text-pink-400 block mb-1">3. Mixed Types: Gower's General Dissimilarity Coefficient (Slide #26):</strong>
-                <p class="text-slate-300">Blends all attribute types into a single distance: $$d(i, j) = \frac{\sum_{f=1}^p \delta_{ij}^{(f)} d_{ij}^{(f)}}{\sum_{f=1}^p \delta_{ij}^{(f)}}$$ where $\delta_{ij}^{(f)} = 0$ if values are missing or asymmetric binary mutual zeros ($0-0$), and $1$ otherwise.</p>
+                <p class="text-slate-300">Blends all attribute types into a single distance: $$d(i, j) = \frac{\sum_{f=1}^p \delta_{ij}^{(f)} d_{ij}^{(f)}}{\sum_{f=1}^p \delta_{ij}^{(f)}}$$ where $\delta_{ij}^{(f)} = 0$ if values are missing or asymmetric binary mutual zeros (\$0-0$), and \$1$ otherwise.</p>
               </div>
 
               <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
@@ -433,7 +433,7 @@
                 </div>
                 <div class="flip-card-back">
                   <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2">Answer:</span>
-                  <p class="text-xs leading-relaxed text-indigo-100">Most diseases and symptoms are rare: two healthy patients both lacking 999 diseases out of 1000 would have a Simple Matching similarity of 99.9%! In asymmetric binary data, mutual negative absence ($0-0$) carries zero clinical meaning. Jaccard distance eliminates mutual zeros ($t$) from the denominator: $d = \frac{r+s}{q+r+s}$.</p>
+                  <p class="text-xs leading-relaxed text-indigo-100">Most diseases and symptoms are rare: two healthy patients both lacking 999 diseases out of 1000 would have a Simple Matching similarity of 99.9%! In asymmetric binary data, mutual negative absence (\$0-0$) carries zero clinical meaning. Jaccard distance eliminates mutual zeros ($t$) from the denominator: $d = \frac{r+s}{q+r+s}$.</p>
                 </div>
               </div>
             </div>
@@ -539,7 +539,7 @@
           <h2 class="card-header">Scaling K-Medoids: CLARA & CLARANS (Slide #63-71)</h2>
           <div class="card-body">
             <h3 class="font-bold text-sky-400 text-sm mb-1">1. CLARA (Clustering LARge Applications - Kaufman & Rousseeuw 1990)</h3>
-            <p class="text-xs text-slate-300 mb-2">Draws multiple random samples (typically 5 samples of size $40 + 2k$), applies PAM on each sample to find the best $k$ medoids, and assigns the entire dataset to the best sample medoids.</p>
+            <p class="text-xs text-slate-300 mb-2">Draws multiple random samples (typically 5 samples of size \$40 + 2k$), applies PAM on each sample to find the best $k$ medoids, and assigns the entire dataset to the best sample medoids.</p>
             <p class="text-xs text-slate-400 mb-3"><strong>Limitation:</strong> If the true medoids are missed in the sample, CLARA can never find them!</p>
 
             <div class="my-3 border-t border-slate-700/60"></div>
@@ -568,7 +568,7 @@
               <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                 <strong class="text-pink-400 block mb-1">1. K-Modes for Categorical Data:</strong>
                 <p class="text-slate-300">• Replaces cluster <strong>means</strong> with cluster <strong>modes</strong> (the most frequent category per attribute).</p>
-                <p class="text-slate-300">• Replaces Euclidean distance with <strong>simple matching dissimilarity</strong>: $d(x, y) = \sum_{j=1}^p \delta(x_j, y_j)$ where $\delta(a,b) = 0$ if equal, $1$ if different.</p>
+                <p class="text-slate-300">• Replaces Euclidean distance with <strong>simple matching dissimilarity</strong>: $d(x, y) = \sum_{j=1}^p \delta(x_j, y_j)$ where $\delta(a,b) = 0$ if equal, \$1$ if different.</p>
                 <p class="text-slate-300">• Updates modes on the fly using category frequencies.</p>
               </div>
 
@@ -1118,7 +1118,7 @@
                 <strong class="text-pink-400 block mb-1">2. Rand Index (RI) & Adjusted Rand Index (ARI):</strong>
                 <p class="text-slate-300 font-mono text-[11px] mb-1">$$RI = \frac{TP + TN}{TP + FP + FN + TN}$$</p>
                 <p class="text-slate-300">• $TP$: pair in same cluster in both $C$ and $C_g$.</p>
-                <p class="text-slate-300">• <strong>ARI corrects for chance:</strong> $ARI = \frac{RI - E[RI]}{\max(RI) - E[RI]} \in [-1, 1]$. Value near $0$ indicates random chance; $1.0$ indicates perfect agreement.</p>
+                <p class="text-slate-300">• <strong>ARI corrects for chance:</strong> $ARI = \frac{RI - E[RI]}{\max(RI) - E[RI]} \in [-1, 1]$. Value near \$0$ indicates random chance; \$1.0$ indicates perfect agreement.</p>
               </div>
             </div>
           </div>
@@ -1217,7 +1217,7 @@
               </div>
 
               <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                <div class="font-bold text-white mb-2">Q3. If the Hopkins statistic $H$ computed on a dataset is $0.51$, what action should the data analyst take?</div>
+                <div class="font-bold text-white mb-2">Q3. If the Hopkins statistic $H$ computed on a dataset is \$0.51$, what action should the data analyst take?</div>
                 <div class="space-y-1.5 text-slate-300">
                   <label class="block p-1.5 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="cq3" value="a" class="mr-2"/> A) Proceed with K-Means with $k=5$</label>
                   <label class="block p-1.5 rounded hover:bg-slate-800 cursor-pointer"><input type="radio" name="cq3" value="b" class="mr-2"/> B) Conclude that data is uniformly distributed (random noise) and contains no genuine clusters</label>

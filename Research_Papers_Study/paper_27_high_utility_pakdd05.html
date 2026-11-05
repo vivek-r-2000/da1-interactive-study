@@ -298,7 +298,7 @@
             <button onclick="answerQuiz(this, false, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">External utility is taxes; Internal utility is cost.</button>
             <button onclick="answerQuiz(this, false, 'q5-exp')" class="quiz-btn w-full text-left p-3 rounded-lg text-xs bg-[#131b2e] border border-[var(--border)] text-slate-300 hover:border-indigo-500 transition-all">They are interchangeable terms for support.</button>
           </div>
-          <div id="q4-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
+          <div id="q5-exp" class="hidden mt-3 p-3 rounded bg-indigo-950/40 border border-indigo-800 text-xs text-indigo-200">
             <strong>Explanation:</strong> Correct! Utility of item i in transaction t is internal utility q(i, t) multiplied by external utility p(i).
           </div>
         </div>
@@ -337,7 +337,7 @@
       } else {
         btn.classList.add('wrong');
       }
-      document.getElementById(explanationId).classList.remove('hidden');
+      const exp = document.getElementById(explanationId); if (exp) exp.classList.remove('hidden');
     }
 
     

@@ -494,7 +494,7 @@
       <div id="progress-bar-fill" style="width:3.8%"></div>
     </div>
   </div>
-  <div id="timer-box" onclick="toggleTimer()" title="Click to pause/resume">⏱ 15:00</div>
+  <div id="timer-box" onclick="toggleTimer()" title="Click to pause/resume">15:00</div>
 </div>
 
 <!-- SIDEBAR -->
@@ -1373,7 +1373,7 @@ function flipCard(id) {
 function formatTime(s) {
   const m = Math.floor(s / 60);
   const sec = s % 60;
-  return `⏱ ${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 
 function startPomodoro() {

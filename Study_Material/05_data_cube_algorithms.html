@@ -437,7 +437,7 @@
     <div id="progress-label">Card 1 of 23 • Section 1 of 6</div>
     <div id="progress-bar-outer"><div id="progress-bar-inner" style="width:4.3%"></div></div>
   </div>
-  <div id="timer-box" onclick="toggleTimer()" title="Click to pause/resume">⏱ 15:00</div>
+  <div id="timer-box" onclick="toggleTimer()" title="Click to pause/resume">15:00</div>
 </div>
 
 <!-- ╔══════════════════════════════════════════════════════╗ -->
@@ -1596,7 +1596,7 @@ function tickTimer() {
 function updateTimerDisplay() {
   const m = Math.floor(timerSeconds/60).toString().padStart(2,'0');
   const s = (timerSeconds%60).toString().padStart(2,'0');
-  document.getElementById('timer-box').textContent = '⏱ '+m+':'+s;
+  document.getElementById('timer-box').textContent = ''+m+':'+s;
 }
 function toggleTimer() {
   timerRunning = !timerRunning;

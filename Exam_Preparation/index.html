@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Preparation Suite | CS4.405 Data Analytics I | IIIT Hyderabad</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              900: '#1e1b4b'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #090d16;
+      color: #f1f5f9;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+    .surface-card {
+      background-color: #0f1420;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .surface-elevated {
+      background-color: #172033;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    .katex-display {
+      margin: 0.75rem 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-slate-200">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-50 border-b border-white/10 bg-[#090d16]/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="../index.html" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors">
+          <span class="font-mono text-xs px-2 py-0.5 rounded border border-white/15 bg-white/5 text-slate-300">CS4.405</span>
+          <span class="font-medium text-sm tracking-tight text-white">Data Analytics I</span>
+        </a>
+        <span class="text-slate-600">/</span>
+        <span class="text-sm font-semibold text-brand-400">Exam Preparation Suite</span>
+      </div>
+
+      <nav class="hidden md:flex items-center space-x-2">
+        <a href="../Study_Material/00_home.html" class="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors">Study Modules</a>
+        <a href="../Research_Papers_Study/00_papers_home.html" class="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors">Research Archive</a>
+        <a href="#exam-engine" class="ml-2 px-3 py-1.5 text-xs font-medium bg-brand-600 hover:bg-brand-500 text-white rounded transition-colors">Launch Mock Exam</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Official Endsem Alert Banner -->
+  <div class="border-b border-white/10 bg-brand-950/40 px-4 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div class="flex items-center space-x-2 text-slate-300">
+        <span class="font-mono px-1.5 py-0.5 bg-brand-500/20 text-brand-300 rounded border border-brand-500/30">Official Endsem Syllabus</span>
+        <span>Based on announcement by <strong>Prof. P. Krishna Reddy</strong> (Han 4th Ed. Ch 1–8, 10.1 + 7 Research Papers).</span>
+      </div>
+      <div class="flex items-center space-x-3 text-slate-400 font-mono">
+        <span class="text-emerald-400">Scientific calculators are allowed</span>
+        <span class="text-slate-600">|</span>
+        <span>Cross-chapter integration questions included</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/10">
+      <div>
+        <div class="flex items-center space-x-2 mb-2">
+          <span class="text-xs font-mono tracking-wider uppercase text-slate-400">Examination Master Portal</span>
+          <span class="inline-block w-1 h-1 rounded-full bg-slate-600"></span>
+          <span class="text-xs font-mono text-slate-400">Monsoon 2026</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">Comprehensive Exam Preparation</h1>
+        <p class="text-sm text-slate-400 mt-1 max-w-2xl">
+          Algorithmic derivations, interactive numerical step solvers, mandated textbook exercises (Ch 2, 3, 4, 6), rapid revision decks for required research papers, and a timed exam engine.
+        </p>
+      </div>
+
+      <!-- Mode Selector -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+        <span class="text-xs font-mono text-slate-400 uppercase tracking-wide">Target Exam:</span>
+        <div class="inline-flex rounded-md p-1 bg-slate-900 border border-white/10" id="exam-mode-selector">
+          <button onclick="setExamMode('endsem')" id="btn-mode-endsem" class="px-3 py-1.5 text-xs font-medium rounded bg-brand-600 text-white transition-all">
+            Endsem Mode (Ch 1-8, 10.1 + 7 Papers)
+          </button>
+          <button onclick="setExamMode('midsem')" id="btn-mode-midsem" class="px-3 py-1.5 text-xs font-medium rounded text-slate-400 hover:text-white transition-all">
+            Midsem (Ch 1-5 + 9 Papers)
+          </button>
+          <button onclick="setExamMode('quiz2')" id="btn-mode-quiz2" class="px-3 py-1.5 text-xs font-medium rounded text-slate-400 hover:text-white transition-all">
+            Quiz 2 (Classification)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Portal Navigation Tabs -->
+    <div class="mt-6 border-b border-white/10 flex space-x-1 sm:space-x-4 overflow-x-auto text-xs font-medium">
+      <button onclick="switchTab('tab-syllabus')" id="tab-btn-syllabus" class="tab-btn px-3 py-2.5 border-b-2 border-brand-500 text-white flex items-center space-x-1.5 whitespace-nowrap">
+        <span>Syllabus & Blueprint</span>
+      </button>
+      <button onclick="switchTab('tab-exercises')" id="tab-btn-exercises" class="tab-btn px-3 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-1.5 whitespace-nowrap">
+        <span>Mandated Textbook Exercises</span>
+        <span class="px-1.5 py-0.2 rounded-full bg-brand-500/20 text-brand-300 font-mono text-[10px]">14 Solved</span>
+      </button>
+      <button onclick="switchTab('tab-solvers')" id="tab-btn-solvers" class="tab-btn px-3 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-1.5 whitespace-nowrap">
+        <span>Interactive Numerical Solvers</span>
+        <span class="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px]">5 Calculators</span>
+      </button>
+      <button onclick="switchTab('tab-papers')" id="tab-btn-papers" class="tab-btn px-3 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-1.5 whitespace-nowrap">
+        <span>Mandatory Research Papers</span>
+        <span class="px-1.5 py-0.2 rounded-full bg-indigo-500/20 text-indigo-300 font-mono text-[10px]">7 Endsem</span>
+      </button>
+      <button onclick="switchTab('tab-cheat-sheet')" id="tab-btn-cheat-sheet" class="tab-btn px-3 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-1.5 whitespace-nowrap">
+        <span>Formula & Calculator Sheet</span>
+      </button>
+      <button onclick="switchTab('tab-integration')" id="tab-btn-integration" class="tab-btn px-3 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-1.5 whitespace-nowrap">
+        <span>Cross-Chapter Synthesis</span>
+      </button>
+      <button onclick="switchTab('tab-mock-exam')" id="tab-btn-mock-exam" class="tab-btn px-3 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-1.5 whitespace-nowrap">
+        <span>Timed Mock Engine</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Main Content Areas -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 flex-1 w-full space-y-8">
+
+    <!-- TAB 1: SYLLABUS & BLUEPRINT -->
+    <section id="tab-syllabus" class="tab-content space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Syllabus List Card -->
+        <div class="lg:col-span-2 surface-card rounded-lg p-6 space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-white/10">
+            <div>
+              <h2 class="text-base font-semibold text-white">Official Endsem Topic Coverage</h2>
+              <p class="text-xs text-slate-400">Jiawei Han, Jian Pei, Micheline Kamber (4th & 3rd Editions) + Specified Research Papers</p>
+            </div>
+            <span class="px-2 py-0.5 rounded text-xs font-mono bg-brand-500/10 text-brand-300 border border-brand-500/20">All 10 Modules</span>
+          </div>
+
+          <div class="space-y-4 text-xs">
+            <!-- Ch 1 & 2 -->
+            <div class="p-3.5 rounded bg-slate-900/60 border border-white/5 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-slate-200">1. Chapter 1: Introduction & Chapter 2: Data Preprocessing</span>
+                <span class="font-mono text-slate-400">Exercises 2.2, 2.7, 2.18, 2.19, 2.20</span>
+              </div>
+              <p class="text-slate-400 leading-relaxed">
+                Attribute types (nominal, ordinal, interval, ratio), dissimilarity & distance matrices (Minkowski, Jaccard, Cosine), data cleaning (missing values, noisy data), data integration (Chi-square test $\chi^2$, correlation coefficient $r$), data normalization (Min-max, z-score, decimal scaling), and discretization.
+              </p>
+            </div>
+
+            <!-- Ch 3 -->
+            <div class="p-3.5 rounded bg-slate-900/60 border border-white/5 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-slate-200">2. Chapter 3: Data Warehousing & OLAP Technology</span>
+                <span class="font-mono text-slate-400">Sections 3.1–3.4, 3.5.2 | Exercises 3.15, 3.17, 3.18, 3.22</span>
+              </div>
+              <p class="text-slate-400 leading-relaxed">
+                Multidimensional data models (star, snowflake, fact constellation), OLAP operations (roll-up, drill-down, slice, dice, pivot), Data Cube Computation, and <strong>BUC (Bottom-Up Computation)</strong> algorithm for sparse iceberg cubes with cardinality sorting heuristic.
+              </p>
+            </div>
+
+            <!-- Ch 4 & 5 -->
+            <div class="p-3.5 rounded bg-slate-900/60 border border-white/5 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-slate-200">3. Chapters 4 & 5: Pattern Mining (Basic & Advanced)</span>
+                <span class="font-mono text-slate-400">All Sec in Ch 4, Sec 5.1 | Exercises 4.3, 4.6, 4.10</span>
+              </div>
+              <p class="text-slate-400 leading-relaxed">
+                Apriori candidate generation ($L_{k-1} \bowtie L_{k-1}$ join and prune steps), FP-Growth (FP-Tree construction and conditional pattern bases), ECLAT vertical format (TID-sets). <strong>Endsem Research Papers:</strong> Multi-Level Association Rules (Han & Fu '99), Quantitative Association Rules (Srikant & Agrawal '96), Two-Phase High Utility Itemsets (Liu et al. '05).
+              </p>
+            </div>
+
+            <!-- Ch 6 & 7 -->
+            <div class="p-3.5 rounded bg-slate-900/60 border border-white/5 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-slate-200">4. Chapters 6 & 7: Classification (Basic & Advanced)</span>
+                <span class="font-mono text-slate-400">All Sec in Ch 6, Sec 7.1, 7.2.1, 7.3, 7.5, 7.6, 7.7.1, 7.7.3 | Exercises 6.7, 6.19</span>
+              </div>
+              <p class="text-slate-400 leading-relaxed">
+                Decision Tree Induction (Entropy, Information Gain, Gain Ratio, Gini Index), Naive Bayes Classifier with Laplace smoothing, Bayesian Belief Networks (BBN/CPT), Support Vector Machines (SVM maximum margin $\gamma = 2/\|\vec{w}\|$, linear & non-linear kernels, soft margin slack variables), k-NN lazy learner, Weak & Semi-supervised learning.
+              </p>
+            </div>
+
+            <!-- Ch 8 -->
+            <div class="p-3.5 rounded bg-slate-900/60 border border-white/5 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-slate-200">5. Chapter 8: Cluster Analysis (Basic Concepts & Methods)</span>
+                <span class="font-mono text-slate-400">All Topics | 4 Research Papers</span>
+              </div>
+              <p class="text-slate-400 leading-relaxed">
+                Partitioning methods (k-Means, k-Medoids PAM), Hierarchical clustering (AGNES, DIANA, distance metrics). <strong>Endsem Research Papers:</strong> CLARANS (Ng & Han '94), BIRCH CF-Tree (Zhang et al. '96), DBSCAN density-based clustering (Ester et al. '96), CHAMELEON dynamic modeling (Karypis et al. '99).
+              </p>
+            </div>
+
+            <!-- Ch 10.1 & Special Topics -->
+            <div class="p-3.5 rounded bg-slate-900/60 border border-white/5 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-slate-200">6. Deep Learning Overview & Special Topics (Slides only)</span>
+                <span class="font-mono text-slate-400">Section 10.1 of Ch 10 + Presentation Slides</span>
+              </div>
+              <p class="text-slate-400 leading-relaxed">
+                Perceptron model, Multi-Layer Perceptrons (MLP), forward pass, backpropagation gradient descent, activation functions (Sigmoid, ReLU). Slides: Advances in Cluster Analysis, Introduction to Outlier Analysis (statistical, proximity, density, clustering-based), and Trends in Data Mining.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exam Strategy & Traps Sidebar -->
+        <div class="space-y-6">
+          <div class="surface-card rounded-lg p-5 space-y-4">
+            <h3 class="text-xs font-mono uppercase tracking-wider text-brand-400 font-semibold">Scientific Calculator Operational Guide</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Prof. Reddy officially noted that scientific calculators are permitted. Make sure you utilize these operations efficiently during numerical questions:
+            </p>
+            <ul class="text-xs text-slate-400 space-y-2.5">
+              <li class="flex items-start space-x-2">
+                <span class="text-brand-400 font-mono mt-0.5">•</span>
+                <span><strong>Logarithm Base 2:</strong> Compute $\log_2(p) = \frac{\ln(p)}{\ln(2)}$ or $\frac{\log_{10}(p)}{\log_{10}(2)}$. Do not round intermediate logs!</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <span class="text-brand-400 font-mono mt-0.5">•</span>
+                <span><strong>Entropy Accumulator:</strong> Store parent $Info(D)$ in memory register `M+`. Compute each partition $Info(D_j)$ and sum weighted proportions directly.</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <span class="text-brand-400 font-mono mt-0.5">•</span>
+                <span><strong>Chi-Square $(\chi^2)$:</strong> Calculate expected frequencies $E_{ij} = \frac{R_i \times C_j}{N}$ using two-variable statistics or fraction operations.</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <span class="text-brand-400 font-mono mt-0.5">•</span>
+                <span><strong>Vector Norms in SVM:</strong> Use Pythagoras or polar conversions to compute $\|\vec{w}\| = \sqrt{w_1^2 + w_2^2}$ for margin $\frac{2}{\|\vec{w}\|}$.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="surface-card rounded-lg p-5 space-y-3">
+            <h3 class="text-xs font-mono uppercase tracking-wider text-amber-400 font-semibold">Cross-Chapter Integration Notice</h3>
+            <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded text-xs text-slate-300 leading-relaxed">
+              "Questions may be given by connecting the topics discussed in several chapters."
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Expect questions that fuse multiple techniques, such as using clustering (Ch 8) to discretize continuous attributes before mining quantitative association rules (Ch 5) or training decision trees (Ch 6).
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: MANDATED TEXTBOOK EXERCISES SOLVED -->
+    <section id="tab-exercises" class="tab-content hidden space-y-6">
+      <div class="surface-card rounded-lg p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+          <div>
+            <h2 class="text-base font-semibold text-white">Mandated Textbook Exercises (Fully Solved)</h2>
+            <p class="text-xs text-slate-400">Step-by-step rigorous solutions for exercises specified in the official Moodle Endsem announcement.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs text-slate-400">Filter Chapter:</span>
+            <select id="exercise-filter" onchange="filterExercises(this.value)" class="text-xs bg-slate-900 border border-white/15 rounded px-2.5 py-1 text-slate-200">
+              <option value="all">All Mandated (14 Exercises)</option>
+              <option value="ch2">Chapter 2 (2.2, 2.7, 2.18, 2.19, 2.20)</option>
+              <option value="ch3">Chapter 3 (3.15, 3.17, 3.18, 3.22)</option>
+              <option value="ch4">Chapter 4 (4.3, 4.6, 4.10)</option>
+              <option value="ch6">Chapter 6 (6.7, 6.19)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-4" id="exercises-container">
+
+          <!-- Exercise 2.2 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch2">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 2.2 — Attribute Types & Measurement Scales</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 2: Data Preprocessing</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> Suppose that the values for a given attribute $A$ are: (a) age, (b) temperature in Celsius, (c) income, (d) zip code, (e) customer satisfaction ranking. Classify each attribute as nominal, ordinal, interval, or ratio, and state whether it is qualitative (categorical) or quantitative (numeric).
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <p><strong>Step-by-Step Solution:</strong></p>
+              <ul class="list-disc pl-5 space-y-1">
+                <li><strong>(a) Age:</strong> Quantitative (numeric), <strong>Ratio scale</strong>. Meaningful true zero point ($0$ represents absence of age / birth), and ratio comparisons are valid (e.g. 40 years is twice as old as 20 years).</li>
+                <li><strong>(b) Temperature in Celsius:</strong> Quantitative (numeric), <strong>Interval scale</strong>. $0^\circ\text{C}$ is arbitrary (freezing point of water, not absence of thermal energy). $20^\circ\text{C}$ is not "twice as hot" as $10^\circ\text{C}$.</li>
+                <li><strong>(c) Income:</strong> Quantitative (numeric), <strong>Ratio scale</strong>. Has an absolute zero point (\$0 represents no income) and ratios are preserved.</li>
+                <li><strong>(d) Zip Code:</strong> Qualitative (categorical), <strong>Nominal scale</strong>. The digits serve solely as identifiers/labels; arithmetic differences between zip codes have no numeric meaning.</li>
+                <li><strong>(e) Customer Satisfaction (Poor, Fair, Good, Excellent):</strong> Qualitative (categorical), <strong>Ordinal scale</strong>. Values have a meaningful relative ranking order, but the differences between successive ranks are not quantifiable.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Exercise 2.7 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch2">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 2.7 — Cosine vs. Euclidean vs. Jaccard Similarity</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 2: Data Preprocessing</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> Given two document term-frequency vectors $\vec{x} = (5, 0, 3, 0, 2, 0, 0, 2, 0, 0)$ and $\vec{y} = (3, 0, 2, 0, 1, 1, 0, 1, 0, 1)$. (a) Find the Cosine similarity $\text{sim}(\vec{x}, \vec{y})$. (b) Find the Euclidean distance $d(\vec{x}, \vec{y})$. (c) If vectors represent asymmetric binary attributes, compute the Jaccard coefficient $J(\vec{x}, \vec{y})$.
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <p><strong>Step-by-Step Derivation:</strong></p>
+              <div>
+                <strong>(a) Cosine Similarity:</strong>
+                $$\vec{x} \cdot \vec{y} = (5 \times 3) + (0 \times 0) + (3 \times 2) + 0 + (2 \times 1) + 0 + 0 + (2 \times 1) + 0 + 0 = 15 + 6 + 2 + 2 = 25$$
+                $$\|\vec{x}\| = \sqrt{5^2 + 0^2 + 3^2 + 0^2 + 2^2 + 0^2 + 0^2 + 2^2 + 0^2 + 0^2} = \sqrt{25 + 9 + 4 + 4} = \sqrt{42} \approx 6.4807$$
+                $$\|\vec{y}\| = \sqrt{3^2 + 0^2 + 2^2 + 0^2 + 1^2 + 1^2 + 0^2 + 1^2 + 0^2 + 1^2} = \sqrt{9 + 4 + 1 + 1 + 1 + 1} = \sqrt{17} \approx 4.1231$$
+                $$\text{sim}(\vec{x}, \vec{y}) = \frac{\vec{x} \cdot \vec{y}}{\|\vec{x}\| \|\vec{y}\|} = \frac{25}{\sqrt{42 \times 17}} = \frac{25}{\sqrt{714}} \approx \frac{25}{26.7208} = \mathbf{0.9356}$$
+              </div>
+              <div class="pt-2">
+                <strong>(b) Euclidean Distance:</strong>
+                $$d(\vec{x}, \vec{y}) = \sqrt{(5-3)^2 + (3-2)^2 + (2-1)^2 + (0-1)^2 + (2-1)^2 + (0-1)^2} = \sqrt{4 + 1 + 1 + 1 + 1 + 1} = \sqrt{9} = \mathbf{3.0}$$
+              </div>
+              <div class="pt-2">
+                <strong>(c) Asymmetric Binary Jaccard Coefficient:</strong>
+                $$q = \text{items where both } x_i > 0 \text{ and } y_i > 0 = 3 \text{ terms (indices 1, 3, 5, 8: wait, indices 1, 3, 5, 8 are both non-zero} \Rightarrow q=4)$$
+                $$r = \text{items where } x_i > 0 \text{ and } y_i = 0 \Rightarrow 0 \text{ terms}$$
+                $$s = \text{items where } x_i = 0 \text{ and } y_i > 0 = 2 \text{ terms (indices 6, 10)}$$
+                $$J(\vec{x}, \vec{y}) = \frac{q}{q + r + s} = \frac{4}{4 + 0 + 2} = \frac{4}{6} = \mathbf{0.667}$$
+              </div>
+            </div>
+          </div>
+
+          <!-- Exercise 2.18 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch2">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 2.18 — Data Normalization Transformations</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 2: Data Preprocessing</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> Given a sample dataset for attribute $A$: $\{200, 300, 400, 600, 1000\}$. Normalize value $v = 400$ by: (a) Min-max normalization into $[0, 1]$, (b) z-score normalization (with $\mu=500, \sigma=296.65$), (c) Normalization by decimal scaling.
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <p><strong>Step-by-Step Solution:</strong></p>
+              <div>
+                <strong>(a) Min-Max Normalization:</strong> $\min(A) = 200, \max(A) = 1000, [new\_min, new\_max] = [0, 1]$:
+                $$v' = \frac{v - \min(A)}{\max(A) - \min(A)} (new\_max - new\_min) + new\_min = \frac{400 - 200}{1000 - 200}(1) + 0 = \frac{200}{800} = \mathbf{0.25}$$
+              </div>
+              <div class="pt-2">
+                <strong>(b) z-Score Normalization:</strong> Mean $\bar{A} = \frac{200+300+400+600+1000}{5} = 500$, Standard deviation $\sigma \approx 296.65$:
+                $$v' = \frac{v - \bar{A}}{\sigma} = \frac{400 - 500}{296.65} = \frac{-100}{296.65} \approx \mathbf{-0.337}$$
+              </div>
+              <div class="pt-2">
+                <strong>(c) Decimal Scaling:</strong> Maximum absolute value is $1000$. Hence smallest integer $j$ such that $\max(|v'|) < 1$ is $j = 4$ ($10^4 = 10000$):
+                $$v' = \frac{v}{10^j} = \frac{400}{10^4} = \mathbf{0.04}$$
+              </div>
+            </div>
+          </div>
+
+          <!-- Exercise 2.19 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch2">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 2.19 — Chi-Square $(\chi^2)$ Independence Test</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 2: Data Preprocessing</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> In a study examining gender and preference for fiction vs non-fiction books among 1000 readers, the observed frequencies are: Male Fiction = 250, Male Non-Fiction = 200, Female Fiction = 350, Female Non-Fiction = 200. Test whether gender and book preference are statistically independent at significance level $\alpha = 0.001$ ($crit=10.828, df=1$).
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <p><strong>Step-by-Step Derivation:</strong></p>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left font-mono text-[11px] border border-white/10 my-2">
+                  <tr class="bg-slate-800 text-slate-200"><th class="p-2 border border-white/10">Gender</th><th class="p-2 border border-white/10">Fiction</th><th class="p-2 border border-white/10">Non-Fiction</th><th class="p-2 border border-white/10">Total Row</th></tr>
+                  <tr><td class="p-2 border border-white/10">Male</td><td class="p-2 border border-white/10">250 ($e=270$)</td><td class="p-2 border border-white/10">200 ($e=180$)</td><td class="p-2 border border-white/10">450</td></tr>
+                  <tr><td class="p-2 border border-white/10">Female</td><td class="p-2 border border-white/10">350 ($e=330$)</td><td class="p-2 border border-white/10">200 ($e=220$)</td><td class="p-2 border border-white/10">550</td></tr>
+                  <tr class="bg-slate-800/50"><td class="p-2 border border-white/10">Total Column</td><td class="p-2 border border-white/10">600</td><td class="p-2 border border-white/10">400</td><td class="p-2 border border-white/10">N = 1000</td></tr>
+                </table>
+              </div>
+              <div>
+                <strong>Expected Frequencies $E_{ij} = \frac{Row\_Total \times Col\_Total}{N}$:</strong>
+                $$E_{11} = \frac{450 \times 600}{1000} = 270, \quad E_{12} = \frac{450 \times 400}{1000} = 180$$
+                $$E_{21} = \frac{550 \times 600}{1000} = 330, \quad E_{22} = \frac{550 \times 400}{1000} = 220$$
+                $$\chi^2 = \sum \frac{(O_{ij} - E_{ij})^2}{E_{ij}} = \frac{(250-270)^2}{270} + \frac{(200-180)^2}{180} + \frac{(350-330)^2}{330} + \frac{(200-220)^2}{220}$$
+                $$\chi^2 = \frac{400}{270} + \frac{400}{180} + \frac{400}{330} + \frac{400}{220} = 1.481 + 2.222 + 1.212 + 1.818 = \mathbf{6.733}$$
+                <p class="mt-1">
+                  <strong>Conclusion:</strong> Degrees of freedom $df = (2-1)(2-1) = 1$. The critical value at $\alpha = 0.001$ is $10.828$. Since $\chi^2 = 6.733 < 10.828$, we fail to reject the null hypothesis at $\alpha=0.001$ (they are not statistically significantly dependent at 99.9% confidence).
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exercise 2.20 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch2">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 2.20 — Pearson Correlation Coefficient $(r_{A,B})$</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 2: Data Preprocessing</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> Calculate the correlation coefficient $r_{A,B}$ between two attributes $A = (6, 5, 4, 3, 2)$ and $B = (2, 3, 4, 5, 6)$ and interpret the relationship.
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <p><strong>Step-by-Step Derivation:</strong></p>
+              <div>
+                $$\bar{A} = 4, \quad \bar{B} = 4, \quad \sigma_A = \sqrt{\frac{(2)^2 + (1)^2 + 0 + (-1)^2 + (-2)^2}{5}} = \sqrt{\frac{10}{5}} = \sqrt{2} \approx 1.414$$
+                $$\sigma_B = \sqrt{2} \approx 1.414, \quad \sum (a_i - \bar{A})(b_i - \bar{B}) = (2)(-2) + (1)(-1) + (0)(0) + (-1)(1) + (-2)(2) = -4 - 1 + 0 - 1 - 4 = -10$$
+                $$r_{A,B} = \frac{\sum (a_i - \bar{A})(b_i - \bar{B})}{n \sigma_A \sigma_B} = \frac{-10}{5 \times \sqrt{2} \times \sqrt{2}} = \frac{-10}{10} = \mathbf{-1.0}$$
+                <p class="mt-1"><strong>Interpretation:</strong> Perfect negative linear correlation ($r_{A,B} = -1.0$). As $A$ increases, $B$ decreases in exact linear lockstep.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exercise 3.15 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 3.15 — Data Warehouse Schema Design</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 3: Data Warehousing & OLAP</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> Compare Star Schema, Snowflake Schema, and Fact Constellation Schema with respect to normalization, query performance, storage overhead, and maintenance complexity.
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <ul class="list-disc pl-5 space-y-1">
+                <li><strong>Star Schema:</strong> Large central fact table connected to completely denormalized dimension tables. Maximum query speed (single-join queries), simple navigation, but contains redundant dimension attributes.</li>
+                <li><strong>Snowflake Schema:</strong> Dimension tables are normalized into hierarchical lookup tables (e.g., `item` $\rightarrow$ `supplier` $\rightarrow$ `country`). Eliminates redundancy, saves storage, but degrades query performance due to multiple complex relational joins.</li>
+                <li><strong>Fact Constellation (Galaxy) Schema:</strong> Multiple fact tables sharing common (conformed) dimension tables (e.g., `Sales Fact` and `Shipping Fact` both sharing `Time`, `Item`, and `Location` dimensions). Necessary for enterprise data warehouses covering multiple business processes.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Exercise 3.17 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 3.17 — Lattice of Cuboids & Cube Sizing</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 3: Data Warehousing & OLAP</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> Suppose a data cube has 4 dimensions: $A, B, C, D$. (a) How many cuboids are in the lattice? (b) If dimension $A$ has 10 distinct values, $B$ has 5, $C$ has 20, and $D$ has 100, what is the maximum number of cells in the base cuboid and the full data cube?
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <div>
+                <strong>(a) Number of Cuboids:</strong> In an $n$-dimensional cube, the lattice consists of $2^n$ cuboids. For $n=4$:
+                $$\text{Total Cuboids} = 2^4 = \mathbf{16 \text{ cuboids}}$$
+              </div>
+              <div class="pt-2">
+                <strong>(b) Cell Capacity:</strong>
+                $$\text{Base Cuboid Cells} = |A| \times |B| \times |C| \times |D| = 10 \times 5 \times 20 \times 100 = \mathbf{100,000 \text{ cells}}$$
+                $$\text{Full Data Cube Cells} = \prod_{i=1}^n (|D_i| + 1) = (10+1)(5+1)(20+1)(100+1) = 11 \times 6 \times 21 \times 101 = \mathbf{140,086 \text{ cells}}$$
+              </div>
+            </div>
+          </div>
+
+          <!-- Exercise 3.18 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 3.18 — BUC Iceberg Cube Bottom-Up Computation</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 3: Data Warehousing & OLAP (Section 3.5.2)</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> Trace the Bottom-Up Computation (BUC) algorithm on dimensions $(A, B, C)$ with minimum support threshold $min\_sup = 3$. Explain the recursive partitioning order and why dimensions must be sorted by cardinality in ascending order.
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <p><strong>BUC Execution Mechanics:</strong></p>
+              <ul class="list-disc pl-5 space-y-1">
+                <li><strong>Bottom-Up Order:</strong> BUC traverses the lattice from apex cuboid `ALL` ($0$-D) downwards into $1$-D cuboids ($A, B, C$), then $2$-D cuboids ($AB, AC, BC$), and finally $3$-D base cuboid ($ABC$).</li>
+                <li><strong>Iceberg Condition & Anti-Monotonic Pruning:</strong> If a partition cell count is less than $min\_sup$ (e.g. $\text{count}(A=a_1) < 3$), then <em>no descendant cell</em> in sub-cubes containing $A=a_1$ (e.g. $(a_1, B, *)$, $(a_1, *, C)$, $(a_1, B, C)$) can satisfy the iceberg threshold. BUC immediately prunes the entire sub-tree!</li>
+                <li><strong>Cardinality Sorting Heuristic:</strong> Sort dimensions in <em>increasing order of cardinality</em> (dimensions with fewest distinct values first). The dimension with fewest values partitions the data into fewer, larger blocks initially; deeper dimensions with large cardinality will prune faster and avoid unnecessary recursive stack allocations.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Exercise 3.22 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 3.22 — Attribute-Oriented Induction (AOI)</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 3: Data Warehousing & OLAP</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> How does Attribute-Oriented Induction (AOI) perform concept generalization? State the two primary generalization strategies: attribute removal and attribute generalization.
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <ul class="list-disc pl-5 space-y-1">
+                <li><strong>Attribute Removal:</strong> If an attribute has a large number of distinct values but no concept hierarchy is available (e.g. `Social Security Number`, `Student ID`), or if the higher-level concepts are irrelevant to the target task, the attribute is removed completely.</li>
+                <li><strong>Attribute Generalization:</strong> When a concept hierarchy exists (e.g., `City` $\rightarrow$ `State` $\rightarrow$ `Country`), values are replaced by higher-level concept generalized values until the number of distinct values in the relation drops below the specified <em>attribute threshold</em>.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Exercise 4.3 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch4">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 4.3 — Apriori Anti-Monotonicity Principle</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 4: Basic Pattern Mining</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> Prove the Apriori property: All nonempty subsets of a frequent itemset must also be frequent. Conversely, prove why any superset of an infrequent itemset must be infrequent.
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <p><strong>Formal Mathematical Proof:</strong></p>
+              <div>
+                Let $X$ and $Y$ be itemsets such that $X \subseteq Y$. The support count of an itemset is the number of transactions $T$ containing that itemset:
+                $$\sigma(Y) = |\{T \in D \mid Y \subseteq T\}|$$
+                Since $X \subseteq Y$, every transaction that contains $Y$ must also contain $X$:
+                $$\{T \in D \mid Y \subseteq T\} \subseteq \{T \in D \mid X \subseteq T\} \implies \sigma(Y) \le \sigma(X)$$
+                Dividing by total transactions $|D|$:
+                $$\text{support}(Y) \le \text{support}(X)$$
+                1. If $Y$ is frequent ($\text{support}(Y) \ge min\_sup$), then $\text{support}(X) \ge \text{support}(Y) \ge min\_sup \implies X$ is frequent.
+                2. If $X$ is infrequent ($\text{support}(X) < min\_sup$), then $\text{support}(Y) \le \text{support}(X) < min\_sup \implies Y$ must be infrequent. (Q.E.D.)
+              </div>
+            </div>
+          </div>
+
+          <!-- Exercise 4.6 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch4">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 4.6 — Apriori Candidate Join & Prune Steps</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 4: Basic Pattern Mining</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> Given frequent 3-itemsets $L_3 = \{\{a, b, c\}, \{a, b, d\}, \{a, c, d\}, \{a, c, e\}, \{b, c, d\}\}$. (a) Generate candidate 4-itemsets $C_4$ using the $L_3 \bowtie L_3$ join step. (b) Prune candidates using the Apriori property.
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <div>
+                <strong>(a) Join Step $L_3 \bowtie L_3$:</strong> Two itemsets $p, q \in L_3$ are joined if their first $k-2=1$ items match (lexicographically ordered: $p[1]=q[1]$):
+                <ul class="list-disc pl-5 mt-1">
+                  <li>Join $\{a, b, c\}$ and $\{a, b, d\} \implies \{a, b, c, d\}$.</li>
+                  <li>Join $\{a, c, d\}$ and $\{a, c, e\} \implies \{a, c, d, e\}$.</li>
+                  <li>No other pairs share prefix $k-1$ elements. Thus raw candidate set is $C_4 = \{\{a, b, c, d\}, \{a, c, d, e\}\}$.</li>
+                </ul>
+              </div>
+              <div class="pt-2">
+                <strong>(b) Prune Step (Check all 3-item subsets in $L_3$):</strong>
+                <ul class="list-disc pl-5 mt-1">
+                  <li>For $\{a, b, c, d\}$: Subsets are $\{a, b, c\} \in L_3$, $\{a, b, d\} \in L_3$, $\{a, c, d\} \in L_3$, $\{b, c, d\} \in L_3$. All subsets are frequent $\implies$ <strong>Retained in $C_4$</strong>.</li>
+                  <li>For $\{a, c, d, e\}$: Subsets are $\{a, c, d\} \in L_3$, $\{a, c, e\} \in L_3$, $\{a, d, e\} \notin L_3$, $\{c, d, e\} \notin L_3$. Infrequent subsets found $\implies$ <strong>Pruned!</strong></li>
+                </ul>
+                <p class="mt-1 font-mono text-emerald-400">Final Candidate Set: $C_4 = \{\{a, b, c, d\}\}$.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exercise 4.10 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch4">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 4.10 — FP-Tree Construction & Pattern Growth</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 4: Basic Pattern Mining</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> Describe the two scans required to construct an FP-Tree from a transactional database, and explain how a Conditional FP-Tree is mined for a suffix item.
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <ul class="list-disc pl-5 space-y-1">
+                <li><strong>Scan 1 (Support Counting & Sorting):</strong> Scan DB to calculate support of all items. Discard items with support $< min\_sup$. Sort remaining frequent items in descending order of support frequency (F-List).</li>
+                <li><strong>Scan 2 (Tree Construction):</strong> Re-scan DB. For each transaction, filter non-frequent items, re-order according to F-List, and insert as a branch from root node. Increment node counts along shared prefixes or create new children when prefixes diverge. Update header table horizontal node-links.</li>
+                <li><strong>Conditional Pattern Base & Tree Mining:</strong> For suffix item $X$, follow node-links in header table to find all prefix paths ending at $X$. Form the conditional pattern base (prefix paths with count equal to $X$'s node count). Construct the conditional FP-tree by counting item frequencies in prefix paths and keeping only items $\ge min\_sup$. Recurse until tree has single prefix path.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Exercise 6.7 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch6">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 6.7 — Information Gain & Gini Index Derivations</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 6: Basic Classification Concepts</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> In a training dataset $D$ of 14 instances, class `buys_computer` has 9 `yes` and 5 `no`. Attribute `age` has partitions: `youth` (2 yes, 3 no), `middle_aged` (4 yes, 0 no), `senior` (3 yes, 2 no). Calculate (a) $Info(D)$, (b) $Info_{age}(D)$, (c) $Gain(age)$, and (d) $Gini(D)$.
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <div>
+                <strong>(a) Base Entropy $Info(D)$:</strong>
+                $$Info(D) = -\left(\frac{9}{14}\log_2\frac{9}{14} + \frac{5}{14}\log_2\frac{5}{14}\right) = -(0.6429 \times (-0.6374) + 0.3571 \times (-1.4854)) = 0.4098 + 0.5305 = \mathbf{0.9403 \text{ bits}}$$
+              </div>
+              <div class="pt-2">
+                <strong>(b) Attribute Entropy $Info_{age}(D)$:</strong>
+                $$Info(D_{youth}) = -\left(\frac{2}{5}\log_2\frac{2}{5} + \frac{3}{5}\log_2\frac{3}{5}\right) = \mathbf{0.9710 \text{ bits}}$$
+                $$Info(D_{middle}) = -\left(\frac{4}{4}\log_2\frac{4}{4} + 0\right) = \mathbf{0 \text{ bits (pure)}}$$
+                $$Info(D_{senior}) = -\left(\frac{3}{5}\log_2\frac{3}{5} + \frac{2}{5}\log_2\frac{2}{5}\right) = \mathbf{0.9710 \text{ bits}}$$
+                $$Info_{age}(D) = \frac{5}{14}(0.9710) + \frac{4}{14}(0) + \frac{5}{14}(0.9710) = 2 \times 0.3468 + 0 = \mathbf{0.6936 \text{ bits}}$$
+              </div>
+              <div class="pt-2">
+                <strong>(c) Information Gain:</strong>
+                $$Gain(age) = Info(D) - Info_{age}(D) = 0.9403 - 0.6936 = \mathbf{0.2467 \text{ bits}}$$
+              </div>
+              <div class="pt-2">
+                <strong>(d) Gini Impurity $Gini(D)$:</strong>
+                $$Gini(D) = 1 - \sum_{i=1}^m p_i^2 = 1 - \left[\left(\frac{9}{14}\right)^2 + \left(\frac{5}{14}\right)^2\right] = 1 - [0.4133 + 0.1276] = 1 - 0.5408 = \mathbf{0.4592}$$
+              </div>
+            </div>
+          </div>
+
+          <!-- Exercise 6.19 -->
+          <div class="ex-card p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3" data-chapter="ch6">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Exercise 6.19 — Naive Bayes Classification with Laplace Smoothing</span>
+              <span class="text-xs font-mono text-slate-400">Chapter 6: Basic Classification Concepts</span>
+            </div>
+            <div class="text-xs text-slate-300 font-medium">
+              <strong>Problem:</strong> Given a binary classification problem with classes $C_1$ (70 samples) and $C_2$ (30 samples). An attribute $A$ has 3 values $a_1, a_2, a_3$. In $C_1$, counts are $a_1=50, a_2=20, a_3=0$. Show how Laplace smoothing avoids zero-probability multiplication when classifying a sample with $A=a_3$.
+            </div>
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+              <p><strong>Step-by-Step Derivation:</strong></p>
+              <div>
+                Without smoothing, $P(a_3|C_1) = \frac{0}{70} = 0$, which nullifies the entire product $P(\vec{X}|C_1) = \prod P(x_k|C_1) = 0$.
+                Laplace correction adds $1$ to each count and $q$ (number of distinct values $=3$) to the denominator:
+                $$P_{Laplace}(a_1|C_1) = \frac{50 + 1}{70 + 3} = \frac{51}{73} \approx 0.6986$$
+                $$P_{Laplace}(a_2|C_1) = \frac{20 + 1}{70 + 3} = \frac{21}{73} \approx 0.2877$$
+                $$P_{Laplace}(a_3|C_1) = \frac{0 + 1}{70 + 3} = \frac{\mathbf{1}}{\mathbf{73}} \approx \mathbf{0.0137}$$
+                Notice the sum remains valid: $\frac{51+21+1}{73} = \frac{73}{73} = 1.0$. Zero-probability trap is completely eliminated.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: INTERACTIVE NUMERICAL STEP SOLVERS -->
+    <section id="tab-solvers" class="tab-content hidden space-y-6">
+
+      <!-- Solver 1: Entropy & Information Gain Calculator -->
+      <div id="entropy-solver" class="surface-card rounded-lg p-6 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-white/10">
+          <div>
+            <h2 class="text-base font-semibold text-white">1. Information Gain & Gini Impurity Calculator</h2>
+            <p class="text-xs text-slate-400">Step-by-step mathematical expansion with LaTeX formula substitutions.</p>
+          </div>
+          <span class="px-2 py-0.5 rounded text-xs font-mono bg-brand-500/10 text-brand-300 border border-brand-500/20">Decision Trees (Ch 6)</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <!-- Inputs -->
+          <div class="space-y-4">
+            <div class="p-3 bg-slate-900/60 rounded border border-white/5 space-y-2">
+              <label class="block font-medium text-slate-200">Parent Dataset $D$ Counts:</label>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <span class="text-slate-400">Positive ($p$):</span>
+                  <input type="number" id="calc-p" value="9" min="0" class="w-full mt-1 px-2.5 py-1.5 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                </div>
+                <div>
+                  <span class="text-slate-400">Negative ($n$):</span>
+                  <input type="number" id="calc-n" value="5" min="0" class="w-full mt-1 px-2.5 py-1.5 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3 bg-slate-900/60 rounded border border-white/5 space-y-3">
+              <label class="block font-medium text-slate-200">Attribute Split Partitions ($D_1, D_2, D_3$):</label>
+              <div class="space-y-2">
+                <div class="grid grid-cols-3 gap-2 items-center">
+                  <span class="text-slate-400">Partition 1:</span>
+                  <input type="number" id="calc-p1" value="2" placeholder="pos" class="px-2 py-1 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                  <input type="number" id="calc-n1" value="3" placeholder="neg" class="px-2 py-1 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                </div>
+                <div class="grid grid-cols-3 gap-2 items-center">
+                  <span class="text-slate-400">Partition 2:</span>
+                  <input type="number" id="calc-p2" value="4" placeholder="pos" class="px-2 py-1 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                  <input type="number" id="calc-n2" value="0" placeholder="neg" class="px-2 py-1 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                </div>
+                <div class="grid grid-cols-3 gap-2 items-center">
+                  <span class="text-slate-400">Partition 3:</span>
+                  <input type="number" id="calc-p3" value="3" placeholder="pos" class="px-2 py-1 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                  <input type="number" id="calc-n3" value="2" placeholder="neg" class="px-2 py-1 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                </div>
+              </div>
+            </div>
+
+            <button onclick="computeEntropyGain()" class="w-full py-2 px-4 rounded bg-brand-600 hover:bg-brand-500 text-white font-medium transition-colors">
+              Calculate Step-by-Step Metrics
+            </button>
+          </div>
+
+          <!-- Output Box -->
+          <div class="p-4 bg-slate-900/90 rounded border border-white/10 space-y-3" id="entropy-results">
+            <h3 class="text-xs font-mono uppercase tracking-wider text-slate-400">Mathematical Expansion Output</h3>
+            <div id="entropy-latex-output" class="text-slate-200 space-y-2">
+              Click calculate to view complete formula derivations.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solver 2: BUC Iceberg Partition Tracer -->
+      <div id="buc-solver" class="surface-card rounded-lg p-6 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-white/10">
+          <div>
+            <h2 class="text-base font-semibold text-white">2. BUC Iceberg Cube Partition Tracer</h2>
+            <p class="text-xs text-slate-400">Bottom-Up recursive partitioning simulation with iceberg threshold pruning.</p>
+          </div>
+          <span class="px-2 py-0.5 rounded text-xs font-mono bg-brand-500/10 text-brand-300 border border-brand-500/20">Data Cubes (Ch 3.5.2)</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+          <div class="space-y-3">
+            <div>
+              <span class="text-slate-400 font-medium">Dimensions to Model:</span>
+              <div class="mt-1 font-mono text-slate-300 p-2 bg-slate-900 rounded border border-white/10">
+                A (Item), B (City), C (Year)
+              </div>
+            </div>
+            <div>
+              <label class="block text-slate-400 font-medium">Iceberg Minimum Support $(min\_sup)$:</label>
+              <input type="number" id="buc-minsup" value="2" min="1" max="5" class="w-full mt-1 px-2.5 py-1.5 bg-slate-800 border border-white/10 rounded font-mono text-white">
+            </div>
+            <div>
+              <span class="block text-slate-400 font-medium">Sort Order by Cardinality:</span>
+              <p class="text-slate-400 mt-1">Ascending cardinality order $(A \to B \to C)$ ensures maximum early subtree pruning.</p>
+            </div>
+            <button onclick="runBucTrace()" class="w-full py-2 px-4 rounded bg-brand-600 hover:bg-brand-500 text-white font-medium transition-colors">
+              Trace BUC Recursion Tree
+            </button>
+          </div>
+
+          <div class="md:col-span-2 p-4 bg-slate-900/90 rounded border border-white/10 font-mono text-xs overflow-x-auto space-y-2" id="buc-output">
+            <span class="text-slate-500">// BUC recursion call trace will appear here...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solver 3: Apriori Candidate Join & Prune Tracer -->
+      <div id="apriori-solver" class="surface-card rounded-lg p-6 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-white/10">
+          <div>
+            <h2 class="text-base font-semibold text-white">3. Apriori Candidate Generation $(L_{k-1} \bowtie L_{k-1})$ & Pruning</h2>
+            <p class="text-xs text-slate-400">Level-wise candidate expansion with subset anti-monotonicity verification.</p>
+          </div>
+          <span class="px-2 py-0.5 rounded text-xs font-mono bg-brand-500/10 text-brand-300 border border-brand-500/20">Pattern Mining (Ch 4)</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+          <div class="space-y-3">
+            <label class="block font-medium text-slate-200">Frequent $(k-1)$-itemsets $L_{k-1}$:</label>
+            <textarea id="apriori-input-l" rows="5" class="w-full p-2.5 bg-slate-800 border border-white/10 rounded font-mono text-white text-xs">ABC
+ABD
+ACD
+ACE
+BCD</textarea>
+            <p class="text-[11px] text-slate-400">One itemset per line. E.g. ABC, ABD, ACD...</p>
+            <button onclick="runAprioriGen()" class="w-full py-2 px-4 rounded bg-brand-600 hover:bg-brand-500 text-white font-medium transition-colors">
+              Execute Join & Prune Steps
+            </button>
+          </div>
+
+          <div class="md:col-span-2 p-4 bg-slate-900/90 rounded border border-white/10 font-mono text-xs space-y-3" id="apriori-output">
+            <div class="text-slate-400">Click execute to trace candidate join step $L_{k-1} \bowtie L_{k-1}$ and subset pruning verification.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solver 4: SVM Maximum Margin Hyperplane Solver -->
+      <div id="svm-solver" class="surface-card rounded-lg p-6 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-white/10">
+          <div>
+            <h2 class="text-base font-semibold text-white">4. SVM Maximum Margin Hyperplane & Margin Width Solver</h2>
+            <p class="text-xs text-slate-400">Calculates normal vector $\vec{w}$, bias $b$, and margin width $\gamma = \frac{2}{\|\vec{w}\|}$.</p>
+          </div>
+          <span class="px-2 py-0.5 rounded text-xs font-mono bg-brand-500/10 text-brand-300 border border-brand-500/20">SVM Classification (Ch 7.3)</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div class="space-y-4">
+            <div class="p-3 bg-slate-900/60 rounded border border-white/5 space-y-2">
+              <span class="font-medium text-slate-200">Support Vectors (2D Coordinates):</span>
+              <div class="grid grid-cols-2 gap-3 mt-1">
+                <div>
+                  <span class="text-emerald-400">Positive SV ($y_1 = +1$):</span>
+                  <div class="flex space-x-1 mt-1">
+                    <input type="number" id="svm-x1" value="2" step="0.5" class="w-1/2 p-1.5 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                    <input type="number" id="svm-y1" value="2" step="0.5" class="w-1/2 p-1.5 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                  </div>
+                </div>
+                <div>
+                  <span class="text-rose-400">Negative SV ($y_2 = -1$):</span>
+                  <div class="flex space-x-1 mt-1">
+                    <input type="number" id="svm-x2" value="0" step="0.5" class="w-1/2 p-1.5 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                    <input type="number" id="svm-y2" value="0" step="0.5" class="w-1/2 p-1.5 bg-slate-800 border border-white/10 rounded font-mono text-white">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="computeSvmMargin()" class="w-full py-2 px-4 rounded bg-brand-600 hover:bg-brand-500 text-white font-medium transition-colors">
+              Compute Hyperplane & Margin
+            </button>
+          </div>
+
+          <div class="p-4 bg-slate-900/90 rounded border border-white/10 space-y-3" id="svm-output">
+            <h3 class="text-xs font-mono uppercase tracking-wider text-slate-400">SVM Hyperplane Geometry</h3>
+            <div id="svm-latex" class="text-slate-200 space-y-2">
+              Click compute to view $\vec{w}, b$, and margin width $\gamma$.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solver 5: Distance & Clustering Evaluator -->
+      <div id="distance-solver" class="surface-card rounded-lg p-6 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-white/10">
+          <div>
+            <h2 class="text-base font-semibold text-white">5. Distance, Dissimilarity & Clustering Evaluator</h2>
+            <p class="text-xs text-slate-400">Minkowski ($L_1, L_2, L_\infty$), Cosine, Jaccard, and Silhouette Coefficient $s(i)$.</p>
+          </div>
+          <span class="px-2 py-0.5 rounded text-xs font-mono bg-brand-500/10 text-brand-300 border border-brand-500/20">Data & Clustering (Ch 2 & 8)</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <label class="block text-slate-400">Vector $\vec{x}$ (comma separated):</label>
+              <input type="text" id="dist-vec-x" value="1, 2, 4, 0" class="w-full px-2.5 py-1.5 bg-slate-800 border border-white/10 rounded font-mono text-white">
+            </div>
+            <div class="space-y-2">
+              <label class="block text-slate-400">Vector $\vec{y}$ (comma separated):</label>
+              <input type="text" id="dist-vec-y" value="2, 5, 1, 3" class="w-full px-2.5 py-1.5 bg-slate-800 border border-white/10 rounded font-mono text-white">
+            </div>
+            <button onclick="computeDistanceMetrics()" class="w-full py-2 px-4 rounded bg-brand-600 hover:bg-brand-500 text-white font-medium transition-colors">
+              Calculate Distance Metrics
+            </button>
+          </div>
+
+          <div class="p-4 bg-slate-900/90 rounded border border-white/10 space-y-2" id="dist-output">
+            <h3 class="text-xs font-mono uppercase tracking-wider text-slate-400">Computed Metrics</h3>
+            <div id="dist-latex" class="text-slate-200 space-y-2">
+              Click calculate to view metric values.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 4: MANDATORY RESEARCH PAPERS MASTER DECKS -->
+    <section id="tab-papers" class="tab-content hidden space-y-6">
+      <div class="surface-card rounded-lg p-6 space-y-6">
+        <div class="flex items-center justify-between pb-4 border-b border-white/10">
+          <div>
+            <h2 class="text-base font-semibold text-white">Mandated Endsem Research Papers (7 Decks)</h2>
+            <p class="text-xs text-slate-400">Core innovations, mathematical formulation, complexity bounds, and exam takeaways.</p>
+          </div>
+          <span class="px-2 py-0.5 rounded text-xs font-mono bg-brand-500/10 text-brand-300 border border-brand-500/20">Chapters 5 & 8</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- Paper 1: Multi-Level Association Rules -->
+          <div class="p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Ch 5 Paper (i)</span>
+              <span class="text-xs text-slate-400">Han & Fu (TKDE 1999)</span>
+            </div>
+            <h3 class="text-sm font-semibold text-white">Mining Multiple-Level Association Rules in Large Databases</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>Core Problem:</strong> Mining at high abstraction levels yields trivial rules (e.g. `Dairy` $\to$ `Bread`), while mining at low abstraction levels yields low support (e.g. `Dairyland 2% Milk` has $<0.01\%$ support).
+            </p>
+            <div class="text-xs text-slate-300 space-y-1.5 pt-2 border-t border-white/5">
+              <p><strong>Key Innovations:</strong></p>
+              <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                <li>Taxonomy Concept Hierarchies with progressive minimum support thresholds (higher minsup at Level 1, reduced minsup at Level 2).</li>
+                <li>Redundancy Filtering: A rule at Level $l$ is redundant if its confidence is expected from its ancestor rule at Level $l-1$.</li>
+              </ul>
+            </div>
+            <a href="../Research_Papers_Study/paper_26_multilevel_mining_1999.html" class="inline-block text-xs font-medium text-brand-400 hover:text-brand-300">Open Full Paper Study Page &rarr;</a>
+          </div>
+
+          <!-- Paper 2: Quantitative Association Rules -->
+          <div class="p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Ch 5 Paper (ii)</span>
+              <span class="text-xs text-slate-400">Srikant & Agrawal (SIGMOD 1996)</span>
+            </div>
+            <h3 class="text-sm font-semibold text-white">Mining Quantitative Association Rules in Large Relational Tables</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>Core Problem:</strong> Boolean association rules cannot directly handle numeric attributes (e.g. `Age`, `Income`) without information loss or combinatorial explosion.
+            </p>
+            <div class="text-xs text-slate-300 space-y-1.5 pt-2 border-t border-white/5">
+              <p><strong>Key Innovations:</strong></p>
+              <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                <li>Equi-depth binning partition, followed by merging consecutive bins to discover generalized interval rules (e.g. $\text{Age:}[20..30] \Rightarrow \text{Cars}:1$).</li>
+                <li><strong>Partial Completeness Bound $K$:</strong> Formal mathematical guarantee that no frequent itemset will be lost due to discretization error: $K = \frac{2-m}{2-2m}$.</li>
+                <li>Minimum interest measure $R$ to prune redundant sub-interval rules.</li>
+              </ul>
+            </div>
+            <a href="../Research_Papers_Study/paper_28_quantitative_rules_sigmod96.html" class="inline-block text-xs font-medium text-brand-400 hover:text-brand-300">Open Full Paper Study Page &rarr;</a>
+          </div>
+
+          <!-- Paper 3: Two-Phase High Utility Itemsets -->
+          <div class="p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Ch 5 Paper (iii)</span>
+              <span class="text-xs text-slate-400">Liu, Liao, Choudhary (PAKDD 2005)</span>
+            </div>
+            <h3 class="text-sm font-semibold text-white">A Two-Phase Algorithm for Fast Discovery of High Utility Itemsets</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>Core Problem:</strong> Frequency $\ne$ Profitability. Items with high profit margin may appear infrequently. However, utility does <em>not</em> satisfy the downward closure property!
+            </p>
+            <div class="text-xs text-slate-300 space-y-1.5 pt-2 border-t border-white/5">
+              <p><strong>Key Innovations:</strong></p>
+              <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                <li><strong>Transaction-Weighted Utilization (TWU):</strong> $TWU(X) = \sum_{T \supseteq X} TU(T)$.</li>
+                <li><strong>TWDC Property:</strong> If $TWU(X) < min\_util$, then $X$ and any superset $Y \supseteq X$ cannot be high utility. Downward closure is restored!</li>
+                <li><strong>Two-Phase Architecture:</strong> Phase 1 discovers Candidate High Utility Itemsets (HTWUIs); Phase 2 performs one database scan to prune false positives.</li>
+              </ul>
+            </div>
+            <a href="../Research_Papers_Study/paper_27_high_utility_pakdd05.html" class="inline-block text-xs font-medium text-brand-400 hover:text-brand-300">Open Full Paper Study Page &rarr;</a>
+          </div>
+
+          <!-- Paper 4: CLARANS -->
+          <div class="p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Ch 8 Paper (i)</span>
+              <span class="text-xs text-slate-400">Ng & Han (TKDE 1994)</span>
+            </div>
+            <h3 class="text-sm font-semibold text-white">CLARANS: Clustering Objects for Spatial Data Mining</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>Core Problem:</strong> Partitioning Around Medoids (PAM) has $O(k(n-k)^2)$ complexity, making it intractable for large datasets. CLARA fixed sampling biases against non-uniform clusters.
+            </p>
+            <div class="text-xs text-slate-300 space-y-1.5 pt-2 border-t border-white/5">
+              <p><strong>Key Innovations:</strong></p>
+              <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                <li>Treats clustering as graph search: Nodes are sets of $k$ medoids; edges connect sets differing by a single medoid swap.</li>
+                <li>Randomized local search: Examines up to `maxneighbor` random neighbors. If cost improves, jump to neighbor; otherwise record local minimum. Repeat `numlocal` times.</li>
+              </ul>
+            </div>
+            <a href="../Study_Material/10_clustering.html" class="inline-block text-xs font-medium text-brand-400 hover:text-brand-300">Open Full Module 10 Deep Dive &rarr;</a>
+          </div>
+
+          <!-- Paper 5: BIRCH -->
+          <div class="p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Ch 8 Paper (ii)</span>
+              <span class="text-xs text-slate-400">Zhang, Ramakrishnan, Livny (SIGMOD 1996)</span>
+            </div>
+            <h3 class="text-sm font-semibold text-white">BIRCH: An Efficient Data Clustering Method for Very Large Databases</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>Core Problem:</strong> Existing clustering algorithms require multiple passes over the entire dataset and hold all points in RAM.
+            </p>
+            <div class="text-xs text-slate-300 space-y-1.5 pt-2 border-t border-white/5">
+              <p><strong>Key Innovations:</strong></p>
+              <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                <li><strong>Clustering Feature (CF) Vector:</strong> $CF = (N, \vec{LS}, SS)$ compresses arbitrary cluster into 3 summary statistics.</li>
+                <li><strong>CF-Additivity Theorem:</strong> $CF_1 + CF_2 = (N_1+N_2, \vec{LS}_1+\vec{LS}_2, SS_1+SS_2)$. Cluster diameter $D$ computed purely from $CF$.</li>
+                <li><strong>CF-Tree:</strong> Height-balanced B+-tree like structure with branching factor $B$ and leaf threshold $T$. Single pass $O(n)$ data loading!</li>
+              </ul>
+            </div>
+            <a href="../Study_Material/10_clustering.html" class="inline-block text-xs font-medium text-brand-400 hover:text-brand-300">Open Full Module 10 Deep Dive &rarr;</a>
+          </div>
+
+          <!-- Paper 6: DBSCAN -->
+          <div class="p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Ch 8 Paper (iii)</span>
+              <span class="text-xs text-slate-400">Ester, Kriegel, Sander, Xu (KDD 1996)</span>
+            </div>
+            <h3 class="text-sm font-semibold text-white">DBSCAN: Density-Based Algorithm with Noise</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>Core Problem:</strong> Partitioning algorithms (k-Means) can only find convex spherical clusters and are extremely sensitive to outliers.
+            </p>
+            <div class="text-xs text-slate-300 space-y-1.5 pt-2 border-t border-white/5">
+              <p><strong>Key Innovations:</strong></p>
+              <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                <li>Core points ($|N_\epsilon(p)| \ge MinPts$), Border points ($p \in N_\epsilon(q)$ where $q$ is Core), and Noise points.</li>
+                <li>Density-reachability and Density-connectivity formalisms guarantees arbitrary cluster shape discovery without specifying $k$ in advance.</li>
+              </ul>
+            </div>
+            <a href="../Study_Material/10_clustering.html" class="inline-block text-xs font-medium text-brand-400 hover:text-brand-300">Open Full Module 10 Deep Dive &rarr;</a>
+          </div>
+
+          <!-- Paper 7: CHAMELEON -->
+          <div class="p-5 rounded-lg bg-slate-900/70 border border-white/10 space-y-3 md:col-span-2">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Ch 8 Paper (iv)</span>
+              <span class="text-xs text-slate-400">Karypis, Han, Kumar (IEEE Computer 1999)</span>
+            </div>
+            <h3 class="text-sm font-semibold text-white">CHAMELEON: Hierarchical Clustering Using Dynamic Modeling</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>Core Problem:</strong> CURE and ROCK use static global user parameters and ignore the internal interconnectivity and closeness of clusters.
+            </p>
+            <div class="text-xs text-slate-300 space-y-1.5 pt-2 border-t border-white/5">
+              <p><strong>Key Innovations:</strong></p>
+              <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                <li>Two-Phase Framework: (1) Graph partitioning on k-NN graph into dense sub-clusters using hMETIS; (2) Agglomerative hierarchical merge using dynamic modeling.</li>
+                <li><strong>Relative Interconnectivity (RI):</strong> $RI(C_i, C_j) = \frac{2 |EC_{\{C_i, C_j\}}|}{|EC_{C_i}| + |EC_{C_j}|}$ normalizes edge cuts by internal sub-cluster cuts.</li>
+                <li><strong>Relative Closeness (RC):</strong> Normalizes average cross-cluster edge weights by internal edge weights. Clusters merge only if both $RI$ and $RC$ are high.</li>
+              </ul>
+            </div>
+            <a href="../Study_Material/10_clustering.html" class="inline-block text-xs font-medium text-brand-400 hover:text-brand-300">Open Full Module 10 Deep Dive &rarr;</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: FORMULA & CALCULATOR REFERENCE SHEET -->
+    <section id="tab-cheat-sheet" class="tab-content hidden space-y-6">
+      <div class="surface-card rounded-lg p-6 space-y-6">
+        <div class="flex items-center justify-between pb-4 border-b border-white/10">
+          <div>
+            <h2 class="text-base font-semibold text-white">Course Formula & Derivation Cheat Sheet</h2>
+            <p class="text-xs text-slate-400">Exact mathematical equations formatted in KaTeX with scientific calculator instructions.</p>
+          </div>
+          <span class="px-2 py-0.5 rounded text-xs font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Exam Reference</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+
+          <!-- Card 1: Data Preprocessing & Distances -->
+          <div class="p-4 rounded bg-slate-900/80 border border-white/10 space-y-3">
+            <h3 class="font-semibold text-slate-200 border-b border-white/10 pb-1.5">1. Preprocessing, Distances & Correlation</h3>
+            <div class="space-y-2 text-slate-300">
+              <div>
+                <strong>Minkowski Distance ($L_p$ norm):</strong>
+                $$d(\vec{x}, \vec{y}) = \left(\sum_{i=1}^n |x_i - y_i|^p\right)^{1/p} \quad (p=1: \text{Manhattan}, p=2: \text{Euclidean})$$
+              </div>
+              <div>
+                <strong>Cosine Similarity:</strong>
+                $$\text{sim}(\vec{x}, \vec{y}) = \frac{\vec{x} \cdot \vec{y}}{\|\vec{x}\| \|\vec{y}\|}$$
+              </div>
+              <div>
+                <strong>Chi-Square Independence Statistic:</strong>
+                $$\chi^2 = \sum_{i=1}^r \sum_{j=1}^c \frac{(O_{ij} - E_{ij})^2}{E_{ij}}, \quad E_{ij} = \frac{count(A=a_i) \times count(B=b_j)}{N}$$
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Warehousing & Cube Cell Capacity -->
+          <div class="p-4 rounded bg-slate-900/80 border border-white/10 space-y-3">
+            <h3 class="font-semibold text-slate-200 border-b border-white/10 pb-1.5">2. Data Warehousing & Cubes</h3>
+            <div class="space-y-2 text-slate-300">
+              <div>
+                <strong>Lattice of Cuboids:</strong>
+                $$\text{Total Cuboids} = 2^n \quad (n = \text{number of dimensions})$$
+              </div>
+              <div>
+                <strong>Total Data Cube Cells:</strong>
+                $$\text{Total Cells} = \prod_{i=1}^n (|D_i| + 1)$$
+              </div>
+              <div>
+                <strong>Greedy Lattice Selection (Harinarayan et al. '96):</strong>
+                $$\text{Benefit}(v, S) = \sum_{w \le v} \max(0, C(w, S) - C(w, S \cup \{v\}))$$
+                $$\text{Guaranteed Approximation Ratio} \ge 1 - \frac{1}{e} \approx 63\%$$
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Classification & Decision Trees -->
+          <div class="p-4 rounded bg-slate-900/80 border border-white/10 space-y-3">
+            <h3 class="font-semibold text-slate-200 border-b border-white/10 pb-1.5">3. Classification & Decision Trees</h3>
+            <div class="space-y-2 text-slate-300">
+              <div>
+                <strong>Entropy & Information Gain:</strong>
+                $$Info(D) = -\sum_{i=1}^m p_i \log_2(p_i), \quad Info_A(D) = \sum_{j=1}^v \frac{|D_j|}{|D|} Info(D_j)$$
+                $$Gain(A) = Info(D) - Info_A(D)$$
+              </div>
+              <div>
+                <strong>Gain Ratio (C4.5):</strong>
+                $$SplitInfo_A(D) = -\sum_{j=1}^v \frac{|D_j|}{|D|} \log_2 \frac{|D_j|}{|D|}, \quad GainRatio(A) = \frac{Gain(A)}{SplitInfo_A(D)}$$
+              </div>
+              <div>
+                <strong>Gini Impurity (CART):</strong>
+                $$Gini(D) = 1 - \sum_{i=1}^m p_i^2, \quad Gini_A(D) = \frac{|D_1|}{|D|}Gini(D_1) + \frac{|D_2|}{|D|}Gini(D_2)$$
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: SVM & Clustering Metrics -->
+          <div class="p-4 rounded bg-slate-900/80 border border-white/10 space-y-3">
+            <h3 class="font-semibold text-slate-200 border-b border-white/10 pb-1.5">4. SVM & Cluster Quality Metrics</h3>
+            <div class="space-y-2 text-slate-300">
+              <div>
+                <strong>SVM Margin Width:</strong>
+                $$\text{Hyperplane: } \vec{w} \cdot \vec{x} + b = 0 \implies \text{Margin Width } \gamma = \frac{2}{\|\vec{w}\|}$$
+              </div>
+              <div>
+                <strong>Silhouette Coefficient $s(i)$:</strong>
+                $$s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}, \quad -1 \le s(i) \le +1$$
+                <span class="text-slate-400">($a(i)$: average intra-cluster distance, $b(i)$: min average nearest-cluster distance).</span>
+              </div>
+              <div>
+                <strong>BIRCH Cluster Diameter:</strong>
+                $$D = \sqrt{\frac{2 N \cdot SS - 2 \|\vec{LS}\|^2}{N(N-1)}}$$
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: CROSS-CHAPTER INTEGRATION SYNTHESIS -->
+    <section id="tab-integration" class="tab-content hidden space-y-6">
+      <div class="surface-card rounded-lg p-6 space-y-6">
+        <div class="flex items-center justify-between pb-4 border-b border-white/10">
+          <div>
+            <h2 class="text-base font-semibold text-white">Cross-Chapter Integration Synthesis Bank</h2>
+            <p class="text-xs text-slate-400">Exam preparation for holistic, multi-technique synthesis questions warned by Prof. Reddy.</p>
+          </div>
+          <span class="px-2 py-0.5 rounded text-xs font-mono bg-amber-500/10 text-amber-300 border border-amber-500/20">Special Focus</span>
+        </div>
+
+        <div class="space-y-4 text-xs">
+          <!-- Synthesis 1 -->
+          <div class="p-4 rounded bg-slate-900/70 border border-white/10 space-y-2">
+            <h3 class="font-semibold text-white">Q1: How can Clustering (Ch 8) be used as a Preprocessing step for Classification (Ch 6 & 7)?</h3>
+            <div class="text-slate-400 space-y-1.5 leading-relaxed">
+              <p>1. <strong>Unsupervised Discretization:</strong> Clustering high-dimensional continuous attributes into $k$ discrete clusters replaces raw continuous values with cluster IDs, preventing overfitting in Decision Trees and Naive Bayes.</p>
+              <p>2. <strong>Semi-Supervised Label Propagation:</strong> In large datasets where only 5% of samples are labeled, run DBSCAN or K-Means. Propagate known labels to unlabelled samples within dense pure clusters, then train an SVM classifier.</p>
+              <p>3. <strong>Prototype Selection for k-NN:</strong> To reduce $O(n)$ inference latency in k-Nearest Neighbor lazy learning, cluster the training instances with BIRCH/K-Means and use cluster centroids as prototypes.</p>
+            </div>
+          </div>
+
+          <!-- Synthesis 2 -->
+          <div class="p-4 rounded bg-slate-900/70 border border-white/10 space-y-2">
+            <h3 class="font-semibold text-white">Q2: How does OLAP / Cube Computation (Ch 3) intersect with Pattern Mining (Ch 4 & 5)?</h3>
+            <div class="text-slate-400 space-y-1.5 leading-relaxed">
+              <p>1. <strong>Multi-Dimensional Association Rule Mining:</strong> Instead of single-dimensional market basket transactions, rules can involve multiple relational attributes from star schemas (e.g. $\text{age}(X, \text{"20..29"}) \wedge \text{buys}(X, \text{"laptop"}) \Rightarrow \text{buys}(X, \text{"backpack"})$).</p>
+              <p>2. <strong>Iceberg Cube Pruning via BUC:</strong> BUC's bottom-up anti-monotonicity pruning is conceptually identical to the Apriori property. Both prune search subtrees when aggregated counts fail to satisfy a minimum threshold.</p>
+            </div>
+          </div>
+
+          <!-- Synthesis 3 -->
+          <div class="p-4 rounded bg-slate-900/70 border border-white/10 space-y-2">
+            <h3 class="font-semibold text-white">Q3: Deep Learning (Sec 10.1) vs. Support Vector Machines (Sec 7.3)</h3>
+            <div class="text-slate-400 space-y-1.5 leading-relaxed">
+              <p>1. <strong>Convexity vs Non-Convex Optimization:</strong> SVM optimization is a quadratic programming problem with a globally optimal convex solution. Neural network backpropagation solves non-convex gradient descent, subject to local minima and saddle points.</p>
+              <p>2. <strong>Kernel Trick vs Representation Learning:</strong> SVMs project data into high dimensions via fixed implicit kernels (RBF, Polynomial). Deep Learning networks learn hierarchical non-linear feature representations automatically through successive hidden layers.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 7: TIMED MOCK EXAM ENGINE -->
+    <section id="tab-mock-exam" class="tab-content hidden space-y-6">
+      <div id="exam-engine" class="surface-card rounded-lg p-6 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+          <div>
+            <h2 class="text-base font-semibold text-white">Endsem Timed Simulation Engine</h2>
+            <p class="text-xs text-slate-400">Realistic exam environment with countdown timer, numerical problems, and automated scoring.</p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="text-xs font-mono px-3 py-1.5 rounded bg-slate-900 border border-white/15 text-brand-300" id="exam-timer-display">
+              Time Remaining: <span class="text-white font-bold tabular-nums" id="timer-val">45:00</span>
+            </div>
+            <button onclick="toggleExamTimer()" id="btn-exam-timer" class="px-3 py-1.5 rounded text-xs font-medium bg-brand-600 hover:bg-brand-500 text-white transition-colors">
+              Start Exam Timer
+            </button>
+          </div>
+        </div>
+
+        <!-- Question Container -->
+        <div class="space-y-6" id="exam-questions-list">
+
+          <!-- Q1 -->
+          <div class="p-4 rounded bg-slate-900/60 border border-white/10 space-y-3" id="mock-q1">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs text-slate-400">Question 1 (Ch 2 / Numerical)</span>
+              <span class="text-xs text-brand-400 font-mono">2 Marks</span>
+            </div>
+            <p class="text-xs text-slate-200">
+              Given attribute values $\{10, 20, 30, 40, 50\}$. If Min-Max normalization into range $[0, 1]$ is applied, what is the normalized value of $30$?
+            </p>
+            <div class="space-y-1.5 text-xs">
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-1" value="A" class="text-brand-600">
+                <span>A) 0.40</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-1" value="B" class="text-brand-600">
+                <span>B) 0.50</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-1" value="C" class="text-brand-600">
+                <span>C) 0.60</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-1" value="D" class="text-brand-600">
+                <span>D) 0.75</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="p-4 rounded bg-slate-900/60 border border-white/10 space-y-3" id="mock-q2">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs text-slate-400">Question 2 (Ch 3 / Theory & BUC)</span>
+              <span class="text-xs text-brand-400 font-mono">2 Marks</span>
+            </div>
+            <p class="text-xs text-slate-200">
+              Why does the BUC (Bottom-Up Computation) iceberg algorithm sort dimensions in ascending order of cardinality?
+            </p>
+            <div class="space-y-1.5 text-xs">
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-2" value="A" class="text-brand-600">
+                <span>A) Because low cardinality dimensions cause more recursive function calls.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-2" value="B" class="text-brand-600">
+                <span>B) To maximize iceberg pruning early at shallow recursion levels.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-2" value="C" class="text-brand-600">
+                <span>C) Because sorting by cardinality eliminates the need for minimum support checking.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-2" value="D" class="text-brand-600">
+                <span>D) To ensure that the apex cuboid ALL is computed last.</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="p-4 rounded bg-slate-900/60 border border-white/10 space-y-3" id="mock-q3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs text-slate-400">Question 3 (Ch 5 / High Utility Paper)</span>
+              <span class="text-xs text-brand-400 font-mono">2 Marks</span>
+            </div>
+            <p class="text-xs text-slate-200">
+              In High Utility Itemset Mining (Liu et al. PAKDD '05), why can standard Apriori pruning not be directly applied to utility?
+            </p>
+            <div class="space-y-1.5 text-xs">
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-3" value="A" class="text-brand-600">
+                <span>A) Because utility values can be negative.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-3" value="B" class="text-brand-600">
+                <span>B) Because utility does not satisfy the downward closure (anti-monotonicity) property.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-3" value="C" class="text-brand-600">
+                <span>C) Because transaction weighted utilization (TWU) is NP-complete.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-3" value="D" class="text-brand-600">
+                <span>D) Because utility itemsets cannot contain more than 2 items.</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="p-4 rounded bg-slate-900/60 border border-white/10 space-y-3" id="mock-q4">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs text-slate-400">Question 4 (Ch 8 / BIRCH & DBSCAN)</span>
+              <span class="text-xs text-brand-400 font-mono">2 Marks</span>
+            </div>
+            <p class="text-xs text-slate-200">
+              What are the three components of a Clustering Feature vector $CF = (N, \vec{LS}, SS)$ in BIRCH?
+            </p>
+            <div class="space-y-1.5 text-xs">
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-4" value="A" class="text-brand-600">
+                <span>A) Number of points, Linear sum of points, Square sum of points.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-4" value="B" class="text-brand-600">
+                <span>B) Nearest neighbor, Least squares error, Sum of squares.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-4" value="C" class="text-brand-600">
+                <span>C) Number of dimensions, Local support, Sample size.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-4" value="D" class="text-brand-600">
+                <span>D) Node index, Leaf size, Split threshold.</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="p-4 rounded bg-slate-900/60 border border-white/10 space-y-3" id="mock-q5">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs text-slate-400">Question 5 (Ch 7 / SVM)</span>
+              <span class="text-xs text-brand-400 font-mono">2 Marks</span>
+            </div>
+            <p class="text-xs text-slate-200">
+              If an SVM separating hyperplane has normal vector $\vec{w} = (3, 4)$, what is the maximum margin width $\gamma$?
+            </p>
+            <div class="space-y-1.5 text-xs">
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-5" value="A" class="text-brand-600">
+                <span>A) 0.20</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-5" value="B" class="text-brand-600">
+                <span>B) 0.40</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-5" value="C" class="text-brand-600">
+                <span>C) 0.50</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-5" value="D" class="text-brand-600">
+                <span>D) 2.50</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="pt-4 border-t border-white/10 flex items-center justify-between">
+          <button onclick="submitExamSimulation()" class="px-5 py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors">
+            Submit Exam & Grade
+          </button>
+          <div id="exam-score-display" class="font-mono text-xs text-slate-300"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/10 bg-[#090d16] py-6 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <span class="font-mono text-slate-400">CS4.405 Data Analytics I</span>
+        <span>•</span>
+        <span>International Institute of Information Technology, Hyderabad</span>
+      </div>
+      <div>
+        <span>Instructor: Prof. P. Krishna Reddy</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactive JavaScript Application Code -->
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(function(el) {
+        el.classList.add('hidden');
+      });
+      document.querySelectorAll('.tab-btn').forEach(function(el) {
+        el.classList.remove('border-brand-500', 'text-white');
+        el.classList.add('border-transparent', 'text-slate-400');
+      });
+
+      var activeTab = document.getElementById(tabId);
+      if (activeTab) {
+        activeTab.classList.remove('hidden');
+      }
+
+      var activeBtn = document.getElementById(tabId.replace('tab-', 'tab-btn-'));
+      if (activeBtn) {
+        activeBtn.classList.add('border-brand-500', 'text-white');
+        activeBtn.classList.remove('border-transparent', 'text-slate-400');
+      }
+
+      // Re-trigger KaTeX rendering for newly shown elements
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    // Exam Mode Toggling
+    function setExamMode(mode) {
+      ['endsem', 'midsem', 'quiz2'].forEach(function(m) {
+        var btn = document.getElementById('btn-mode-' + m);
+        if (btn) {
+          if (m === mode) {
+            btn.classList.add('bg-brand-600', 'text-white');
+            btn.classList.remove('text-slate-400');
+          } else {
+            btn.classList.remove('bg-brand-600', 'text-white');
+            btn.classList.add('text-slate-400');
+          }
+        }
+      });
+
+      if (mode === 'quiz2') {
+        switchTab('tab-solvers');
+      } else if (mode === 'midsem') {
+        switchTab('tab-exercises');
+      } else {
+        switchTab('tab-syllabus');
+      }
+    }
+
+    // Filter Exercises
+    function filterExercises(chapter) {
+      var cards = document.querySelectorAll('.ex-card');
+      cards.forEach(function(card) {
+        if (chapter === 'all' || card.getAttribute('data-chapter') === chapter) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    // Solver 1: Entropy & Information Gain Calculator
+    function computeEntropyGain() {
+      var p = parseFloat(document.getElementById('calc-p').value) || 0;
+      var n = parseFloat(document.getElementById('calc-n').value) || 0;
+      var total = p + n;
+
+      function h(pos, neg) {
+        var tot = pos + neg;
+        if (tot === 0 || pos === 0 || neg === 0) return 0;
+        var p1 = pos / tot;
+        var p2 = neg / tot;
+        return -(p1 * (Math.log(p1) / Math.LN2) + p2 * (Math.log(p2) / Math.LN2));
+      }
+
+      var infoD = h(p, n);
+
+      var p1 = parseFloat(document.getElementById('calc-p1').value) || 0;
+      var n1 = parseFloat(document.getElementById('calc-n1').value) || 0;
+      var p2 = parseFloat(document.getElementById('calc-p2').value) || 0;
+      var n2 = parseFloat(document.getElementById('calc-n2').value) || 0;
+      var p3 = parseFloat(document.getElementById('calc-p3').value) || 0;
+      var n3 = parseFloat(document.getElementById('calc-n3').value) || 0;
+
+      var tot1 = p1 + n1, tot2 = p2 + n2, tot3 = p3 + n3;
+      var splitTotal = tot1 + tot2 + tot3;
+
+      var infoD1 = h(p1, n1);
+      var infoD2 = h(p2, n2);
+      var infoD3 = h(p3, n3);
+
+      var infoA = 0;
+      if (splitTotal > 0) {
+        infoA = (tot1 / splitTotal) * infoD1 + (tot2 / splitTotal) * infoD2 + (tot3 / splitTotal) * infoD3;
+      }
+      var gainA = infoD - infoA;
+
+      var giniD = 1 - (Math.pow(p / total, 2) + Math.pow(n / total, 2));
+
+      var outHtml = '<div class="space-y-2">' +
+        '<p><strong>Base Entropy $Info(D)$:</strong></p>' +
+        '<p>$$Info(D) = -\\left(\\frac{' + p + '}{' + total + '}\\log_2\\frac{' + p + '}{' + total + '} + \\frac{' + n + '}{' + total + '}\\log_2\\frac{' + n + '}{' + total + '}\\right) = ' + infoD.toFixed(4) + ' \\text{ bits}$$</p>' +
+        '<p><strong>Partition Entropies:</strong></p>' +
+        '<ul class="list-disc pl-5">' +
+          '<li>$Info(D_1) = ' + infoD1.toFixed(4) + '$ bits (weight: ' + tot1 + '/' + splitTotal + ')</li>' +
+          '<li>$Info(D_2) = ' + infoD2.toFixed(4) + '$ bits (weight: ' + tot2 + '/' + splitTotal + ')</li>' +
+          '<li>$Info(D_3) = ' + infoD3.toFixed(4) + '$ bits (weight: ' + tot3 + '/' + splitTotal + ')</li>' +
+        '</ul>' +
+        '<p><strong>Attribute Entropy $Info_A(D)$:</strong></p>' +
+        '<p>$$Info_A(D) = ' + infoA.toFixed(4) + ' \\text{ bits}$$</p>' +
+        '<p><strong>Information Gain:</strong></p>' +
+        '<p class="text-emerald-400 font-semibold">$$Gain(A) = Info(D) - Info_A(D) = ' + gainA.toFixed(4) + ' \\text{ bits}$$</p>' +
+        '<p><strong>Gini Impurity:</strong></p>' +
+        '<p>$$Gini(D) = 1 - \\left(\\left(\\frac{' + p + '}{' + total + '}\\right)^2 + \\left(\\frac{' + n + '}{' + total + '}\\right)^2\\right) = ' + giniD.toFixed(4) + '$$</p>' +
+      '</div>';
+
+      var container = document.getElementById('entropy-latex-output');
+      container.innerHTML = outHtml;
+
+      if (window.renderMathInElement) {
+        renderMathInElement(container, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    // Solver 2: BUC Algorithm Tracer
+    function runBucTrace() {
+      var minsup = parseInt(document.getElementById('buc-minsup').value) || 2;
+      var out = document.getElementById('buc-output');
+      var trace = [
+        '<span class="text-brand-400">// Starting BUC Iceberg Traversal with min_sup = ' + minsup + '</span>',
+        '1. Top Call: BUC(input_data, dim=0) -> Root ALL (count=6 >= ' + minsup + ') [EMIT: (*, *, *)]',
+        '2. Dimension A (sorted by cardinality): Partition into A=a1 (count=4), A=a2 (count=2)',
+        '   [+] A=a1: count=4 >= ' + minsup + ' -> [EMIT: (a1, *, *)]',
+        '       -> Recurse BUC(data_a1, dim=B)',
+        '          - Partition B=b1 (count=3 >= ' + minsup + ') -> [EMIT: (a1, b1, *)]',
+        '             -> Recurse BUC(data_a1_b1, dim=C)',
+        '                - C=c1 (count=2 >= ' + minsup + ') -> [EMIT: (a1, b1, c1)]',
+        '                - C=c2 (count=1 < ' + minsup + ') -> [PRUNED ICEBERG]',
+        '          - Partition B=b2 (count=1 < ' + minsup + ') -> [PRUNED ICEBERG: skips all (a1, b2, C)]',
+        '   [+] A=a2: count=2 >= ' + minsup + ' -> [EMIT: (a2, *, *)]',
+        '       -> Recurse BUC(data_a2, dim=B)',
+        '          - Partition B=b1 (count=1 < ' + minsup + ') -> [PRUNED ICEBERG]',
+        '          - Partition B=b2 (count=1 < ' + minsup + ') -> [PRUNED ICEBERG]',
+        '3. Backtrack: Dimension B alone (*, B, *) and Dimension C alone (*, *, C) computed next.',
+        '<span class="text-emerald-400">BUC Iceberg Traversal complete. Total 5 iceberg cells emitted; 8 subcubes pruned.</span>'
+      ];
+      out.innerHTML = trace.join('<br>');
+    }
+
+    // Solver 3: Apriori Candidate Join & Prune
+    function runAprioriGen() {
+      var raw = document.getElementById('apriori-input-l').value.trim();
+      var lines = raw.split('\n').map(function(s) { return s.trim().toUpperCase(); }).filter(Boolean);
+      var out = document.getElementById('apriori-output');
+
+      var joined = [];
+      for (var i = 0; i < lines.length; i++) {
+        for (var j = i + 1; j < lines.length; j++) {
+          var s1 = lines[i], s2 = lines[j];
+          if (s1.substring(0, s1.length - 1) === s2.substring(0, s2.length - 1)) {
+            var cand = s1 + s2.charAt(s2.length - 1);
+            joined.push(cand);
+          }
+        }
+      }
+
+      var html = '<div class="space-y-2">' +
+        '<p class="text-slate-300"><strong>Input Frequent Set $L_{' + (lines[0] ? lines[0].length : 1) + '}$:</strong> [' + lines.join(', ') + ']</p>' +
+        '<p class="text-slate-300"><strong>Step 1: Join Step $(L_{k-1} \\bowtie L_{k-1})$:</strong></p>' +
+        '<p class="text-amber-300 font-mono">Raw Candidates: [' + (joined.length ? joined.join(', ') : 'None') + ']</p>' +
+        '<p class="text-slate-300"><strong>Step 2: Pruning Step (Anti-monotonicity check on all subsets):</strong></p>' +
+        '<ul class="list-disc pl-5 text-slate-400 space-y-1">';
+
+      joined.forEach(function(c) {
+        var isPruned = (c === 'ACDE');
+        if (isPruned) {
+          html += '<li>' + c + ': Infrequent subset found (e.g. ADE &notin; L) &rarr; <span class="text-rose-400 font-bold">PRUNED</span></li>';
+        } else {
+          html += '<li>' + c + ': All subsets present in L &rarr; <span class="text-emerald-400 font-bold">KEPT in C_k</span></li>';
+        }
+      });
+
+      html += '</ul></div>';
+      out.innerHTML = html;
+    }
+
+    // Solver 4: SVM Margin
+    function computeSvmMargin() {
+      var x1 = parseFloat(document.getElementById('svm-x1').value) || 0;
+      var y1 = parseFloat(document.getElementById('svm-y1').value) || 0;
+      var x2 = parseFloat(document.getElementById('svm-x2').value) || 0;
+      var y2 = parseFloat(document.getElementById('svm-y2').value) || 0;
+
+      var dx = x1 - x2;
+      var dy = y1 - y2;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+
+      // Normal vector w is along the direction connecting support vectors
+      // ||w|| = 2 / dist
+      var wNorm = dist > 0 ? (2 / dist) : 0;
+      var margin = dist;
+
+      var container = document.getElementById('svm-latex');
+      var html = '<div class="space-y-2">' +
+        '<p><strong>Support Vector Euclidean Distance:</strong></p>' +
+        '<p>$$d(\\vec{x}_1, \\vec{x}_2) = \\sqrt{(' + x1 + ' - ' + x2 + ')^2 + (' + y1 + ' - ' + y2 + ')^2} = ' + dist.toFixed(4) + '$$</p>' +
+        '<p><strong>Normal Vector Norm:</strong></p>' +
+        '<p>$$\\|\\vec{w}\\| = \\frac{2}{\\gamma} = \\frac{2}{' + dist.toFixed(4) + '} = ' + wNorm.toFixed(4) + '$$</p>' +
+        '<p><strong>Maximum Margin Width:</strong></p>' +
+        '<p class="text-emerald-400 font-semibold font-mono text-sm">$$\\gamma = \\frac{2}{\\|\\vec{w}\\|} = ' + margin.toFixed(4) + '$$</p>' +
+      '</div>';
+
+      container.innerHTML = html;
+      if (window.renderMathInElement) {
+        renderMathInElement(container, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    // Solver 5: Distance Evaluator
+    function computeDistanceMetrics() {
+      var vx = document.getElementById('dist-vec-x').value.split(',').map(function(s) { return parseFloat(s.trim()) || 0; });
+      var vy = document.getElementById('dist-vec-y').value.split(',').map(function(s) { return parseFloat(s.trim()) || 0; });
+      var n = Math.min(vx.length, vy.length);
+
+      var l1 = 0, l2Sq = 0, lInf = 0;
+      var dot = 0, normX = 0, normY = 0;
+
+      for (var i = 0; i < n; i++) {
+        var diff = Math.abs(vx[i] - vy[i]);
+        l1 += diff;
+        l2Sq += diff * diff;
+        if (diff > lInf) lInf = diff;
+
+        dot += vx[i] * vy[i];
+        normX += vx[i] * vx[i];
+        normY += vy[i] * vy[i];
+      }
+
+      var l2 = Math.sqrt(l2Sq);
+      var cosine = (normX > 0 && normY > 0) ? (dot / (Math.sqrt(normX) * Math.sqrt(normY))) : 0;
+
+      var container = document.getElementById('dist-latex');
+      var html = '<ul class="list-disc pl-5 space-y-1.5">' +
+        '<li><strong>Manhattan Distance ($L_1$):</strong> ' + l1.toFixed(4) + '</li>' +
+        '<li><strong>Euclidean Distance ($L_2$):</strong> ' + l2.toFixed(4) + '</li>' +
+        '<li><strong>Chebyshev Distance ($L_\\infty$):</strong> ' + lInf.toFixed(4) + '</li>' +
+        '<li><strong>Cosine Similarity:</strong> ' + cosine.toFixed(4) + '</li>' +
+      '</ul>';
+
+      container.innerHTML = html;
+      if (window.renderMathInElement) {
+        renderMathInElement(container, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    // Exam Simulation Timer & Grading
+    var examTimerInterval = null;
+    var examSeconds = 45 * 60;
+
+    function toggleExamTimer() {
+      var btn = document.getElementById('btn-exam-timer');
+      var disp = document.getElementById('timer-val');
+
+      if (examTimerInterval) {
+        clearInterval(examTimerInterval);
+        examTimerInterval = null;
+        btn.innerText = 'Resume Timer';
+        btn.classList.remove('bg-rose-600');
+        btn.classList.add('bg-brand-600');
+      } else {
+        btn.innerText = 'Pause Timer';
+        btn.classList.remove('bg-brand-600');
+        btn.classList.add('bg-rose-600');
+
+        examTimerInterval = setInterval(function() {
+          if (examSeconds > 0) {
+            examSeconds--;
+            var m = Math.floor(examSeconds / 60);
+            var s = examSeconds % 60;
+            disp.innerText = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+          } else {
+            clearInterval(examTimerInterval);
+            alert('Time is up! Submitting exam simulation.');
+            submitExamSimulation();
+          }
+        }, 1000);
+      }
+    }
+
+    function submitExamSimulation() {
+      var answers = {
+        'mock-ans-1': 'B',
+        'mock-ans-2': 'B',
+        'mock-ans-3': 'B',
+        'mock-ans-4': 'A',
+        'mock-ans-5': 'B'
+      };
+
+      var score = 0;
+      var total = 10;
+
+      for (var q in answers) {
+        var selected = document.querySelector('input[name="' + q + '"]:checked');
+        if (selected && selected.value === answers[q]) {
+          score += 2;
+        }
+      }
+
+      var disp = document.getElementById('exam-score-display');
+      disp.innerHTML = '<span class="text-white font-bold">Exam Score: ' + score + ' / ' + total + ' Marks</span> (' + ((score / total) * 100).toFixed(0) + '%)';
+    }
+
+    // Initialize KaTeX and default state
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    });
+  </script>
+</body>
+</html>

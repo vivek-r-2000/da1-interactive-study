@@ -417,7 +417,7 @@
   <span class="title">Advanced Pattern Mining</span>
   <div id="progress-bar-wrap"><div id="progress-bar" style="width:4%"></div></div>
   <span id="progress-label">Card 1 of 26</span>
-  <button id="timer-btn" onclick="toggleTimer()">⏱ 15:00</button>
+  <button id="timer-btn" onclick="toggleTimer()">15:00</button>
 </div>
 
 <!-- POMODORO OVERLAY -->
@@ -437,7 +437,7 @@
     <span class="sidebar-item" onclick="goToCard(13)">§3 Quantitative Rules</span>
     <span class="sidebar-item" onclick="goToCard(18)">§4 High-Utility Mining</span>
     <span class="sidebar-item" onclick="goToCard(23)">§5 Constraint-Based</span>
-    <span class="sidebar-item" onclick="goToCard(26)">🎯 End Quiz</span>
+    <span class="sidebar-item" onclick="goToCard(26)">End Quiz</span>
     <span class="sidebar-item" onclick="goToCard(27)">📚 Appendix</span>
   </div>
   <div class="sidebar-section" style="margin-top:8px">
@@ -1114,7 +1114,7 @@ const SECTION_MAP = [
   {start:13,end:17,label:"§3 Quantitative Rules"},
   {start:18,end:22,label:"§4 High-Utility Mining"},
   {start:23,end:25,label:"§5 Constraint-Based"},
-  {start:26,end:26,label:"🎯 End Quiz"},
+  {start:26,end:26,label:"End Quiz"},
   {start:27,end:27,label:"📚 Appendix"},
 ];
 
@@ -1172,7 +1172,7 @@ function updateUI() {
     "C19: Utility Analogy","C20: Utility Formula","C21: Utility Calc 🧮",
     "C22: Two-Phase Algo","C23: Flip – No Apriori",
     "C24: Constraint Analogy","C25: Four Types","C26: Flip – Anti-Mono",
-    "C27: 🎯 End Quiz","C28: 📚 Appendix"
+    "C27: End Quiz","C28: 📚 Appendix"
   ];
   const container = document.getElementById('sidebar-cards');
   labels.forEach((lbl, i) => {
@@ -1214,7 +1214,7 @@ function updateTimerDisplay() {
   const m = Math.floor(timerSeconds / 60).toString().padStart(2,'0');
   const s = (timerSeconds % 60).toString().padStart(2,'0');
   const btn = document.getElementById('timer-btn');
-  btn.textContent = `⏱ ${m}:${s}`;
+  btn.textContent = `${m}:${s}`;
   btn.classList.toggle('urgent', timerSeconds < 120);
 }
 

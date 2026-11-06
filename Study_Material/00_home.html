@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>DA-1 Interactive Study Hub 🎓</title>
+<title>Data Analytics I — Study Hub</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <style>
   /* ── Theme Variables ── */
@@ -270,13 +270,15 @@
   display: flex; align-items: center; justify-content: space-between;
 ">
   <div style="display:flex; align-items:center; gap:.65rem;">
-    <span style="font-size:1.3rem;">🎓</span>
+    <span class="font-mono text-xs px-2 py-0.5 rounded border border-white/10 bg-white/5 text-slate-300">CS4.405</span>
     <span style="font-weight:700; font-size:.95rem; letter-spacing:.01em;">DA-1 Study Hub</span>
   </div>
   <div style="display:flex; gap:.75rem; align-items:center;">
-    <span class="stat-chip">📚 8 Modules</span>
-    <span class="stat-chip">⏱ ~8 hrs total</span>
-    <span class="stat-chip" id="completedChip">✅ 0 / 8 done</span>
+    <a href="../Exam_Preparation/index.html" style="text-decoration:none; padding: .3rem .85rem; border-radius: 6px; font-size: .78rem; font-weight:600; background: #4f46e5; color: #fff;">Exam Prep Suite &rarr;</a>
+    <a href="../Research_Papers_Study/00_papers_home.html" style="text-decoration:none; padding: .3rem .85rem; border-radius: 6px; font-size: .78rem; font-weight:500; border: 1px solid var(--border); color: var(--muted-foreground);">Research Papers</a>
+    <span class="stat-chip">10 Modules</span>
+    <span class="stat-chip">~8 hrs total</span>
+    <span class="stat-chip" id="completedChip">0 / 10 done</span>
   </div>
 </nav>
 
@@ -289,11 +291,11 @@
   </div>
   <h1 style="font-size:clamp(2rem,5vw,3.2rem); font-weight:800; line-height:1.15; margin-bottom:1rem;">
     <span class="hero-gradient">Data Analytics-I</span><br/>
-    Interactive Study Hub 🎓
+    Interactive Study Hub
   </h1>
   <p style="font-size:1.05rem; color:var(--muted-foreground); max-width:620px; margin:0 auto 1.5rem;">
     Your <strong style="color:var(--foreground);">visual, bite-sized</strong> guide to DA-1.
-    Built for humans with short attention spans. 🧠⚡
+    Comprehensive, mathematically rigorous curriculum.
   </p>
   <p style="font-size:.88rem; color:var(--muted-foreground); font-style:italic; margin-bottom:2rem;">
     "One concept at a time. One card at a time. One ✅ at a time."
@@ -357,7 +359,7 @@
       <div class="module-badge">Module 01 · 🌍</div>
       <div>
         <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Introduction to Data Analytics</h2>
-        <span style="font-size:.75rem; color:#6c63ff; font-weight:600;">⏱ ~45 min</span>
+        <span style="font-size:.75rem; color:#6c63ff; font-weight:600;">~45 min</span>
       </div>
       <ul class="topic-list">
         <li>DIKW Pyramid — Data → Wisdom</li>
@@ -365,7 +367,7 @@
         <li>Data Mining Functionalities</li>
         <li>Big Data Landscape &amp; Applications</li>
       </ul>
-      <a href="01_intro.html" class="start-btn">Start → <span>🚀</span></a>
+      <a href="01_intro.html" class="start-btn">Start &rarr;</a>
     </div>
 
     <!-- ── Card 2 ── -->
@@ -373,7 +375,7 @@
       <div class="module-badge">Module 02 · 📊</div>
       <div>
         <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Data Concepts &amp; Statistics</h2>
-        <span style="font-size:.75rem; color:#06d6a0; font-weight:600;">⏱ ~60 min</span>
+        <span style="font-size:.75rem; color:#06d6a0; font-weight:600;">~60 min</span>
       </div>
       <ul class="topic-list">
         <li>Attribute Types (Nominal → Ratio)</li>
@@ -381,7 +383,7 @@
         <li>Central Tendency &amp; Spread</li>
         <li>Correlation &amp; Data Visualization</li>
       </ul>
-      <a href="02_data_concepts_stats.html" class="start-btn">Start → <span>🚀</span></a>
+      <a href="02_data_concepts_stats.html" class="start-btn">Start &rarr;</a>
     </div>
 
     <!-- ── Card 3 ── -->
@@ -389,7 +391,7 @@
       <div class="module-badge">Module 03 · 🧹</div>
       <div>
         <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Data Preprocessing</h2>
-        <span style="font-size:.75rem; color:#ffd166; font-weight:600;">⏱ ~60 min</span>
+        <span style="font-size:.75rem; color:#ffd166; font-weight:600;">~60 min</span>
       </div>
       <ul class="topic-list">
         <li>Similarity &amp; Distance Measures</li>
@@ -397,7 +399,7 @@
         <li>Normalization Techniques</li>
         <li>PCA &amp; Dimensionality Reduction</li>
       </ul>
-      <a href="03_preprocessing.html" class="start-btn">Start → <span>🚀</span></a>
+      <a href="03_preprocessing.html" class="start-btn">Start &rarr;</a>
     </div>
 
     <!-- ── Card 4 ── -->
@@ -405,7 +407,7 @@
       <div class="module-badge">Module 04 · 🏭</div>
       <div>
         <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Data Warehousing &amp; OLAP</h2>
-        <span style="font-size:.75rem; color:#ef476f; font-weight:600;">⏱ ~45 min</span>
+        <span style="font-size:.75rem; color:#ef476f; font-weight:600;">~45 min</span>
       </div>
       <ul class="topic-list">
         <li>Star &amp; Snowflake Schema</li>
@@ -413,7 +415,7 @@
         <li>Data Cube Architecture</li>
         <li>Attribute-Oriented Induction</li>
       </ul>
-      <a href="04_warehousing_olap.html" class="start-btn">Start → <span>🚀</span></a>
+      <a href="04_warehousing_olap.html" class="start-btn">Start &rarr;</a>
     </div>
 
     <!-- ── Card 5 ── -->
@@ -421,7 +423,7 @@
       <div class="module-badge">Module 05 · 🧊</div>
       <div>
         <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Data Cube Algorithms</h2>
-        <span style="font-size:.75rem; color:#118ab2; font-weight:600;">⏱ ~50 min</span>
+        <span style="font-size:.75rem; color:#118ab2; font-weight:600;">~50 min</span>
       </div>
       <ul class="topic-list">
         <li>BUC &amp; MultiWay Array Algorithms</li>
@@ -429,7 +431,7 @@
         <li>Iceberg Cube &amp; min_sup threshold</li>
         <li>Star-Cubing &amp; Shell Fragment</li>
       </ul>
-      <a href="05_data_cube_algorithms.html" class="start-btn">Start → <span>🚀</span></a>
+      <a href="05_data_cube_algorithms.html" class="start-btn">Start &rarr;</a>
     </div>
 
     <!-- ── Card 6 ── -->
@@ -437,7 +439,7 @@
       <div class="module-badge">Module 06 · 🛒</div>
       <div>
         <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Association Rule Mining</h2>
-        <span style="font-size:.75rem; color:#f78c6c; font-weight:600;">⏱ ~60 min</span>
+        <span style="font-size:.75rem; color:#f78c6c; font-weight:600;">~60 min</span>
       </div>
       <ul class="topic-list">
         <li>Support &amp; Confidence Thresholds</li>
@@ -445,15 +447,15 @@
         <li>FP-Tree &amp; FP-Growth</li>
         <li>Lift, Kulczynski &amp; Pattern Evaluation</li>
       </ul>
-      <a href="06_association_rules.html" class="start-btn">Start → <span>🚀</span></a>
+      <a href="06_association_rules.html" class="start-btn">Start &rarr;</a>
     </div>
 
     <!-- ── Card 7 ── -->
     <div class="module-card border-c7">
-      <div class="module-badge">Module 07 · 🔬</div>
+      <div class="module-badge">Module 07</div>
       <div>
         <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Advanced Pattern Mining</h2>
-        <span style="font-size:.75rem; color:#c77dff; font-weight:600;">⏱ ~45 min</span>
+        <span style="font-size:.75rem; color:#c77dff; font-weight:600;">~45 min</span>
       </div>
       <ul class="topic-list">
         <li>Coverage &amp; Colossal Patterns</li>
@@ -461,7 +463,7 @@
         <li>High-Utility Itemset Mining</li>
         <li>Constraint-Based Mining</li>
       </ul>
-      <a href="07_advanced_patterns.html" class="start-btn">Start → <span>🚀</span></a>
+      <a href="07_advanced_patterns.html" class="start-btn">Start &rarr;</a>
     </div>
 
     <!-- ── Card 8 ── -->
@@ -469,7 +471,7 @@
       <div class="module-badge">Module 08 · 🏷️</div>
       <div>
         <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Classification</h2>
-        <span style="font-size:.75rem; color:#4cc9f0; font-weight:600;">⏱ ~90 min</span>
+        <span style="font-size:.75rem; color:#4cc9f0; font-weight:600;">~90 min</span>
       </div>
       <ul class="topic-list">
         <li>Decision Trees &amp; Gini/Entropy</li>
@@ -477,15 +479,15 @@
         <li>Logistic Regression Basics</li>
         <li>Ensemble Methods &amp; Evaluation Metrics</li>
       </ul>
-      <a href="08_classification.html" class="start-btn">Start → <span>🚀</span></a>
+      <a href="08_classification.html" class="start-btn">Start &rarr;</a>
     </div>
 
     <!-- ── Card 9 ── -->
     <div class="module-card border-c1">
-      <div class="module-badge">Module 09 · 🧠</div>
+      <div class="module-badge">Module 09</div>
       <div>
         <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Advanced Classification</h2>
-        <span style="font-size:.75rem; color:#8b5cf6; font-weight:600;">⏱ ~75 min</span>
+        <span style="font-size:.75rem; color:#8b5cf6; font-weight:600;">~75 min</span>
       </div>
       <ul class="topic-list">
         <li>Feature Selection (Filter, Wrapper, Embedded)</li>
@@ -493,15 +495,15 @@
         <li>Support Vector Machines (MMH, Kernel Trick)</li>
         <li>Weak Supervision, Lazy Learners &amp; Fuzzy Sets</li>
       </ul>
-      <a href="09_advanced_classification.html" class="start-btn">Start → <span>🚀</span></a>
+      <a href="09_advanced_classification.html" class="start-btn">Start &rarr;</a>
     </div>
 
     <!-- ── Card 10 ── -->
     <div class="module-card border-c2">
-      <div class="module-badge">Module 10 · 🎯</div>
+      <div class="module-badge">Module 10</div>
       <div>
         <h2 style="font-size:1rem; font-weight:700; margin-bottom:.15rem;">Cluster Analysis: Basic &amp; Advanced</h2>
-        <span style="font-size:.75rem; color:#06d6a0; font-weight:600;">⏱ ~90 min</span>
+        <span style="font-size:.75rem; color:#06d6a0; font-weight:600;">~90 min</span>
       </div>
       <ul class="topic-list">
         <li>Partitioning (K-Means, PAM, CLARANS, K-Modes)</li>
@@ -509,7 +511,7 @@
         <li>Density-Based (DBSCAN, OPTICS, DENCLUE)</li>
         <li>Grid-Based (STING, CLIQUE) &amp; Silhouette Validation</li>
       </ul>
-      <a href="10_clustering.html" class="start-btn">Start → <span>🚀</span></a>
+      <a href="10_clustering.html" class="start-btn">Start &rarr;</a>
     </div>
 
   </div>

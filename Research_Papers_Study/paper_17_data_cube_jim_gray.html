@@ -127,7 +127,7 @@
     <!-- Pomodoro Timer -->
     <div class="flex items-center gap-2">
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs font-mono font-bold text-amber-400">
-        <span>⏱️ Focus:</span>
+        <span>Focus:</span>
         <span id="timer-display">15:00</span>
       </div>
       <button onclick="toggleTimer()" class="text-xs bg-[var(--card)] hover:bg-[var(--border)] px-2.5 py-1.5 rounded-lg border border-[var(--border)]">⏯</button>
@@ -147,7 +147,7 @@
         In standard relational databases, the SQL <code class="text-indigo-300">GROUP BY</code> operator produces a 1D list of aggregated buckets for one set of attributes. But real-world business analysts need multidimensional cross-tabulations (spreadsheets showing sales by Model, Year, and Color simultaneously with row and column sub-totals).
       </p>
       <div class="p-4 rounded-xl bg-indigo-950/30 border border-indigo-800/40 text-sm text-indigo-200 leading-relaxed mb-4">
-        <strong>💡 Jim Gray's Elegant Breakthrough:</strong>
+        <strong>Jim Gray's Formulation:</strong>
         To produce an N-dimensional cross-tabulation in SQL-92, a developer had to write &dollar;2^N$ separate <code class="text-amber-300">SELECT ... GROUP BY</code> queries glued together by <code class="text-amber-300">UNION ALL</code>. For 10 dimensions, that was 1,024 queries!
         <br/><br/>
         <strong>Jim Gray et al. (1997)</strong> introduced the <strong>CUBE</strong> operator and the magical <strong>ALL</strong> token to represent super-aggregate totals within relational semantics.

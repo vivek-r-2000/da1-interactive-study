@@ -567,7 +567,7 @@
     <div id="progress-bar" style="width:3.3%"></div>
   </div>
   <span id="progress-label">Card 1 of 30</span>
-  <span id="timer-display" onclick="togglePause()" title="Click to pause/resume">⏱ 15:00</span>
+  <span id="timer-display" onclick="togglePause()" title="Click to pause/resume">15:00</span>
 </div>
 
 <!-- ══ MAIN CONTENT ══ -->
@@ -591,7 +591,7 @@
     <p>Data attributes fall into two big families: <strong>Qualitative</strong> (categories) and <strong>Quantitative</strong> (numbers). Each family has subtypes.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Choosing the wrong attribute type for analysis leads to meaningless results. Knowing your data type tells you exactly which operations and charts are valid.
   </div>
 </div>
@@ -672,7 +672,7 @@
     <p><strong>Valid operations:</strong> = and ≠ only. Mode is the only meaningful central tendency measure.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Machine learning algorithms need nominal variables encoded as numbers. But treating "1=Red, 2=Blue, 3=Green" as if 3>2>1 is a serious mistake — it implies an order that doesn't exist!
   </div>
 </div>
@@ -691,7 +691,7 @@
     <p><strong>Valid operations:</strong> =, ≠, &gt;, &lt;. Mode and Median are meaningful. Mean is questionable.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Survey data (like "rate your satisfaction 1–5") is ordinal. Reporting the average satisfaction score sounds clean, but it can be misleading. Use the median or frequency distribution instead.
   </div>
 </div>
@@ -713,7 +713,7 @@
     <p><strong>Valid operations:</strong> =, ≠, &gt;, &lt;, +, −. Mean, Median, Mode all valid.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     IQ scores are interval data. An IQ of 140 is NOT "twice as intelligent" as IQ 70. The zero on the IQ scale is arbitrary, not absolute.
   </div>
 </div>
@@ -732,7 +732,7 @@
     <p><strong>Temperature in Kelvin</strong> is ratio! 0K truly = no heat (absolute zero). 400K is twice as hot as 200K.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Financial data (revenue, profit) is ratio — you can legitimately say "Company A earns 3× more than Company B." This enables powerful comparative analysis.
   </div>
 </div>
@@ -805,7 +805,7 @@
     <p>Regular databases can't handle these 5 challenges together. <strong>Big Data technologies</strong> (Hadoop, Spark) were built specifically for this.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     You need to diagnose which "V" is the problem before choosing a Big Data solution. Not all big datasets have all 5 Vs.
   </div>
 </div>
@@ -848,7 +848,7 @@
     <p>Traditional SQL databases can't hold or query petabyte-scale data efficiently. That's why Google built <strong>BigTable</strong> and why Hadoop/Spark exist.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Volume determines storage architecture. At petabyte scale, you distribute data across thousands of commodity servers rather than one giant expensive machine.
   </div>
 </div>
@@ -880,7 +880,7 @@
     <p>NoSQL databases (MongoDB, Cassandra) and data lakes (S3, HDFS) handle variety better than traditional SQL.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     A single hospital has all three types: structured patient records, semi-structured HL7 messages, unstructured doctor's notes and X-ray images.
   </div>
 </div>
@@ -904,7 +904,7 @@
     </div>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Many organizations collect lots of data (Volume ✅) but fail to extract Value because they ignored Veracity (bad data quality). Data cleaning can take 60–80% of a data scientist's time!
   </div>
 </div>
@@ -954,7 +954,7 @@
     <p>These 4 categories of descriptive statistics give you a complete picture of any dataset.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Before building any ML model, data analysts spend hours computing these statistics to understand the data — this is called Exploratory Data Analysis (EDA).
   </div>
 </div>
@@ -1037,7 +1037,7 @@
     <p>SD = 0 means all values are identical. A higher SD = more spread = less consistency.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     In finance, SD of stock returns = risk! Higher volatility (SD) means higher risk. The Sharpe Ratio uses SD to measure risk-adjusted returns.
   </div>
 </div>
@@ -1084,7 +1084,7 @@
     <p>If a score is more than 3 SDs from the mean, it's considered an extreme outlier (probability &lt;0.3%).</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Many ML algorithms assume normality. If your data isn't normal (skewed, heavy-tailed), you may need to transform it first using log or sqrt transformations.
   </div>
 </div>
@@ -1118,7 +1118,7 @@
     <p>A quick rule: <strong>If Mean &gt; Median → positive skew.</strong> If Mean &lt; Median → negative skew.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Skewed data violates normality assumptions of many statistical tests. You can fix skew using log transformation (common for income data), square root, or Box-Cox transformation.
   </div>
 </div>
@@ -1147,7 +1147,7 @@
     <p>This third variable causing both is called a <strong>confounding variable</strong> or <strong>lurking variable</strong>.</p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Machine learning features with high correlation can cause multicollinearity issues. In causal analysis, you need randomized experiments to establish causation, not just correlation.
   </div>
 </div>
@@ -1220,7 +1220,7 @@
     </div>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Data analysts spend significant time choosing the right visualization. The wrong chart can mislead stakeholders — a truncated y-axis in a bar chart, for example, can make tiny differences look enormous.
   </div>
 </div>
@@ -1283,7 +1283,7 @@
     </div>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Parallel coordinates are used in industrial quality control to monitor many sensors simultaneously. One "out of pattern" line instantly reveals a faulty machine.
   </div>
 </div>
@@ -1316,7 +1316,7 @@
     <p style="font-size:12px; color:var(--muted-foreground); margin-top:8px;"><em>↑ Simple tag cloud of Module 2 keywords by importance</em></p>
   </div>
   <div class="why-box">
-    <strong>🎯 Why does this matter?</strong>
+    <strong>Significance & Purpose</strong>
     Choosing the right visualization is a core data analytics skill. The goal: maximum insight with minimum cognitive effort for the viewer.
   </div>
 </div>
@@ -1596,13 +1596,13 @@ function startTimer() {
     timerSeconds--;
     if (timerSeconds <= 0) {
       clearInterval(timerInterval);
-      document.getElementById('timer-display').textContent = '⏱ 0:00';
+      document.getElementById('timer-display').textContent = '0:00';
       document.getElementById('break-overlay').classList.add('show');
       return;
     }
     const m = Math.floor(timerSeconds / 60);
     const s = timerSeconds % 60;
-    document.getElementById('timer-display').textContent = `⏱ ${m}:${s.toString().padStart(2,'0')}`;
+    document.getElementById('timer-display').textContent = `${m}:${s.toString().padStart(2,'0')}`;
   }, 1000);
 }
 
@@ -1617,7 +1617,7 @@ function resumeTimer() {
   timerSeconds = 900;
   timerPaused = false;
   document.getElementById('break-overlay').classList.remove('show');
-  document.getElementById('timer-display').textContent = '⏱ 15:00';
+  document.getElementById('timer-display').textContent = '15:00';
   startTimer();
 }
 

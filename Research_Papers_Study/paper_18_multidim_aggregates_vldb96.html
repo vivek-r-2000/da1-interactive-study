@@ -127,7 +127,7 @@
     <!-- Pomodoro Timer -->
     <div class="flex items-center gap-2">
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs font-mono font-bold text-amber-400">
-        <span>⏱️ Focus:</span>
+        <span>Focus:</span>
         <span id="timer-display">15:00</span>
       </div>
       <button onclick="toggleTimer()" class="text-xs bg-[var(--card)] hover:bg-[var(--border)] px-2.5 py-1.5 rounded-lg border border-[var(--border)]">⏯</button>
@@ -147,7 +147,7 @@
         When Jim Gray introduced the Data Cube operator, every executive wanted answers across all dimensional combinations. But for a data warehouse with $N$ dimensions, there are &dollar;2^N$ separate cuboids (group-bys). If $N = 6$, that is 64 cuboids; if $N = 10$, that is 1,024 cuboids.
       </p>
       <div class="p-4 rounded-xl bg-indigo-950/30 border border-indigo-800/40 text-sm text-indigo-200 leading-relaxed mb-4">
-        <strong>💡 The Naive Flaw:</strong> If your raw fact table has 100 million rows, running 1,024 separate SQL <code class="text-amber-300">GROUP BY</code> queries would scan 100 billion rows and execute 1,024 independent disk sorts! This would take days.
+        <strong>The Naive Formulation:</strong> If your raw fact table has 100 million rows, running 1,024 separate SQL <code class="text-amber-300">GROUP BY</code> queries would scan 100 billion rows and execute 1,024 independent disk sorts! This would take days.
         <br/><br/>
         <strong>Agarwal, Agrawal, Deshpande, Gupta, Naughton, Ramakrishnan, and Sarawagi (VLDB 1996)</strong> solved this by proving how to compute the entire cuboid lattice by sharing memory, sorting orders, and disk partitions.
       </div>
@@ -391,7 +391,7 @@
     document.getElementById('pipesort-diagram').innerHTML = `
       <div class="space-y-4">
         <div class="p-3 rounded-lg bg-[#0a101f] border border-indigo-900/60">
-          <div class="text-xs font-bold text-emerald-400 mb-1">🚀 Primary Pipeline (Zero Re-Sorts):</div>
+          <div class="text-xs font-bold text-emerald-400 mb-1">Primary Pipeline (Zero Re-Sorts):</div>
           <div class="text-xs font-mono text-white">\${p1}</div>
         </div>
         <div class="p-3 rounded-lg bg-[#0a101f] border border-indigo-900/60">

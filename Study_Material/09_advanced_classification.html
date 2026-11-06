@@ -180,7 +180,7 @@
       <div id="progress-bar" style="width: 3%"></div>
     </div>
     <span id="progress-text">Card 1 / 30</span>
-    <span id="timer" onclick="toggleTimer()">⏱ 15:00</span>
+    <span id="timer" onclick="toggleTimer()">15:00</span>
   </header>
 
   <div id="layout">
@@ -244,7 +244,7 @@
             <p>In classical introductory machine learning, we make a massive, unrealistic assumption: <em>"A clean training table with $n$ rows and $p$ perfectly chosen attributes is already handed to us."</em></p>
             <p><strong>Reality in Data Analytics:</strong> In enterprise datasets, we often collect <strong>thousands or tens of thousands of features</strong> (gene expression levels, browser cookies, sensor telemetry, text tokens). Most of these features are noisy, redundant, or completely irrelevant to our target variable.</p>
             <div class="p-4 rounded-xl bg-indigo-950/40 border border-indigo-800/50 mb-4">
-              <h4 class="font-bold text-indigo-300 text-sm mb-1">🎯 The Triple Curse of Too Many Features:</h4>
+              <h4 class="font-bold text-indigo-300 text-sm mb-1">The Triple Curse of Too Many Features:</h4>
               <ul class="text-xs space-y-1 text-slate-300 list-disc list-inside">
                 <li><strong>Overfitting:</strong> Algorithms memorize spurious correlations in high dimensions instead of real patterns.</li>
                 <li><strong>Curse of Dimensionality:</strong> In high dimensions, points become equidistant and distance-based metrics (k-NN, clustering) break down.</li>
@@ -1001,7 +1001,7 @@
       document.getElementById('card-counter').innerText = `${idx + 1} / ${totalCards}`;
 
       document.getElementById('prev-btn').disabled = (idx === 0);
-      document.getElementById('next-btn').innerText = (idx === totalCards - 1) ? 'Finish 🎓' : 'Next →';
+      document.getElementById('next-btn').innerText = (idx === totalCards - 1) ? 'Finish' : 'Next →';
 
       if (idx === 2) updateFeatureSandbox();
       if (idx === 6) calcBBN();
@@ -1302,7 +1302,7 @@
             timerSeconds--;
             const m = Math.floor(timerSeconds / 60);
             const s = timerSeconds % 60;
-            document.getElementById('timer').innerText = `⏱ ${m}:${s < 10 ? '0' : ''}${s}`;
+            document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
           }
         }, 1000);
       }

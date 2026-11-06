@@ -182,7 +182,7 @@
       <div id="progress-bar" style="width: 3.3%"></div>
     </div>
     <span id="progress-text">Card 1 / 30</span>
-    <span id="timer" onclick="toggleTimer()">⏱ 15:00</span>
+    <span id="timer" onclick="toggleTimer()">15:00</span>
   </header>
 
   <div id="layout">
@@ -248,7 +248,7 @@
             <p><strong>Cluster analysis</strong> (or clustering) is the process of partitioning a set of data objects into subsets called <strong>clusters</strong>. Unlike classification, clustering is fundamentally <strong>unsupervised</strong>: there are no predefined class labels or training teacher.</p>
 
             <div class="p-3.5 bg-indigo-950/40 border border-indigo-800/60 rounded-xl mb-3 text-xs text-slate-300">
-              <strong class="text-indigo-300 text-sm block mb-1">🎯 Core Objective:</strong>
+              <strong class="text-indigo-300 text-sm block mb-1">Core Objective:</strong>
               Objects within the same cluster must have <strong>high intra-class similarity</strong> (cohesion), while objects in different clusters must have <strong>low inter-class similarity</strong> (distinctness).
             </div>
 
@@ -1293,7 +1293,7 @@
       document.getElementById('card-counter').innerText = `${idx + 1} / ${totalCards}`;
 
       document.getElementById('prev-btn').disabled = (idx === 0);
-      document.getElementById('next-btn').innerText = (idx === totalCards - 1) ? 'Finish 🎓' : 'Next →';
+      document.getElementById('next-btn').innerText = (idx === totalCards - 1) ? 'Finish' : 'Next →';
 
       if (idx === 4) drawMetricSandbox();
       if (idx === 11) initPartitioningCanvas();
@@ -1341,7 +1341,7 @@
           }
           const m = Math.floor(timerSeconds / 60);
           const s = timerSeconds % 60;
-          document.getElementById('timer').innerText = `⏱ ${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+          document.getElementById('timer').innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
         }, 1000);
       }
     }

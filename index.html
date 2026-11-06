@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Analytics I — Global Learning & Moodle Hub 🎓</title>
+<title>Data Analytics I — Academic Study Suite & Examination Portal</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 <style>
@@ -24,18 +24,23 @@
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
   }
-  .card-glow:hover {
-    box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.4);
-    border-color: #6366f1;
-    transform: translateY(-2px);
+  .surface-card {
+    background-color: #0f1420;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: border-color 150ms ease;
+  }
+  .surface-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
   .badge {
     font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-weight: 600;
+    letter-spacing: 0.025em;
     padding: 0.2rem 0.5rem;
-    border-radius: 9999px;
+    border-radius: 4px;
   }
   /* Mobile touches */
   @media (max-width: 640px) {
@@ -47,24 +52,27 @@
 <body class="antialiased selection:bg-indigo-500 selection:text-white">
 
   <!-- TOP APP BAR -->
-  <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md border-b border-[var(--border)] px-4 py-3">
+  <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md border-b border-white/10 px-4 py-3">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <span class="text-2xl">🎓</span>
+        <span class="font-mono text-xs px-2 py-0.5 rounded border border-white/15 bg-white/5 text-slate-300">CS4.405</span>
         <div>
-          <span class="font-black text-sm md:text-base text-white tracking-tight">DA-1 Study Suite</span>
-          <span class="hidden md:inline-block ml-2 text-xs text-indigo-400 font-mono bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/50">IIIT Monsoon 2026</span>
+          <span class="font-bold text-sm md:text-base text-white tracking-tight">Data Analytics I</span>
+          <span class="hidden md:inline-block ml-2 text-xs text-slate-400 font-mono bg-slate-900 px-2 py-0.5 rounded border border-white/10">IIIT Monsoon 2026</span>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <a href="https://courses.iiit.ac.in/course/view.php?id=5977" target="_blank" rel="noopener noreferrer" class="text-xs bg-amber-600/90 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm">
-          <span>🏛️ Moodle Portal</span>
+        <a href="Exam_Preparation/index.html" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3 py-1.5 rounded transition-all">
+          Exam Prep Suite
         </a>
-        <a href="Study_Material/00_home.html" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm">
-          <span>📘 Lectures</span>
+        <a href="Study_Material/00_home.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded border border-white/10 transition-all">
+          Lectures
         </a>
-        <a href="Research_Papers_Study/00_papers_home.html" class="text-xs bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm">
-          <span>🔬 Papers</span>
+        <a href="Research_Papers_Study/00_papers_home.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded border border-white/10 transition-all">
+          Papers
+        </a>
+        <a href="https://courses.iiit.ac.in/course/view.php?id=5977" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-block text-xs text-slate-400 hover:text-slate-200 font-medium px-2 py-1.5 transition-all">
+          Moodle &rarr;
         </a>
       </div>
     </div>
@@ -72,24 +80,23 @@
 
   <!-- HERO SECTION -->
   <section class="max-w-7xl mx-auto px-4 pt-8 pb-6">
-    <div class="bg-gradient-to-br from-[#12192c] via-[#0d1424] to-[#17142b] border border-[var(--border)] rounded-2xl p-6 md:p-10 relative overflow-hidden">
-      <div class="absolute -right-20 -top-20 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="bg-gradient-to-br from-[#12192c] via-[#0d1424] to-[#17142b] border border-white/10 rounded-2xl p-6 md:p-10 relative overflow-hidden">
       <div class="relative z-10 max-w-3xl">
         <div class="flex flex-wrap items-center gap-2 mb-4">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-800/60 text-indigo-300 text-xs font-semibold">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Interactive Visual Learning Platform
+          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-slate-900 border border-white/10 text-slate-300 font-mono text-xs">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            Academic Study Suite
           </div>
-          <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-950/80 border border-amber-800/60 text-amber-300 text-xs font-semibold">
-            <span>🏛️ IIIT-H CS4.405 (Course 5977)</span>
+          <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-slate-900 border border-white/10 text-slate-400 font-mono text-xs">
+            IIIT Hyderabad &bull; CS4.405 (Course 5977)
           </div>
         </div>
-        <h1 class="hero-title text-3xl md:text-5xl font-black text-white tracking-tight mb-4 leading-tight">
-          Data Analytics-I <br/>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">
-            Interactive Learning & Research Hub
-          </span>
+        <h1 class="hero-title text-3xl md:text-5xl font-bold text-white tracking-tight mb-3 leading-tight">
+          Data Analytics I
         </h1>
+        <p class="text-lg text-slate-300 font-medium mb-3">
+          Interactive Study Suite & Comprehensive Exam Preparation
+        </p>
         <p class="text-sm md:text-base text-slate-300 leading-relaxed mb-4">
           Instructor: <strong class="text-white">Prof. P. Krishna Reddy</strong> • TAs: Sukasi Manidhar, Sherley Peethala, Tejasvini Ramaswamy, Arihant Rastogi, Vundela Reddy.
         </p>
@@ -99,27 +106,48 @@
 
         <!-- STATS BAR -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div class="stat-box bg-[#090d16]/70 border border-[var(--border)] rounded-xl p-3 text-center">
-            <div class="text-xl md:text-2xl font-black text-indigo-400">9</div>
-            <div class="text-[11px] text-slate-400 uppercase font-semibold">Lecture Modules</div>
+          <div class="stat-box bg-[#090d16]/70 border border-white/10 rounded-lg p-3 text-center">
+            <div class="text-xl md:text-2xl font-bold font-mono tabular-nums text-white">10</div>
+            <div class="text-[11px] text-slate-400 uppercase font-medium">Lecture Modules</div>
           </div>
-          <div class="stat-box bg-[#090d16]/70 border border-[var(--border)] rounded-xl p-3 text-center">
-            <div class="text-xl md:text-2xl font-black text-purple-400">35</div>
-            <div class="text-[11px] text-slate-400 uppercase font-semibold">Research Papers</div>
+          <div class="stat-box bg-[#090d16]/70 border border-white/10 rounded-lg p-3 text-center">
+            <div class="text-xl md:text-2xl font-bold font-mono tabular-nums text-white">35</div>
+            <div class="text-[11px] text-slate-400 uppercase font-medium">Research Papers</div>
           </div>
-          <div class="stat-box bg-[#090d16]/70 border border-[var(--border)] rounded-xl p-3 text-center">
-            <div class="text-xl md:text-2xl font-black text-amber-400">9</div>
-            <div class="text-[11px] text-slate-400 uppercase font-semibold">Midsem Papers</div>
+          <div class="stat-box bg-[#090d16]/70 border border-white/10 rounded-lg p-3 text-center">
+            <div class="text-xl md:text-2xl font-bold font-mono tabular-nums text-brand-400">7</div>
+            <div class="text-[11px] text-slate-400 uppercase font-medium">Endsem Papers</div>
           </div>
-          <div class="stat-box bg-[#090d16]/70 border border-[var(--border)] rounded-xl p-3 text-center">
-            <div class="text-xl md:text-2xl font-black text-emerald-400">6</div>
-            <div class="text-[11px] text-slate-400 uppercase font-semibold">Assignments</div>
+          <div class="stat-box bg-[#090d16]/70 border border-white/10 rounded-lg p-3 text-center">
+            <div class="text-xl md:text-2xl font-bold font-mono tabular-nums text-emerald-400">14</div>
+            <div class="text-[11px] text-slate-400 uppercase font-medium">Mandated Exercises</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
+  
+  <!-- EXAM PREPARATION SUITE CALLOUT -->
+  <section class="max-w-7xl mx-auto px-4 mb-8">
+    <div class="surface-card rounded-lg p-6 border-l-4 border-l-indigo-500 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="space-y-2 max-w-3xl">
+        <div class="flex items-center space-x-2">
+          <span class="font-mono text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-white/10">Official Endsem Preparation</span>
+          <span class="text-xs font-mono text-emerald-400">Scientific calculators allowed</span>
+        </div>
+        <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight">Endsem Examination Suite (Ch 1–8, 10.1 + 7 Research Papers)</h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          Based directly on the official Moodle announcement by <strong>Prof. P. Krishna Reddy</strong>. Includes full step-by-step solutions for all 14 mandated textbook exercises (2.2, 2.7, 2.18, 2.19, 2.20, 3.15, 3.17, 3.18, 3.22, 4.3, 4.6, 4.10, 6.7, 6.19), 5 interactive numerical step solvers, 7 Endsem paper study decks, cross-chapter synthesis questions, and timed mock simulator.
+        </p>
+      </div>
+      <div class="flex-shrink-0">
+        <a href="Exam_Preparation/index.html" class="inline-flex items-center px-5 py-2.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition-colors shadow-sm">
+          Open Exam Preparation Suite &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
   <!-- SEARCH & FILTER BAR -->
   <section class="max-w-7xl mx-auto px-4 mb-6">
     <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
@@ -130,7 +158,7 @@
           type="text" 
           id="search-input" 
           placeholder="Search any topic, paper, or algorithm (e.g., Apriori, BUC, SVM, BBN, Decision Tree, COVID, OLAP, Quiz 2)..."
-          class="w-full bg-[#131b2e] border border-[var(--border)] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+          class="w-full bg-[#131b2e] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
           oninput="handleSearch()"
         />
       </div>
@@ -138,10 +166,10 @@
       <!-- Category Filter Pills -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none" id="filter-pills">
         <button onclick="setFilter('all')" class="filter-pill active px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white border border-indigo-500" data-filter="all">All (44)</button>
-        <button onclick="setFilter('lecture')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-indigo-500" data-filter="lecture">Lectures (9)</button>
-        <button onclick="setFilter('paper')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-purple-500" data-filter="paper">Papers (35)</button>
-        <button onclick="setFilter('moodle')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-amber-500" data-filter="moodle">🏛️ Moodle & Exams</button>
-        <button onclick="setFilter('assignment')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-[var(--border)] hover:border-emerald-500" data-filter="assignment">📝 Assignments (6)</button>
+        <button onclick="setFilter('lecture')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-white/10 hover:border-indigo-500" data-filter="lecture">Lectures (9)</button>
+        <button onclick="setFilter('paper')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-white/10 hover:border-purple-500" data-filter="paper">Papers (35)</button>
+        <button onclick="setFilter('moodle')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-white/10 hover:border-amber-500" data-filter="moodle">Moodle & Exams</button>
+        <button onclick="setFilter('assignment')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-white/10 hover:border-emerald-500" data-filter="assignment">Assignments (6)</button>
       </div>
     </div>
   </section>
@@ -154,7 +182,7 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-xl font-bold text-white flex items-center gap-2">
-            <span>🏛️ IIIT Moodle Course Central & Exam Hub</span>
+            <span>IIIT Moodle Course Central & Exam Hub</span>
             <span class="text-xs bg-amber-950 text-amber-300 font-mono px-2 py-0.5 rounded border border-amber-800">Moodle ID: 5977</span>
           </h2>
           <p class="text-xs text-slate-400">Official midsem exam syllabus, quiz coverage, grading policy, and announcements digest.</p>
@@ -166,62 +194,62 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <!-- Midsem Card -->
-        <div class="bg-[#131b2e] border border-amber-500/30 rounded-xl p-5 card-glow">
+        <div class="bg-[#131b2e] border border-white/10 rounded-xl p-5 surface-card">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-amber-500/20 text-amber-300 border border-amber-500/30">Official Exam Syllabus</span>
+            <span class="badge bg-amber-500/20 text-amber-300 border border-white/10">Official Exam Syllabus</span>
             <span class="text-xs text-amber-400 font-mono">Midsem Coverage</span>
           </div>
-          <h3 class="font-bold text-white text-base mb-2">🎯 MIDSEM Exam Topics & Tested Papers</h3>
+          <h3 class="font-bold text-white text-base mb-2">Midsem Exam Topics & Tested Papers</h3>
           <p class="text-xs text-slate-300 mb-3 leading-relaxed">
             Scientific calculators allowed. Textbook: <em>Han, Pei, Tong (4th ed., 2022)</em> Chapters 1, 2, 3, 4, 5.1.
           </p>
           <div class="text-xs font-semibold text-amber-300 mb-2">9 Mandatory Tested Research Papers:</div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
-            <a href="Research_Papers_Study/paper_18_multidim_aggregates_vldb96.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-[var(--border)] transition-colors">
-              📄 Paper 18: Multidim Aggregates (VLDB)
+            <a href="Research_Papers_Study/paper_18_multidim_aggregates_vldb96.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-white/10 transition-colors">
+              Paper 18: Multidim Aggregates (VLDB)
             </a>
-            <a href="Research_Papers_Study/paper_20_buc_sigmod99.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-[var(--border)] transition-colors">
-              📄 Paper 20: BUC Iceberg Cubes (SIGMOD)
+            <a href="Research_Papers_Study/paper_20_buc_sigmod99.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-white/10 transition-colors">
+              Paper 20: BUC Iceberg Cubes (SIGMOD)
             </a>
-            <a href="Research_Papers_Study/paper_22_apriori_vldb94.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-[var(--border)] transition-colors">
-              📄 Paper 22: Apriori Rules (VLDB)
+            <a href="Research_Papers_Study/paper_22_apriori_vldb94.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-white/10 transition-colors">
+              Paper 22: Apriori Rules (VLDB)
             </a>
-            <a href="Research_Papers_Study/paper_23_fptree_sigmod00.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-[var(--border)] transition-colors">
-              📄 Paper 23: FP-Tree Growth (SIGMOD)
+            <a href="Research_Papers_Study/paper_23_fptree_sigmod00.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-white/10 transition-colors">
+              Paper 23: FP-Tree Growth (SIGMOD)
             </a>
-            <a href="Research_Papers_Study/paper_24_eclat_tkde00.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-[var(--border)] transition-colors">
-              📄 Paper 24: ECLAT Scalable (TKDE)
+            <a href="Research_Papers_Study/paper_24_eclat_tkde00.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-white/10 transition-colors">
+              Paper 24: ECLAT Scalable (TKDE)
             </a>
-            <a href="Research_Papers_Study/paper_25_coverage_patterns_2012.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-[var(--border)] transition-colors">
-              📄 Paper 25: Coverage Patterns (Ad Banner)
+            <a href="Research_Papers_Study/paper_25_coverage_patterns_2012.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-white/10 transition-colors">
+              Paper 25: Coverage Patterns (Ad Banner)
             </a>
-            <a href="Research_Papers_Study/paper_26_multilevel_mining_1999.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-[var(--border)] transition-colors">
-              📄 Paper 26: Multi-Level Mining
+            <a href="Research_Papers_Study/paper_26_multilevel_mining_1999.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-white/10 transition-colors">
+              Paper 26: Multi-Level Mining
             </a>
-            <a href="Research_Papers_Study/paper_28_quantitative_rules_sigmod96.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-[var(--border)] transition-colors">
-              📄 Paper 28: Quantitative Rules (Sec 1-2)
+            <a href="Research_Papers_Study/paper_28_quantitative_rules_sigmod96.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-white/10 transition-colors">
+              Paper 28: Quantitative Rules (Sec 1-2)
             </a>
-            <a href="Research_Papers_Study/paper_27_high_utility_pakdd05.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-[var(--border)] transition-colors sm:col-span-2">
-              📄 Paper 27: Two-Phase High Utility Itemsets (TWU)
+            <a href="Research_Papers_Study/paper_27_high_utility_pakdd05.html" class="p-1.5 rounded bg-[#090d16] hover:bg-indigo-950/60 text-slate-300 hover:text-indigo-300 border border-white/10 transition-colors sm:col-span-2">
+              Paper 27: Two-Phase High Utility Itemsets (TWU)
             </a>
           </div>
         </div>
 
         <!-- Quiz 1 & 2 Card -->
-        <div class="bg-[#131b2e] border border-[var(--border)] rounded-xl p-5 card-glow flex flex-col justify-between">
+        <div class="bg-[#131b2e] border border-white/10 rounded-xl p-5 surface-card flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Exams & Quizzes</span>
+              <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Exams & Quizzes</span>
               <span class="text-xs text-emerald-400 font-mono">Quiz 1 & Quiz 2</span>
             </div>
-            <h3 class="font-bold text-white text-base mb-2">📝 Quiz Coverage & Newly Announced Quiz 2</h3>
+            <h3 class="font-bold text-white text-base mb-2">Quiz Coverage & Quiz 2 Topics</h3>
             <ul class="text-xs text-slate-300 space-y-2 mb-3">
               <li>• <strong class="text-amber-300">Quiz 2 (CONFIRMED):</strong> Date: <strong>22 October 2026</strong> • Time: <strong>8:45 AM to 9:30 AM</strong> (45 min) • Hall: <strong>H205</strong>.<br/>Topics: (1) <em>Classification: Basic Concepts</em> (Module 08); (2) <em>Classification: Advanced Methods</em> (Module 09, <a href="Lecture_Slides/09_AdvClassificationDA.pptx" class="text-indigo-400 underline">AdvClassificationDA.pptx</a>).</li>
               <li>• <strong class="text-white">Quiz 1:</strong> 45-min short questions covering Ch 1, 2, 3 (Warehousing to 25 Aug). Papers: Cao, Han-Cai AOI, Jim Gray Data Cube, Multidimensional Aggregates.</li>
               <li>• <strong class="text-white">Theory Assignment Incentive:</strong> Optional but rewarded: <span class="text-emerald-400 font-semibold">Endsem 35% + Theory Assignments 5%</span>.</li>
             </ul>
           </div>
-          <div class="pt-3 border-t border-[var(--border)]">
+          <div class="pt-3 border-t border-white/10">
             <span class="text-[11px] text-slate-400">Classroom: <strong>H205</strong> • Slot: 8:30 AM • Instructor: <strong>Prof. P. Krishna Reddy</strong></span>
           </div>
         </div>
@@ -233,7 +261,7 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-xl font-bold text-white flex items-center gap-2">
-            <span>📝 Course Assignments & Research Review</span>
+            <span>Course Assignments & Research Reviews</span>
             <span class="text-xs bg-emerald-950 text-emerald-300 font-mono px-2 py-0.5 rounded border border-emerald-800">6 Deliverables</span>
           </h2>
           <p class="text-xs text-slate-400">Practical programming assignments, notebooks, datasets, research reviews, and new idea proposals.</p>
@@ -242,56 +270,56 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <!-- A1 -->
-        <div class="bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow">
+        <div class="bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-blue-500/20 text-blue-300 border border-blue-500/30">Assignment 1</span>
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Assignment 1</span>
             <span class="text-xs text-slate-400 font-mono">Completed</span>
           </div>
-          <h3 class="font-bold text-white text-sm mb-1.5">📊 EDA & Data Statistics</h3>
+          <h3 class="font-bold text-white text-sm mb-1.5">EDA & Data Statistics</h3>
           <p class="text-xs text-slate-400 mb-3">Statistical moments, missing value handling, correlation, and distribution plotting.</p>
           <div class="text-[11px] text-indigo-400 font-semibold">Folder: <code>Assignments/A1/</code></div>
         </div>
 
         <!-- A2 -->
-        <div class="bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow">
+        <div class="bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-purple-500/20 text-purple-300 border border-purple-500/30">Assignment 2</span>
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Assignment 2</span>
             <span class="text-xs text-slate-400 font-mono">Completed</span>
           </div>
-          <h3 class="font-bold text-white text-sm mb-1.5">🏭 Warehousing, Cube & AOI</h3>
+          <h3 class="font-bold text-white text-sm mb-1.5">Warehousing, Cube & AOI</h3>
           <p class="text-xs text-slate-400 mb-3">Star schemas, OLAP cubes, and Attribute-Oriented Induction on large real-world benchmarks.</p>
           <div class="text-[11px] text-purple-400 font-semibold">Folder: <code>Assignments/A2/</code></div>
         </div>
 
         <!-- A3 -->
-        <div class="bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow">
+        <div class="bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Assignment 3</span>
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Assignment 3</span>
             <span class="text-xs text-slate-400 font-mono">Completed</span>
           </div>
-          <h3 class="font-bold text-white text-sm mb-1.5">🛒 Pattern Mining & ML</h3>
+          <h3 class="font-bold text-white text-sm mb-1.5">Pattern Mining & ML</h3>
           <p class="text-xs text-slate-400 mb-3">Apriori, FP-Growth, frequent itemset algorithms, and supervised classifiers.</p>
           <div class="text-[11px] text-emerald-400 font-semibold">Folder: <code>Assignments/A3/</code></div>
         </div>
 
         <!-- Research Paper Assignment 1 -->
-        <a href="Research_Paper_Assignment_1_Summary.md" class="bg-[#131b2e] border border-amber-500/30 rounded-xl p-4 card-glow block hover:border-amber-400 transition-colors">
+        <a href="Research_Paper_Assignment_1_Summary.md" class="bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card block hover:border-amber-400 transition-colors">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-amber-500/20 text-amber-300 border border-amber-500/30">Theory Review 1</span>
+            <span class="badge bg-amber-500/20 text-amber-300 border border-white/10">Theory Review 1</span>
             <span class="text-xs text-amber-400 font-mono">5% Endsem</span>
           </div>
-          <h3 class="font-bold text-white text-sm mb-1.5">🔬 Research Paper Assignment 1</h3>
+          <h3 class="font-bold text-white text-sm mb-1.5">Research Paper Assignment 1</h3>
           <p class="text-xs text-slate-400 mb-3">Critical engineering review of Popular Paths (DAPD 2021) and Subgraph Coverage (JDSA 2021).</p>
           <div class="text-[11px] text-amber-400 font-semibold flex items-center gap-1">Read Summary Report →</div>
         </a>
 
         <!-- Assignment: New Idea -->
-        <div class="bg-[#131b2e] border border-pink-500/30 rounded-xl p-4 card-glow">
+        <div class="bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-pink-500/20 text-pink-300 border border-pink-500/30">New Idea Proposal</span>
+            <span class="badge bg-pink-500/20 text-pink-300 border border-white/10">New Idea Proposal</span>
             <span class="text-xs text-pink-400 font-mono">Due Nov 7, 5 PM</span>
           </div>
-          <h3 class="font-bold text-white text-sm mb-1.5">💡 Assignment: New Idea</h3>
+          <h3 class="font-bold text-white text-sm mb-1.5">Assignment: New Idea</h3>
           <p class="text-xs text-slate-400 mb-2">Propose 1–2 novel ideas or improvements using course insights (8-part structured format, 5% of Endsem).</p>
           <div class="text-[11px] text-pink-400 font-semibold mb-1">Spec in <code>Discussions/Announcements/02_New Idea_ Assignment.md</code></div>
           <a href="https://phdprojects.org/data-mining-research-issues/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] text-pink-300 hover:text-white underline">
@@ -300,23 +328,23 @@
         </div>
 
         <!-- Research Paper Assignment 2 -->
-        <div class="bg-[#131b2e] border border-indigo-500/30 rounded-xl p-4 card-glow">
+        <div class="bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Theory Review 2</span>
+            <span class="badge bg-indigo-500/20 text-indigo-300 border border-white/10">Theory Review 2</span>
             <span class="text-xs text-indigo-400 font-mono">Due Nov 13, 5 PM</span>
           </div>
-          <h3 class="font-bold text-white text-sm mb-1.5">📄 Research Paper Assignment 2</h3>
+          <h3 class="font-bold text-white text-sm mb-1.5">Research Paper Assignment 2</h3>
           <p class="text-xs text-slate-400 mb-3">Human-in-the-loop object recognition (`2020-C1-Vyshnavi`) + Document embeddings (`2020-Narendra`) + KDD paper review.</p>
           <div class="text-[11px] text-indigo-400 font-semibold">Spec in <code>Discussions/Announcements/03_Research Paper Assignment 2.md</code></div>
         </div>
 
         <!-- Assignment 4 (LATEST) -->
-        <div class="bg-[#131b2e] border border-cyan-500/40 rounded-xl p-4 card-glow sm:col-span-2 lg:col-span-3">
+        <div class="bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card sm:col-span-2 lg:col-span-3">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Assignment 4 (LATEST)</span>
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Assignment 4 (LATEST)</span>
             <span class="text-xs text-cyan-400 font-mono">Deadline: 15 Nov 2026, 11:59 PM</span>
           </div>
-          <h3 class="font-bold text-white text-base mb-1.5">🚗 Multiclass Classification, K-Means Clustering & Campaign Uplift Case Study</h3>
+          <h3 class="font-bold text-white text-base mb-1.5">Multiclass Classification, K-Means Clustering & Campaign Uplift Case Study</h3>
           <p class="text-xs text-slate-300 mb-2 leading-relaxed">
             <strong>Section 1:</strong> Multiclass classification on automobile customer dataset (A/B/C/D segments, One-vs-One, One-vs-All, Random Forest, Permutation Feature Importance).<br/>
             <strong>Section 2:</strong> Data visualization in PowerBI, K-Means implementation from scratch, feature scaling rationale, Elbow method, Silhouette analysis, and cluster persona profiling.<br/>
@@ -336,7 +364,7 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-xl font-bold text-white flex items-center gap-2">
-            <span>📘 Core Lecture Course Modules</span>
+            <span>Core Lecture Course Modules</span>
             <span class="text-xs bg-indigo-950 text-indigo-300 font-mono px-2 py-0.5 rounded border border-indigo-800">10 Modules (Updated)</span>
           </h2>
           <p class="text-xs text-slate-400">Structured card-by-card lessons with Pomodoro timers, KaTeX math, active recall cards, and interactive canvases.</p>
@@ -349,12 +377,12 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="lecture-cards">
 
         <!-- Mod 1 -->
-        <a href="Study_Material/01_intro.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Introduction to Data Analytics DIKW KDD Data Mining Intro-DA2026">
+        <a href="Study_Material/01_intro.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Introduction to Data Analytics DIKW KDD Data Mining Intro-DA2026">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-blue-500/20 text-blue-300 border border-blue-500/30">Module 01</span>
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Module 01</span>
             <span class="text-xs text-slate-400 font-mono">~45 min</span>
           </div>
-          <h3 class="font-bold text-white text-base group-hover:text-indigo-300 transition-colors mb-1.5">🌍 Intro to Data Analytics</h3>
+          <h3 class="font-bold text-white text-base group-hover:text-indigo-300 transition-colors mb-1.5">Intro to Data Analytics</h3>
           <p class="text-xs text-slate-400 leading-relaxed mb-3">DIKW Pyramid, KDD 8-step pipeline, 6 data mining superpowers, and email classification.</p>
           <div class="text-[11px] font-semibold text-indigo-400 flex items-center gap-1">
             Start Lesson <span>→</span>
@@ -362,12 +390,12 @@
         </a>
 
         <!-- Mod 2 -->
-        <a href="Study_Material/02_data_concepts_stats.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Data Concepts Big Data 5Vs Statistics Mean Median Mode Normal Distribution Boxplot Scatter Lec2and3">
+        <a href="Study_Material/02_data_concepts_stats.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Data Concepts Big Data 5Vs Statistics Mean Median Mode Normal Distribution Boxplot Scatter Lec2and3">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Module 02</span>
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Module 02</span>
             <span class="text-xs text-slate-400 font-mono">~60 min</span>
           </div>
-          <h3 class="font-bold text-white text-base group-hover:text-emerald-300 transition-colors mb-1.5">📊 Data Concepts & Stats</h3>
+          <h3 class="font-bold text-white text-base group-hover:text-emerald-300 transition-colors mb-1.5">Data Concepts & Stats</h3>
           <p class="text-xs text-slate-400 leading-relaxed mb-3">Nominal/Ordinal/Ratio attributes, 5 Vs of Big Data, Boxplots, and live Pearson Correlation.</p>
           <div class="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
             Start Lesson <span>→</span>
@@ -375,12 +403,12 @@
         </a>
 
         <!-- Mod 3 -->
-        <a href="Study_Material/03_preprocessing.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Data Preprocessing Euclidean Manhattan Cosine Jaccard Normalization Binning PCA PreprocessDA">
+        <a href="Study_Material/03_preprocessing.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Data Preprocessing Euclidean Manhattan Cosine Jaccard Normalization Binning PCA PreprocessDA">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-amber-500/20 text-amber-300 border border-amber-500/30">Module 03</span>
+            <span class="badge bg-amber-500/20 text-amber-300 border border-white/10">Module 03</span>
             <span class="text-xs text-slate-400 font-mono">~60 min</span>
           </div>
-          <h3 class="font-bold text-white text-base group-hover:text-amber-300 transition-colors mb-1.5">🧹 Data Preprocessing</h3>
+          <h3 class="font-bold text-white text-base group-hover:text-amber-300 transition-colors mb-1.5">Data Preprocessing</h3>
           <p class="text-xs text-slate-400 leading-relaxed mb-3">Euclidean vs Manhattan distance, Jaccard sets, Missing value imputation, and PCA vectors.</p>
           <div class="text-[11px] font-semibold text-amber-400 flex items-center gap-1">
             Start Lesson <span>→</span>
@@ -388,12 +416,12 @@
         </a>
 
         <!-- Mod 4 -->
-        <a href="Study_Material/04_warehousing_olap.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Data Warehousing OLAP Star Schema Snowflake Roll-up Drill-down Slice Dice Attribute Oriented Induction WarehouseDA AttributeDA">
+        <a href="Study_Material/04_warehousing_olap.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Data Warehousing OLAP Star Schema Snowflake Roll-up Drill-down Slice Dice Attribute Oriented Induction WarehouseDA AttributeDA">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-purple-500/20 text-purple-300 border border-purple-500/30">Module 04</span>
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Module 04</span>
             <span class="text-xs text-slate-400 font-mono">~45 min</span>
           </div>
-          <h3 class="font-bold text-white text-base group-hover:text-purple-300 transition-colors mb-1.5">🏭 Warehousing & OLAP</h3>
+          <h3 class="font-bold text-white text-base group-hover:text-purple-300 transition-colors mb-1.5">Warehousing & OLAP</h3>
           <p class="text-xs text-slate-400 leading-relaxed mb-3">Star vs Snowflake schema, 3D interactive cube (Roll-up, Drill-down, Slice, Dice), and AOI.</p>
           <div class="text-[11px] font-semibold text-purple-400 flex items-center gap-1">
             Start Lesson <span>→</span>
@@ -401,12 +429,12 @@
         </a>
 
         <!-- Mod 5 -->
-        <a href="Study_Material/05_data_cube_algorithms.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Data Cube Algorithms BUC Bottom Up MultiWay Array Chunking Star-Cubing Shell Fragments DataCubeDA">
+        <a href="Study_Material/05_data_cube_algorithms.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Data Cube Algorithms BUC Bottom Up MultiWay Array Chunking Star-Cubing Shell Fragments DataCubeDA">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Module 05</span>
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Module 05</span>
             <span class="text-xs text-slate-400 font-mono">~50 min</span>
           </div>
-          <h3 class="font-bold text-white text-base group-hover:text-cyan-300 transition-colors mb-1.5">🧊 Cube Algorithms</h3>
+          <h3 class="font-bold text-white text-base group-hover:text-cyan-300 transition-colors mb-1.5">Cube Algorithms</h3>
           <p class="text-xs text-slate-400 leading-relaxed mb-3">Bottom-Up Computation (BUC) lattice pruning, MultiWay array chunking, and Star-Cubing.</p>
           <div class="text-[11px] font-semibold text-cyan-400 flex items-center gap-1">
             Start Lesson <span>→</span>
@@ -414,12 +442,12 @@
         </a>
 
         <!-- Mod 6 -->
-        <a href="Study_Material/06_association_rules.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Association Rule Mining Support Confidence Apriori FP-Tree FP-Growth Lift Kulczynski IntroAssoRules FPTree">
+        <a href="Study_Material/06_association_rules.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Association Rule Mining Support Confidence Apriori FP-Tree FP-Growth Lift Kulczynski IntroAssoRules FPTree">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-pink-500/20 text-pink-300 border border-pink-500/30">Module 06</span>
+            <span class="badge bg-pink-500/20 text-pink-300 border border-white/10">Module 06</span>
             <span class="text-xs text-slate-400 font-mono">~60 min</span>
           </div>
-          <h3 class="font-bold text-white text-base group-hover:text-pink-300 transition-colors mb-1.5">🛒 Association Rules</h3>
+          <h3 class="font-bold text-white text-base group-hover:text-pink-300 transition-colors mb-1.5">Association Rules</h3>
           <p class="text-xs text-slate-400 leading-relaxed mb-3">Support/Confidence, Apriori candidate join-prune, FP-Tree building, Lift & Kulczynski.</p>
           <div class="text-[11px] font-semibold text-pink-400 flex items-center gap-1">
             Start Lesson <span>→</span>
@@ -427,12 +455,12 @@
         </a>
 
         <!-- Mod 7 -->
-        <a href="Study_Material/07_advanced_patterns.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Advanced Pattern Mining Coverage Multi-level Quantitative High-Utility TWU Constraints AdvancedPatternMiningDA">
+        <a href="Study_Material/07_advanced_patterns.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Advanced Pattern Mining Coverage Multi-level Quantitative High-Utility TWU Constraints AdvancedPatternMiningDA">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-rose-500/20 text-rose-300 border border-rose-500/30">Module 07</span>
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Module 07</span>
             <span class="text-xs text-slate-400 font-mono">~45 min</span>
           </div>
-          <h3 class="font-bold text-white text-base group-hover:text-rose-300 transition-colors mb-1.5">🔬 Advanced Patterns</h3>
+          <h3 class="font-bold text-white text-base group-hover:text-rose-300 transition-colors mb-1.5">Advanced Patterns</h3>
           <p class="text-xs text-slate-400 leading-relaxed mb-3">Coverage Patterns, Multi-level taxonomies, High-Utility mining with TWU, and constraints.</p>
           <div class="text-[11px] font-semibold text-rose-400 flex items-center gap-1">
             Start Lesson <span>→</span>
@@ -440,12 +468,12 @@
         </a>
 
         <!-- Mod 8 -->
-        <a href="Study_Material/08_classification.html" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Classification Decision Trees Entropy Information Gain Gini Naive Bayes k-NN Confusion Matrix ROC Ensemble Random Forest IntroClassificationDA">
+        <a href="Study_Material/08_classification.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Classification Decision Trees Entropy Information Gain Gini Naive Bayes k-NN Confusion Matrix ROC Ensemble Random Forest IntroClassificationDA">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Module 08</span>
+            <span class="badge bg-indigo-500/20 text-indigo-300 border border-white/10">Module 08</span>
             <span class="text-xs text-slate-400 font-mono">~90 min</span>
           </div>
-          <h3 class="font-bold text-white text-base group-hover:text-indigo-300 transition-colors mb-1.5">🏷️ Classification</h3>
+          <h3 class="font-bold text-white text-base group-hover:text-indigo-300 transition-colors mb-1.5">Classification</h3>
           <p class="text-xs text-slate-400 leading-relaxed mb-3">Decision Trees (Entropy/Gini), Naive Bayes spam filter, k-NN scatter, ROC curves & Ensembles.</p>
           <div class="text-[11px] font-semibold text-indigo-400 flex items-center gap-1">
             Start Lesson <span>→</span>
@@ -453,12 +481,12 @@
         </a>
 
         <!-- Mod 9 -->
-        <a href="Study_Material/09_advanced_classification.html" class="module-item group block bg-[#131b2e] border border-purple-500/40 rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Advanced Classification Feature Selection BBN Bayesian Belief Network SVM Support Vector Machine Weak Supervision Zero Shot LIME Rough Sets Fuzzy AdvClassificationDA Quiz 2">
+        <a href="Study_Material/09_advanced_classification.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Advanced Classification Feature Selection BBN Bayesian Belief Network SVM Support Vector Machine Weak Supervision Zero Shot LIME Rough Sets Fuzzy AdvClassificationDA Quiz 2">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-purple-500/20 text-purple-300 border border-purple-500/30">Module 09</span>
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Module 09</span>
             <span class="text-xs text-purple-400 font-mono">~75 min</span>
           </div>
-          <h3 class="font-bold text-white text-base group-hover:text-purple-300 transition-colors mb-1.5">🧠 Advanced Classification</h3>
+          <h3 class="font-bold text-white text-base group-hover:text-purple-300 transition-colors mb-1.5">Advanced Classification</h3>
           <p class="text-xs text-slate-400 leading-relaxed mb-3">Feature selection (Filter/Wrapper/Embedded), Bayesian Belief Networks (CPT), SVM kernels, Lazy learners (k-NN, CBR), Weak supervision, and Fuzzy logic.</p>
           <div class="text-[11px] font-semibold text-purple-400 flex items-center gap-1">
             Start Lesson <span>→</span>
@@ -466,12 +494,12 @@
         </a>
 
         <!-- Mod 10 (LATEST) -->
-        <a href="Study_Material/10_clustering.html" class="module-item group block bg-[#131b2e] border border-emerald-500/40 rounded-xl p-4 card-glow transition-all" data-type="lecture" data-title="Cluster Analysis Clustering K-Means K-Medoids PAM CLARA CLARANS BIRCH CURE CHAMELEON ROCK DBSCAN OPTICS DENCLUE STING CLIQUE Silhouette Hopkins IntroClusteringDA Assignment 4">
+        <a href="Study_Material/10_clustering.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Cluster Analysis Clustering K-Means K-Medoids PAM CLARA CLARANS BIRCH CURE CHAMELEON ROCK DBSCAN OPTICS DENCLUE STING CLIQUE Silhouette Hopkins IntroClusteringDA Assignment 4">
           <div class="flex items-center justify-between mb-2">
-            <span class="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Module 10 (LATEST)</span>
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Module 10 (LATEST)</span>
             <span class="text-xs text-emerald-400 font-mono">~90 min</span>
           </div>
-          <h3 class="font-bold text-white text-base group-hover:text-emerald-300 transition-colors mb-1.5">🎯 Cluster Analysis: Basic & Advanced</h3>
+          <h3 class="font-bold text-white text-base group-hover:text-emerald-300 transition-colors mb-1.5">Cluster Analysis: Basic & Advanced</h3>
           <p class="text-xs text-slate-400 leading-relaxed mb-3">Partitioning (K-Means/PAM/CLARANS), Hierarchical (BIRCH CF-Tree/CURE), Density (DBSCAN/OPTICS/DENCLUE), Grid (STING/CLIQUE), and Silhouette validation.</p>
           <div class="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
             Start Lesson <span>→</span>
@@ -486,7 +514,7 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-xl font-bold text-white flex items-center gap-2">
-            <span>🔬 35 Research Paper Visual Tutorials</span>
+            <span>Seminal Research Papers Visual Library</span>
             <span class="text-xs bg-purple-950 text-purple-300 font-mono px-2 py-0.5 rounded border border-purple-800">Papers 1–35</span>
           </h2>
           <p class="text-xs text-slate-400">Deep mathematical and algorithmic breakdowns with interactive simulators.</p>
@@ -506,7 +534,7 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="border-t border-[var(--border)] py-8 text-center text-xs text-slate-500">
+  <footer class="border-t border-white/10 py-8 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto px-4">
       <p class="mb-2">Data Analytics I (CS4.405) • International Institute of Information Technology, Hyderabad</p>
       <p>Prof. P. Krishna Reddy • Built for desktop and mobile browsers · KaTeX Math · Tailwind Engine · Vanilla Canvas JS</p>
@@ -557,11 +585,11 @@
       switch(cat) {
         case 'Foundations': return { bg: 'bg-blue-500/20', text: 'text-blue-300', border: 'border-blue-500/30' };
         case 'Streaming & Fusion': return { bg: 'bg-emerald-500/20', text: 'text-emerald-300', border: 'border-emerald-500/30' };
-        case 'Data Curation': return { bg: 'bg-amber-500/20', text: 'text-amber-300', border: 'border-amber-500/30' };
+        case 'Data Curation': return { bg: 'bg-amber-500/20', text: 'text-amber-300', border: 'border-white/10' };
         case 'Cube & Warehousing': return { bg: 'bg-purple-500/20', text: 'text-purple-300', border: 'border-purple-500/30' };
-        case 'Association & Patterns': return { bg: 'bg-pink-500/20', text: 'text-pink-300', border: 'border-pink-500/30' };
+        case 'Association & Patterns': return { bg: 'bg-pink-500/20', text: 'text-pink-300', border: 'border-white/10' };
         case 'Advanced Patterns': return { bg: 'bg-rose-500/20', text: 'text-rose-300', border: 'border-rose-500/30' };
-        case 'Surveys & Foundations': return { bg: 'bg-indigo-500/20', text: 'text-indigo-300', border: 'border-indigo-500/30' };
+        case 'Surveys & Foundations': return { bg: 'bg-indigo-500/20', text: 'text-indigo-300', border: 'border-white/10' };
         default: return { bg: 'bg-slate-500/20', text: 'text-slate-300', border: 'border-slate-500/30' };
       }
     }
@@ -572,7 +600,7 @@
         const col = getCatColor(p.cat);
         const padNum = String(p.num).padStart(2, '0');
         return `
-          <a href="Research_Papers_Study/${p.file}" class="module-item group block bg-[#131b2e] border border-[var(--border)] rounded-xl p-4 card-glow transition-all" data-type="paper" data-title="${p.num} ${p.title} ${p.authors} ${p.cat} ${p.tags}">
+          <a href="Research_Papers_Study/${p.file}" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="paper" data-title="${p.num} ${p.title} ${p.authors} ${p.cat} ${p.tags}">
             <div class="flex items-center justify-between mb-2">
               <span class="badge ${col.bg} ${col.text} border ${col.border}">Paper ${padNum}</span>
               <span class="text-[11px] text-slate-400 font-mono">${p.cat}</span>
@@ -594,10 +622,10 @@
       document.querySelectorAll('.filter-pill').forEach(btn => {
         if (btn.dataset.filter === type) {
           btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
-          btn.classList.remove('bg-[#131b2e]', 'text-slate-300', 'border-[var(--border)]');
+          btn.classList.remove('bg-[#131b2e]', 'text-slate-300', 'border-white/10');
         } else {
           btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
-          btn.classList.add('bg-[#131b2e]', 'text-slate-300', 'border-[var(--border)]');
+          btn.classList.add('bg-[#131b2e]', 'text-slate-300', 'border-white/10');
         }
       });
 

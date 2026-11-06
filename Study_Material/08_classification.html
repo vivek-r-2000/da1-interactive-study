@@ -406,7 +406,7 @@
   <span class="title">📊 Module 8 — Classification</span>
   <div id="progress-bar-wrap"><div id="progress-bar" style="width:2%"></div></div>
   <span id="progress-text">Card 1 of 44</span>
-  <div id="timer" onclick="toggleTimer()" title="Click to pause/resume">⏱ 15:00</div>
+  <div id="timer" onclick="toggleTimer()" title="Click to pause/resume">15:00</div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════════
@@ -723,7 +723,7 @@
 <div class="card-container" id="card-10">
   <div class="card card-teal">
     <div class="card-tag">🌳 Decision Trees • Card 11 of 44</div>
-    <div class="card-header">🔬 Entropy Calculator — Live Demo</div>
+    <div class="card-header">Entropy Calculator — Live Demo</div>
     <div class="card-body">
       <p>Move the slider to change the proportion of class "Yes". See how entropy changes!</p>
       <div class="viz-wrap">
@@ -1126,7 +1126,7 @@
           <div style="color:var(--muted-foreground);">But useless!</div>
         </div>
         <div style="text-align:center;background:rgba(34,197,94,.15);padding:10px 16px;border-radius:10px;">
-          <div style="font-size:24px;">🧠</div>
+          
           <div>Smart classifier</div>
           <div style="color:#22c55e;font-weight:700;">92% Accuracy</div>
           <div style="color:var(--muted-foreground);">Catches 85% of disease!</div>
@@ -1374,7 +1374,7 @@
 <div class="card-container" id="card-34">
   <div class="card card-purple">
     <div class="card-tag">🌲 Ensemble Methods • Card 35 of 44</div>
-    <div class="card-header">🚀 Boosting & AdaBoost — Learning from Mistakes</div>
+    <div class="card-header">Boosting & AdaBoost — Learning from Mistakes</div>
     <div class="card-body">
       <p>While Bagging trains models <em>independently</em> in parallel, Boosting trains them <em>sequentially</em> — each model focuses on where the previous one failed.</p>
       <ul>
@@ -1806,7 +1806,7 @@ function tickTimer() {
 function renderTimer() {
   const m = Math.floor(timerSecs/60);
   const s = timerSecs % 60;
-  document.getElementById('timer').textContent = `⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('timer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
 function toggleTimer() {

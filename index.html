@@ -107,7 +107,7 @@
         <!-- STATS BAR -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div class="stat-box bg-[#090d16]/70 border border-white/10 rounded-lg p-3 text-center">
-            <div class="text-xl md:text-2xl font-bold font-mono tabular-nums text-white">10</div>
+            <div class="text-xl md:text-2xl font-bold font-mono tabular-nums text-white">12</div>
             <div class="text-[11px] text-slate-400 uppercase font-medium">Lecture Modules</div>
           </div>
           <div class="stat-box bg-[#090d16]/70 border border-white/10 rounded-lg p-3 text-center">
@@ -165,8 +165,8 @@
 
       <!-- Category Filter Pills -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none" id="filter-pills">
-        <button onclick="setFilter('all')" class="filter-pill active px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white border border-indigo-500" data-filter="all">All (44)</button>
-        <button onclick="setFilter('lecture')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-white/10 hover:border-indigo-500" data-filter="lecture">Lectures (9)</button>
+        <button onclick="setFilter('all')" class="filter-pill active px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white border border-indigo-500" data-filter="all">All (53)</button>
+        <button onclick="setFilter('lecture')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-white/10 hover:border-indigo-500" data-filter="lecture">Lectures (12)</button>
         <button onclick="setFilter('paper')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-white/10 hover:border-purple-500" data-filter="paper">Papers (35)</button>
         <button onclick="setFilter('moodle')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-white/10 hover:border-amber-500" data-filter="moodle">Moodle & Exams</button>
         <button onclick="setFilter('assignment')" class="filter-pill px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#131b2e] text-slate-300 border border-white/10 hover:border-emerald-500" data-filter="assignment">Assignments (6)</button>
@@ -235,22 +235,24 @@
           </div>
         </div>
 
-        <!-- Quiz 1 & 2 Card -->
+        <!-- Official Endsem 2026 Card -->
         <div class="bg-[#131b2e] border border-white/10 rounded-xl p-5 surface-card flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Exams & Quizzes</span>
-              <span class="text-xs text-emerald-400 font-mono">Quiz 1 & Quiz 2</span>
+              <span class="badge bg-indigo-950 text-indigo-300 border border-indigo-800 font-mono">Official Endsem 2026</span>
+              <span class="text-xs text-emerald-400 font-mono">Scientific Calculators Allowed</span>
             </div>
-            <h3 class="font-bold text-white text-base mb-2">Quiz Coverage & Quiz 2 Topics</h3>
+            <h3 class="font-bold text-white text-base mb-2">Endsem Syllabus & Exam Blueprint</h3>
             <ul class="text-xs text-slate-300 space-y-2 mb-3">
-              <li>• <strong class="text-amber-300">Quiz 2 (CONFIRMED):</strong> Date: <strong>22 October 2026</strong> • Time: <strong>8:45 AM to 9:30 AM</strong> (45 min) • Hall: <strong>H205</strong>.<br/>Topics: (1) <em>Classification: Basic Concepts</em> (Module 08); (2) <em>Classification: Advanced Methods</em> (Module 09, <a href="Lecture_Slides/09_AdvClassificationDA.pptx" class="text-indigo-400 underline">AdvClassificationDA.pptx</a>).</li>
-              <li>• <strong class="text-white">Quiz 1:</strong> 45-min short questions covering Ch 1, 2, 3 (Warehousing to 25 Aug). Papers: Cao, Han-Cai AOI, Jim Gray Data Cube, Multidimensional Aggregates.</li>
-              <li>• <strong class="text-white">Theory Assignment Incentive:</strong> Optional but rewarded: <span class="text-emerald-400 font-semibold">Endsem 35% + Theory Assignments 5%</span>.</li>
+              <li>• <strong class="text-amber-300">Curriculum Scope:</strong> Ch 1 (Intro), Ch 2 (Preprocessing), Ch 3 (OLAP &amp; BUC), Ch 4 (Pattern Mining), Ch 5 (Adv. Patterns), Ch 6 &amp; 7 (Classification), Ch 8 (Clustering), <strong>Topic 9 (Deep Learning Han §10.1)</strong>, and <strong>Topic 10 (Advances in Clustering, Outlier Analysis &amp; Trends)</strong>.</li>
+              <li>• <strong class="text-white">Mandated Textbook Exercises:</strong> Solved step-by-step for 2.2, 2.7, 2.18, 2.19, 2.20, 3.15, 3.17, 3.18, 3.22, 4.3, 4.6, 4.10, 6.7, and 6.19.</li>
+              <li>• <strong class="text-white">7 Mandated Research Papers:</strong> Han &amp; Fu '99, Srikant '96, Liu '05, CLARANS '94, BIRCH '96, DBSCAN '96, CHAMELEON '99.</li>
+              <li>• <strong class="text-sky-300">Exam Note:</strong> Questions will connect topics across multiple chapters.</li>
             </ul>
           </div>
-          <div class="pt-3 border-t border-white/10">
-            <span class="text-[11px] text-slate-400">Classroom: <strong>H205</strong> • Slot: 8:30 AM • Instructor: <strong>Prof. P. Krishna Reddy</strong></span>
+          <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+            <span class="text-[11px] text-slate-400">Hall: <strong>H205</strong> • Weightage: <strong>35% + 5% Bonus</strong></span>
+            <a href="Exam_Preparation/index.html" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">Open Exam Suite &rarr;</a>
           </div>
         </div>
       </div>
@@ -365,7 +367,7 @@
         <div>
           <h2 class="text-xl font-bold text-white flex items-center gap-2">
             <span>Core Lecture Course Modules</span>
-            <span class="text-xs bg-indigo-950 text-indigo-300 font-mono px-2 py-0.5 rounded border border-indigo-800">10 Modules (Updated)</span>
+            <span class="text-xs bg-indigo-950 text-indigo-300 font-mono px-2 py-0.5 rounded border border-indigo-800">12 Modules (Complete Syllabus)</span>
           </h2>
           <p class="text-xs text-slate-400">Structured card-by-card lessons with Pomodoro timers, KaTeX math, active recall cards, and interactive canvases.</p>
         </div>
@@ -505,6 +507,33 @@
             Start Lesson <span>→</span>
           </div>
         </a>
+
+        <!-- Mod 11: Deep Learning -->
+        <a href="Study_Material/11_deep_learning.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Deep Learning Neural Networks Perceptron MLP Multi Layer Forward Propagation Backpropagation Activation Sigmoid ReLU Loss Cross Entropy Optimization Gradient Descent Han Chapter 10.1 Endsem">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Module 11 (ENDSEM)</span>
+            <span class="text-xs text-indigo-400 font-mono">~60 min</span>
+          </div>
+          <h3 class="font-bold text-white text-base group-hover:text-indigo-300 transition-colors mb-1.5">Overview of Deep Learning</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3">Biological vs Artificial neuron, Perceptrons, XOR barrier, Multilayer Perceptrons (MLP), Sigmoid/ReLU activations, Forward Pass matrix math, and Backpropagation chain rule.</p>
+          <div class="text-[11px] font-semibold text-indigo-400 flex items-center gap-1">
+            Start Lesson <span>&rarr;</span>
+          </div>
+        </a>
+
+        <!-- Mod 12: Outlier Analysis & Trends -->
+        <a href="Study_Material/12_outlier_analysis_trends.html" class="module-item group block bg-[#131b2e] border border-white/10 rounded-xl p-4 surface-card transition-all" data-type="lecture" data-title="Outlier Analysis Anomaly Detection Local Outlier Factor LOF Distance Based Statistical Grubbs Advances Clustering STING CLIQUE Subspace DENCLUE Trajectory Mining Spatial Trends Data Mining Endsem">
+          <div class="flex items-center justify-between mb-2">
+            <span class="badge bg-slate-900 text-slate-300 border border-white/10 font-mono">Module 12 (ENDSEM)</span>
+            <span class="text-xs text-sky-400 font-mono">~75 min</span>
+          </div>
+          <h3 class="font-bold text-white text-base group-hover:text-sky-300 transition-colors mb-1.5">Advances, Outliers &amp; Trends</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3">STING hierarchical grid, CLIQUE subspace clustering, Hawkins outlier definition, Statistical methods (Grubbs), Local Outlier Factor (LOF), and Spatio-temporal trajectories.</p>
+          <div class="text-[11px] font-semibold text-sky-400 flex items-center gap-1">
+            Start Lesson <span>&rarr;</span>
+          </div>
+        </a>
+
 
       </div>
     </div>

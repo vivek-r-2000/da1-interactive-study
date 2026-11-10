@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 12 — Advances in Clustering, Outlier Analysis & Trends | DA-I</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"/>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  :root {
+    --background: #0f172a;
+    --card: #1e293b;
+    --sidebar: #0f172a;
+    --foreground: #f1f5f9;
+    --muted-foreground: #94a3b8;
+    --border: #334155;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #0ea5e9;
+    --accent: #8b5cf6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top Bar ── */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+    display: flex; align-items: center; padding: 0 16px; gap: 12px;
+  }
+  #topbar .title { font-weight: 700; font-size: 15px; white-space: nowrap; color: var(--foreground); }
+  #progress-bar-wrap { flex: 1; background: var(--border); border-radius: 9999px; height: 8px; min-width: 80px; }
+  #progress-bar { height: 100%; border-radius: 9999px; background: var(--primary); transition: width .4s ease; }
+  #progress-text { font-size: 12px; color: var(--muted-foreground); white-space: nowrap; }
+  #timer {
+    font-size: 14px; font-weight: 700; color: var(--primary);
+    background: rgba(99,102,241,.15); padding: 4px 10px; border-radius: 8px;
+    cursor: pointer; white-space: nowrap;
+  }
+  #home-btn {
+    font-size: 12px; padding: 4px 10px; border-radius: 8px;
+    background: rgba(255,255,255,.07); color: var(--foreground); text-decoration: none;
+    border: 1px solid var(--border); white-space: nowrap;
+  }
+
+  /* ── Layout ── */
+  #layout { display: flex; margin-top: 56px; height: calc(100vh - 56px); }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 250px; min-width: 250px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 12px 0;
+  }
+  .sidebar-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em;
+    color: var(--muted-foreground); padding: 10px 16px 4px;
+    text-transform: uppercase;
+  }
+  .sidebar-item {
+    display: block; padding: 7px 16px; font-size: 12px;
+    color: var(--muted-foreground); cursor: pointer; border-radius: 6px;
+    margin: 1px 6px; transition: background .15s, color .15s;
+    border: none; background: none; text-align: left; width: calc(100% - 12px);
+  }
+  .sidebar-item:hover { background: rgba(255,255,255,.06); color: var(--foreground); }
+  .sidebar-item.active { background: rgba(99,102,241,.2); color: var(--primary); font-weight: 600; }
+
+  /* ── Main Content ── */
+  #main { flex: 1; overflow-y: auto; padding: 28px 32px; position: relative; }
+
+  /* ── Cards ── */
+  .card-container { display: none; animation: fadeIn .35s ease; }
+  .card-container.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    max-width: 840px; margin: 0 auto 20px;
+  }
+  .card-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    color: var(--muted-foreground); text-transform: uppercase; margin-bottom: 12px;
+  }
+  .card-header { font-size: 22px; font-weight: 800; margin-bottom: 16px; line-height: 1.3; }
+  .card-body { font-size: 13.5px; line-height: 1.7; color: #cbd5e1; }
+  .card-body p { margin-bottom: 12px; }
+  .card-body ul, .card-body ol { margin-left: 20px; margin-bottom: 12px; }
+  .card-body li { margin-bottom: 6px; }
+
+  /* ── Interactive Elements ── */
+  .interactive-box {
+    background: rgba(15,23,42,.7);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .btn-primary {
+    background: var(--primary); color: #fff;
+    padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13px;
+    border: none; cursor: pointer; transition: opacity .15s; text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { opacity: .9; }
+  .btn-secondary {
+    background: rgba(255,255,255,.08); color: var(--foreground);
+    padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13px;
+    border: 1px solid var(--border); cursor: pointer; transition: background .15s; text-decoration: none; display: inline-block;
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,.14); }
+
+  /* ── Flip Card ── */
+  .flip-card {
+    background: transparent;
+    perspective: 1000px;
+    min-height: 170px;
+    margin: 14px 0;
+    cursor: pointer;
+  }
+  .flip-card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 170px;
+    text-align: left; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+  .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+  .flip-card-front, .flip-card-back {
+    position: absolute; width: 100%; height: 100%; min-height: 170px;
+    -webkit-backface-visibility: hidden; backface-visibility: hidden;
+    border-radius: 12px; padding: 20px 24px;
+    display: flex; flex-direction: column; justify-content: center;
+    border: 1px solid var(--border);
+  }
+  .flip-card-front { background: #1e293b; color: #f8fafc; }
+  .flip-card-back { background: #312e81; color: #e0e7ff; transform: rotateY(180deg); }
+
+  /* ── Canvas Simulator ── */
+  canvas { background: #0b1120; border: 1px solid #334155; border-radius: 8px; display: block; }
+
+  /* ── Responsive Mobile ── */
+  @media (max-width: 768px) {
+    #sidebar { position: fixed; left: -260px; top: 56px; bottom: 0; z-index: 40; transition: left .25s ease; }
+    #sidebar.mobile-open { left: 0; }
+    #sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 35; }
+    #sidebar-backdrop.mobile-open { display: block; }
+    #main { padding: 16px; }
+    .card { padding: 20px 18px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <button class="md:hidden text-slate-400 hover:text-white p-1" onclick="toggleMobileSidebar()" aria-label="Toggle navigation menu">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <span class="title">Module 12: Outliers, Advances & Trends</span>
+    <div id="progress-bar-wrap">
+      <div id="progress-bar" style="width: 5.5%;"></div>
+    </div>
+    <span id="progress-text">Card 1 / 18</span>
+    <button id="timer" onclick="toggleTimer()">15:00</button>
+    <a href="00_home.html" id="home-btn">Study Hub</a>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div id="layout">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar">
+      <div class="sidebar-section-label">1. Advances in Clustering</div>
+      <button class="sidebar-item active" onclick="goToCard(0)">1. Topic 10 Overview</button>
+      <button class="sidebar-item" onclick="goToCard(1)">2. STING: Grid Hierarchy</button>
+      <button class="sidebar-item" onclick="goToCard(2)">3. CLIQUE: Subspaces</button>
+      <button class="sidebar-item" onclick="goToCard(3)">4. DENCLUE: Density Kernels</button>
+      <button class="sidebar-item" onclick="goToCard(4)">5. Constraint-Based Clustering</button>
+
+      <div class="sidebar-section-label">2. Outlier Foundations</div>
+      <button class="sidebar-item" onclick="goToCard(5)">6. What is an Outlier?</button>
+      <button class="sidebar-item" onclick="goToCard(6)">7. The 3 Outlier Classes</button>
+      <button class="sidebar-item" onclick="goToCard(7)">8. Statistical Outlier Methods</button>
+
+      <div class="sidebar-section-label">3. Proximity & Density Outliers</div>
+      <button class="sidebar-item" onclick="goToCard(8)">9. Distance-Based k-NN Outliers</button>
+      <button class="sidebar-item" onclick="goToCard(9)">10. Local Outlier Factor (LOF)</button>
+      <button class="sidebar-item" onclick="goToCard(10)">11. LOF Worked Numerical</button>
+      <button class="sidebar-item" onclick="goToCard(11)">12. Clustering & SVM Outliers</button>
+
+      <div class="sidebar-section-label">4. Trends in Data Mining</div>
+      <button class="sidebar-item" onclick="goToCard(12)">13. Spatio-Temporal Mining</button>
+      <button class="sidebar-item" onclick="goToCard(13)">14. Graph & Network Mining</button>
+      <button class="sidebar-item" onclick="goToCard(14)">15. High-Dimensional Challenges</button>
+
+      <div class="sidebar-section-label">5. Interactive Lab & Review</div>
+      <button class="sidebar-item" onclick="goToCard(15)">16. Interactive LOF Sandbox</button>
+      <button class="sidebar-item" onclick="goToCard(16)">17. Active Recall Cards</button>
+      <button class="sidebar-item" onclick="goToCard(17)">18. Endsem Review Quiz</button>
+    </aside>
+
+    <!-- MAIN VIEWPORT -->
+    <main id="main">
+
+      <!-- CARD 0: Topic 10 Overview -->
+      <div class="card-container active" id="card-0">
+        <div class="card">
+          <div class="card-tag">Section 1: Advances in Clustering • Card 1 of 18</div>
+          <h2 class="card-header">Topic 10 Overview & Endsem Scope (Reddy Official Syllabus)</h2>
+          <div class="card-body">
+            <p>In the official Endsem announcement, Prof. P. Krishna Reddy specifically highlighted: <strong class="text-amber-300">"Topic 10: Advances in Cluster analysis, Intro. to Outlier analysis and Trends in Data Mining (Refer PPTs only)"</strong>.</p>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-3 text-xs space-y-2">
+              <strong class="text-indigo-400 block mb-1">Key Curriculum Pillars for Topic 10:</strong>
+              <ul class="space-y-1 text-slate-300">
+                <li>• <strong>Advanced Clustering Paradigms:</strong> Grid-based (STING), Subspace grid-density (CLIQUE), and Kernel Density Attractors (DENCLUE).</li>
+                <li>• <strong>Constraint-Based Clustering:</strong> Incorporating domain knowledge with Must-Link and Cannot-Link constraints.</li>
+                <li>• <strong>Outlier Analysis Methodologies:</strong> Statistical (Grubbs' test, 3-sigma), Proximity ($k$-NN distance), and Density-based (Local Outlier Factor - LOF).</li>
+                <li>• <strong>Modern Trends:</strong> Spatio-temporal trajectory patterns (convoys vs swarms), graph community mining, and the high-dimensional empty space curse.</li>
+              </ul>
+            </div>
+
+            <div class="p-3 bg-indigo-950/40 border border-indigo-800/60 rounded-xl text-xs text-slate-300">
+              <strong class="text-indigo-300 block mb-1">Scientific Calculator Advisory:</strong>
+              Numerical problems on LOF reachability calculations, Grubbs' test statistics, and grid cell probability integrals require precise arithmetic. Use your approved calculator!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 1: STING -->
+      <div class="card-container" id="card-1">
+        <div class="card">
+          <div class="card-tag">Section 1: Advances in Clustering • Card 2 of 18</div>
+          <h2 class="card-header">STING: Statistical Information Grid (Wang et al. 1997)</h2>
+          <div class="card-body">
+            <p><strong>STING</strong> is a hierarchical grid-based technique that quantizes the spatial area into rectangular cells stored in a multi-resolution quad-tree structure.</p>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-3 text-xs space-y-2">
+              <strong class="text-sky-400 block mb-1">Precomputed Cell Statistical Parameters:</strong>
+              <p class="text-slate-300">For each cell at each hierarchical level, STING precomputes and stores:</p>
+              <ul class="text-slate-300 grid grid-cols-2 gap-1.5 font-mono">
+                <li>• $n$: Attribute count</li>
+                <li>• $m$: Attribute mean</li>
+                <li>• $s$: Standard deviation</li>
+                <li>• $\min, \max$: Extreme bounds</li>
+                <li>• $\text{dist}$: Distribution type (Normal, Uniform, Exponential, None)</li>
+              </ul>
+              <p class="text-slate-400 mt-2">Bottom-up aggregation: Higher-level cell parameters are calculated directly from their 4 child cells without scanning raw data points!</p>
+            </div>
+
+            <h3 class="font-bold text-slate-200 mt-4 mb-2">Query Processing & Complexity</h3>
+            <ol class="list-decimal text-xs space-y-1.5 text-slate-300 ml-5">
+              <li>Start at the top layer of the hierarchical tree.</li>
+              <li>For each cell in the current layer, calculate the probability that it satisfies the user query using stored statistical parameters.</li>
+              <li>Prune irrelevant cells; descend to child cells of relevant candidates.</li>
+              <li>Repeat until the bottom layer is reached, then group contiguous relevant cells into clusters.</li>
+            </ol>
+
+            <div class="p-3 bg-emerald-950/40 border border-emerald-800/60 rounded-xl text-xs text-slate-300 mt-3">
+              <strong class="text-emerald-300 block mb-1">Time Complexity Advantage:</strong>
+              Query time complexity is <strong class="text-white font-mono">$O(K)$</strong>, where $K$ is the number of grid cells at the bottom layer ($K \ll N$). <strong>STING query execution is completely independent of the number of raw data tuples $N$!</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2: CLIQUE -->
+      <div class="card-container" id="card-2">
+        <div class="card">
+          <div class="card-tag">Section 1: Advances in Clustering • Card 3 of 18</div>
+          <h2 class="card-header">CLIQUE: Subspace Clustering (Agrawal et al. 1998)</h2>
+          <div class="card-body">
+            <p>In high dimensions ($d > 20$), distance metrics break down because virtually all pairs of points become equidistant (the <em>Curse of Dimensionality</em>). Real clusters exist only in <strong>subspaces</strong> involving subsets of attributes.</p>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-3 text-xs space-y-2">
+              <strong class="text-indigo-400 block mb-1">The CLIQUE Apriori Subspace Principle:</strong>
+              <div class="font-mono text-sm text-indigo-300 bg-slate-950 p-2.5 rounded my-1 text-center">
+                A $k$-dimensional cell $C$ is dense ONLY IF all its $(k-1)$-dimensional projection cells are also dense.
+              </div>
+              <p class="text-slate-400">This is identical to the Apriori property in Association Rule Mining: any subset of a frequent itemset must be frequent!</p>
+            </div>
+
+            <h3 class="font-bold text-slate-200 mt-4 mb-2">CLIQUE 3-Step Execution</h3>
+            <ol class="list-decimal text-xs space-y-1.5 text-slate-300 ml-5">
+              <li><strong>Identification of Subspaces:</strong> Partition each 1D attribute into equal intervals. Identify dense 1D units (count $\ge \xi$). Join dense 1D units to generate candidate 2D units, prune using the Apriori property, and iterate up to $k$ dimensions.</li>
+              <li><strong>Cluster Discovery:</strong> Connect contiguous adjacent dense cells in each dense subspace using depth-first search.</li>
+              <li><strong>Minimal Cluster Description:</strong> Generate minimal DNF Boolean expressions covering the rectangular dense regions.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 3: DENCLUE -->
+      <div class="card-container" id="card-3">
+        <div class="card">
+          <div class="card-tag">Section 1: Advances in Clustering • Card 4 of 18</div>
+          <h2 class="card-header">DENCLUE: Kernel Density Attractors (Hinneburg & Keim 1998)</h2>
+          <div class="card-body">
+            <p><strong>DENCLUE</strong> (DENsity-based CLUstEring) uses a rigorous statistical foundation based on non-parametric <strong>Kernel Density Estimation (KDE)</strong>.</p>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-3 text-xs space-y-2">
+              <strong class="text-sky-400 block mb-1">Influence Function & Overall Density:</strong>
+              <p class="text-slate-300">Each data point $\mathbf{y}$ exerts an influence on any spatial point $\mathbf{x}$ via a Gaussian influence kernel:</p>
+              <div class="font-mono text-slate-300 text-center my-1.5">
+                $$f_{\text{Gaussian}}(\mathbf{x}, \mathbf{y}) = e^{-\frac{\|\mathbf{x} - \mathbf{y}\|^2}{2\sigma^2}}$$
+              </div>
+              <p class="text-slate-300">The overall density $f_D(\mathbf{x})$ at point $\mathbf{x}$ is the sum of influence functions across all $N$ data points:</p>
+              <div class="font-mono text-indigo-300 text-center my-1.5">
+                $$f_D(\mathbf{x}) = \frac{1}{N} \sum_{i=1}^N f_{\text{Gaussian}}(\mathbf{x}, \mathbf{x}_i)$$
+              </div>
+            </div>
+
+            <h3 class="font-bold text-slate-200 mt-4 mb-2">Density Attractors & Hill Climbing</h3>
+            <ul class="text-xs space-y-1.5 text-slate-300">
+              <li><strong>Density Attractor:</strong> A local maximum (peak) of the overall density function $f_D(\mathbf{x})$.</li>
+              <li>Points climb the gradient $\nabla f_D(\mathbf{x})$ toward their local density attractor using hill climbing.</li>
+              <li><strong>Center-Defined Cluster:</strong> All points that climb to the same density attractor whose density $\ge \xi$.</li>
+              <li><strong>Arbitrary-Shaped Cluster:</strong> Formed by merging multiple density attractors connected by a path of density $\ge \xi$.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 4: Constraint-Based Clustering -->
+      <div class="card-container" id="card-4">
+        <div class="card">
+          <div class="card-tag">Section 1: Advances in Clustering • Card 5 of 18</div>
+          <h2 class="card-header">Constraint-Based Clustering: User Guidance & COP-KMeans</h2>
+          <div class="card-body">
+            <p>Purely unsupervised clustering can produce technically valid clusters that are useless for domain applications. <strong>Semi-supervised clustering</strong> allows domain experts to inject pairwise constraints.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-emerald-400 block mb-1">1. Must-Link Constraints (ML)</strong>
+                <p class="text-slate-300 mb-1 font-mono">$$\text{ML}(d_i, d_j) \implies c(d_i) = c(d_j)$$</p>
+                <p class="text-slate-400">Specifies that instances $d_i$ and $d_j$ <em>must</em> be assigned to the exact same cluster. Transitive: $\text{ML}(a,b) \land \text{ML}(b,c) \implies \text{ML}(a,c)$.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-rose-400 block mb-1">2. Cannot-Link Constraints (CL)</strong>
+                <p class="text-slate-300 mb-1 font-mono">$$\text{CL}(d_i, d_j) \implies c(d_i) \ne c(d_j)$$</p>
+                <p class="text-slate-400">Specifies that instances $d_i$ and $d_j$ <em>cannot</em> be in the same cluster. <em>Non-transitive:</em> $\text{CL}(a,b) \land \text{CL}(b,c) \not\implies \text{CL}(a,c)$.</p>
+              </div>
+            </div>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-2 text-xs">
+              <strong class="text-indigo-400 block mb-1">COP-KMeans Algorithm (Wagstaff et al. 2001):</strong>
+              <p class="text-slate-300">Modifies standard K-Means assignment step: An object $d_i$ is assigned to its nearest centroid $C_k$ <em>only if</em> assigning $d_i$ to $C_k$ does not violate any Must-Link or Cannot-Link constraints with previously assigned points. If all $k$ clusters violate a constraint, the algorithm fails and reports infeasibility.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 5: What is an Outlier? -->
+      <div class="card-container" id="card-5">
+        <div class="card">
+          <div class="card-tag">Section 2: Outlier Foundations • Card 6 of 18</div>
+          <h2 class="card-header">Introduction to Outlier Analysis: Hawkins Definition & Scope</h2>
+          <div class="card-body">
+            <p>Outlier detection (anomaly detection) is the task of identifying data points that deviate substantially from the expected pattern or distribution of the remaining data.</p>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-3 text-xs">
+              <div class="text-xs font-bold text-amber-400 mb-1 uppercase">Hawkins' Classic Definition (1980)</div>
+              <blockquote class="italic text-slate-200 border-l-2 border-amber-400 pl-3 my-2">
+                "An outlier is an observation which deviates so much from the other observations as to arouse suspicions that it was generated by a different mechanism."
+              </blockquote>
+            </div>
+
+            <h3 class="font-bold text-slate-200 mt-4 mb-2">High-Stakes Real-World Applications</h3>
+            <ul class="text-xs space-y-1.5 text-slate-300">
+              <li>• <strong>Credit Card Fraud:</strong> An abnormal transaction pattern (e.g., sudden overseas luxury jewelry purchase) amid routine domestic grocery spending.</li>
+              <li>• <strong>Cybersecurity Intrusion:</strong> A surge in outbound network socket traffic on unusual ports indicating data exfiltration or botnet compromise.</li>
+              <li>• <strong>Healthcare Diagnostics:</strong> A sudden spike in intracranial pressure or arrhythmia deviating from patient baseline vital signs.</li>
+              <li>• <strong>Industrial IoT Fault Detection:</strong> Vibration harmonics in aircraft turbines signaling micro-fractures prior to catastrophic failure.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 6: The 3 Fundamental Outlier Classes -->
+      <div class="card-container" id="card-6">
+        <div class="card">
+          <div class="card-tag">Section 2: Outlier Foundations • Card 7 of 18</div>
+          <h2 class="card-header">The 3 Fundamental Outlier Classes (Han §12.1)</h2>
+          <div class="card-body">
+            <p>Outliers fall into three distinct conceptual categories based on their context and relationships:</p>
+
+            <div class="space-y-3 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-indigo-400 block mb-0.5">1. Global Outliers (Point Anomalies)</strong>
+                <p class="text-slate-300">An individual object that deviates significantly with respect to all other points in the entire universe of data.</p>
+                <p class="text-slate-400 mt-0.5"><em>Example:</em> A transaction of \$10,000,000 in a retail grocery database where 99.9% of transactions are under \$200.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-400 block mb-0.5">2. Contextual Outliers (Conditional Anomalies)</strong>
+                <p class="text-slate-300">An object that deviates significantly with respect to a specific context, though its raw value is normal globally.</p>
+                <p class="text-slate-400 mt-0.5"><em>Example:</em> A temperature reading of 32°C in Hyderabad during May is normal, but 32°C in Hyderabad in late December is a contextual outlier!</p>
+                <div class="text-[11px] text-slate-400 bg-slate-950 p-2 rounded mt-1">Requires 2 attribute classes: (1) <strong>Contextual attributes</strong> (e.g. date, location), and (2) <strong>Behavioral attributes</strong> (e.g. temperature, salary).</div>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-pink-400 block mb-0.5">3. Collective Outliers</strong>
+                <p class="text-slate-300">A group of data objects that collectively deviate from the entire dataset, even though individual objects in isolation appear benign.</p>
+                <p class="text-slate-400 mt-0.5"><em>Example:</em> In a heart ECG, an individual cardiac voltage reading might be in the normal physiological range, but a flat horizontal sequence for 3 seconds constitutes a collective cardiac arrest anomaly.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 7: Statistical Approaches -->
+      <div class="card-container" id="card-7">
+        <div class="card">
+          <div class="card-tag">Section 2: Outlier Foundations • Card 8 of 18</div>
+          <h2 class="card-header">Statistical Outlier Detection: Parametric & Non-Parametric</h2>
+          <div class="card-body">
+            <p>Statistical methods assume normal data points are generated by a stochastic model $\mathcal{M}(\theta)$, and objects with low probability density under $\mathcal{M}$ are declared outliers.</p>
+
+            <div class="space-y-3 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-indigo-400 block mb-1">1. Univariate Normal Distribution & 3-Sigma Rule</strong>
+                <p class="font-mono text-slate-300 mb-1">$$Z = \frac{x - \mu}{\sigma} \implies \text{Outlier if } |Z| > 3$$</p>
+                <p class="text-slate-400">Under Gaussian assumption, $P(|X - \mu| > 3\sigma) \approx 0.0027$ (only 0.27% of observations).</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-400 block mb-1">2. Grubbs' Test (Extreme Studentized Deviate)</strong>
+                <p class="text-slate-300">Formally tests the null hypothesis $H_0$: There are no outliers in the univariate sample.</p>
+                <p class="font-mono text-slate-300 my-1">$$G = \frac{\max_{i=1\dots n} |x_i - \bar{x}|}{s}$$</p>
+                <p class="text-slate-400">Reject $H_0$ at significance level $\alpha$ if $G > \frac{n-1}{\sqrt{n}} \sqrt{\frac{t^2_{\alpha/(2n), n-2}}{n - 2 + t^2_{\alpha/(2n), n-2}}}$.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-1">3. Non-Parametric Boxplot (Tukey's IQR Method)</strong>
+                <p class="font-mono text-slate-300 mb-1">$$IQR = Q_3 - Q_1, \quad \text{Fence} = [Q_1 - 1.5 \cdot IQR, \; Q_3 + 1.5 \cdot IQR]$$</p>
+                <p class="text-slate-400">Does not assume Gaussianity. Extremely robust against skewed distributions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 8: Distance-Based Outlier Detection -->
+      <div class="card-container" id="card-8">
+        <div class="card">
+          <div class="card-tag">Section 3: Proximity & Density Outliers • Card 9 of 18</div>
+          <h2 class="card-header">Distance-Based Outlier Detection ($k$-NN Distance)</h2>
+          <div class="card-body">
+            <p>Distance-based methods avoid making parametric distributional assumptions by measuring the geometric isolation of objects.</p>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-3 text-xs space-y-2">
+              <strong class="text-indigo-400 block mb-1">Knorr & Ng Definition (1998):</strong>
+              <p class="text-slate-300">An object $p$ in dataset $T$ is a $DB(r, \pi)$-outlier if at least fraction $\pi$ of the objects in $T$ lie at distance greater than radius $r$ from $p$.</p>
+              <div class="font-mono text-slate-300 my-1">$$\frac{|\{q \in T \mid \text{dist}(p, q) > r\}|}{|T|} \ge \pi$$</div>
+            </div>
+
+            <h3 class="font-bold text-slate-200 mt-4 mb-2">Distance-to-$k^{\text{th}}$-Nearest-Neighbor Metric</h3>
+            <p class="text-xs text-slate-300 mb-2">Define the outlier score of object $p$ as its distance to its $k^{\text{th}}$ nearest neighbor: <strong class="text-sky-400 font-mono">$D^k(p)$</strong>. Rank all objects in descending order of $D^k(p)$; the top $m$ objects are declared outliers.</p>
+
+            <div class="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl text-xs text-slate-300">
+              <strong class="text-rose-300 block mb-1">The Fatal Flaw of Distance-Based Detection:</strong>
+              Distance-based methods implicitly assume a uniform density across the dataset. If the dataset contains clusters of <strong>different densities</strong> (e.g. a dense cluster $C_1$ and a sparse cluster $C_2$), points at the edge of sparse cluster $C_2$ will have larger $D^k$ than genuine outliers floating near dense cluster $C_1$!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 9: Local Outlier Factor -->
+      <div class="card-container" id="card-9">
+        <div class="card">
+          <div class="card-tag">Section 3: Proximity & Density Outliers • Card 10 of 18</div>
+          <h2 class="card-header">Density-Based Outlier Detection: Local Outlier Factor (LOF)</h2>
+          <div class="card-body">
+            <p>To overcome the variable density trap, Breunig, Kriegel, Ng & Sander (SIGMOD 2000) introduced the <strong>Local Outlier Factor (LOF)</strong>, which compares the density of an object to the densities of its local neighbors.</p>
+
+            <div class="space-y-3 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-400 block mb-1">1. $k$-distance of $p$ ($d_k(p)$) & $k$-distance neighborhood ($N_k(p)$)</strong>
+                <p class="text-slate-300">The distance $d(p, o)$ between $p$ and its $k^{\text{th}}$ nearest neighbor $o$. $N_k(p)$ contains all points within distance $d_k(p)$.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-indigo-400 block mb-1">2. Reachability Distance of $p$ with respect to $o$</strong>
+                <p class="font-mono text-slate-300 mb-1">$$\text{reach-dist}_k(p, o) = \max\{d_k(o), d(p, o)\}$$</p>
+                <p class="text-slate-400">If $p$ is very close to $o$, the reachability distance is smoothed to $d_k(o)$. This prevents statistical instability for dense clusters.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-1">3. Local Reachability Density ($\text{lrd}_k(p)$)</strong>
+                <p class="font-mono text-slate-300 mb-1">$$\text{lrd}_k(p) = \frac{|N_k(p)|}{\sum_{o \in N_k(p)} \text{reach-dist}_k(p, o)}$$</p>
+                <p class="text-slate-400">The inverse of the average reachability distance from neighbors to $p$.</p>
+              </div>
+
+              <div class="p-3 bg-purple-950/40 border border-purple-800/60 rounded-lg">
+                <strong class="text-purple-300 block mb-1">4. Local Outlier Factor ($\text{LOF}_k(p)$)</strong>
+                <p class="font-mono text-slate-300 mb-1">$$\text{LOF}_k(p) = \frac{\sum_{o \in N_k(p)} \frac{\text{lrd}_k(o)}{\text{lrd}_k(p)}}{|N_k(p)|}$$</p>
+                <p class="text-purple-200">The average ratio of the local reachability density of $p$'s neighbors to that of $p$ itself.</p>
+              </div>
+            </div>
+
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-300">
+              <strong class="text-white block mb-1">Interpreting the LOF Score:</strong>
+              • $\text{LOF} \approx 1.0$: Point has density similar to neighbors $\implies$ <strong class="text-emerald-400">Inlier</strong>.<br/>
+              • $\text{LOF} < 1.0$: Point is in a high-density core surrounded by looser points $\implies$ <strong class="text-sky-400">Deep Inlier</strong>.<br/>
+              • $\text{LOF} \gg 1.0$: Point's density is dramatically lower than its neighbors $\implies$ <strong class="text-rose-400">Local Outlier</strong>!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 10: LOF Worked Numerical Calculation -->
+      <div class="card-container" id="card-10">
+        <div class="card">
+          <div class="card-tag">Section 3: Proximity & Density Outliers • Card 11 of 18</div>
+          <h2 class="card-header">LOF Step-by-Step Worked Numerical Calculation</h2>
+          <div class="card-body">
+            <p class="text-amber-300 font-semibold mb-2">⭐ High Probability Endsem Numerical Question</p>
+            <p class="text-xs text-slate-300 mb-3">Consider 4 points on a 1D line: $A=0, B=1, C=2, P=6$. Let $k=2$. Let us compute $\text{LOF}_{k=2}(P)$.</p>
+
+            <div class="space-y-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-indigo-400 block mb-1">Step 1: Compute 2-distances ($d_2$) and 2-distance neighborhoods ($N_2$)</strong>
+                <p class="font-mono text-slate-300">For $A(0)$: Distances to $B(1), C(2) \implies d_2(A) = 2, \; N_2(A) = \{B, C\}$</p>
+                <p class="font-mono text-slate-300">For $B(1)$: Distances to $A(1), C(1) \implies d_2(B) = 1, \; N_2(B) = \{A, C\}$</p>
+                <p class="font-mono text-slate-300">For $C(2)$: Distances to $B(1), A(2) \implies d_2(C) = 2, \; N_2(C) = \{B, A\}$</p>
+                <p class="font-mono text-slate-300">For $P(6)$: Nearest 2 neighbors are $C(4)$ and $B(5) \implies d_2(P) = 5, \; N_2(P) = \{C, B\}$</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-400 block mb-1">Step 2: Compute Reachability Distances</strong>
+                <p class="font-mono text-slate-300">For $B$: $\text{reach-dist}_2(A, B) = \max\{d_2(B), d(A,B)\} = \max\{1, 1\} = 1$; $\text{reach-dist}_2(C, B) = \max\{1, 1\} = 1$</p>
+                <p class="font-mono text-slate-300">$\implies \text{lrd}_2(B) = \frac{2}{1 + 1} = \mathbf{1.0}$</p>
+                <p class="font-mono text-slate-300 mt-1">For $C$: $\text{reach-dist}_2(B, C) = \max\{d_2(C), d(B,C)\} = \max\{2, 1\} = 2$; $\text{reach-dist}_2(A, C) = \max\{2, 2\} = 2$</p>
+                <p class="font-mono text-slate-300">$\implies \text{lrd}_2(C) = \frac{2}{2 + 2} = \mathbf{0.5}$</p>
+                <p class="font-mono text-slate-300 mt-1">For $P$: $\text{reach-dist}_2(P, C) = \max\{d_2(C), d(P,C)\} = \max\{2, 4\} = 4$; $\text{reach-dist}_2(P, B) = \max\{d_2(B), d(P,B)\} = \max\{1, 5\} = 5$</p>
+                <p class="font-mono text-slate-300">$\implies \text{lrd}_2(P) = \frac{2}{4 + 5} = \frac{2}{9} \approx \mathbf{0.2222}$</p>
+              </div>
+
+              <div class="p-3 bg-emerald-950/40 border border-emerald-800/60 rounded-lg">
+                <strong class="text-emerald-300 block mb-1">Step 3: Compute $\text{LOF}_2(P)$</strong>
+                <p class="font-mono text-slate-300">$$\text{LOF}_2(P) = \frac{\frac{\text{lrd}_2(C)}{\text{lrd}_2(P)} + \frac{\text{lrd}_2(B)}{\text{lrd}_2(P)}}{2} = \frac{\frac{0.5}{2/9} + \frac{1.0}{2/9}}{2} = \frac{2.25 + 4.5}{2} = \mathbf{3.375}$$</p>
+                <p class="text-emerald-200 mt-1">Since $\text{LOF}_2(P) = 3.375 \gg 1.0$, $P$ is unambiguously flagged as a substantial local outlier!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 11: Clustering & Classification Outliers -->
+      <div class="card-container" id="card-11">
+        <div class="card">
+          <div class="card-tag">Section 3: Proximity & Density Outliers • Card 12 of 18</div>
+          <h2 class="card-header">Clustering-Based & Classification-Based Outlier Detection</h2>
+          <div class="card-body">
+            <p>Clustering and classification algorithms can be repurposed directly as high-performance anomaly detectors:</p>
+
+            <div class="space-y-3 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-400 block mb-1">1. Clustering-Based Approaches</strong>
+                <ul class="text-slate-300 space-y-1">
+                  <li>• <strong>Unassigned Points:</strong> In DBSCAN, all points that are neither core points nor border points are assigned to noise cluster $-1$.</li>
+                  <li>• <strong>Distance to Centroid:</strong> In K-Means, objects whose distance to their assigned cluster centroid $\|x_i - \mu_{c(i)}\|$ exceeds a 99th percentile threshold are flagged.</li>
+                  <li>• <strong>Small Cluster Outliers:</strong> Clusters containing fewer than $\theta_{\text{size}}$ objects (e.g. $< 1\%$ of data) are declared collective outlier clusters.</li>
+                </ul>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-indigo-400 block mb-1">2. One-Class Support Vector Machine (Schölkopf et al. 2001)</strong>
+                <p class="text-slate-300">Maps training data into a high-dimensional feature space via an RBF kernel and finds a maximum margin hyperplane that separates the data from the coordinate origin. Outliers lie on the wrong side of the boundary.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-1">3. Isolation Forest (Liu et al. 2008)</strong>
+                <p class="text-slate-300">Builds an ensemble of random decision trees (iTrees). Outliers are few and different, so they are isolated near the root of the tree with very short path lengths $h(x)$!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 12: Spatio-Temporal Mining -->
+      <div class="card-container" id="card-12">
+        <div class="card">
+          <div class="card-tag">Section 4: Trends in Data Mining • Card 13 of 18</div>
+          <h2 class="card-header">Trends: Spatio-Temporal & Trajectory Data Mining</h2>
+          <div class="card-body">
+            <p>With widespread GPS tracking, smartphones, and connected vehicles, spatio-temporal data mining has become an indispensable branch of data analytics.</p>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-3 text-xs space-y-2">
+              <strong class="text-sky-400 block mb-1">Tobler's First Law of Geography (Spatial Autocorrelation):</strong>
+              <blockquote class="italic text-slate-200 border-l-2 border-sky-400 pl-3 my-1">
+                "Everything is related to everything else, but near things are more related than distant things."
+              </blockquote>
+              <p class="text-slate-400">Violates the standard statistical assumption that data observations are independent and identically distributed (i.i.d.)!</p>
+            </div>
+
+            <h3 class="font-bold text-slate-200 mt-4 mb-2">Moving Object Trajectory Patterns</h3>
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-indigo-400">1. Moving Cluster:</strong> A density-connected group of objects whose membership changes slightly over time, but the overall cluster migrates smoothly across consecutive timestamps.
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-emerald-400">2. Convoy:</strong> A group of at least $m$ objects that remain density-connected with the <em>exact same membership</em> for at least $k$ consecutive time steps.
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded">
+                <strong class="text-amber-400">3. Swarm:</strong> Relaxes the consecutive constraint: at least $m$ objects travel together for at least $k$ (possibly non-consecutive) time intervals.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 13: Graph & Network Mining -->
+      <div class="card-container" id="card-13">
+        <div class="card">
+          <div class="card-tag">Section 4: Trends in Data Mining • Card 14 of 18</div>
+          <h2 class="card-header">Trends: Graph & Social Network Mining</h2>
+          <div class="card-body">
+            <p>Graph structures model complex relationships across social networks, biological protein interactions, citation networks, and the World Wide Web.</p>
+
+            <div class="space-y-3 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-indigo-400 block mb-0.5">1. Frequent Subgraph Mining (gSpan, FSG)</strong>
+                <p class="text-slate-300">Finds subgraphs appearing in at least $\text{min\_sup}$ graph transactions. Challenges: Subgraph isomorphism testing is NP-Complete! Solved using canonical DFS code lexicographical ordering.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-400 block mb-0.5">2. PageRank (Brin & Page 1998)</strong>
+                <p class="text-slate-300">Models a random web surfer with damping factor $d \approx 0.85$:</p>
+                <div class="font-mono text-slate-300 my-1">$$PR(u) = \frac{1-d}{N} + d \sum_{v \in B(u)} \frac{PR(v)}{L(v)}$$</div>
+                <p class="text-slate-400">Converges via power iteration to the stationary distribution of the Markov transition matrix.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-0.5">3. Community Detection & Modularity</strong>
+                <p class="text-slate-300">Partitions graph into dense subgraphs with high internal connectivity and sparse external inter-community edges using Newman-Girvan Modularity $Q$.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 14: High-Dimensional Challenges -->
+      <div class="card-container" id="card-14">
+        <div class="card">
+          <div class="card-tag">Section 4: Trends in Data Mining • Card 15 of 18</div>
+          <h2 class="card-header">The Curse of Dimensionality & Empty Space Phenomenon</h2>
+          <div class="card-body">
+            <p>As the number of dimensions $d$ grows into hundreds or thousands, geometric properties behave in deeply counter-intuitive ways:</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-3 text-xs">
+              <div class="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl">
+                <strong class="text-rose-400 block mb-1">1. Distance Concentration</strong>
+                <p class="text-slate-300 mb-2">Beyer et al. (1999) proved that under broad data distributions, the ratio between maximum and minimum Euclidean distance between points approaches 1:</p>
+                <div class="font-mono text-rose-200">$$\lim_{d \to \infty} \frac{d_{\max} - d_{\min}}{d_{\min}} = 0$$</div>
+                <p class="text-slate-400 mt-1">Every point becomes equidistant from every other point! Nearest-neighbor queries lose all discriminative power.</p>
+              </div>
+
+              <div class="p-3 bg-amber-950/40 border border-amber-800/60 rounded-xl">
+                <strong class="text-amber-400 block mb-1">2. The Empty Space Phenomenon</strong>
+                <p class="text-slate-300 mb-2">Consider a unit hypercube $[-1, 1]^d$ and inscribed hypersphere of radius $1$. The volume ratio of the hypersphere approaches 0 exponentially:</p>
+                <div class="font-mono text-amber-200">$$\frac{\text{Vol}(S^d)}{\text{Vol}(C^d)} = \frac{\pi^{d/2}}{2^d \Gamma(d/2 + 1)} \xrightarrow{d \to \infty} 0$$</div>
+                <p class="text-slate-400 mt-1">Almost 100% of the volume of high-dimensional space is concentrated in the corners! Datasets become extremely sparse.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 15: Interactive LOF Sandbox -->
+      <div class="card-container" id="card-15">
+        <div class="card">
+          <div class="card-tag">Section 5: Interactive Lab • Card 16 of 18</div>
+          <h2 class="card-header">Interactive Local Outlier Factor (LOF) Density Sandbox</h2>
+          <div class="card-body">
+            <p class="text-xs text-slate-400 mb-3">Notice how LOF handles datasets with <strong>two clusters of different densities</strong> (Cluster 1: tight/dense; Cluster 2: loose/sparse). Drag the candidate outlier $P$ to see its LOF score update dynamically.</p>
+
+            <div class="interactive-box">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-3 text-xs">
+                <div class="flex items-center gap-2">
+                  <label class="text-slate-400">Neighborhood size $k$:</label>
+                  <select id="lof-k-select" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white" onchange="calcLOF()">
+                    <option value="3">k = 3</option>
+                    <option value="4" selected>k = 4</option>
+                    <option value="5">k = 5</option>
+                  </select>
+                </div>
+                <div class="flex gap-2">
+                  <button class="btn-primary text-xs py-1" onclick="resetOutlierPos()">Reset Outlier $P$</button>
+                  <button class="btn-secondary text-xs py-1" onclick="generateNewLOFPoints()">Randomize Clusters</button>
+                </div>
+              </div>
+
+              <canvas id="lofCanvas" width="560" height="260" class="w-full"></canvas>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 text-xs font-mono">
+                <div class="p-2 bg-slate-900 border border-slate-800 rounded">
+                  <span class="text-slate-400">Outlier $P$ LOF: </span>
+                  <span id="p-lof-val" class="text-rose-400 font-bold">--</span>
+                </div>
+                <div class="p-2 bg-slate-900 border border-slate-800 rounded">
+                  <span class="text-slate-400">Dense Cluster Avg LOF: </span>
+                  <span id="c1-lof-val" class="text-emerald-400 font-bold">~1.02</span>
+                </div>
+                <div class="p-2 bg-slate-900 border border-slate-800 rounded">
+                  <span class="text-slate-400">Sparse Cluster Avg LOF: </span>
+                  <span id="c2-lof-val" class="text-sky-400 font-bold">~1.05</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 16: Active Recall Flashcards -->
+      <div class="card-container" id="card-16">
+        <div class="card">
+          <div class="card-tag">Section 5: Interactive Lab • Card 17 of 18</div>
+          <h2 class="card-header">Active Recall Flashcards: Outlier & Trend Essentials</h2>
+          <div class="card-body">
+            <p class="text-xs text-slate-400 mb-3">Click on any card to flip and verify your understanding before the Endsem.</p>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front">
+                  <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">Concept 1</span>
+                  <h3 class="text-lg font-bold">What is the query time complexity of STING and why?</h3>
+                  <span class="text-xs text-slate-500 mt-4">Click to reveal answer ↻</span>
+                </div>
+                <div class="flip-card-back">
+                  <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2">Answer</span>
+                  <p class="text-xs leading-relaxed">STING query time complexity is $O(K)$, where $K$ is the number of grid cells at the bottom layer. Because cells store precomputed statistical summary parameters (count, mean, stdev, min, max, distribution), query processing inspects cells hierarchically without scanning the $N$ raw database tuples. Hence, $O(K) \ll O(N)$.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front">
+                  <span class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2">Concept 2</span>
+                  <h3 class="text-lg font-bold">Why does distance-based outlier detection fail in multi-density datasets?</h3>
+                  <span class="text-xs text-slate-500 mt-4">Click to reveal answer ↻</span>
+                </div>
+                <div class="flip-card-back">
+                  <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2">Answer</span>
+                  <p class="text-xs leading-relaxed">Distance-based methods ($k$-NN distance $D^k$) measure absolute Euclidean distance. In a dataset with a very dense cluster and a very sparse cluster, legitimate inliers in the sparse cluster naturally have larger $D^k$ than genuine outliers floating outside the dense cluster. LOF solves this by taking relative ratios of local reachability densities.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front">
+                  <span class="text-xs font-bold text-pink-400 uppercase tracking-wider mb-2">Concept 3</span>
+                  <h3 class="text-lg font-bold">What is the difference between a Trajectory Convoy and a Swarm?</h3>
+                  <span class="text-xs text-slate-500 mt-4">Click to reveal answer ↻</span>
+                </div>
+                <div class="flip-card-back">
+                  <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2">Answer</span>
+                  <p class="text-xs leading-relaxed">A <strong>Convoy</strong> requires at least $m$ objects to remain density-connected for at least $k$ <em>consecutive</em> timestamps. A <strong>Swarm</strong> relaxes the consecutive constraint: the objects must travel together for at least $k$ timestamps, but the timestamps can be <em>non-consecutive</em>.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 17: Endsem Review Quiz -->
+      <div class="card-container" id="card-17">
+        <div class="card">
+          <div class="card-tag">Section 5: Interactive Lab • Card 18 of 18</div>
+          <h2 class="card-header">Endsem Self-Assessment Quiz (Topic 10 Review)</h2>
+          <div class="card-body">
+            <p class="text-xs text-slate-400 mb-4">Answer all questions to test your Endsem exam readiness.</p>
+
+            <form id="outlier-quiz-form" class="space-y-4 text-xs" onsubmit="event.preventDefault(); checkOutlierQuiz();">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <p class="font-bold text-slate-200 mb-2">1. In CLIQUE subspace clustering, which fundamental property allows pruning candidate high-dimensional cells?</p>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq1" value="a" class="mr-2"/> Kernel influence summation</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq1" value="b" class="mr-2"/> The Apriori subspace property: A k-d cell is dense only if all its (k-1)-d projections are dense</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq1" value="c" class="mr-2"/> Transitive closure of Cannot-Link constraints</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq1" value="d" class="mr-2"/> Grubbs' studentized extreme deviation test</label>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <p class="font-bold text-slate-200 mb-2">2. What does an LOF score of approximately 1.0 indicate for an object?</p>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq2" value="a" class="mr-2"/> The object is an extreme global outlier</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq2" value="b" class="mr-2"/> The object is a contextual anomaly</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq2" value="c" class="mr-2"/> The object is a regular inlier with density comparable to its local neighbors</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq2" value="d" class="mr-2"/> The object violates Must-Link constraints</label>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <p class="font-bold text-slate-200 mb-2">3. What is the defining characteristic of a Contextual Outlier?</p>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq3" value="a" class="mr-2"/> It deviates significantly with respect to contextual attributes (e.g., season/time), while its behavioral value may be globally normal</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq3" value="b" class="mr-2"/> It has zero reachability distance</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq3" value="c" class="mr-2"/> It only occurs in 1-dimensional datasets</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="otq3" value="d" class="mr-2"/> It can only be detected via supervised neural networks</label>
+              </div>
+
+              <button type="submit" class="btn-primary w-full py-2">Submit Quiz & Check Score</button>
+            </form>
+
+            <div id="outlier-quiz-result" class="hidden text-center p-3 rounded-lg font-bold text-xs mt-3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM NAVIGATION BAR -->
+      <div class="max-w-[840px] mx-auto flex items-center justify-between pt-4 pb-12">
+        <button id="prev-btn" class="btn-secondary" onclick="prevCard()" disabled>← Previous</button>
+        <span class="text-xs text-slate-500 font-mono" id="card-counter">1 / 18</span>
+        <button id="next-btn" class="btn-primary" onclick="nextCard()">Next →</button>
+      </div>
+
+    </main>
+  </div>
+
+  <div id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    let currentCard = 0;
+    const totalCards = 18;
+
+    function goToCard(idx) {
+      if (idx < 0 || idx >= totalCards) return;
+      document.querySelectorAll('.card-container').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById('card-' + idx);
+      if (target) target.classList.add('active');
+
+      document.querySelectorAll('.sidebar-item').forEach((item, i) => {
+        if (i === idx) item.classList.add('active');
+        else item.classList.remove('active');
+      });
+
+      currentCard = idx;
+      document.getElementById('progress-bar').style.width = ((idx + 1) / totalCards * 100) + '%';
+      document.getElementById('progress-text').innerText = `Card ${idx + 1} / ${totalCards}`;
+      document.getElementById('card-counter').innerText = `${idx + 1} / ${totalCards}`;
+
+      document.getElementById('prev-btn').disabled = (idx === 0);
+      document.getElementById('next-btn').innerText = (idx === totalCards - 1) ? 'Finish' : 'Next →';
+
+      if (idx === 15) calcLOF();
+
+      document.getElementById('main').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextCard() { if (currentCard < totalCards - 1) goToCard(currentCard + 1); }
+    function prevCard() { if (currentCard > 0) goToCard(currentCard - 1); }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextCard();
+      if (e.key === 'ArrowLeft') prevCard();
+    });
+
+    // Mobile Sidebar
+    function toggleMobileSidebar() {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+      document.getElementById('sidebar-backdrop').classList.toggle('mobile-open');
+    }
+
+    // Pomodoro Timer
+    let timerSeconds = 15 * 60;
+    let timerRunning = false;
+    let timerInterval = null;
+
+    function toggleTimer() {
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+      } else {
+        timerRunning = true;
+        timerInterval = setInterval(() => {
+          if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            alert('Study sprint complete! Take a 5-minute breather.');
+            return;
+          }
+          timerSeconds--;
+          const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+          const s = String(timerSeconds % 60).padStart(2, '0');
+          document.getElementById('timer').innerText = `${m}:${s}`;
+        }, 1000);
+      }
+    }
+
+    // ── LOF DENSITY SIMULATOR ──
+    let denseCluster = [];
+    let sparseCluster = [];
+    let outlierPoint = { x: 260, y: 70 };
+    let isDraggingP = false;
+
+    function generateNewLOFPoints() {
+      denseCluster = [];
+      sparseCluster = [];
+
+      // Dense Cluster 1: 15 points tightly centered at (130, 150) radius ~35
+      for (let i = 0; i < 15; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const rad = Math.pow(Math.random(), 0.7) * 35;
+        denseCluster.push({ x: 130 + Math.cos(ang) * rad, y: 150 + Math.sin(ang) * rad, type: 1 });
+      }
+
+      // Sparse Cluster 2: 15 points loosely centered at (410, 150) radius ~85
+      for (let i = 0; i < 15; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const rad = Math.pow(Math.random(), 0.7) * 85;
+        sparseCluster.push({ x: 410 + Math.cos(ang) * rad, y: 150 + Math.sin(ang) * rad, type: 2 });
+      }
+
+      calcLOF();
+    }
+
+    function resetOutlierPos() {
+      outlierPoint = { x: 260, y: 70 };
+      calcLOF();
+    }
+
+    function dist(p1, p2) {
+      return Math.hypot(p1.x - p2.x, p1.y - p2.y);
+    }
+
+    function calcLOF() {
+      const cvs = document.getElementById('lofCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width, h = cvs.height;
+
+      const k = parseInt(document.getElementById('lof-k-select').value);
+      const allPoints = [...denseCluster, ...sparseCluster, { ...outlierPoint, isP: true }];
+
+      // Step A: Calculate k-distance and k-neighborhood for all points
+      const n = allPoints.length;
+      const kDist = new Array(n);
+      const kNeighbors = new Array(n);
+
+      for (let i = 0; i < n; i++) {
+        const dists = [];
+        for (let j = 0; j < n; j++) {
+          if (i === j) continue;
+          dists.push({ idx: j, d: dist(allPoints[i], allPoints[j]) });
+        }
+        dists.sort((a, b) => a.d - b.d);
+        const kth = dists[k - 1].d;
+        kDist[i] = kth;
+        kNeighbors[i] = dists.slice(0, k).map(x => x.idx);
+      }
+
+      // Step B: Calculate local reachability density (lrd)
+      const lrd = new Array(n);
+      for (let i = 0; i < n; i++) {
+        let sumReach = 0;
+        kNeighbors[i].forEach(j => {
+          const reach = Math.max(kDist[j], dist(allPoints[i], allPoints[j]));
+          sumReach += reach;
+        });
+        lrd[i] = kNeighbors[i].length / (sumReach + 0.0001);
+      }
+
+      // Step C: Calculate LOF
+      const lofScores = new Array(n);
+      for (let i = 0; i < n; i++) {
+        let sumRatio = 0;
+        kNeighbors[i].forEach(j => {
+          sumRatio += lrd[j] / (lrd[i] + 0.00001);
+        });
+        lofScores[i] = sumRatio / kNeighbors[i].length;
+      }
+
+      const pIdx = n - 1;
+      const pLOF = lofScores[pIdx];
+
+      const pLOFEl = document.getElementById('p-lof-val');
+      if (pLOFEl) {
+        pLOFEl.innerText = pLOF.toFixed(2);
+        pLOFEl.className = pLOF >= 2.0 ? 'text-rose-400 font-bold' : (pLOF >= 1.4 ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold');
+      }
+
+      // Draw Canvas
+      ctx.fillStyle = '#0b1120';
+      ctx.fillRect(0, 0, w, h);
+
+      // Draw Cluster Labels
+      ctx.fillStyle = '#64748b'; ctx.font = '11px sans-serif';
+      ctx.fillText('Dense Cluster (High lrd)', 70, 30);
+      ctx.fillText('Sparse Cluster (Lower lrd)', 350, 30);
+
+      // Draw dense points
+      denseCluster.forEach((pt, i) => {
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2); ctx.fill();
+      });
+
+      // Draw sparse points
+      sparseCluster.forEach((pt, i) => {
+        ctx.fillStyle = '#818cf8';
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2); ctx.fill();
+      });
+
+      // Draw Outlier P and its reachability connections to its k neighbors
+      const pNeighbors = kNeighbors[pIdx];
+      ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      pNeighbors.forEach(nIdx => {
+        const neighbor = allPoints[nIdx];
+        ctx.beginPath();
+        ctx.moveTo(outlierPoint.x, outlierPoint.y);
+        ctx.lineTo(neighbor.x, neighbor.y);
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+
+      // Draw k-distance circle around P
+      ctx.strokeStyle = 'rgba(244, 63, 94, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(outlierPoint.x, outlierPoint.y, kDist[pIdx], 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Draw Outlier P Node
+      ctx.fillStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.arc(outlierPoint.x, outlierPoint.y, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif';
+      ctx.fillText(`P (LOF: ${pLOF.toFixed(2)})`, outlierPoint.x + 10, outlierPoint.y - 8);
+    }
+
+    // Dragging Handler for Outlier P
+    const cvs = document.getElementById('lofCanvas');
+    if (cvs) {
+      cvs.addEventListener('mousedown', (e) => {
+        const rect = cvs.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        if (Math.hypot(mx - outlierPoint.x, my - outlierPoint.y) < 25) {
+          isDraggingP = true;
+        }
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDraggingP) return;
+        const rect = cvs.getBoundingClientRect();
+        outlierPoint.x = Math.max(20, Math.min(cvs.width - 20, e.clientX - rect.left));
+        outlierPoint.y = Math.max(20, Math.min(cvs.height - 20, e.clientY - rect.top));
+        calcLOF();
+      });
+
+      window.addEventListener('mouseup', () => { isDraggingP = false; });
+    }
+
+    // ── QUIZ CHECKER ──
+    function checkOutlierQuiz() {
+      const q1 = document.querySelector('input[name="otq1"]:checked');
+      const q2 = document.querySelector('input[name="otq2"]:checked');
+      const q3 = document.querySelector('input[name="otq3"]:checked');
+
+      const res = document.getElementById('outlier-quiz-result');
+      res.classList.remove('hidden');
+
+      if (!q1 || !q2 || !q3) {
+        res.className = 'text-center p-3 rounded-lg font-bold text-xs mt-2 bg-amber-950/60 border border-amber-800 text-amber-200';
+        res.innerText = 'Please answer all questions before submitting!';
+        return;
+      }
+
+      let score = 0;
+      if (q1.value === 'b') score++;
+      if (q2.value === 'c') score++;
+      if (q3.value === 'a') score++;
+
+      if (score === 3) {
+        res.className = 'text-center p-3 rounded-lg font-bold text-xs mt-2 bg-emerald-950/60 border border-emerald-800 text-emerald-200';
+        res.innerHTML = `3/3 Correct! Outstanding mastery of Advances in Clustering and Outlier Analysis!`;
+      } else {
+        res.className = 'text-center p-3 rounded-lg font-bold text-xs mt-2 bg-rose-950/60 border border-rose-800 text-rose-200';
+        res.innerHTML = `Score: ${score}/3. Review Q1 (CLIQUE Apriori property), Q2 (LOF ≈ 1.0 interpretation), or Q3 (Contextual outlier definition).`;
+      }
+    }
+
+    // Initialize on load
+    window.onload = function() {
+      generateNewLOFPoints();
+    };
+  </script>
+</body>
+</html>

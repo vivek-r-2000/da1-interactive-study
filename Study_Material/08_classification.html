@@ -1702,8 +1702,8 @@
           <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-3">
             <summary class="font-bold text-[var(--foreground)] cursor-pointer">📊 Classifier Comparison: Paired Student's t-Test &amp; ROC/AUC Curves</summary>
             <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
-              <p>• <strong>Comparing Two Classifiers ($M_1$ vs. $M_2$):</strong> Run 10-fold cross-validation. Compute the difference in error rates $d_i = \text{err}(M_1)_i - \text{err}(M_2)_i$ for each fold. Compute sample mean $ar{d}$ and standard deviation $s_d$. The test statistic is:<br/>
-              $t = \frac{ar{d}}{s_d / \sqrt{k}} \sim t_{k-1}$. If $|t| > t_{\text{critical}}$, we reject the null hypothesis and conclude that the performance difference is statistically significant.</p>
+              <p>• <strong>Comparing Two Classifiers ($M_1$ vs. $M_2$):</strong> Run 10-fold cross-validation. Compute the difference in error rates $d_i = \text{err}(M_1)_i - \text{err}(M_2)_i$ for each fold. Compute sample mean $\bar{d}$ and standard deviation $s_d$. The test statistic is:<br/>
+              $t = \frac{\bar{d}}{s_d / \sqrt{k}} \sim t_{k-1}$. If $|t| > t_{\text{critical}}$, we reject the null hypothesis and conclude that the performance difference is statistically significant.</p>
               <p>• <strong>ROC Curves:</strong> Plots True Positive Rate (Sensitivity / Recall) on the Y-axis against False Positive Rate (&dollar;1 - \text{Specificity}$) on the X-axis across all decision thresholds. A random guess gives the diagonal line ($\text{AUC} = 0.5$); a perfect classifier has $\text{AUC} = 1.0$.</p>
             </div>
           </details>
@@ -1712,7 +1712,7 @@
             <summary class="font-bold text-[var(--foreground)] cursor-pointer">🤝 Deep-Dive into Ensembles &amp; Class Imbalance</summary>
             <div class="mt-3 text-sm text-[var(--muted-foreground)] space-y-2">
               <p>• <strong>AdaBoost (Adaptive Boosting):</strong> Assigns initial weights $w_i = 1/d$ to all tuples. In each round, trains a base classifier $M_i$. Its error rate is $\epsilon_i = \sum w_k \mathbb{I}(M_i(x_k) 
-eq y_k)$. Classifier weight is $lpha_i = \frac{1}{2}\ln\frac{1-\epsilon_i}{\epsilon_i}$. Correctly classified tuples have weights decreased; misclassified tuples have weights increased. Final prediction is a weighted vote.</p>
+eq y_k)$. Classifier weight is $\alpha_i = \frac{1}{2}\ln\frac{1-\epsilon_i}{\epsilon_i}$. Correctly classified tuples have weights decreased; misclassified tuples have weights increased. Final prediction is a weighted vote.</p>
               <p>• <strong>Gradient Boosting &amp; XGBoost:</strong> Fits each subsequent tree to the negative gradient (pseudo-residuals) of the loss function, optimizing both loss and tree complexity regularization.</p>
               <p>• <strong>Random Forest:</strong> Uses bagging plus random feature selection at each node split (`Forest-RI` and `Forest-RC`), preventing dominant features from dominating all trees.</p>
               <p>• <strong>Handling Class Imbalance:</strong> In rare-event detection (fraud, rare diseases), standard accuracy is deceptive. Techniques: (1) <em>Oversampling</em> (replicating rare cases or generating synthetic samples via SMOTE); (2) <em>Undersampling</em> majority class; (3) <em>Threshold-moving</em>; (4) <em>Cost-sensitive learning</em>.</p>

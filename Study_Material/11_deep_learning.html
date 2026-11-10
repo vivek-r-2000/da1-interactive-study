@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 11 — Overview of Deep Learning: Perceptrons, MLPs & Backpropagation | DA-I</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"/>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  :root {
+    --background: #0f172a;
+    --card: #1e293b;
+    --sidebar: #0f172a;
+    --foreground: #f1f5f9;
+    --muted-foreground: #94a3b8;
+    --border: #334155;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #0ea5e9;
+    --accent: #8b5cf6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top Bar ── */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+    display: flex; align-items: center; padding: 0 16px; gap: 12px;
+  }
+  #topbar .title { font-weight: 700; font-size: 15px; white-space: nowrap; color: var(--foreground); }
+  #progress-bar-wrap { flex: 1; background: var(--border); border-radius: 9999px; height: 8px; min-width: 80px; }
+  #progress-bar { height: 100%; border-radius: 9999px; background: var(--primary); transition: width .4s ease; }
+  #progress-text { font-size: 12px; color: var(--muted-foreground); white-space: nowrap; }
+  #timer {
+    font-size: 14px; font-weight: 700; color: var(--primary);
+    background: rgba(99,102,241,.15); padding: 4px 10px; border-radius: 8px;
+    cursor: pointer; white-space: nowrap;
+  }
+  #home-btn {
+    font-size: 12px; padding: 4px 10px; border-radius: 8px;
+    background: rgba(255,255,255,.07); color: var(--foreground); text-decoration: none;
+    border: 1px solid var(--border); white-space: nowrap;
+  }
+
+  /* ── Layout ── */
+  #layout { display: flex; margin-top: 56px; height: calc(100vh - 56px); }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 250px; min-width: 250px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 12px 0;
+  }
+  .sidebar-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em;
+    color: var(--muted-foreground); padding: 10px 16px 4px;
+    text-transform: uppercase;
+  }
+  .sidebar-item {
+    display: block; padding: 7px 16px; font-size: 12px;
+    color: var(--muted-foreground); cursor: pointer; border-radius: 6px;
+    margin: 1px 6px; transition: background .15s, color .15s;
+    border: none; background: none; text-align: left; width: calc(100% - 12px);
+  }
+  .sidebar-item:hover { background: rgba(255,255,255,.06); color: var(--foreground); }
+  .sidebar-item.active { background: rgba(99,102,241,.2); color: var(--primary); font-weight: 600; }
+
+  /* ── Main Content ── */
+  #main { flex: 1; overflow-y: auto; padding: 28px 32px; position: relative; }
+
+  /* ── Cards ── */
+  .card-container { display: none; animation: fadeIn .35s ease; }
+  .card-container.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    max-width: 840px; margin: 0 auto 20px;
+  }
+  .card-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    color: var(--muted-foreground); text-transform: uppercase; margin-bottom: 12px;
+  }
+  .card-header { font-size: 22px; font-weight: 800; margin-bottom: 16px; line-height: 1.3; }
+  .card-body { font-size: 13.5px; line-height: 1.7; color: #cbd5e1; }
+  .card-body p { margin-bottom: 12px; }
+  .card-body ul, .card-body ol { margin-left: 20px; margin-bottom: 12px; }
+  .card-body li { margin-bottom: 6px; }
+
+  /* ── Interactive Elements ── */
+  .interactive-box {
+    background: rgba(15,23,42,.7);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .btn-primary {
+    background: var(--primary); color: #fff;
+    padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13px;
+    border: none; cursor: pointer; transition: opacity .15s; text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { opacity: .9; }
+  .btn-secondary {
+    background: rgba(255,255,255,.08); color: var(--foreground);
+    padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13px;
+    border: 1px solid var(--border); cursor: pointer; transition: background .15s; text-decoration: none; display: inline-block;
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,.14); }
+
+  /* ── Flip Card ── */
+  .flip-card {
+    background: transparent;
+    perspective: 1000px;
+    min-height: 170px;
+    margin: 14px 0;
+    cursor: pointer;
+  }
+  .flip-card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 170px;
+    text-align: left; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+  .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+  .flip-card-front, .flip-card-back {
+    position: absolute; width: 100%; height: 100%; min-height: 170px;
+    -webkit-backface-visibility: hidden; backface-visibility: hidden;
+    border-radius: 12px; padding: 20px 24px;
+    display: flex; flex-direction: column; justify-content: center;
+    border: 1px solid var(--border);
+  }
+  .flip-card-front { background: #1e293b; color: #f8fafc; }
+  .flip-card-back { background: #312e81; color: #e0e7ff; transform: rotateY(180deg); }
+
+  /* ── Canvas Simulator ── */
+  canvas { background: #0b1120; border: 1px solid #334155; border-radius: 8px; display: block; }
+
+  /* ── Responsive Mobile ── */
+  @media (max-width: 768px) {
+    #sidebar { position: fixed; left: -260px; top: 56px; bottom: 0; z-index: 40; transition: left .25s ease; }
+    #sidebar.mobile-open { left: 0; }
+    #sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 35; }
+    #sidebar-backdrop.mobile-open { display: block; }
+    #main { padding: 16px; }
+    .card { padding: 20px 18px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <button class="md:hidden text-slate-400 hover:text-white p-1" onclick="toggleMobileSidebar()" aria-label="Toggle navigation menu">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <span class="title">Module 11: Deep Learning Overview</span>
+    <div id="progress-bar-wrap">
+      <div id="progress-bar" style="width: 5.5%;"></div>
+    </div>
+    <span id="progress-text">Card 1 / 18</span>
+    <button id="timer" onclick="toggleTimer()">15:00</button>
+    <a href="00_home.html" id="home-btn">Study Hub</a>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div id="layout">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar">
+      <div class="sidebar-section-label">1. Foundations</div>
+      <button class="sidebar-item active" onclick="goToCard(0)">1. Biological vs Artificial</button>
+      <button class="sidebar-item" onclick="goToCard(1)">2. Perceptron Model</button>
+      <button class="sidebar-item" onclick="goToCard(2)">3. XOR & Linear Separability</button>
+
+      <div class="sidebar-section-label">2. Architecture & Activations</div>
+      <button class="sidebar-item" onclick="goToCard(3)">4. Multi-Layer Perceptrons</button>
+      <button class="sidebar-item" onclick="goToCard(4)">5. Activation Functions</button>
+      <button class="sidebar-item" onclick="goToCard(5)">6. Softmax & Output Layers</button>
+      <button class="sidebar-item" onclick="goToCard(6)">7. Forward Pass Matrix Math</button>
+
+      <div class="sidebar-section-label">3. Optimization & Training</div>
+      <button class="sidebar-item" onclick="goToCard(7)">8. Loss & Cost Functions</button>
+      <button class="sidebar-item" onclick="goToCard(8)">9. Gradient Descent Variants</button>
+      <button class="sidebar-item" onclick="goToCard(9)">10. Backpropagation Derivation</button>
+      <button class="sidebar-item" onclick="goToCard(10)">11. Worked Numerical Example</button>
+      <button class="sidebar-item" onclick="goToCard(11)">12. Learning Rate & Dynamics</button>
+
+      <div class="sidebar-section-label">4. Generalization & Deep Nets</div>
+      <button class="sidebar-item" onclick="goToCard(12)">13. Overfitting & Regularization</button>
+      <button class="sidebar-item" onclick="goToCard(13)">14. Vanishing Gradients</button>
+      <button class="sidebar-item" onclick="goToCard(14)">15. Perceptron vs SVM vs MLP</button>
+
+      <div class="sidebar-section-label">5. Interactive Lab & Review</div>
+      <button class="sidebar-item" onclick="goToCard(15)">16. Interactive Perceptron</button>
+      <button class="sidebar-item" onclick="goToCard(16)">17. Active Recall Cards</button>
+      <button class="sidebar-item" onclick="goToCard(17)">18. Endsem Exam Quiz</button>
+    </aside>
+
+    <!-- MAIN VIEWPORT -->
+    <main id="main">
+
+      <!-- CARD 0: Biological vs Artificial Neuron -->
+      <div class="card-container active" id="card-0">
+        <div class="card">
+          <div class="card-tag">Section 1: Foundations • Card 1 of 18</div>
+          <h2 class="card-header">Biological vs Artificial Neuron (Han 4th Ed §10.1)</h2>
+          <div class="card-body">
+            <p>Artificial Neural Networks (ANNs) draw biological inspiration from the human central nervous system, which contains roughly $10^{11}$ interconnected neurons operating with massive parallelism.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+              <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl">
+                <h3 class="font-bold text-sky-400 mb-2">Biological Brain Anatomy</h3>
+                <ul class="text-xs space-y-1.5 text-slate-300">
+                  <li><strong>Dendrites:</strong> Branching nerve fibers that receive electrical pulses from adjacent neurons.</li>
+                  <li><strong>Soma (Cell Body):</strong> Sums electrochemical input signals across all dendrites.</li>
+                  <li><strong>Axon:</strong> Transmission line sending action potentials when the soma threshold is reached.</li>
+                  <li><strong>Synapse:</strong> Junction gap between axon and dendrites; synaptic plasticity controls connection strength.</li>
+                </ul>
+              </div>
+
+              <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl">
+                <h3 class="font-bold text-indigo-400 mb-2">Artificial Neuron Equivalent</h3>
+                <ul class="text-xs space-y-1.5 text-slate-300">
+                  <li><strong>Input Vector $\vec{x}$:</strong> Features $(x_1, x_2, \dots, x_d)$ entering the node.</li>
+                  <li><strong>Weights $\vec{w}$:</strong> Synaptic weights $(w_1, w_2, \dots, w_d)$ scaling inputs.</li>
+                  <li><strong>Summation $\Sigma$:</strong> Linear aggregation $z = \sum_{i=1}^d w_i x_i + b$.</li>
+                  <li><strong>Activation Function $\sigma(z)$:</strong> Non-linear firing gate producing output signal $a$.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="p-3 bg-indigo-950/40 border border-indigo-800/60 rounded-xl text-xs text-slate-300">
+              <strong class="text-indigo-300 block mb-1">McCulloch-Pitts Neuron (1943):</strong>
+              The earliest mathematical model of a binary threshold neuron: inputs $x_i \in \{0, 1\}$ are weighted and compared against threshold $\theta$. If $\sum w_i x_i \ge \theta$, output is $1$, else $0$.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 1: The Perceptron Model -->
+      <div class="card-container" id="card-1">
+        <div class="card">
+          <div class="card-tag">Section 1: Foundations • Card 2 of 18</div>
+          <h2 class="card-header">The Perceptron Model (Rosenblatt 1958)</h2>
+          <div class="card-body">
+            <p>Frank Rosenblatt extended the threshold neuron by introducing an <strong>adaptive weight learning algorithm</strong> that converges if the training data is linearly separable.</p>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-3 text-center">
+              <div class="text-xs text-slate-400 mb-1">Perceptron Net Input & Activation</div>
+              <div class="font-mono text-base text-indigo-300 mb-2">$$z = \mathbf{w}^T \mathbf{x} + b = \sum_{i=1}^d w_i x_i + b$$</div>
+              <div class="font-mono text-sm text-slate-200">$$y = f(z) = \begin{cases} +1 & \text{if } z \ge 0 \\ -1 \text{ (or } 0) & \text{if } z < 0 \end{cases}$$</div>
+            </div>
+
+            <h3 class="font-bold text-slate-200 mt-4 mb-2">The Perceptron Learning Rule</h3>
+            <p>Given learning rate $\eta \in (0, 1]$ and target label $t \in \{-1, +1\}$:</p>
+            <ol class="list-decimal text-xs space-y-1.5 text-slate-300 ml-5">
+              <li>Initialize weights $\vec{w}$ and bias $b$ to zeros or small random numbers.</li>
+              <li>For each sample $(\vec{x}, t)$, compute output $\hat{y} = \text{sign}(\mathbf{w}^T \mathbf{x} + b)$.</li>
+              <li>If $\hat{y} \ne t$, update parameters:
+                $$\mathbf{w} \leftarrow \mathbf{w} + \eta (t - \hat{y}) \mathbf{x}$$
+                $$b \leftarrow b + \eta (t - \hat{y})$$
+              </li>
+              <li>Repeat until all samples are correctly classified (zero training errors).</li>
+            </ol>
+
+            <div class="p-3 bg-emerald-950/40 border border-emerald-800/60 rounded-xl text-xs text-slate-300 mt-3">
+              <strong class="text-emerald-300 block mb-1">Novikoff's Perceptron Convergence Theorem (1962):</strong>
+              If a training set is linearly separable with margin $\gamma > 0$ and maximum input radius $R = \max \|\mathbf{x}\|$, the Perceptron algorithm will make at most $(R / \gamma)^2$ weight updates before converging to a separating hyperplane.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2: XOR & Linear Separability -->
+      <div class="card-container" id="card-2">
+        <div class="card">
+          <div class="card-tag">Section 1: Foundations • Card 3 of 18</div>
+          <h2 class="card-header">Linear Separability & The XOR Barrier (Minsky & Papert 1969)</h2>
+          <div class="card-body">
+            <p>A single perceptron defines a linear decision boundary: a straight line in 2D ($w_1 x_1 + w_2 x_2 + b = 0$), a plane in 3D, and a hyperplane in higher dimensions.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-1">AND Gate (Separable)</strong>
+                <p class="text-slate-400 mb-1">Weights: $w_1=1, w_2=1, b=-1.5$</p>
+                <p class="text-slate-300">$(0,0) \to -1.5 \to 0$</p>
+                <p class="text-slate-300">$(1,0) \to -0.5 \to 0$</p>
+                <p class="text-slate-300">$(0,1) \to -0.5 \to 0$</p>
+                <p class="text-slate-300 font-bold text-emerald-300">$(1,1) \to +0.5 \to 1$ ✓</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-400 block mb-1">OR Gate (Separable)</strong>
+                <p class="text-slate-400 mb-1">Weights: $w_1=1, w_2=1, b=-0.5$</p>
+                <p class="text-slate-300">$(0,0) \to -0.5 \to 0$</p>
+                <p class="text-slate-300">$(1,0) \to +0.5 \to 1$</p>
+                <p class="text-slate-300">$(0,1) \to +0.5 \to 1$</p>
+                <p class="text-slate-300 font-bold text-sky-300">$(1,1) \to +1.5 \to 1$ ✓</p>
+              </div>
+
+              <div class="p-3 bg-rose-950/40 border border-rose-800/60 rounded-lg">
+                <strong class="text-rose-400 block mb-1">XOR Gate (Non-Separable!)</strong>
+                <p class="text-slate-400 mb-1">Outputs: $(0,0)\to 0, (1,1)\to 0$, but $(1,0)\to 1, (0,1)\to 1$</p>
+                <p class="text-rose-200">No single straight line can separate $(0,1), (1,0)$ from $(0,0), (1,1)$! Single perceptron loops indefinitely.</p>
+              </div>
+            </div>
+
+            <div class="p-3 bg-amber-950/40 border border-amber-800/60 rounded-xl text-xs text-slate-300">
+              <strong class="text-amber-300 block mb-1">The First AI Winter:</strong>
+              Minsky & Papert's 1969 book <em>Perceptrons</em> proved mathematically that single-layer perceptrons cannot compute XOR. This halted neural network funding for over a decade until the discovery of the <strong>Multi-Layer Perceptron</strong> and <strong>Backpropagation</strong>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 3: Multi-Layer Perceptrons -->
+      <div class="card-container" id="card-3">
+        <div class="card">
+          <div class="card-tag">Section 2: Architecture & Activations • Card 4 of 18</div>
+          <h2 class="card-header">Multi-Layer Perceptrons (MLP) & Hidden Representations</h2>
+          <div class="card-body">
+            <p>An MLP inserts one or more <strong>hidden layers</strong> between the input and output layers. The hidden units transform the original input space into a new non-linear feature space where the classes become linearly separable!</p>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-3">
+              <div class="text-xs font-bold text-indigo-400 mb-2 uppercase">Solving XOR with 2 Hidden Nodes + 1 Output Node</div>
+              <p class="text-xs text-slate-300">Hidden node $h_1$ computes $x_1 \text{ OR } x_2$. Hidden node $h_2$ computes $\text{NAND}(x_1, x_2) = \text{NOT}(x_1 \text{ AND } x_2)$. Output node $y$ computes $h_1 \text{ AND } h_2$!</p>
+              <div class="font-mono text-xs text-slate-300 bg-slate-950 p-2.5 rounded mt-2">
+                $$x_1 \oplus x_2 = (x_1 \lor x_2) \land \neg(x_1 \land x_2)$$
+              </div>
+            </div>
+
+            <h3 class="font-bold text-slate-200 mt-4 mb-2">Universal Approximation Theorem (Cybenko 1989, Hornik 1991)</h3>
+            <p class="text-xs text-slate-300">A feed-forward neural network with a single hidden layer containing a finite number of non-linear neurons (e.g., sigmoid activations) can approximate <strong>any continuous function</strong> on compact subsets of $\mathbb{R}^n$ to arbitrary precision $\epsilon > 0$.</p>
+
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-400 mt-2">
+              <em>Key Caveat:</em> The theorem proves <em>existence</em> of such a network; it does not guarantee that gradient descent will find the optimal weights in polynomial time!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 4: Activation Functions -->
+      <div class="card-container" id="card-4">
+        <div class="card">
+          <div class="card-tag">Section 2: Architecture & Activations • Card 5 of 18</div>
+          <h2 class="card-header">Activation Functions: Sigmoid, Tanh, ReLU & Derivatives</h2>
+          <div class="card-body">
+            <p>Without non-linear activation functions, a 100-layer neural network collapses into a single linear matrix multiplication: $\mathbf{W}_3(\mathbf{W}_2(\mathbf{W}_1 \mathbf{x})) = (\mathbf{W}_3 \mathbf{W}_2 \mathbf{W}_1)\mathbf{x} = \mathbf{W}_{\text{comb}}\mathbf{x}$. Non-linearity is essential!</p>
+
+            <div class="space-y-3 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <div class="flex justify-between items-center mb-1">
+                  <strong class="text-indigo-400 font-bold">1. Logistic Sigmoid Function $\sigma(z)$</strong>
+                  <span class="text-slate-400 font-mono">Range: (0, 1)</span>
+                </div>
+                <p class="font-mono text-slate-300 mb-1">$$\sigma(z) = \frac{1}{1 + e^{-z}}, \quad \sigma'(z) = \sigma(z)(1 - \sigma(z))$$</p>
+                <p class="text-slate-400">Maps net input to probability. <strong>Weakness:</strong> Max derivative is $0.25$ (at $z=0$); causes severe vanishing gradient in deep layers. Not zero-centered.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <div class="flex justify-between items-center mb-1">
+                  <strong class="text-sky-400 font-bold">2. Hyperbolic Tangent $\tanh(z)$</strong>
+                  <span class="text-slate-400 font-mono">Range: (-1, +1)</span>
+                </div>
+                <p class="font-mono text-slate-300 mb-1">$$\tanh(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}}, \quad \tanh'(z) = 1 - \tanh^2(z)$$</p>
+                <p class="text-slate-400">Zero-centered (mean output near 0), speeding up training compared to sigmoid. Still saturates at large $|z|$.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <div class="flex justify-between items-center mb-1">
+                  <strong class="text-emerald-400 font-bold">3. Rectified Linear Unit (ReLU)</strong>
+                  <span class="text-slate-400 font-mono">Range: [0, $\infty$)</span>
+                </div>
+                <p class="font-mono text-slate-300 mb-1">$$f(z) = \max(0, z), \quad f'(z) = \begin{cases} 1 & z > 0 \\ 0 & z < 0 \end{cases}$$</p>
+                <p class="text-slate-400">The modern deep learning standard. Derivative is 1 for positive inputs (no gradient vanishing!). Computationally cheap. <em>Risk:</em> "Dying ReLU" if neurons receive large negative updates.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 5: Softmax & Output Layers -->
+      <div class="card-container" id="card-5">
+        <div class="card">
+          <div class="card-tag">Section 2: Architecture & Activations • Card 6 of 18</div>
+          <h2 class="card-header">Softmax & Output Layer Selection for Tasks</h2>
+          <div class="card-body">
+            <p>The choice of activation function at the final output layer depends strictly on the supervised learning task objective:</p>
+
+            <div class="overflow-x-auto my-3">
+              <table class="w-full text-xs text-left border border-slate-800">
+                <thead class="bg-slate-900 text-slate-300 font-bold border-b border-slate-800">
+                  <tr>
+                    <th class="p-2.5">Task Type</th>
+                    <th class="p-2.5">Output Layer Nodes</th>
+                    <th class="p-2.5">Output Activation</th>
+                    <th class="p-2.5">Standard Loss Function</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 text-slate-300">
+                  <tr>
+                    <td class="p-2.5 font-bold text-sky-400">Continuous Regression</td>
+                    <td class="p-2.5">1 (or $m$ continuous targets)</td>
+                    <td class="p-2.5">Linear / Identity ($a = z$)</td>
+                    <td class="p-2.5">Mean Squared Error (MSE)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2.5 font-bold text-indigo-400">Binary Classification</td>
+                    <td class="p-2.5">1 node ($P(y=1|\mathbf{x})$)</td>
+                    <td class="p-2.5">Sigmoid $\sigma(z)$</td>
+                    <td class="p-2.5">Binary Cross-Entropy</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2.5 font-bold text-emerald-400">Multi-Class Classification ($K$ classes)</td>
+                    <td class="p-2.5">$K$ nodes</td>
+                    <td class="p-2.5">Softmax $\hat{y}_k = \frac{e^{z_k}}{\sum_{j=1}^K e^{z_j}}$</td>
+                    <td class="p-2.5">Categorical Cross-Entropy</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-300">
+              <strong class="text-indigo-300 block mb-1">Properties of Softmax:</strong>
+              1. Ensures all outputs lie strictly in $(0, 1)$.<br/>
+              2. Ensures $\sum_{k=1}^K \hat{y}_k = 1.0$ (a valid probability distribution over mutual classes).<br/>
+              3. Monotonic: Higher logits $z_k$ always yield higher probabilities $\hat{y}_k$.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 6: Matrix Formulation of Forward Pass -->
+      <div class="card-container" id="card-6">
+        <div class="card">
+          <div class="card-tag">Section 2: Architecture & Activations • Card 7 of 18</div>
+          <h2 class="card-header">Matrix Formulation of Forward Propagation</h2>
+          <div class="card-body">
+            <p>Modern deep learning frameworks (PyTorch, TensorFlow) compute entire layers and batches simultaneously through vectorized linear algebra operations:</p>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-3 text-xs space-y-2">
+              <p>For any layer $l \in \{1, 2, \dots, L\}$:</p>
+              <div class="font-mono text-sm text-indigo-300">$$\mathbf{z}^{[l]} = \mathbf{W}^{[l]} \mathbf{a}^{[l-1]} + \mathbf{b}^{[l]}$$</div>
+              <div class="font-mono text-sm text-sky-300">$$\mathbf{a}^{[l]} = g^{[l]}(\mathbf{z}^{[l]})$$</div>
+              <p class="text-slate-400">Where $\mathbf{a}^{[0]} = \mathbf{x}$ (the raw input vector), and $g^{[l]}(\cdot)$ is the layer's activation function.</p>
+            </div>
+
+            <h3 class="font-bold text-slate-200 mt-4 mb-2">Dimensionality Verification (Crucial for Exams)</h3>
+            <ul class="text-xs space-y-1.5 text-slate-300">
+              <li>Let layer $l-1$ have $n^{[l-1]}$ neurons, and layer $l$ have $n^{[l]}$ neurons.</li>
+              <li>Weight matrix $\mathbf{W}^{[l]}$ has shape: <strong class="text-indigo-400">$(n^{[l]} \times n^{[l-1]})$</strong>.</li>
+              <li>Bias vector $\mathbf{b}^{[l]}$ has shape: <strong class="text-indigo-400">$(n^{[l]} \times 1)$</strong>.</li>
+              <li>Activation vector $\mathbf{a}^{[l]}$ has shape: <strong class="text-indigo-400">$(n^{[l]} \times 1)$</strong>.</li>
+              <li>For a mini-batch of $m$ training samples: $\mathbf{A}^{[l-1]}$ has shape $(n^{[l-1]} \times m)$, and $\mathbf{Z}^{[l]} = \mathbf{W}^{[l]} \mathbf{A}^{[l-1]} + \mathbf{b}^{[l]}$ uses broadcasting to shape $(n^{[l]} \times m)$.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 7: Loss & Cost Functions -->
+      <div class="card-container" id="card-7">
+        <div class="card">
+          <div class="card-tag">Section 3: Optimization & Training • Card 8 of 18</div>
+          <h2 class="card-header">Loss & Cost Functions (Han 4th Ed §10.1)</h2>
+          <div class="card-body">
+            <p>A <strong>Loss function</strong> $L(\hat{y}, y)$ measures error on a single training example. The <strong>Cost function</strong> $J(\mathbf{W}, \mathbf{b})$ averages the loss across the entire training dataset of $n$ samples.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-pink-400 block mb-1">1. Mean Squared Error (MSE / L2 Loss)</strong>
+                <p class="font-mono text-slate-300 mb-2">$$J(\mathbf{W}, \mathbf{b}) = \frac{1}{2n} \sum_{i=1}^n \|\hat{\mathbf{y}}^{(i)} - \mathbf{y}^{(i)}\|^2$$</p>
+                <p class="text-slate-400">Standard for regression. In classification with sigmoid activations, MSE produces a non-convex loss surface with numerous local minima and slow plateaus!</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <strong class="text-emerald-400 block mb-1">2. Cross-Entropy Loss (Log Loss)</strong>
+                <p class="font-mono text-slate-300 mb-2">$$J(\mathbf{W}, \mathbf{b}) = -\frac{1}{n}\sum_{i=1}^n \sum_{k=1}^K y_k^{(i)} \log \hat{y}_k^{(i)}$$</p>
+                <p class="text-slate-400">Derived from Maximum Likelihood Estimation (MLE). When combined with Softmax, the loss surface is strictly convex and gradients are proportional to linear error $(\hat{y}_k - y_k)$, preventing training slowdown!</p>
+              </div>
+            </div>
+
+            <div class="p-3 bg-indigo-950/40 border border-indigo-800/60 rounded-xl text-xs text-slate-300">
+              <strong class="text-indigo-300 block mb-1">Why Cross-Entropy Beats MSE for Classification:</strong>
+              If a sigmoid neuron is severely wrong ($\hat{y} \approx 0$ when $y = 1$), $\sigma'(z) \approx 0$. In MSE, gradient $\frac{\partial J}{\partial w} = (\hat{y} - y)\sigma'(z)x \approx 0$, so the neuron learns virtually nothing! In Cross-Entropy, the $\sigma'(z)$ term cancels out exactly, leaving $\frac{\partial J}{\partial z} = \hat{y} - y$, driving immediate fast updates.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 8: Gradient Descent Variants -->
+      <div class="card-container" id="card-8">
+        <div class="card">
+          <div class="card-tag">Section 3: Optimization & Training • Card 9 of 18</div>
+          <h2 class="card-header">Gradient Descent Variants: Batch, Stochastic & Mini-Batch</h2>
+          <div class="card-body">
+            <p>Neural networks optimize weights by stepping in the direction opposite to the cost gradient: $\mathbf{w} \leftarrow \mathbf{w} - \eta \nabla_\mathbf{w} J(\mathbf{w})$.</p>
+
+            <div class="space-y-3 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-400 block mb-1">1. Batch Gradient Descent (BGD)</strong>
+                <p class="text-slate-300">Computes gradient over all $N$ training examples before updating weights once.</p>
+                <p class="text-slate-400"><em>Pros:</em> Stable convergence to minimum. <em>Cons:</em> Extremely slow for big datasets; cannot fit in GPU RAM.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-pink-400 block mb-1">2. Stochastic Gradient Descent (SGD)</strong>
+                <p class="text-slate-300">Updates weights after evaluating every single individual example $(x^{(i)}, y^{(i)})$.</p>
+                <p class="text-slate-400"><em>Pros:</em> Fast updates; noisy path helps escape shallow local minima. <em>Cons:</em> Highly oscillatory, never settles smoothly at minimum.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-1">3. Mini-Batch Gradient Descent (Standard Practice)</strong>
+                <p class="text-slate-300">Computes gradient on small random batches of size $B \in \{32, 64, 128, 256\}$.</p>
+                <p class="text-slate-400"><em>Pros:</em> Leverages vectorized matrix arithmetic on GPU hardware; robust balance of speed and stability.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 9: Backpropagation Derivation -->
+      <div class="card-container" id="card-9">
+        <div class="card">
+          <div class="card-tag">Section 3: Optimization & Training • Card 10 of 18</div>
+          <h2 class="card-header">The Backpropagation Algorithm: Detailed Derivation</h2>
+          <div class="card-body">
+            <p>Backpropagation (Rumelhart, Hinton & Williams 1986) applies the <strong>multivariate Chain Rule of Calculus</strong> to calculate the exact partial derivative $\frac{\partial E}{\partial w_{ij}}$ for every weight in the network.</p>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-3 text-xs space-y-3">
+              <div>
+                <strong class="text-indigo-400 block mb-1">Step 1: Gradient for Output Layer Weights ($w_{jk}$ connecting hidden node $j$ to output $k$)</strong>
+                <p class="font-mono text-slate-300">$$\frac{\partial E}{\partial w_{jk}} = \frac{\partial E}{\partial y_k} \cdot \frac{\partial y_k}{\partial z_k} \cdot \frac{\partial z_k}{\partial w_{jk}}$$</p>
+                <p class="text-slate-400">Since $z_k = \sum_j w_{jk} a_j + b_k$, we have $\frac{\partial z_k}{\partial w_{jk}} = a_j$. Defining output error $\delta_k \equiv \frac{\partial E}{\partial z_k} = \frac{\partial E}{\partial y_k} \sigma'(z_k)$:</p>
+                <p class="font-mono text-indigo-300">$$\frac{\partial E}{\partial w_{jk}} = \delta_k \cdot a_j$$</p>
+              </div>
+
+              <div class="border-t border-slate-800 pt-2">
+                <strong class="text-sky-400 block mb-1">Step 2: Gradient for Hidden Layer Weights ($w_{ij}$ connecting input $i$ to hidden node $j$)</strong>
+                <p class="font-mono text-slate-300">$$\frac{\partial E}{\partial w_{ij}} = \frac{\partial E}{\partial z_j} \cdot \frac{\partial z_j}{\partial w_{ij}} = \delta_j \cdot x_i$$</p>
+                <p class="text-slate-400">Where hidden node error $\delta_j$ backpropagates errors from all connected output nodes $k$:</p>
+                <p class="font-mono text-sky-300">$$\delta_j = \left( \sum_{k \in \text{outputs}} \delta_k w_{jk} \right) \cdot \sigma'(z_j)$$</p>
+              </div>
+
+              <div class="border-t border-slate-800 pt-2">
+                <strong class="text-emerald-400 block mb-1">Step 3: Weight and Bias Parameter Updates</strong>
+                <p class="font-mono text-emerald-300">$$w \leftarrow w - \eta \frac{\partial E}{\partial w}, \quad b \leftarrow b - \eta \delta$$</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 10: Step-by-Step Worked Numerical Example -->
+      <div class="card-container" id="card-10">
+        <div class="card">
+          <div class="card-tag">Section 3: Optimization & Training • Card 11 of 18</div>
+          <h2 class="card-header">Step-by-Step Worked Numerical Example (Textbook §10.1 Walkthrough)</h2>
+          <div class="card-body">
+            <p class="text-amber-300 font-semibold mb-2">⭐ High Probability Endsem Numerical Question</p>
+            <p>Consider a 2-input, 2-hidden, 2-output feedforward network with sigmoid activations ($\eta = 0.5$):</p>
+            <ul class="text-xs space-y-1 text-slate-300 mb-3">
+              <li>Inputs: $x_1 = 0.05, x_2 = 0.10$. Biases: $b_1 = 0.35, b_2 = 0.60$.</li>
+              <li>Input-to-hidden weights: $w_1 = 0.15, w_2 = 0.20, w_3 = 0.25, w_4 = 0.30$.</li>
+              <li>Hidden-to-output weights: $w_5 = 0.40, w_6 = 0.45, w_7 = 0.50, w_8 = 0.55$.</li>
+              <li>Target outputs: $t_1 = 0.01, t_2 = 0.99$.</li>
+            </ul>
+
+            <div class="space-y-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-indigo-400 block mb-1">Phase 1: Forward Pass</strong>
+                <p class="font-mono text-slate-300">$z_{h1} = w_1 x_1 + w_2 x_2 + b_1 = 0.15(0.05) + 0.20(0.10) + 0.35 = 0.3775$</p>
+                <p class="font-mono text-slate-300">$a_{h1} = \sigma(0.3775) = \frac{1}{1 + e^{-0.3775}} \approx \mathbf{0.59326999}$</p>
+                <p class="font-mono text-slate-300">$z_{h2} = w_3 x_1 + w_4 x_2 + b_1 = 0.25(0.05) + 0.30(0.10) + 0.35 = 0.3925 \implies a_{h2} \approx \mathbf{0.59688438}$</p>
+                <p class="font-mono text-slate-300 mt-1">$z_{o1} = w_5 a_{h1} + w_6 a_{h2} + b_2 = 0.4(0.59327) + 0.45(0.59688) + 0.6 = 1.1059 \implies a_{o1} \approx \mathbf{0.75136507}$</p>
+                <p class="font-mono text-slate-300">$z_{o2} = w_7 a_{h1} + w_8 a_{h2} + b_2 = 0.5(0.59327) + 0.55(0.59688) + 0.6 = 1.2249 \implies a_{o2} \approx \mathbf{0.77292847}$</p>
+                <p class="font-mono text-pink-400 mt-1">Total Error: $E_{\text{total}} = \frac{1}{2}(t_1 - a_{o1})^2 + \frac{1}{2}(t_2 - a_{o2})^2 = 0.27481 + 0.02356 = \mathbf{0.29837111}$</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-400 block mb-1">Phase 2: Backward Pass for Output Weight $w_5$</strong>
+                <p class="font-mono text-slate-300">$\delta_{o1} = \frac{\partial E}{\partial z_{o1}} = (a_{o1} - t_1) \cdot a_{o1}(1 - a_{o1}) = (0.75137 - 0.01) \cdot 0.75137(1 - 0.75137) = \mathbf{0.13849856}$</p>
+                <p class="font-mono text-slate-300">$\frac{\partial E}{\partial w_5} = \delta_{o1} \cdot a_{h1} = 0.13849856 \cdot 0.59326999 = \mathbf{0.08216704}$</p>
+                <p class="font-mono text-emerald-300 font-bold mt-1">Updated $w_5^+ = w_5 - \eta \frac{\partial E}{\partial w_5} = 0.40 - 0.5(0.08216704) = \mathbf{0.35891648}$</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-amber-400 block mb-1">Phase 3: Backward Pass for Hidden Weight $w_1$</strong>
+                <p class="font-mono text-slate-300">$\delta_{o2} = (a_{o2} - t_2) a_{o2}(1 - a_{o2}) = (0.77293 - 0.99) \cdot 0.77293(0.22707) = \mathbf{-0.03809824}$</p>
+                <p class="font-mono text-slate-300">$\delta_{h1} = (\delta_{o1} w_5 + \delta_{o2} w_7) \cdot a_{h1}(1 - a_{h1}) = (0.1385(0.4) + (-0.0381)(0.5)) \cdot 0.59327(0.40673) = \mathbf{0.0087714}$</p>
+                <p class="font-mono text-slate-300">$\frac{\partial E}{\partial w_1} = \delta_{h1} \cdot x_1 = 0.0087714 \cdot 0.05 = \mathbf{0.00043857}$</p>
+                <p class="font-mono text-emerald-300 font-bold mt-1">Updated $w_1^+ = w_1 - \eta \frac{\partial E}{\partial w_1} = 0.15 - 0.5(0.00043857) = \mathbf{0.14978071}$</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 11: Learning Rate & Dynamics -->
+      <div class="card-container" id="card-11">
+        <div class="card">
+          <div class="card-tag">Section 3: Optimization & Training • Card 12 of 18</div>
+          <h2 class="card-header">Learning Rate $\eta$, Momentum & Convergence Dynamics</h2>
+          <div class="card-body">
+            <p>The learning rate $\eta$ is the single most critical hyperparameter in neural network training:</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-rose-400 block mb-1">Too Large ($\eta > 1.0$)</strong>
+                <p class="text-slate-300">Overshoots valleys, oscillates wildly, and eventually causes the cost function to diverge ($J \to \infty$ or NaN).</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-amber-400 block mb-1">Too Small ($\eta < 0.0001$)</strong>
+                <p class="text-slate-300">Extremely slow progress. High risk of getting permanently trapped in shallow local minima or saddle points.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-1">Optimal or Decaying</strong>
+                <p class="text-slate-300">Starts with moderate $\eta$ to explore, then decays $\eta_t = \frac{\eta_0}{1 + kt}$ to settle into sharp global minima.</p>
+              </div>
+            </div>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-2 text-xs">
+              <strong class="text-indigo-400 block mb-1">Momentum Acceleration ($\alpha$ or $\beta \approx 0.9$):</strong>
+              <p class="text-slate-300 mb-2">Incorporates previous weight change velocity like a heavy ball rolling down a hilly terrain:</p>
+              <div class="font-mono text-slate-300">$$\Delta \mathbf{w}_t = \alpha \Delta \mathbf{w}_{t-1} - \eta \nabla J(\mathbf{w}_t)$$</div>
+              <p class="text-slate-400 mt-1">Dampens oscillations across steep ravines and accelerates motion along flat plateaus.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 12: Overfitting & Regularization -->
+      <div class="card-container" id="card-12">
+        <div class="card">
+          <div class="card-tag">Section 4: Generalization & Deep Nets • Card 13 of 18</div>
+          <h2 class="card-header">Overfitting & Regularization Strategies</h2>
+          <div class="card-body">
+            <p>Deep neural networks have millions of parameters and can easily memorize noisy training data, leading to severe generalization failure (high variance).</p>
+
+            <div class="space-y-3 my-3 text-xs">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-indigo-400 block mb-0.5">1. L2 Weight Decay (Ridge Regularization)</strong>
+                <p class="font-mono text-slate-300 mb-1">$$J_{\text{reg}}(\mathbf{w}) = J(\mathbf{w}) + \frac{\lambda}{2} \sum w_i^2 \implies \mathbf{w} \leftarrow (1 - \eta \lambda)\mathbf{w} - \eta \nabla J$$</p>
+                <p class="text-slate-400">Penalizes large weights, favoring smoother decision boundaries that do not react excessively to single outliers.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-400 block mb-0.5">2. Dropout (Srivastava et al. 2014)</strong>
+                <p class="text-slate-300">During each training forward pass, randomly deactivate a fraction $p$ (e.g., 50%) of hidden units.</p>
+                <p class="text-slate-400">Prevents co-adaptation of features. Effectively trains an ensemble of $2^N$ thinned subnetworks!</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-0.5">3. Early Stopping</strong>
+                <p class="text-slate-300">Monitor validation error at every epoch. Save network weights when validation loss hits minimum; halt when validation loss starts rising for $E$ consecutive patience epochs.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 13: Vanishing Gradients -->
+      <div class="card-container" id="card-13">
+        <div class="card">
+          <div class="card-tag">Section 4: Generalization & Deep Nets • Card 14 of 18</div>
+          <h2 class="card-header">Vanishing & Exploding Gradients in Deep Architectures</h2>
+          <div class="card-body">
+            <p>In deep networks with $L$ layers, backpropagation multiplies derivatives across all consecutive layers: $\frac{\partial E}{\partial z_1} = \frac{\partial E}{\partial z_L} \prod_{l=1}^{L-1} \mathbf{W}^{[l+1]} \sigma'(z_l)$.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-3 text-xs">
+              <div class="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl">
+                <strong class="text-rose-400 block mb-1">The Vanishing Gradient Problem</strong>
+                <p class="text-slate-300 mb-2">When using Sigmoid ($\max \sigma'=0.25$) or Tanh ($\max \tanh'=1$), repeated multiplication of numbers $< 1$ causes gradients in early layers to decay exponentially ($0.25^{10} \approx 9.5 \times 10^{-7}$).</p>
+                <p class="text-rose-200">Result: Lower layers never learn; network acts like a shallow model.</p>
+              </div>
+
+              <div class="p-3 bg-amber-950/40 border border-amber-800/60 rounded-xl">
+                <strong class="text-amber-400 block mb-1">Architectural Solutions</strong>
+                <ul class="text-slate-300 space-y-1">
+                  <li>• <strong>ReLU Activation:</strong> Gradient is exactly $1.0$ for $z>0$, eliminating decay.</li>
+                  <li>• <strong>He / Xavier Weight Initialization:</strong> Scales initial weights with $\sqrt{2 / n_{\text{in}}}$.</li>
+                  <li>• <strong>Batch Normalization:</strong> Normalizes inputs to zero mean and unit variance per layer.</li>
+                  <li>• <strong>Residual Connections (ResNets):</strong> Skip connections $\mathbf{a}^{[l+2]} = g(\mathbf{z}^{[l+2]} + \mathbf{a}^{[l]})$ let gradients flow unhindered.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 14: Perceptron vs SVM vs Logistic Regression vs MLP -->
+      <div class="card-container" id="card-14">
+        <div class="card">
+          <div class="card-tag">Section 4: Generalization & Deep Nets • Card 15 of 18</div>
+          <h2 class="card-header">Perceptron vs Logistic Regression vs SVM vs MLP</h2>
+          <div class="card-body">
+            <p>A classic multi-chapter exam synthesis question compares linear classifiers with deep neural networks:</p>
+
+            <div class="overflow-x-auto my-3">
+              <table class="w-full text-xs text-left border border-slate-800">
+                <thead class="bg-slate-900 text-slate-300 font-bold border-b border-slate-800">
+                  <tr>
+                    <th class="p-2.5">Model</th>
+                    <th class="p-2.5">Boundary Type</th>
+                    <th class="p-2.5">Loss Function</th>
+                    <th class="p-2.5">Uniqueness & Optimization</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 text-slate-300">
+                  <tr>
+                    <td class="p-2.5 font-bold text-sky-400">Single Perceptron</td>
+                    <td class="p-2.5">Linear Hyperplane</td>
+                    <td class="p-2.5">Perceptron Loss $(\max(0, -t \cdot z))$</td>
+                    <td class="p-2.5">Non-unique boundary; depends heavily on sample presentation order!</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2.5 font-bold text-indigo-400">Logistic Regression</td>
+                    <td class="p-2.5">Linear Hyperplane</td>
+                    <td class="p-2.5">Log Loss (Cross-Entropy)</td>
+                    <td class="p-2.5">Unique solution via maximum likelihood; yields calibrated probabilities.</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2.5 font-bold text-emerald-400">Linear SVM</td>
+                    <td class="p-2.5">Maximum Margin Hyperplane (MMH)</td>
+                    <td class="p-2.5">Hinge Loss $(\max(0, 1 - y \cdot z))$</td>
+                    <td class="p-2.5">Globally optimal & unique; determined solely by <em>support vectors</em>.</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2.5 font-bold text-purple-400">Multi-Layer Perceptron (MLP)</td>
+                    <td class="p-2.5">Arbitrary Non-Linear Manifold</td>
+                    <td class="p-2.5">Cross-Entropy or MSE</td>
+                    <td class="p-2.5">Non-convex optimization; finds high-quality local minima via SGD.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 15: Interactive Perceptron Sandbox -->
+      <div class="card-container" id="card-15">
+        <div class="card">
+          <div class="card-tag">Section 5: Interactive Lab • Card 16 of 18</div>
+          <h2 class="card-header">Interactive 2-Input Perceptron & Decision Boundary</h2>
+          <div class="card-body">
+            <p class="text-xs text-slate-400 mb-3">Adjust weights $w_1, w_2$ and bias $b$ to see the decision line $w_1 x_1 + w_2 x_2 + b = 0$ classify 2D data points in real time.</p>
+
+            <div class="interactive-box">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3 text-xs">
+                <div>
+                  <label class="block text-slate-400 mb-1">Weight $w_1$: <span id="w1-val" class="text-indigo-400 font-mono font-bold">1.20</span></label>
+                  <input type="range" id="w1-slider" min="-3" max="3" step="0.1" value="1.2" class="w-full" oninput="updatePerceptron()"/>
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Weight $w_2$: <span id="w2-val" class="text-sky-400 font-mono font-bold">-0.80</span></label>
+                  <input type="range" id="w2-slider" min="-3" max="3" step="0.1" value="-0.8" class="w-full" oninput="updatePerceptron()"/>
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Bias $b$: <span id="b-val" class="text-pink-400 font-mono font-bold">0.10</span></label>
+                  <input type="range" id="b-slider" min="-3" max="3" step="0.1" value="0.1" class="w-full" oninput="updatePerceptron()"/>
+                </div>
+              </div>
+
+              <div class="flex gap-2 mb-3">
+                <button class="btn-primary text-xs py-1" onclick="autoTrainPerceptron()">Auto Train (SGD 10 Steps)</button>
+                <button class="btn-secondary text-xs py-1" onclick="resetPerceptronPoints()">New Random Dataset</button>
+              </div>
+
+              <canvas id="percepCanvas" width="560" height="260" class="w-full"></canvas>
+
+              <div class="flex justify-between items-center mt-3 text-xs font-mono">
+                <span class="text-slate-400">Classification Accuracy: <span id="percepAccuracy" class="text-emerald-400 font-bold">0%</span></span>
+                <span class="text-slate-400">Formula: <span id="percepFormula" class="text-indigo-300">1.20 x₁ + -0.80 x₂ + 0.10 = 0</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 16: Active Recall Flashcards -->
+      <div class="card-container" id="card-16">
+        <div class="card">
+          <div class="card-tag">Section 5: Interactive Lab • Card 17 of 18</div>
+          <h2 class="card-header">Active Recall Flashcards: Key Deep Learning Concepts</h2>
+          <div class="card-body">
+            <p class="text-xs text-slate-400 mb-3">Click on any card to flip and verify your understanding before the Endsem.</p>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front">
+                  <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">Concept 1</span>
+                  <h3 class="text-lg font-bold">Why did Minsky & Papert claim perceptrons cannot learn XOR?</h3>
+                  <span class="text-xs text-slate-500 mt-4">Click to reveal answer ↻</span>
+                </div>
+                <div class="flip-card-back">
+                  <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2">Answer</span>
+                  <p class="text-xs leading-relaxed">A single perceptron forms only a single linear hyperplane. In XOR, points $(0,1)$ and $(1,0)$ (class 1) lie on the opposite diagonal of $(0,0)$ and $(1,1)$ (class 0). No single line can separate them. An MLP with at least one hidden layer is required to fold the feature space.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front">
+                  <span class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2">Concept 2</span>
+                  <h3 class="text-lg font-bold">What is the exact Backpropagation error term $\delta_k$ at the output layer?</h3>
+                  <span class="text-xs text-slate-500 mt-4">Click to reveal answer ↻</span>
+                </div>
+                <div class="flip-card-back">
+                  <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2">Answer</span>
+                  <p class="text-xs leading-relaxed">$\delta_k = \frac{\partial E}{\partial z_k} = \frac{\partial E}{\partial y_k} \sigma'(z_k)$. For Squared Error Loss $E = \frac{1}{2}(t_k - y_k)^2$, $\frac{\partial E}{\partial y_k} = (y_k - t_k)$. For Sigmoid activation, $\sigma'(z_k) = y_k(1 - y_k)$. Hence $\delta_k = (y_k - t_k) y_k (1 - y_k)$.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front">
+                  <span class="text-xs font-bold text-pink-400 uppercase tracking-wider mb-2">Concept 3</span>
+                  <h3 class="text-lg font-bold">Why does ReLU solve vanishing gradients while Sigmoid fails?</h3>
+                  <span class="text-xs text-slate-500 mt-4">Click to reveal answer ↻</span>
+                </div>
+                <div class="flip-card-back">
+                  <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2">Answer</span>
+                  <p class="text-xs leading-relaxed">Sigmoid's derivative $\sigma'(z)$ has a maximum value of $0.25$ at $z=0$, and rapidly approaches $0$ as $|z|$ grows. In deep networks, multiplying numbers $\le 0.25$ layer-by-layer causes gradients to decay exponentially to $0$. In contrast, $\text{ReLU}'(z) = 1.0$ for all $z > 0$, propagating gradients unchanged regardless of depth.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 17: Endsem Review Quiz -->
+      <div class="card-container" id="card-17">
+        <div class="card">
+          <div class="card-tag">Section 5: Interactive Lab • Card 18 of 18</div>
+          <h2 class="card-header">Endsem Self-Assessment Quiz (Han §10.1)</h2>
+          <div class="card-body">
+            <p class="text-xs text-slate-400 mb-4">Answer all questions to test your Endsem exam readiness.</p>
+
+            <form id="dl-quiz-form" class="space-y-4 text-xs" onsubmit="event.preventDefault(); checkDLQuiz();">
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <p class="font-bold text-slate-200 mb-2">1. In an MLP with 4 input nodes, 3 hidden nodes, and 2 output nodes, what is the total number of trainable weights and biases?</p>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq1" value="a" class="mr-2"/> 17</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq1" value="b" class="mr-2"/> 23 (Weights: 4×3 + 3×2 = 18; Biases: 3 + 2 = 5; Total = 23)</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq1" value="c" class="mr-2"/> 24</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq1" value="d" class="mr-2"/> 18</label>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <p class="font-bold text-slate-200 mb-2">2. What is the derivative of the Logistic Sigmoid function $\sigma(z) = \frac{1}{1 + e^{-z}}$?</p>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq2" value="a" class="mr-2"/> $1 - \sigma(z)^2$</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq2" value="b" class="mr-2"/> $\sigma(z) (1 - \sigma(z))$</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq2" value="c" class="mr-2"/> $e^{-z} / (1 + e^{-z})$</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq2" value="d" class="mr-2"/> $\max(0, z)$</label>
+              </div>
+
+              <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
+                <p class="font-bold text-slate-200 mb-2">3. How does error backpropagation compute the error term $\delta_j$ for a hidden node $j$?</p>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq3" value="a" class="mr-2"/> $\delta_j = (t_j - y_j) \cdot x_j$</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq3" value="b" class="mr-2"/> $\delta_j = \left( \sum_k \delta_k w_{jk} \right) \cdot \sigma'(z_j)$</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq3" value="c" class="mr-2"/> $\delta_j = \frac{1}{2} \sum_k (t_k - y_k)^2$</label>
+                <label class="block py-1 cursor-pointer"><input type="radio" name="dlq3" value="d" class="mr-2"/> $\delta_j = \eta \cdot \delta_k$</label>
+              </div>
+
+              <button type="submit" class="btn-primary w-full py-2">Submit Quiz & Check Score</button>
+            </form>
+
+            <div id="dl-quiz-result" class="hidden text-center p-3 rounded-lg font-bold text-xs mt-3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM NAVIGATION BAR -->
+      <div class="max-w-[840px] mx-auto flex items-center justify-between pt-4 pb-12">
+        <button id="prev-btn" class="btn-secondary" onclick="prevCard()" disabled>← Previous</button>
+        <span class="text-xs text-slate-500 font-mono" id="card-counter">1 / 18</span>
+        <button id="next-btn" class="btn-primary" onclick="nextCard()">Next →</button>
+      </div>
+
+    </main>
+  </div>
+
+  <div id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    let currentCard = 0;
+    const totalCards = 18;
+
+    function goToCard(idx) {
+      if (idx < 0 || idx >= totalCards) return;
+      document.querySelectorAll('.card-container').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById('card-' + idx);
+      if (target) target.classList.add('active');
+
+      document.querySelectorAll('.sidebar-item').forEach((item, i) => {
+        if (i === idx) item.classList.add('active');
+        else item.classList.remove('active');
+      });
+
+      currentCard = idx;
+      document.getElementById('progress-bar').style.width = ((idx + 1) / totalCards * 100) + '%';
+      document.getElementById('progress-text').innerText = `Card ${idx + 1} / ${totalCards}`;
+      document.getElementById('card-counter').innerText = `${idx + 1} / ${totalCards}`;
+
+      document.getElementById('prev-btn').disabled = (idx === 0);
+      document.getElementById('next-btn').innerText = (idx === totalCards - 1) ? 'Finish' : 'Next →';
+
+      if (idx === 15) updatePerceptron();
+
+      document.getElementById('main').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextCard() { if (currentCard < totalCards - 1) goToCard(currentCard + 1); }
+    function prevCard() { if (currentCard > 0) goToCard(currentCard - 1); }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextCard();
+      if (e.key === 'ArrowLeft') prevCard();
+    });
+
+    // Mobile Sidebar
+    function toggleMobileSidebar() {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+      document.getElementById('sidebar-backdrop').classList.toggle('mobile-open');
+    }
+
+    // Pomodoro Timer
+    let timerSeconds = 15 * 60;
+    let timerRunning = false;
+    let timerInterval = null;
+
+    function toggleTimer() {
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+      } else {
+        timerRunning = true;
+        timerInterval = setInterval(() => {
+          if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            alert('Study sprint complete! Take a 5-minute breather.');
+            return;
+          }
+          timerSeconds--;
+          const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+          const s = String(timerSeconds % 60).padStart(2, '0');
+          document.getElementById('timer').innerText = `${m}:${s}`;
+        }, 1000);
+      }
+    }
+
+    // ── PERCEPTRON SIMULATOR ──
+    let dataset = [];
+
+    function resetPerceptronPoints() {
+      dataset = [];
+      // 10 points for class +1 around (1.2, 1.2)
+      for (let i = 0; i < 10; i++) {
+        dataset.push({
+          x: 0.8 + Math.random() * 1.6,
+          y: 0.8 + Math.random() * 1.6,
+          label: 1
+        });
+      }
+      // 10 points for class -1 around (-1.2, -1.2)
+      for (let i = 0; i < 10; i++) {
+        dataset.push({
+          x: -2.4 + Math.random() * 1.6,
+          y: -2.4 + Math.random() * 1.6,
+          label: -1
+        });
+      }
+      updatePerceptron();
+    }
+
+    function updatePerceptron() {
+      const w1 = parseFloat(document.getElementById('w1-slider').value);
+      const w2 = parseFloat(document.getElementById('w2-slider').value);
+      const b = parseFloat(document.getElementById('b-slider').value);
+
+      document.getElementById('w1-val').innerText = w1.toFixed(2);
+      document.getElementById('w2-val').innerText = w2.toFixed(2);
+      document.getElementById('b-val').innerText = b.toFixed(2);
+
+      const signB = b >= 0 ? `+ ${b.toFixed(2)}` : `- ${Math.abs(b).toFixed(2)}`;
+      document.getElementById('percepFormula').innerText = `${w1.toFixed(2)} x₁ + ${w2.toFixed(2)} x₂ ${signB} = 0`;
+
+      const cvs = document.getElementById('percepCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width, h = cvs.height;
+
+      // Coordinate mapping: [-3, 3] to [0, w], [-3, 3] to [h, 0]
+      const toX = val => ((val + 3) / 6) * w;
+      const toY = val => h - ((val + 3) / 6) * h;
+      const fromX = px => (px / w) * 6 - 3;
+      const fromY = py => ((h - py) / h) * 6 - 3;
+
+      // Draw background decision regions
+      const imgData = ctx.createImageData(w, h);
+      for (let py = 0; py < h; py += 3) {
+        const yCoord = fromY(py);
+        for (let px = 0; px < w; px += 3) {
+          const xCoord = fromX(px);
+          const z = w1 * xCoord + w2 * yCoord + b;
+          const isPos = z >= 0;
+
+          const r = isPos ? 30 : 20;
+          const g = isPos ? 40 : 20;
+          const bVal = isPos ? 80 : 45;
+
+          for (let dy = 0; dy < 3 && py + dy < h; dy++) {
+            for (let dx = 0; dx < 3 && px + dx < w; dx++) {
+              const idx = ((py + dy) * w + (px + dx)) * 4;
+              imgData.data[idx] = r;
+              imgData.data[idx + 1] = g;
+              imgData.data[idx + 2] = bVal;
+              imgData.data[idx + 3] = 255;
+            }
+          }
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      // Draw Grid Axes
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(toX(-3), toY(0)); ctx.lineTo(toX(3), toY(0));
+      ctx.moveTo(toX(0), toY(-3)); ctx.lineTo(toX(0), toY(3));
+      ctx.stroke();
+
+      // Draw Decision Boundary Line: w1*x + w2*y + b = 0 => y = -(w1*x + b) / w2
+      if (Math.abs(w2) > 0.001) {
+        const xA = -3, yA = -(w1 * xA + b) / w2;
+        const xB = 3, yB = -(w1 * xB + b) / w2;
+        ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(toX(xA), toY(yA));
+        ctx.lineTo(toX(xB), toY(yB));
+        ctx.stroke();
+      }
+
+      // Draw Points & Calculate Accuracy
+      let correct = 0;
+      dataset.forEach(pt => {
+        const pred = (w1 * pt.x + w2 * pt.y + b >= 0) ? 1 : -1;
+        const isRight = (pred === pt.label);
+        if (isRight) correct++;
+
+        ctx.fillStyle = pt.label === 1 ? '#38bdf8' : '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(toX(pt.x), toY(pt.y), 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = isRight ? '#10b981' : '#fbbf24';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+
+      const acc = dataset.length > 0 ? ((correct / dataset.length) * 100).toFixed(0) : 0;
+      const accEl = document.getElementById('percepAccuracy');
+      if (accEl) {
+        accEl.innerText = `${acc}% (${correct}/${dataset.length})`;
+        accEl.className = acc == 100 ? 'text-emerald-400 font-bold' : (acc >= 75 ? 'text-amber-400 font-bold' : 'text-rose-400 font-bold');
+      }
+    }
+
+    function autoTrainPerceptron() {
+      let w1 = parseFloat(document.getElementById('w1-slider').value);
+      let w2 = parseFloat(document.getElementById('w2-slider').value);
+      let b = parseFloat(document.getElementById('b-slider').value);
+      const lr = 0.15;
+
+      for (let epoch = 0; epoch < 10; epoch++) {
+        dataset.forEach(pt => {
+          const z = w1 * pt.x + w2 * pt.y + b;
+          const pred = z >= 0 ? 1 : -1;
+          if (pred !== pt.label) {
+            const err = pt.label - pred; // +2 or -2
+            w1 += lr * err * pt.x;
+            w2 += lr * err * pt.y;
+            b += lr * err;
+          }
+        });
+      }
+
+      // Clamp values to slider limits
+      w1 = Math.max(-3, Math.min(3, w1));
+      w2 = Math.max(-3, Math.min(3, w2));
+      b = Math.max(-3, Math.min(3, b));
+
+      document.getElementById('w1-slider').value = w1;
+      document.getElementById('w2-slider').value = w2;
+      document.getElementById('b-slider').value = b;
+      updatePerceptron();
+    }
+
+    // ── QUIZ CHECKER ──
+    function checkDLQuiz() {
+      const q1 = document.querySelector('input[name="dlq1"]:checked');
+      const q2 = document.querySelector('input[name="dlq2"]:checked');
+      const q3 = document.querySelector('input[name="dlq3"]:checked');
+
+      const res = document.getElementById('dl-quiz-result');
+      res.classList.remove('hidden');
+
+      if (!q1 || !q2 || !q3) {
+        res.className = 'text-center p-3 rounded-lg font-bold text-xs mt-2 bg-amber-950/60 border border-amber-800 text-amber-200';
+        res.innerText = 'Please answer all questions before submitting!';
+        return;
+      }
+
+      let score = 0;
+      if (q1.value === 'b') score++;
+      if (q2.value === 'b') score++;
+      if (q3.value === 'b') score++;
+
+      if (score === 3) {
+        res.className = 'text-center p-3 rounded-lg font-bold text-xs mt-2 bg-emerald-950/60 border border-emerald-800 text-emerald-200';
+        res.innerHTML = `3/3 Correct! You have thoroughly mastered Deep Learning Section 10.1 essentials!`;
+      } else {
+        res.className = 'text-center p-3 rounded-lg font-bold text-xs mt-2 bg-rose-950/60 border border-rose-800 text-rose-200';
+        res.innerHTML = `Score: ${score}/3. Review Q1 (total weight & bias counts), Q2 (sigmoid derivative), or Q3 (hidden error backpropagation).`;
+      }
+    }
+
+    // Initialize on load
+    window.onload = function() {
+      resetPerceptronPoints();
+    };
+  </script>
+</body>
+</html>

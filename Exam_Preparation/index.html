@@ -438,6 +438,16 @@
 
               </p>
 
+              <div class="flex flex-wrap items-center gap-3 pt-1 border-t border-white/5">
+
+                <a href="../Study_Material/11_deep_learning.html" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">Module 11: Deep Learning Lesson &rarr;</a>
+
+                <span class="text-slate-600">&bull;</span>
+
+                <a href="../Study_Material/12_outlier_analysis_trends.html" class="text-xs text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1">Module 12: Outliers & Trends Lesson &rarr;</a>
+
+              </div>
+
             </div>
 
           </div>
@@ -1199,6 +1209,135 @@
                 $$P_{Laplace}(a_3|C_1) = \frac{0 + 1}{70 + 3} = \frac{\mathbf{1}}{\mathbf{73}} \approx \mathbf{0.0137}$$
 
                 Notice the sum remains valid: $\frac{51+21+1}{73} = \frac{73}{73} = 1.0$. Zero-probability trap is completely eliminated.
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    
+          <!-- TOPIC 9 MANDATED WORKED EXAMPLE: Deep Learning Forward & Backprop (Han §10.1) -->
+
+          <div class="p-4 rounded bg-slate-900/80 border border-white/10 space-y-3" data-chapter="6">
+
+            <div class="flex items-center justify-between">
+
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-white/10">Topic 9 Mandated Example: Han §10.1</span>
+
+              <span class="text-xs text-slate-400">Deep Learning Backpropagation</span>
+
+            </div>
+
+            <div class="text-xs text-slate-300 leading-relaxed">
+
+              <strong>Problem:</strong> Given a feedforward network with 2 inputs ($x_1=0.05, x_2=0.10$), 2 hidden nodes ($h_1, h_2$ with bias $b_1=0.35$), and 2 output nodes ($o_1, o_2$ with bias $b_2=0.60$) using sigmoid activations $\sigma(z) = \frac{1}{1+e^{-z}}$. Initial weights are $w_1=0.15, w_2=0.20, w_3=0.25, w_4=0.30, w_5=0.40, w_6=0.45, w_7=0.50, w_8=0.55$. Target outputs are $t_1=0.01, t_2=0.99$, and learning rate $\eta=0.5$. Calculate the forward pass outputs, total error, and the backpropagation updates for output weight $w_5$ and hidden weight $w_1$.
+
+            </div>
+
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+
+              <p><strong>Step-by-Step Numerical Walkthrough:</strong></p>
+
+              <div>
+
+                <strong>1. Forward Propagation:</strong><br/>
+
+                $$z_{h1} = 0.15(0.05) + 0.20(0.10) + 0.35 = 0.3775 \implies a_{h1} = \sigma(0.3775) \approx \mathbf{0.59327}$$
+
+                $$z_{h2} = 0.25(0.05) + 0.30(0.10) + 0.35 = 0.3925 \implies a_{h2} = \sigma(0.3925) \approx \mathbf{0.59688}$$
+
+                $$z_{o1} = 0.40(0.59327) + 0.45(0.59688) + 0.60 = 1.1059 \implies a_{o1} \approx \mathbf{0.75137}$$
+
+                $$z_{o2} = 0.50(0.59327) + 0.55(0.59688) + 0.60 = 1.2249 \implies a_{o2} \approx \mathbf{0.77293}$$
+
+                $$E_{\text{total}} = \frac{1}{2}(0.01 - 0.75137)^2 + \frac{1}{2}(0.99 - 0.77293)^2 = 0.27481 + 0.02356 = \mathbf{0.29837}$$
+
+              </div>
+
+              <div>
+
+                <strong>2. Backpropagation for Output Weight $w_5$:</strong><br/>
+
+                $$\delta_{o1} = (a_{o1} - t_1) \cdot a_{o1}(1 - a_{o1}) = (0.75137 - 0.01) \cdot 0.75137(0.24863) \approx \mathbf{0.13850}$$
+
+                $$\frac{\partial E}{\partial w_5} = \delta_{o1} \cdot a_{h1} = 0.13850 \cdot 0.59327 \approx \mathbf{0.08217}$$
+
+                $$w_5^+ = w_5 - \eta \frac{\partial E}{\partial w_5} = 0.40 - 0.5(0.08217) = \mathbf{0.35892}$$
+
+              </div>
+
+              <div>
+
+                <strong>3. Backpropagation for Hidden Weight $w_1$:</strong><br/>
+
+                $$\delta_{o2} = (0.77293 - 0.99) \cdot 0.77293(0.22707) \approx -0.03810$$
+
+                $$\delta_{h1} = (\delta_{o1} w_5 + \delta_{o2} w_7) \cdot a_{h1}(1 - a_{h1}) = (0.13850(0.40) + (-0.03810)(0.50)) \cdot 0.59327(0.40673) \approx \mathbf{0.00877}$$
+
+                $$\frac{\partial E}{\partial w_1} = \delta_{h1} \cdot x_1 = 0.00877 \cdot 0.05 \approx \mathbf{0.000439}$$
+
+                $$w_1^+ = w_1 - \eta \frac{\partial E}{\partial w_1} = 0.15 - 0.5(0.000439) = \mathbf{0.14978}$$
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- TOPIC 10 MANDATED WORKED EXAMPLE: Local Outlier Factor (LOF) Calculation -->
+
+          <div class="p-4 rounded bg-slate-900/80 border border-white/10 space-y-3" data-chapter="8">
+
+            <div class="flex items-center justify-between">
+
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-white/10">Topic 10 Mandated Example: Outliers (PPTs)</span>
+
+              <span class="text-xs text-slate-400">Local Outlier Factor (LOF)</span>
+
+            </div>
+
+            <div class="text-xs text-slate-300 leading-relaxed">
+
+              <strong>Problem:</strong> Consider 4 data objects lying on a 1D real coordinate line: $A=0, B=1, C=2, P=6$. Using neighborhood size $k=2$, compute the $2$-distance, reachability distance, local reachability density ($\text{lrd}$), and the final $\text{LOF}_2(P)$. Explain why LOF correctly declares $P$ an outlier while $B$ and $C$ remain inliers.
+
+            </div>
+
+            <div class="text-xs text-slate-400 space-y-2 border-t border-white/5 pt-3">
+
+              <p><strong>Step-by-Step Derivation:</strong></p>
+
+              <div>
+
+                <strong>1. 2-Distances & Neighborhoods:</strong><br/>
+
+                $d_2(A)=2, N_2(A)=\{B,C\}$. $d_2(B)=1, N_2(B)=\{A,C\}$. $d_2(C)=2, N_2(C)=\{B,A\}$. $d_2(P)=5, N_2(P)=\{C,B\}$.
+
+              </div>
+
+              <div>
+
+                <strong>2. Local Reachability Densities ($\text{lrd}_2$):</strong><br/>
+
+                For $B$: $\text{reach-dist}_2(A,B) = \max\{1, 1\} = 1$, $\text{reach-dist}_2(C,B) = \max\{1, 1\} = 1 \implies \text{lrd}_2(B) = \frac{2}{1+1} = \mathbf{1.0}$.<br/>
+
+                For $C$: $\text{reach-dist}_2(B,C) = \max\{2, 1\} = 2$, $\text{reach-dist}_2(A,C) = \max\{2, 2\} = 2 \implies \text{lrd}_2(C) = \frac{2}{2+2} = \mathbf{0.5}$.<br/>
+
+                For $P$: $\text{reach-dist}_2(P,C) = \max\{2, 4\} = 4$, $\text{reach-dist}_2(P,B) = \max\{1, 5\} = 5 \implies \text{lrd}_2(P) = \frac{2}{4+5} = \frac{\mathbf{2}}{\mathbf{9}} \approx \mathbf{0.2222}$.
+
+              </div>
+
+              <div>
+
+                <strong>3. Final Local Outlier Factor $\text{LOF}_2(P)$:</strong><br/>
+
+                $$\text{LOF}_2(P) = \frac{\frac{\text{lrd}_2(C)}{\text{lrd}_2(P)} + \frac{\text{lrd}_2(B)}{\text{lrd}_2(P)}}{2} = \frac{\frac{0.5}{2/9} + \frac{1.0}{2/9}}{2} = \frac{2.25 + 4.5}{2} = \mathbf{3.375}$$
+
+                Because $\text{LOF}_2(P) = 3.375 \gg 1.0$, $P$ has local density over $3\times$ sparser than its surrounding neighbors, unambiguously categorizing it as an outlier.
 
               </div>
 

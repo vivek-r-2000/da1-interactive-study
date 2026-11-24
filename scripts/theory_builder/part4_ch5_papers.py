@@ -139,5 +139,24 @@ part4_html = r"""
             </div>
           </div>
         </div>
+
+        <!-- Textbook Ch 5 Summary -->
+        <details class="surface-card p-4 text-xs">
+          <summary class="font-bold text-amber-300 flex items-center justify-between cursor-pointer">
+            <span>📖 Textbook Chapter 5 Summary (Han §5.7 — Plain-English Walkthrough)</span>
+            <span class="toggle-icon text-amber-400">&rarr;</span>
+          </summary>
+          <div class="mt-3 space-y-2 text-slate-300 border-t border-white/10 pt-2 leading-relaxed">
+            <p class="text-slate-200 font-medium">Chapter 5 goes beyond basic itemsets to map out advanced pattern types, mining constraints, complex structures, and real-world uses. <em>(Endsem focuses on §5.1 Mining Diverse Patterns + 3 mandated papers.)</em></p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><strong>Beyond basic patterns:</strong> Beyond frequent itemsets, you can mine multilevel, multidimensional, quantitative, rare, negative, high-dimensional, compressed, and approximate patterns.</li>
+              <li><strong>Multilevel, multidimensional &amp; quantitative rules [Endsem §5.1]:</strong> Multilevel associations span concept hierarchy levels using multiple minimum support thresholds; multidimensional rules differ in handling repetitive predicates; quantitative rules combine discretization, clustering, and statistics to uncover numeric exceptions.</li>
+              <li><strong>Rare &amp; negative patterns [Endsem §5.1]:</strong> Rare patterns appear infrequently yet carry high value, while negative patterns contain negatively correlated components checked carefully using null-invariance.</li>
+              <li><strong>Constraint-based mining:</strong> User constraints guide search toward useful patterns via pattern-pruning and data-pruning constraints (monotonicity, antimonotonicity, data-antimonotonicity, succinctness).</li>
+              <li><strong>High-dimensional &amp; compressed patterns:</strong> Row-enumeration handles wide datasets with few tuples, Pattern-Fusion mines colossal patterns, clustering builds compressed representative patterns, and top-$k$ mining trims redundancy.</li>
+              <li><strong>Sequential, subgraph &amp; text mining:</strong> Sequential mining (GSP, SPADE, PrefixSpan, CloSpan) finds ordered events; subgraph mining (AGM, FSG, gSpan, CloseGraph) finds frequent graph structures; text and software tools include ToPMine, SegPhrase, AutoPhrase, and CP-Miner.</li>
+            </ul>
+          </div>
+        </details>
       </section>
 """

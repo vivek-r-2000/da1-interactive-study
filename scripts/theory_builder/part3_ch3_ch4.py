@@ -162,6 +162,25 @@ part3_html = r"""
             </div>
           </details>
         </div>
+
+        <!-- Textbook Ch 3 Summary -->
+        <details class="surface-card p-4 text-xs">
+          <summary class="font-bold text-purple-300 flex items-center justify-between cursor-pointer">
+            <span>📖 Textbook Chapter 3 Summary (Han §3.6 — Plain-English Walkthrough)</span>
+            <span class="toggle-icon text-purple-400">&rarr;</span>
+          </summary>
+          <div class="mt-3 space-y-2 text-slate-300 border-t border-white/10 pt-2 leading-relaxed">
+            <p class="text-slate-200 font-medium">Data warehouses, data lakes, and OLAP cubes organize huge multi-source datasets so teams can slice, summarize, and query them fast. <em>(Endsem covers §3.1–3.4 + §3.5.2 BUC.)</em></p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><strong>Data warehouse basics:</strong> A data warehouse is subject-oriented, integrated, time-variant, and nonvolatile for management decision making—kept separate from operational OLTP databases.</li>
+              <li><strong>Architecture, ETL &amp; metadata:</strong> Uses a three-tier architecture (relational warehouse DB server, OLAP server, client tools), back-end ETL/refresh tools, and a metadata repository tracking schemas, lineage, and business terms.</li>
+              <li><strong>Data lakes &amp; storage layers:</strong> A data lake stores raw and transformed enterprise data in its natural format across raw, optional standardized, cleansed, application, and optional sandbox layers.</li>
+              <li><strong>Multidimensional models &amp; cubes:</strong> Modeled via star, snowflake, or fact constellation schemas around a data cube (lattice of cuboids) and concept hierarchies.</li>
+              <li><strong>OLAP servers, measures &amp; operations:</strong> Servers use ROLAP (relational), MOLAP (array-based), or HOLAP (hybrid). Measures are distributive, algebraic, or holistic; analysts explore cubes via roll-up, drill-down, drill-across, drill-through, slice-and-dice, and pivot.</li>
+              <li><strong>Indexing, columnar storage &amp; materialization:</strong> Bitmap and join indexes speed up aggregate joins; column-based databases cut I/O; cube computation uses full materialization or partial materialization (such as iceberg cubes via BUC).</li>
+            </ul>
+          </div>
+        </details>
       </section>
 
       <!-- ==========================================
@@ -304,5 +323,24 @@ part3_html = r"""
             </div>
           </details>
         </div>
+
+        <!-- Textbook Ch 4 Summary -->
+        <details class="surface-card p-4 text-xs">
+          <summary class="font-bold text-pink-300 flex items-center justify-between cursor-pointer">
+            <span>📖 Textbook Chapter 4 Summary (Han §4.4 — Plain-English Walkthrough)</span>
+            <span class="toggle-icon text-pink-400">&rarr;</span>
+          </summary>
+          <div class="mt-3 space-y-2 text-slate-300 border-t border-white/10 pt-2 leading-relaxed">
+            <p class="text-slate-200 font-medium">Chapter 4 shows how to find frequent patterns, associations, and statistical correlations hidden inside large transaction datasets.</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><strong>Real-world uses:</strong> Finding frequent patterns, associations, and correlations helps teams improve selective marketing, decision analysis, and business management (e.g., market basket analysis).</li>
+              <li><strong>Association &amp; correlation rules:</strong> Mining first finds frequent itemsets meeting minimum support, builds strong rules ($A \Rightarrow B$) meeting minimum confidence, and checks statistical correlation.</li>
+              <li><strong>Three scalable algorithm families:</strong> Apriori-like generate-and-test algorithms, frequent pattern growth algorithms (FP-growth), and vertical data format algorithms (Eclat).</li>
+              <li><strong>Apriori &amp; variations:</strong> Mines Boolean rules level by level using the Apriori property (all nonempty subsets of a frequent itemset are frequent), while hashing, transaction reduction, partitioning, and sampling cut DB scans to one or two.</li>
+              <li><strong>FP-growth &amp; Eclat:</strong> FP-growth avoids candidate generation by compressing transactions into an FP-tree; Eclat intersects vertical item-TID_sets using optimizations like diffset.</li>
+              <li><strong>Interestingness &amp; null-invariance:</strong> Support and confidence alone can mislead. Among lift, $\chi^2$, all_confidence, max_confidence, Kulczynski, and cosine, only the last four are null-invariant—pairing Kulczynski with Imbalance Ratio (IR) works best.</li>
+            </ul>
+          </div>
+        </details>
       </section>
 """

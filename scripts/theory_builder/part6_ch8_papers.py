@@ -169,5 +169,24 @@ part6_html = r"""
             </div>
           </details>
         </div>
+
+        <!-- Textbook Ch 8 Summary -->
+        <details class="surface-card p-4 text-xs">
+          <summary class="font-bold text-purple-300 flex items-center justify-between cursor-pointer">
+            <span>📖 Textbook Chapter 8 Summary (Han §8.6 — Plain-English Walkthrough)</span>
+            <span class="toggle-icon text-purple-400">&rarr;</span>
+          </summary>
+          <div class="mt-3 space-y-2 text-slate-300 border-t border-white/10 pt-2 leading-relaxed">
+            <p class="text-slate-200 font-medium">Chapter 8 introduces clustering as unsupervised learning that groups similar objects together and keeps dissimilar objects apart.</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><strong>What clustering does:</strong> Clustering groups physical or abstract objects without labels, serving as a standalone distribution tool or preprocessing step in business intelligence, image recognition, Web search, biology, and security.</li>
+              <li><strong>Requirements &amp; families:</strong> Strong clustering handles scalability, mixed attributes, arbitrary shapes, minimal parameters, noise resistance, incremental updates, and high dimensions via partitioning, hierarchical, density-based, or grid-based methods.</li>
+              <li><strong>Partitioning &amp; k-Means:</strong> Partitioning builds $k$ clusters and refines them via iterative relocation. Centroid-based k-means greedily minimizes within-cluster sum of squared error (SSE) until assignments stabilize.</li>
+              <li><strong>k-Medoids, k-Modes &amp; Kernel k-Means:</strong> k-Medoids uses real data objects as centers to resist outliers; k-modes handles nominal data; kernel k-means uses kernels like Gaussian RBF to find concave, non-linearly separable clusters.</li>
+              <li><strong>Hierarchical methods &amp; linkages:</strong> Agglomerative (bottom-up) and divisive (top-down, e.g., MST) methods build nested dendrograms using single-linkage (min), complete-linkage (max), mean, or average distances (Lance-Williams).</li>
+              <li><strong>BIRCH, Probabilistic &amp; Density-Based:</strong> BIRCH stores clustering features (CF) in a CF-tree; probabilistic hierarchical clustering models cluster distances probabilistically; density-based methods (DBSCAN) grow clusters from dense neighborhoods (alongside grid methods like STING/CLIQUE and Silhouette evaluation).</li>
+            </ul>
+          </div>
+        </details>
       </section>
 """

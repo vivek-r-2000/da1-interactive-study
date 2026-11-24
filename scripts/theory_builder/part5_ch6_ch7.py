@@ -156,6 +156,25 @@ part5_html = r"""
             </div>
           </details>
         </div>
+
+        <!-- Textbook Ch 6 Summary -->
+        <details class="surface-card p-4 text-xs">
+          <summary class="font-bold text-indigo-300 flex items-center justify-between cursor-pointer">
+            <span>📖 Textbook Chapter 6 Summary (Han §6.8 — Plain-English Walkthrough)</span>
+            <span class="toggle-icon text-indigo-400">&rarr;</span>
+          </summary>
+          <div class="mt-3 space-y-2 text-slate-300 border-t border-white/10 pt-2 leading-relaxed">
+            <p class="text-slate-200 font-medium">This chapter covers how to build models that predict data labels, evaluate their accuracy reliably, and handle imbalanced datasets.</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><strong>Classification vs. numeric prediction:</strong> Classification extracts models predicting categorical labels, while numeric prediction models continuous-valued functions.</li>
+              <li><strong>Decision tree induction:</strong> Trees grow top-down recursively using attribute selection measures (ID3, C4.5, CART), and tree pruning removes noise-driven branches to boost test accuracy.</li>
+              <li><strong>Naive Bayesian &amp; linear classifiers:</strong> Naive Bayes applies Bayes' theorem assuming class-conditional independence; linear classifiers (Perceptron, logistic regression) combine weighted inputs linearly.</li>
+              <li><strong>Eager vs. lazy learners:</strong> Decision trees, Bayesian, and linear models are eager learners (build a global model before testing); lazy learners (nearest-neighbor, case-based reasoning) store training tuples and generalize at query time.</li>
+              <li><strong>Confusion matrices &amp; metrics:</strong> Two-class confusion matrices track TP, TN, FP, FN to compute accuracy, sensitivity (recall), specificity, precision, $F$, and $F_\beta$ (accuracy alone misleads on minority classes).</li>
+              <li><strong>Partitioning, model selection &amp; ensembles:</strong> Data splits via holdout, random sampling, cross-validation, or bootstrapping; significance tests ($t$-test) and ROC curves compare models. Ensembles (bagging, boosting, random forests) combine base models, while class imbalance uses oversampling, undersampling, or threshold moving.</li>
+            </ul>
+          </div>
+        </details>
       </section>
 
       <!-- ==========================================
@@ -242,5 +261,24 @@ part5_html = r"""
             </div>
           </div>
         </div>
+
+        <!-- Textbook Ch 7 Summary -->
+        <details class="surface-card p-4 text-xs">
+          <summary class="font-bold text-indigo-300 flex items-center justify-between cursor-pointer">
+            <span>📖 Textbook Chapter 7 Summary (Han §7.8 — Plain-English Walkthrough)</span>
+            <span class="toggle-icon text-indigo-400">&rarr;</span>
+          </summary>
+          <div class="mt-3 space-y-2 text-slate-300 border-t border-white/10 pt-2 leading-relaxed">
+            <p class="text-slate-200 font-medium">Chapter 7 expands classification beyond basic trees into probabilistic graphs, margin-based boundaries, scarce-label learning, and complex data types. <em>(Endsem syllabus covers §7.1, 7.2.1, 7.3, 7.5, 7.6, 7.7.1, 7.7.3.)</em></p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><strong>Bayesian belief networks [Endsem §7.1]:</strong> Unlike Naive Bayes, BBNs let you specify conditional independencies between subsets of variables in a graphical causal model (DAG + CPTs).</li>
+              <li><strong>Support vector machines &amp; multiclass [Endsem §7.3, §7.6, §7.7.3]:</strong> SVMs map tuples into higher dimensions to find a maximum-margin hyperplane via support vectors; ensembles of binary classifiers and error-correcting codes extend binary models like SVMs to multiclass tasks.</li>
+              <li><strong>Scarce-label &amp; transfer learning [Endsem §7.5]:</strong> Semisupervised classification uses labeled + unlabeled data (self-training, cotraining); active learning queries a human oracle; distant supervision, transfer learning (TrAdaBoost), and zero-shot learning handle scarce labels.</li>
+              <li><strong>[Beyond Endsem Core]</strong> Rule-based classifiers (sequential covering), genetic algorithms, associative &amp; discriminative frequent-pattern classification, feature selection/engineering, metric learning, and LIME local explanations.</li>
+              <li><strong>[Beyond Endsem Core]</strong> Stream classification (one-pass, concept drift), sequence/graph classification, and reinforcement learning (evaluative feedback balancing exploration vs exploitation).</li>
+              <li><em>Syllabus reminder:</em> Also review <strong>§7.2.1 (Lazy Learners / Case-Based Reasoning)</strong>, standalone <strong>§7.6 (Ensembles)</strong>, and <strong>§7.7.1 (Class Imbalance / SMOTE)</strong> above, which are in the Endsem syllabus even though omitted from the textbook's §7.8 summary.</li>
+            </ul>
+          </div>
+        </details>
       </section>
 """

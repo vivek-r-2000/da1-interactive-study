@@ -115,6 +115,24 @@ part7_html = r"""
             </div>
           </div>
         </div>
+
+        <!-- Textbook Ch 10 Summary -->
+        <details class="surface-card p-4 text-xs">
+          <summary class="font-bold text-indigo-300 flex items-center justify-between cursor-pointer">
+            <span>📖 Textbook Chapter 10 Summary (Han §10.6 — Plain-English Walkthrough, §10.1 Focus)</span>
+            <span class="toggle-icon text-indigo-400">&rarr;</span>
+          </summary>
+          <div class="mt-3 space-y-2 text-slate-300 border-t border-white/10 pt-2 leading-relaxed">
+            <p class="text-slate-200 font-medium">Chapter 10 covers how neural networks learn layered features with backpropagation and scale to grids, sequences, and graphs. <em>(Endsem syllabus covers §10.1 only.)</em></p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><strong>Units, activations &amp; deep networks [Endsem §10.1]:</strong> A unit computes a linear weighted sum of inputs and passes it through a nonlinear activation like sign, sigmoid, or ReLU. Stacking layers creates a deep network that approximates nonlinear functions and learns feature hierarchies.</li>
+              <li><strong>Multilayer feed-forward networks (MLPs) [Endsem §10.1]:</strong> An MLP stacks an input layer, one or more hidden layers, and an output layer, written cleanly in matrix form as a chain graph.</li>
+              <li><strong>Backpropagation [Endsem §10.1]:</strong> Backpropagation uses gradient descent to adjust weights and biases, minimizing prediction loss by alternating forward propagation (inputs to outputs) and backward error propagation (outputs back to inputs).</li>
+              <li><strong>[Beyond §10.1] Optimization &amp; generalization:</strong> Responsive ReLU activations and cross-entropy loss fight vanishing gradients; adaptive learning rates, dropout, and greedy pretraining improve convergence and test generalization.</li>
+              <li><strong>[Beyond §10.1] CNNs, RNNs &amp; GNNs:</strong> CNNs model grid/image data via shared convolution kernels and pooling; RNNs/LSTMs model sequences via shared time weights and memory gates; GNNs/GCNs learn node embeddings over graphs.</li>
+            </ul>
+          </div>
+        </details>
       </section>
 
       <!-- ==========================================

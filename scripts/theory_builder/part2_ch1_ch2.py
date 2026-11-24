@@ -107,6 +107,25 @@ part2_html = r"""
           <strong class="text-rose-300 block mb-1">⚠️ Professor's Exam Trap: Classification vs Clustering</strong>
           Never mix up Classification and Clustering! <strong>Classification is Supervised</strong> (target class labels exist in training data, e.g., Fraud = Yes/No). <strong>Clustering is Unsupervised</strong> (no target labels exist; the algorithm discovers clusters purely from pairwise distance metrics).
         </div>
+
+        <!-- Textbook Ch 1 Summary -->
+        <details class="surface-card p-4 text-xs">
+          <summary class="font-bold text-indigo-300 flex items-center justify-between cursor-pointer">
+            <span>📖 Textbook Chapter 1 Summary (Han §1.8 — Plain-English Walkthrough)</span>
+            <span class="toggle-icon text-indigo-400">&rarr;</span>
+          </summary>
+          <div class="mt-3 space-y-2 text-slate-300 border-t border-white/10 pt-2 leading-relaxed">
+            <p class="text-slate-200 font-medium">Data mining turns massive piles of raw data into clear, useful patterns and real-world knowledge.</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><strong>Why data mining exists:</strong> Rapid data growth demands effective, scalable, and flexible analysis. Data mining grew naturally from information technology and brings several fields together.</li>
+              <li><strong>Knowledge discovery steps:</strong> The KDD process finds interesting patterns through data cleaning, data integration, data selection, data transformation, pattern and model discovery, pattern or model evaluation, and knowledge presentation.</li>
+              <li><strong>What makes a pattern interesting:</strong> A pattern or model counts as knowledge when it holds on test data with some certainty, looks novel, helps users act or check a hunch, and stays easy to understand. Objective or subjective interestingness measures guide discovery.</li>
+              <li><strong>Supported data types:</strong> You can mine structured data (relational databases, transaction data) and unstructured data (text, multimedia). Data also splits into stored data and stream data, which needs special stream mining algorithms.</li>
+              <li><strong>Data mining functionalities:</strong> Tasks specify what patterns or knowledge to find: characterization and discrimination; mining frequent patterns, associations, and correlations; classification and regression; deep learning; cluster analysis; and outlier detection.</li>
+              <li><strong>Related fields &amp; society:</strong> Data mining blends statistics, machine learning, and database technology, powering business intelligence, Web search, bioinformatics, health informatics, and finance while balancing data privacy and security.</li>
+            </ul>
+          </div>
+        </details>
       </section>
 
       <!-- ==========================================
@@ -360,5 +379,24 @@ part2_html = r"""
             </div>
           </details>
         </div>
+
+        <!-- Textbook Ch 2 Summary -->
+        <details class="surface-card p-4 text-xs">
+          <summary class="font-bold text-emerald-300 flex items-center justify-between cursor-pointer">
+            <span>📖 Textbook Chapter 2 Summary (Han §2.7 — Plain-English Walkthrough)</span>
+            <span class="toggle-icon text-emerald-400">&rarr;</span>
+          </summary>
+          <div class="mt-3 space-y-2 text-slate-300 border-t border-white/10 pt-2 leading-relaxed">
+            <p class="text-slate-200 font-medium">Good data mining starts with knowing your attribute types, measuring how objects compare, and cleaning messy inputs.</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><strong>Data objects &amp; attribute types:</strong> Datasets contain objects described by nominal (categorical names), binary (two states, symmetric or asymmetric), ordinal (ranked without known step sizes), or numeric attributes.</li>
+              <li><strong>Numeric scales:</strong> Interval-scaled attributes use fixed equal units (no true zero), while ratio-scaled attributes have an inherent zero-point so ratios make sense.</li>
+              <li><strong>Basic statistics &amp; plots:</strong> Mean, weighted mean, median, and mode track central tendency; range, quantiles, quartiles, IQR, variance, and standard deviation track spread. Boxplots, quantile plots, Q-Q plots, histograms, and scatter plots let you inspect distributions visually.</li>
+              <li><strong>Similarity &amp; dissimilarity:</strong> Common proximity metrics include Jaccard coefficient (asymmetric binary), Euclidean, Manhattan, Minkowski, and supremum distances (numeric), cosine measure and Tanimoto coefficient (sparse term-frequency vectors), and Kullback-Leibler (KL) divergence $D_{KL}(p(x) \| q(x))$.</li>
+              <li><strong>Data quality &amp; cleaning:</strong> Quality spans accuracy, completeness, consistency, timeliness, believability, and interpretability. Data cleaning fills missing values, smooths noise, spots outliers, and fixes inconsistencies via discrepancy detection and transformation.</li>
+              <li><strong>Integration, transformation &amp; reduction:</strong> Data integration resolves semantic heterogeneity, correlation, and tuple duplication. Data transformation uses normalization, discretization, compression, and sampling; dimensionality reduction uses PCA, attribute subset selection, kernel PCA, and t-SNE.</li>
+            </ul>
+          </div>
+        </details>
       </section>
 """

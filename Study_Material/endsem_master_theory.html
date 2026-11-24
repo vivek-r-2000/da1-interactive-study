@@ -474,63 +474,73 @@
         <!-- 2.4 MANDATED TEXTBOOK EXERCISES CHAPTER 2 -->
         <div class="surface-elevated p-5 space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Chapter 2)</h3>
-            <span class="text-xs font-mono text-amber-400">Ex 2.2, 2.7, 2.18, 2.19, 2.20</span>
+            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Han 4th Ed. Chapter 2)</h3>
+            <span class="text-xs font-mono text-amber-400">Ex 2.2, 2.7, 2.18 (+2.14), 2.19, 2.20</span>
           </div>
 
           <!-- Ex 2.2 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 2.2: Data Cleaning & Handling Missing Values</span>
+              <span>Exercise 2.2 (Book p. 80 / PDF p. 111): Central Tendency, Five-Number Summary &amp; Boxplot of Age</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Suppose a retail sales dataset has 10% missing income values. What are the 5 standard methods to handle them, and which is best for machine learning?</p>
-              <ol class="list-decimal ml-5 space-y-1">
-                <li><strong>Ignore the tuple:</strong> Drop row. Only viable if missingness is completely random and dataset is enormous. Otherwise biases sample.</li>
-                <li><strong>Fill manually:</strong> Time-consuming and infeasible for millions of rows.</li>
-                <li><strong>Use global constant (e.g. "Unknown" or -1):</strong> Algorithmic hazard: clustering or decision trees might treat "Unknown" as an interesting distinct group!</li>
-                <li><strong>Use attribute central tendency (Mean / Median):</strong> Fast and standard. For skewed salary distributions, use <em>median</em> over mean.</li>
-                <li><strong>Most probable value (Inference via Decision Tree / Regression):</strong> Best approach. Predict missing income from Age, Education, and Job using a regression model.</li>
-              </ol>
+              <p><strong>Verbatim Question:</strong> Suppose that the data for analysis include the attribute <em>age</em>. The <em>age</em> values for the data tuples are (in ascending order): <code>13, 15, 16, 16, 19, 20, 20, 21, 22, 22, 25, 25, 25, 25, 30, 33, 33, 35, 35, 35, 35, 36, 40, 45, 46, 52, 70</code> ($N = 27$). (a) What is the <em>mean</em> of the data? What is the <em>median</em>? (b) What is the <em>mode</em> and modality? (c) What is the <em>midrange</em>? (d) Find (roughly) $Q_1$ and $Q_3$. (e) Give the <em>five-number summary</em>. (f) Show a <em>boxplot</em> of the data.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Mean &amp; Median ($N = 27$):</strong></p>
+                <p>&bull; $\sum x_i = 809 \implies \text{Mean } \bar{x} = \frac{809}{27} \approx \mathbf{29.9630}$ years.</p>
+                <p>&bull; $N = 27$ is odd $\implies$ Median is at position $\frac{27+1}{2} = 14 \implies \text{Median } (Q_2) = x_{(14)} = \mathbf{25}$.</p>
+                <p><strong>(b) Mode &amp; Modality:</strong> Both $25$ and $35$ occur $4$ times (highest frequency) $\implies$ <strong>Bimodal</strong> (modes: $25, 35$).</p>
+                <p><strong>(c) Midrange:</strong> $\frac{\min + \max}{2} = \frac{13 + 70}{2} = \mathbf{41.5}$.</p>
+                <p><strong>(d) Quartiles ($Q_1, Q_3$):</strong> Splitting at $x_{(14)} = 25$ (excluding median): lower half has $13$ items &rarr; middle ($7$th) is $Q_1 = \mathbf{20}$; upper half has $13$ items ($15$th–$27$th) &rarr; middle ($21$st) is $Q_3 = \mathbf{35}$.</p>
+                <p><strong>(e) Five-Number Summary:</strong> $[\text{Min}, Q_1, Q_2, Q_3, \text{Max}] = \mathbf{[13, 20, 25, 35, 70]}$.</p>
+                <p><strong>(f) Boxplot &amp; Fences:</strong> $\text{IQR} = Q_3 - Q_1 = 35 - 20 = 15$. Lower fence $= 20 - 1.5(15) = -2.5$ (lower whisker $= 13$). Upper fence $= 35 + 1.5(15) = 57.5 \implies \mathbf{70}$ is an <strong>outlier</strong> (plotted individually); upper whisker stops at $\mathbf{52}$.</p>
+              </div>
             </div>
           </details>
 
           <!-- Ex 2.7 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 2.7: Five-Number Summary, IQR & Boxplot Outlier Fences</span>
+              <span>Exercise 2.7 (Book p. 81 / PDF p. 112): Hospital Age &amp; %Fat — Stats, Boxplots, Scatter &amp; Q-Q Plot</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given sorted age values: <code>13, 15, 16, 16, 19, 20, 20, 21, 22, 22, 25, 25, 25, 25, 30, 33, 33, 35, 35, 35, 36, 40, 45, 46, 52, 70</code> ($n=26$). Compute Five-number summary, $IQR$, and test if $70$ is an outlier.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                &bull; Min = 13, Max = 70<br/>
-                &bull; Median ($Q_2$): Average of 13th (25) and 14th (25) = 25<br/>
-                &bull; First Quartile ($Q_1$): Median of lower 13 values = 7th value = 20<br/>
-                &bull; Third Quartile ($Q_3$): Median of upper 13 values = 20th value = 35<br/>
-                &bull; Five-number summary: [13, 20, 25, 35, 70]<br/>
-                &bull; $IQR = Q_3 - Q_1 = 35 - 20 = 15$<br/>
-                &bull; Upper Outlier Fence: $Q_3 + 1.5 \cdot IQR = 35 + 1.5(15) = 35 + 22.5 = \mathbf{57.5}$<br/>
-                &bull; Conclusion: Since $70 > 57.5$, <strong>70 is formally flagged as an outlier</strong>.
+              <p><strong>Verbatim Question:</strong> Suppose that a hospital tested the <em>age</em> and <em>body fat</em> data for 18 randomly selected adults ($n=18$): (a) Calculate the mean, median, and standard deviation of <em>age</em> and <em>%fat</em>. (b) Draw the boxplots for <em>age</em> and <em>%fat</em>. (c) Draw a <em>scatter plot</em> and a <em>q-q plot</em> based on these two variables.</p>
+              <div class="overflow-x-auto my-1">
+                <table class="w-full text-[11px] font-mono text-center border border-white/10">
+                  <tr class="bg-slate-950 text-indigo-300"><td>age</td><td>23</td><td>23</td><td>27</td><td>27</td><td>39</td><td>41</td><td>47</td><td>49</td><td>50</td></tr>
+                  <tr><td class="bg-slate-950 text-sky-300">%fat</td><td>9.5</td><td>26.5</td><td>7.8</td><td>17.8</td><td>31.4</td><td>25.9</td><td>27.4</td><td>27.2</td><td>31.2</td></tr>
+                  <tr class="bg-slate-950 text-indigo-300"><td>age</td><td>52</td><td>54</td><td>54</td><td>56</td><td>57</td><td>58</td><td>58</td><td>60</td><td>61</td></tr>
+                  <tr><td class="bg-slate-950 text-sky-300">%fat</td><td>34.6</td><td>42.5</td><td>28.8</td><td>33.4</td><td>30.2</td><td>34.1</td><td>32.9</td><td>41.2</td><td>35.7</td></tr>
+                </table>
+              </div>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Summary Statistics (Han Eq. 2.6 population $\sigma$; sample $s$ shown in parentheses):</strong></p>
+                <p>&bull; <strong>age:</strong> $\sum x_i = 836 \implies \bar{x} = \frac{836}{18} \approx \mathbf{46.4444}$. Median $= \frac{50+52}{2} = \mathbf{51.0}$. $\sigma = \sqrt{\frac{2970.4444}{18}} \approx \mathbf{12.8462}$ (sample $s \approx 13.2186$).</p>
+                <p>&bull; <strong>%fat (sorted):</strong> <code>7.8, 9.5, 17.8, 25.9, 26.5, 27.2, 27.4, 28.8, 30.2, 31.2, 31.4, 32.9, 33.4, 34.1, 34.6, 35.7, 41.2, 42.5</code>.</p>
+                <p>&bull; $\sum y_i = 518.1 \implies \bar{y} = \frac{518.1}{18} \approx \mathbf{28.7833}$. Median $= \frac{30.2+31.2}{2} = \mathbf{30.7}$. $\sigma = \sqrt{\frac{1455.9450}{18}} \approx \mathbf{8.9937}$ (sample $s \approx 9.2544$).</p>
+                <p><strong>(b) Boxplots ($n=18 \implies$ lower 9 median = 5th, upper 9 median = 14th):</strong></p>
+                <p>&bull; <strong>age:</strong> $[23, 39, 51, 57, 61]$, $\text{IQR}=18$, fences $[12, 84] \implies$ no outliers; whiskers $23$ and $61$.</p>
+                <p>&bull; <strong>%fat:</strong> $[7.8, 26.5, 30.7, 34.1, 42.5]$, $\text{IQR}=7.6$, fences $[15.1, 45.5] \implies \mathbf{7.8, 9.5}$ are outliers (&lt; $15.1$); lower whisker $= 17.8$, upper whisker $= 42.5$.</p>
+                <p><strong>(c) Scatter &amp; Q-Q Plot:</strong> Scatter plots observed pairs $(\text{age}_i, \text{\%fat}_i)$ showing an upward linear trend. Q-Q plot pairs independently sorted quantiles $(x_{(i)}, y_{(i)})$ at $f_i = \frac{i-0.5}{18}$ (e.g., $(23, 7.8), (23, 9.5), \dots, (61, 42.5)$), revealing an S-like shift at lower ages because low-fat points skew the left tail.</p>
               </div>
             </div>
           </details>
 
-          <!-- Ex 2.18 -->
+          <!-- Ex 2.18 (+2.14) -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 2.18: Cosine Similarity vs Euclidean Distance on Document Vectors</span>
+              <span>Exercise 2.18 (Book p. 82 / PDF p. 113): Normalization of Age = 35 (using Ex. 2.14 Data)</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given document term vectors $\vec{x} = (5, 0, 3, 0, 2, 0, 0, 2, 0, 0)$ and $\vec{y} = (3, 0, 2, 0, 1, 1, 0, 1, 0, 1)$. Compute Cosine Similarity and Euclidean Distance.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                &bull; Dot product: $\vec{x} \cdot \vec{y} = (5)(3) + (0)(0) + (3)(2) + (0)(0) + (2)(1) + (0)(1) + (0)(0) + (2)(1) + 0 + 0 = 15 + 6 + 2 + 2 = \mathbf{25}$<br/>
-                &bull; $\|\vec{x}\| = \sqrt{5^2 + 0 + 3^2 + 0 + 2^2 + 0 + 0 + 2^2 + 0 + 0} = \sqrt{25 + 9 + 4 + 4} = \sqrt{42} \approx 6.48074$<br/>
-                &bull; $\|\vec{y}\| = \sqrt{3^2 + 0 + 2^2 + 0 + 1^2 + 1^2 + 0 + 1^2 + 0 + 1^2} = \sqrt{9 + 4 + 1 + 1 + 1 + 1} = \sqrt{17} \approx 4.12311$<br/>
-                &bull; $\cos(\vec{x}, \vec{y}) = \frac{25}{\sqrt{42}\sqrt{17}} = \frac{25}{\sqrt{714}} = \frac{25}{26.72078} \approx \mathbf{0.9356}$ (Highly similar documents!)<br/>
-                &bull; Euclidean distance: $d(\vec{x}, \vec{y}) = \sqrt{(5-3)^2 + 0 + (3-2)^2 + 0 + (2-1)^2 + (0-1)^2 + 0 + (2-1)^2 + 0 + (0-1)^2} = \sqrt{4 + 0 + 1 + 0 + 1 + 1 + 0 + 1 + 0 + 1} = \sqrt{9} = \mathbf{3.0}$.
+              <p><strong>Verbatim Question:</strong> Using the data for <em>age</em> given in Exercise 2.14 (<code>13, 15, 16, 16, 19, 20, 20, 21, 22, 22, 25, 25, 25, 25, 30, 33, 33, 35, 35, 35, 35, 36, 40, 45, 46, 52, 70</code>; $N=27, \min=13, \max=70, \bar{x}=\frac{809}{27}\approx 29.9630$), answer: (a) Use min-max normalization to transform $v=35$ onto $[0.0, 1.0]$. (b) Use z-score normalization to transform $v=35$, where standard deviation $\sigma = 12.70$ years. (c) Use decimal scaling for $v=35$. (d) Comment on which method you prefer and why.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Min-Max onto $[0.0, 1.0]$:</strong> $v' = \frac{35 - 13}{70 - 13}(1.0 - 0.0) + 0.0 = \frac{22}{57} \approx \mathbf{0.3860}$.</p>
+                <p><strong>(b) Z-Score ($\sigma = 12.70$):</strong> $v' = \frac{35 - 29.9630}{12.70} = \frac{5.0370}{12.70} \approx \mathbf{0.3966}$ (with rounded $\bar{A}=29.96$: $0.3969$).</p>
+                <p><strong>(c) Decimal Scaling:</strong> $\max(|v_i|) = 70 \implies$ smallest $j$ with $70 / 10^j \lt 1$ is $j = 2 \implies v' = \frac{35}{10^2} = \mathbf{0.35}$.</p>
+                <p><strong>(d) Preference:</strong> <strong>Decimal scaling</strong> (simple division by $100$, preserves exact proportions, never goes out-of-bounds for human ages $&lt; 100$) or <strong>Z-score normalization</strong> (resists range compression from the outlier $70$ and handles future records $&gt; 70$ without breaking $[0,1]$ bounds, unlike Min-Max).</p>
               </div>
             </div>
           </details>
@@ -538,17 +548,33 @@
           <!-- Ex 2.19 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 2.19: Min-Max vs Z-Score Normalization Step-by-Step</span>
+              <span>Exercise 2.19 (Book p. 82 / PDF p. 113): Z-Score Table, Pearson Correlation &amp; Covariance (Ex. 2.7 Data)</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> An attribute has $\min = 200$, $\max = 1000$, $\bar{A} = 500$, and standard deviation $s = 100$. Normalize value $v = 400$ using (a) Min-Max onto $[0, 1]$ and (b) Z-score normalization.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                (a) Min-Max Normalization:<br/>
-                $$v' = \frac{v - \min}{\max - \min}(1 - 0) + 0 = \frac{400 - 200}{1000 - 200} = \frac{200}{800} = \mathbf{0.25}$$
-                (b) Z-Score Normalization:<br/>
-                $$v' = \frac{v - \bar{A}}{s} = \frac{400 - 500}{100} = \frac{-100}{100} = \mathbf{-1.0}$$
-                Interpretation: 400 is located exactly 1 standard deviation below the population mean.
+              <p><strong>Verbatim Question:</strong> Using the data for <em>age</em> and <em>body fat</em> given in Exercise 2.7, answer: (a) Normalize the two attributes based on <em>z-score normalization</em>. (b) Calculate the <em>correlation coefficient</em> (Pearson's product moment coefficient). Are they positively or negatively correlated? Compute their covariance.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Z-Score Normalization ($z_i = \frac{v_i - \bar{V}}{\sigma_V}$ using $\bar{A}=46.4444, \sigma_A=12.8462$ and $\bar{B}=28.7833, \sigma_B=8.9937$):</strong></p>
+                <p>Sample values: Tuple 1 $(23, 9.5) \to (-1.8250, -2.1441)$; Tuple 5 $(39, 31.4) \to (-0.5795, +0.2909)$; Tuple 9 $(50, 31.2) \to (+0.2768, +0.2687)$; Tuple 18 $(61, 35.7) \to (+1.1331, +0.7691)$.</p>
+                <div class="overflow-x-auto my-1">
+                  <table class="w-full text-[10px] text-center border border-white/10">
+                    <tr class="bg-slate-900 text-indigo-300"><th>#</th><th>age</th><th>$z_{\text{age}}$</th><th>%fat</th><th>$z_{\text{\%fat}}$</th><th>#</th><th>age</th><th>$z_{\text{age}}$</th><th>%fat</th><th>$z_{\text{\%fat}}$</th></tr>
+                    <tr><td>1</td><td>23</td><td>-1.825</td><td>9.5</td><td>-2.144</td><td>10</td><td>52</td><td>+0.433</td><td>34.6</td><td>+0.647</td></tr>
+                    <tr><td>2</td><td>23</td><td>-1.825</td><td>26.5</td><td>-0.254</td><td>11</td><td>54</td><td>+0.588</td><td>42.5</td><td>+1.525</td></tr>
+                    <tr><td>3</td><td>27</td><td>-1.514</td><td>7.8</td><td>-2.333</td><td>12</td><td>54</td><td>+0.588</td><td>28.8</td><td>+0.002</td></tr>
+                    <tr><td>4</td><td>27</td><td>-1.514</td><td>17.8</td><td>-1.221</td><td>13</td><td>56</td><td>+0.744</td><td>33.4</td><td>+0.513</td></tr>
+                    <tr><td>5</td><td>39</td><td>-0.580</td><td>31.4</td><td>+0.291</td><td>14</td><td>57</td><td>+0.822</td><td>30.2</td><td>+0.158</td></tr>
+                    <tr><td>6</td><td>41</td><td>-0.424</td><td>25.9</td><td>-0.321</td><td>15</td><td>58</td><td>+0.900</td><td>34.1</td><td>+0.591</td></tr>
+                    <tr><td>7</td><td>47</td><td>+0.043</td><td>27.4</td><td>-0.154</td><td>16</td><td>58</td><td>+0.900</td><td>32.9</td><td>+0.458</td></tr>
+                    <tr><td>8</td><td>49</td><td>+0.199</td><td>27.2</td><td>-0.176</td><td>17</td><td>60</td><td>+1.055</td><td>41.2</td><td>+1.381</td></tr>
+                    <tr><td>9</td><td>50</td><td>+0.277</td><td>31.2</td><td>+0.269</td><td>18</td><td>61</td><td>+1.133</td><td>35.7</td><td>+0.769</td></tr>
+                  </table>
+                </div>
+                <p><strong>(b) Covariance &amp; Pearson Correlation ($n = 18$):</strong></p>
+                <p>&bull; $\sum_{i=1}^{18} a_i b_i = 25763.20$, $\sum (a_i - \bar{A})(b_i - \bar{B}) = 1700.3333$.</p>
+                <p>&bull; $\text{Cov}(A, B) = \frac{25763.20}{18} - (46.4444)(28.7833) = \mathbf{94.4630}$ (sample cov $\div 17 = 100.0196$).</p>
+                <p>&bull; $r_{A,B} = \frac{94.4630}{(12.8462)(8.9937)} = \mathbf{+0.8176}$ (exact same value for sample vs population).</p>
+                <p>&bull; <strong>Conclusion:</strong> Strong <strong>positive correlation</strong> ($r = +0.8176 \gt 0$): body fat percentage generally rises with age.</p>
               </div>
             </div>
           </details>
@@ -556,29 +582,18 @@
           <!-- Ex 2.20 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 2.20: Chi-Square ($\chi^2$) Independence Test Calculation</span>
+              <span>Exercise 2.20 (Book p. 82 / PDF p. 113): Partitioning 12 Sales Price Records into 3 Bins</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given a contingency table of 1500 people classified by Gender and Fiction/Non-fiction preference:</p>
-              <table class="w-full border border-white/10 text-center my-1">
-                <tr class="bg-slate-950 font-bold"><td></td><td>Fiction</td><td>Non-fiction</td><td>Total</td></tr>
-                <tr><td class="font-bold">Male</td><td>250 (observed)</td><td>200 (observed)</td><td>450</td></tr>
-                <tr><td class="font-bold">Female</td><td>200 (observed)</td><td>850 (observed)</td><td>1050</td></tr>
-                <tr class="font-bold bg-slate-950"><td>Total</td><td>450</td><td>1050</td><td>1500</td></tr>
-              </table>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                1. Expected Frequencies $E_{ij} = \frac{RowTotal \times ColTotal}{N}$:<br/>
-                &bull; $E_{Male, Fic} = \frac{450 \times 450}{1500} = 135$<br/>
-                &bull; $E_{Male, Non} = \frac{450 \times 1050}{1500} = 315$<br/>
-                &bull; $E_{Fem, Fic} = \frac{1050 \times 450}{1500} = 315$<br/>
-                &bull; $E_{Fem, Non} = \frac{1050 \times 1050}{1500} = 735$<br/><br/>
-                2. $\chi^2 = \sum \frac{(O_{ij} - E_{ij})^2}{E_{ij}}$:<br/>
-                $$\chi^2 = \frac{(250-135)^2}{135} + \frac{(200-315)^2}{315} + \frac{(200-315)^2}{315} + \frac{(850-735)^2}{735}$$
-                $$\chi^2 = \frac{115^2}{135} + \frac{(-115)^2}{315} + \frac{(-115)^2}{315} + \frac{115^2}{735} = \frac{13225}{135} + \frac{13225}{315} + \frac{13225}{315} + \frac{13225}{735}$$
-                $$\chi^2 = 97.96 + 41.98 + 41.98 + 17.99 = \mathbf{199.91}$$
-                3. Degrees of freedom $= (r-1)(c-1) = (2-1)(2-1) = 1$.<br/>
-                Critical value at $\alpha=0.001$ is $10.83$. Since $199.91 \gg 10.83$, we decisively reject the null hypothesis: <strong>Gender and Reading Preference are strongly dependent!</strong>
+              <p><strong>Verbatim Question:</strong> Suppose a group of 12 <em>sales price</em> records has been sorted as follows: <code>5, 10, 11, 13, 15, 35, 50, 55, 72, 92, 204, 215</code>. Partition them into three bins by: (a) Equal-frequency (equal-depth) partitioning, (b) Equal-width partitioning, (c) Clustering.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Equal-Frequency ($12 / 3 = 4$ items per bin):</strong></p>
+                <p>&bull; Bin 1: <code>{5, 10, 11, 13}</code> &bull; Bin 2: <code>{15, 35, 50, 55}</code> &bull; Bin 3: <code>{72, 92, 204, 215}</code></p>
+                <p><strong>(b) Equal-Width:</strong> Width $w = \frac{215 - 5}{3} = 70 \implies$ bins $[5, 75], (75, 145], (145, 215]$:</p>
+                <p>&bull; Bin 1: <code>{5, 10, 11, 13, 15, 35, 50, 55, 72}</code> &bull; Bin 2: <code>{92}</code> &bull; Bin 3: <code>{204, 215}</code></p>
+                <p><strong>(c) Clustering ($k = 3$ 1D $k$-means minimizing SSE):</strong></p>
+                <p>&bull; Cluster 1: <code>{5, 10, 11, 13, 15, 35}</code> (mean $= 14.83$) &bull; Cluster 2: <code>{50, 55, 72, 92}</code> (mean $= 67.25$) &bull; Cluster 3: <code>{204, 215}</code> (mean $= 209.50$). (Check: $|35 - 14.83| = 20.17 \lt |35 - 67.25| = 32.25$.)</p>
               </div>
             </div>
           </details>
@@ -665,23 +680,31 @@
         <!-- 3.4 MANDATED TEXTBOOK EXERCISES CHAPTER 3 -->
         <div class="surface-elevated p-5 space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Chapter 3)</h3>
+            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Han 4th Ed. Chapter 3)</h3>
             <span class="text-xs font-mono text-amber-400">Ex 3.15, 3.17, 3.18, 3.22</span>
           </div>
 
           <!-- Ex 3.15 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 3.15: Star Schema vs Snowflake Schema Design</span>
+              <span>Exercise 3.15 (Book pp. 137–138 / PDF pp. 168–169): ROLAP, MOLAP &amp; HOLAP Implementations</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Design a Star Schema and Snowflake Schema for a University hospital tracking Patient Visits across Dimensions (Patient, Doctor, Department, Time). Compare their query trade-offs.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                &bull; Fact Table: Patient_Visits_Fact(patient_id, doctor_id, dept_id, time_id, charge, length_of_stay)<br/>
-                &bull; Star Schema: Dimensions patient_dim, doctor_dim, dept_dim, time_dim are denormalized.<br/>
-                &bull; Snowflake Schema: dept_dim normalized into (dept_dim &rarr; hospital_branch_dim); time_dim normalized into (day &rarr; month &rarr; quarter &rarr; year).<br/>
-                &bull; Trade-off: Snowflake saves disk space by removing redundant department descriptions, but Star schema answers aggregations ~3&times; faster due to zero dimension joins.
+              <p><strong>Verbatim Question:</strong> A multidimensional view can be implemented by a relational technique (<em>ROLAP</em>), a multidimensional technique (<em>MOLAP</em>), or a hybrid technique (<em>HOLAP</em>). (a) Briefly describe each. (b) Explain how each implements: (i) warehouse generation (incl. aggregation), (ii) roll-up, (iii) drill-down, (iv) incremental updating. (c) Which do you prefer, and why?</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Descriptions:</strong> <strong>ROLAP</strong> uses relational tables (star/snowflake) + OLAP middleware generating SQL. <strong>MOLAP</strong> stores cuboids directly in compressed array-based multidimensional structures. <strong>HOLAP</strong> combines both: atomic base data in ROLAP + high-level summary cubes in MOLAP.</p>
+                <p><strong>(b) Operations Matrix:</strong></p>
+                <div class="overflow-x-auto my-1">
+                  <table class="w-full text-[10px] text-left border border-white/10">
+                    <tr class="bg-slate-900 text-amber-300"><th class="p-1.5">Operation</th><th class="p-1.5">ROLAP</th><th class="p-1.5">MOLAP</th><th class="p-1.5">HOLAP</th></tr>
+                    <tr><td class="p-1.5 font-bold">i. Generation</td><td class="p-1.5">Load fact/dim tables; compute SQL GROUP BY / CUBE summary tables.</td><td class="p-1.5">Map dims to array indices; MultiWay array cubing with sparse compression.</td><td class="p-1.5">Load base rows to ROLAP; materialize upper summary cuboids in MOLAP.</td></tr>
+                    <tr><td class="p-1.5 font-bold">ii. Roll-up</td><td class="p-1.5">Join dims to parent level + SQL GROUP BY (or redirect to coarser table).</td><td class="p-1.5">Index directly into coarser cuboid array or sum along axis.</td><td class="p-1.5">Read precomputed MOLAP array; fall back to ROLAP if not materialized.</td></tr>
+                    <tr><td class="p-1.5 font-bold">iii. Drill-down</td><td class="p-1.5">SQL query with WHERE on parent + GROUP BY finer dim attribute.</td><td class="p-1.5">Index lower-level array chunk along refined dim coordinates.</td><td class="p-1.5">Traverse MOLAP arrays; switch to ROLAP SQL for raw drill-through.</td></tr>
+                    <tr><td class="p-1.5 font-bold">iv. Incremental Update</td><td class="p-1.5">Append deltas to fact table; update affected summary rows via MERGE.</td><td class="p-1.5">Insert into chunks; expand/re-chunk arrays for new members; propagate ancestors.</td><td class="p-1.5">Append raw deltas to ROLAP, then propagate delta aggregates to MOLAP.</td></tr>
+                  </table>
+                </div>
+                <p><strong>(c) Preference:</strong> <strong>HOLAP</strong> is best overall for large enterprise warehouses: massive sparse atomic data scales cleanly in ROLAP while frequent summary analytics run at MOLAP array speed.</p>
               </div>
             </div>
           </details>
@@ -689,50 +712,51 @@
           <!-- Ex 3.17 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 3.17: OLAP Operations Sequence Walkthrough</span>
+              <span>Exercise 3.17 (Book p. 138 / PDF p. 169): Max &amp; Min Cells in an n-D Data Cube (p Distinct Values)</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Starting from total annual sales by country: <code>Sales(Country, Year)</code>, give the exact OLAP sequence to view quarterly sales of laptops in India for 2026.</p>
-              <ol class="list-decimal ml-5 space-y-1 font-mono text-slate-200">
-                <li><strong>Slice:</strong> Fix <code>Country = 'India'</code> and <code>Year = '2026'</code>.</li>
-                <li><strong>Drill-Down:</strong> Descend on Time hierarchy from <code>Year</code> &rarr; <code>Quarter</code> (Q1, Q2, Q3, Q4).</li>
-                <li><strong>Drill-Down (Dimension addition):</strong> Introduce the Item dimension hierarchy.</li>
-                <li><strong>Slice:</strong> Filter <code>Item_Category = 'Laptops'</code>.</li>
-              </ol>
+              <p><strong>Verbatim Question:</strong> A data cube $C$ has $n$ dimensions, each with exactly $p$ distinct values in the base cuboid (no concept hierarchies). Find: (a) max cells in base cuboid, (b) min cells in base cuboid, (c) max cells in $C$ (base + aggregate), (d) min cells in $C$.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Max base cells:</strong> All Cartesian tuples present $\implies \mathbf{p^n}$.</p>
+                <p><strong>(b) Min base cells:</strong> Every dimension still exhibits all $p$ distinct values; placing values diagonally $(v_{1,i}, \dots, v_{n,i})$ requires at least $\mathbf{p}$ cells.</p>
+                <p><strong>(c) Max total cells in $C$:</strong> Each coordinate takes $p$ values or $*$ (<code>all</code>): $\sum_{k=0}^n \binom{n}{k} p^k = \mathbf{(p + 1)^n}$.</p>
+                <p><strong>(d) Min total cells in $C$:</strong> Out of $2^n$ cuboids, the $0$-D apex has $1$ cell, and all $2^n - 1$ non-apex cuboids retain $\ge 1$ dimension with $p$ distinct values ($\ge p$ cells each; achieved by $p$ diagonal base cells) $\implies \mathbf{p(2^n - 1) + 1 = p \cdot 2^n - p + 1}$.</p>
+              </div>
             </div>
           </details>
 
           <!-- Ex 3.18 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 3.18: Distributive vs Algebraic vs Holistic Classification</span>
+              <span>Exercise 3.18 (Book p. 138 / PDF p. 169): 10-D Base Cuboid (3 Cells) — Full, Iceberg &amp; Closed Cells</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Classify the following aggregate functions and prove why <code>Median</code> is holistic:</p>
-              <ul class="space-y-1 font-mono text-slate-200">
-                <li>&bull; <code>SUM</code>, <code>MIN</code>, <code>MAX</code>, <code>COUNT</code> &rarr; <strong>Distributive</strong>: $SUM(D) = \sum_{k} SUM(D_k)$.</li>
-                <li>&bull; <code>AVG</code>, <code>Standard Deviation</code> &rarr; <strong>Algebraic</strong>: $AVG(D) = \frac{\sum SUM(D_k)}{\sum COUNT(D_k)}$. Requires exactly 2 distributive tracking values.</li>
-                <li>&bull; <code>MEDIAN</code> &rarr; <strong>Holistic</strong>: Given $Median(D_1) = 50$ and $Median(D_2) = 70$, the true median of $D_1 \cup D_2$ cannot be determined without knowing the full distribution of all individual raw elements!</li>
-              </ul>
+              <p><strong>Verbatim Question:</strong> A 10-D base cuboid has 3 base cells: (1) $(a_1, d_2, d_3, d_4, \dots, d_{10})$, (2) $(d_1, b_2, d_3, d_4, \dots, d_{10})$, (3) $(d_1, d_2, c_3, d_4, \dots, d_{10})$, with $a_1 \ne d_1, b_2 \ne d_2, c_3 \ne d_3$ and measure <code>count()</code>. Find: (a) nonempty cuboids, (b) nonempty aggregate (nonbase) cells, (c) nonempty aggregate cells with <code>count >= 2</code>, (d) closed cells in the full cube.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p>Let dims $\{4,\dots,10\}$ have $2^7 = 128$ keep/$*$ subsets (values never differ there).</p>
+                <p><strong>(a) Nonempty cuboids:</strong> Every projection of 3 base cells is nonempty $\implies 2^{10} = \mathbf{1024}$.</p>
+                <p><strong>(b) Nonempty aggregate cells:</strong> Over dims $\{1,2,3\}$: $\emptyset$ gives $1$ cell (count 3); 1 kept dim ($3$ choices) gives $2$ cells each (count 2 and 1); 2 kept dims ($3$ choices) give $3$ cells each; all 3 kept dims give $3$ cells in $128 - 1 = 127$ nonbase cuboids. Sum $= (1 + 6 + 9) \times 128 + 3 \times 127 = \mathbf{2429}$ (total $2432 - 3$ base).</p>
+                <p><strong>(c) Iceberg aggregate cells ($\text{count} \ge 2$):</strong> Only $\emptyset$ on $\{1,2,3\}$ ($1$ cell, count 3) and single kept dim on $\{1,2,3\}$ ($3 \times 1$ cells with $d_i$, count 2) pass $\implies (1 + 3) \times 128 = \mathbf{512}$.</p>
+                <p><strong>(d) Closed cells:</strong> Closed cells must fix $d_4,\dots,d_{10}$. Over $\{1,2,3\}$: count 3 gives $(*, *, *, d_4\dots)$ ($1$ cell); count 2 gives $(d_1,*,*)$, $(*,d_2,*)$, $(*,*,d_3)$ ($3$ cells); count 1 gives the $3$ base cells $\implies 1 + 3 + 3 = \mathbf{7}$.</p>
+              </div>
             </div>
           </details>
 
           <!-- Ex 3.22 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 3.22: BUC Recursive Bottom-Up Iceberg Pruning Trace</span>
+              <span>Exercise 3.22 (Book p. 139 / PDF p. 170): Curse of Dimensionality in 100-D Full, Iceberg &amp; Closed Cubes</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given 3 dimensions $A, B, C$ and threshold $\text{min\_sup} = 3$. Trace how BUC prunes when counting partition $A = a_1$.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                1. BUC sorts dimensions by decreasing cardinality: say $A (10 \text{ vals}) > B (5 \text{ vals}) > C (2 \text{ vals})$.<br/>
-                2. Base partition $(a_1, *, *)$ has count $= 2$.<br/>
-                3. BUC tests: Is count $\ge \text{min\_sup}$? $2 < 3 \implies$ <strong>FAIL</strong>.<br/>
-                4. Prune: BUC immediately skips evaluating $(a_1, b_1, *), (a_1, b_2, *), \dots, (a_1, b_k, c_j)$!<br/>
-                5. Total savings: BUC avoids scanning all subcuboids under $a_1$, cutting recursion depth by 75%.
+              <p><strong>Verbatim Question:</strong> Consider 100-D base cells $(a_1, a_2, a_3, \dots, a_{100})$ and $(a_1, a_2, b_3, \dots, b_{100})$. (a) Find number of nonempty aggregate cells + storage/time comment. (b) If iceberg condition is $\text{count} \ge 2$, how many aggregate cells and which? (c) If 20 tuples map to those two base cells with count 10 each and $\text{min\_sup}=10$: (i) how many aggregate cells appear, (ii) ignoring redundant constant-to-$*$ generalizations with same measure, how many distinct (closed) cells remain?</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Nonempty aggregate cells:</strong> Each cell produces $2^{100}-1$ aggregate cells, overlapping only when dims $3\dots 100$ are all $*$ ($2^2 = 4$ cells) $\implies 2(2^{100}-1) - 4 = \mathbf{2^{101} - 6} \approx 2.535 \times 10^{30}$ cells. Completely intractable in time and space ($O(2^D)$).</p>
+                <p><strong>(b) Iceberg ($\text{min\_sup}=2$ from count-1 cells):</strong> Only the $\mathbf{4}$ overlapping aggregate cells pass: $(a_1,a_2,*,\dots,*)$, $(a_1,*,*,\dots,*)$, $(*,a_2,*,\dots,*)$, $(*,*,*,\dots,*)$.</p>
+                <p><strong>(c)(i) Iceberg ($\text{min\_sup}=10$ on count-10 base cells):</strong> Every cell has count $10$ or $20 \ge 10$, so all $\mathbf{2^{101} - 6}$ aggregate cells survive ($2^{101}-10$ with count $10$, and $4$ with count $20$)!</p>
+                <p><strong>(c)(ii) Closed cells remaining:</strong> $\mathbf{3}$ cells: $(a_1, a_2, a_3, \dots, a_{100}):10$, $(a_1, a_2, b_3, \dots, b_{100}):10$, and $(a_1, a_2, *, \dots, *):20$.</p>
               </div>
             </div>
           </details>
@@ -800,27 +824,38 @@
         <!-- 4.3 MANDATED TEXTBOOK EXERCISES CHAPTER 4 -->
         <div class="surface-elevated p-5 space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Chapter 4)</h3>
-            <span class="text-xs font-mono text-amber-400">Ex 4.3, 4.6, 4.10</span>
+            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Han 4th Ed. Chapter 4)</h3>
+            <span class="text-xs font-mono text-amber-400">Ex 4.3, 4.6, 4.10 (plus 4.1)</span>
           </div>
+
+          <!-- Ex 4.1 -->
+          <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
+            <summary class="font-bold text-slate-200 flex items-center justify-between">
+              <span>Exercise 4.1 (Book p. 170 / PDF p. 201 — Included for Moodle "4.1Chapter 5" Check): Frequent Check from Closed Itemsets $\mathcal{C}$</span>
+              <span class="toggle-icon text-indigo-400">&rarr;</span>
+            </summary>
+            <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
+              <p><strong>Verbatim Question:</strong> Suppose you have the set $\mathcal{C}$ of all frequent closed itemsets on a data set $D$, as well as the support count for each frequent closed itemset. Describe an algorithm to determine whether a given itemset $X$ is frequent or not, and the support of $X$ if it is frequent.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p>1. Find all frequent closed supersets: $S = \{ Y \in \mathcal{C} \mid X \subseteq Y \}$.</p>
+                <p>2. If $S = \emptyset$: return <strong>not frequent</strong> (no closed frequent superset covers $X$, so $\text{closure}(X)$ cannot be frequent).</p>
+                <p>3. Otherwise ($S \ne \emptyset$): return <strong>frequent</strong> with exact support count $\text{support\_count}(X) = \max_{Y \in S} \text{support\_count}(Y)$ (because $\text{closure}(X) \in S$ has $\text{support}(X) = \text{support}(\text{closure}(X)) \ge \text{support}(Y)$ for every superset $Y \supseteq \text{closure}(X)$).</p>
+              </div>
+            </div>
+          </details>
 
           <!-- Ex 4.3 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 4.3: Apriori Candidate Join & Prune Step Trace</span>
+              <span>Exercise 4.3 (Book p. 170 / PDF p. 201): Proofs of Apriori Subset Support, Confidence &amp; Partition Properties</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given $L_3 = \{\{a, b, c\}, \{a, b, d\}, \{a, c, d\}, \{a, c, e\}, \{b, c, d\}\}$. Trace the join step and prune step to find $C_4$.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                1. Join Step ($L_3 \bowtie L_3$ on first 2 items):<br/>
-                &bull; $\{a, b, c\} \bowtie \{a, b, d\} \implies \mathbf{\{a, b, c, d\}}$<br/>
-                &bull; $\{a, c, d\} \bowtie \{a, c, e\} \implies \mathbf{\{a, c, d, e\}}$<br/>
-                Candidate set after join: $C_4 = \{\{a, b, c, d\}, \{a, c, d, e\}\}$.<br/><br/>
-                2. Prune Step (Check if all 3-subsets belong to $L_3$):<br/>
-                &bull; For $\{a, b, c, d\}$: Subsets are $\{a, b, c\} \in L_3$, $\{a, b, d\} \in L_3$, $\{a, c, d\} \in L_3$, $\{b, c, d\} \in L_3$. All present! &rarr; <strong>KEPT</strong>.<br/>
-                &bull; For $\{a, c, d, e\}$: Subsets include $\{a, d, e\}$. Is $\{a, d, e\} \in L_3$? <strong>NO!</strong> &rarr; <strong>PRUNED</strong>.<br/><br/>
-                Final Valid Candidate Set: $C_4 = \mathbf{\{\{a, b, c, d\}\}}$.
+              <p><strong>Verbatim Question:</strong> The Apriori algorithm uses prior knowledge of subset support properties. (a) Prove all nonempty subsets of a frequent itemset must be frequent. (b) Prove $\text{support}(s') \ge \text{support}(s)$ for any nonempty subset $s' \subseteq s$. (c) Given frequent itemset $l$ and $s \subset l, s' \subseteq s$, prove $\text{conf}(s' \Rightarrow (l-s')) \le \text{conf}(s \Rightarrow (l-s))$. (d) If $D$ is divided into $n$ nonoverlapping partitions, prove any globally frequent itemset in $D$ is frequent in at least one partition.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) &amp; (b):</strong> Every transaction $T \in D$ containing $s$ also contains any subset $s' \subseteq s$, so $\{T \mid s \subseteq T\} \subseteq \{T \mid s' \subseteq T\} \implies \text{sup\_count}(s') \ge \text{sup\_count}(s)$. Dividing by $|D|$ gives $\text{support}(s') \ge \text{support}(s)$. Hence if $s$ is frequent ($\ge \text{min\_sup}$), every nonempty subset $s'$ is also frequent.</p>
+                <p><strong>(c):</strong> $\text{conf}(s' \Rightarrow (l-s')) = \frac{\text{sup}(l)}{\text{sup}(s')}$ and $\text{conf}(s \Rightarrow (l-s)) = \frac{\text{sup}(l)}{\text{sup}(s)}$. By (b), $\text{sup}(s') \ge \text{sup}(s) \gt 0 \implies \frac{\text{sup}(l)}{\text{sup}(s')} \le \frac{\text{sup}(l)}{\text{sup}(s)}$.</p>
+                <p><strong>(d) Proof by contradiction:</strong> Suppose $X$ is infrequent in all partitions $D_1,\dots,D_n$: $\text{sup\_count}_{D_i}(X) \lt \sigma |D_i|$ for all $i$. Summing over $i=1\dots n$ yields $\text{sup\_count}_D(X) \lt \sigma \sum |D_i| = \sigma |D|$, contradicting that $X$ is frequent in $D$.</p>
               </div>
             </div>
           </details>
@@ -828,16 +863,24 @@
           <!-- Ex 4.6 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 4.6: FP-Tree Construction & Conditional Pattern Base</span>
+              <span>Exercise 4.6 (Book p. 171 / PDF p. 202): MONKEY 5-Transaction Database — Apriori, FP-Growth &amp; Metarules</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given 5 transactions: $T_1: \{I1, I2, I5\}$, $T_2: \{I2, I4\}$, $T_3: \{I2, I3\}$, $T_4: \{I1, I2, I4\}$, $T_5: \{I1, I3\}$. Let $\text{min\_sup} = 2$. Find frequent patterns containing $I5$.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                1. Support counts: $I2: 4, I1: 3, I3: 2, I4: 2, I5: 1$.<br/>
-                2. Filter frequent items ($\text{min\_sup} \ge 2$): $I2, I1, I3, I4$. ($I5$ has count 1 &lt; 2, so $I5$ is infrequent overall).<br/>
-                3. If $\text{min\_sup}=1$, $I5$ appears in $T_1$ with prefix path: <code>(I2:1, I1:1)</code>.<br/>
-                4. Conditional pattern base for $I5$: $\{\{I2, I1\}: 1\}$. Conditional FP-tree for $I5$ has no nodes with support &ge; 2.
+              <p><strong>Verbatim Question:</strong> A database has 5 transactions ($\text{min\_sup} = 60\% \implies 3$, $\text{min\_conf} = 80\%$): <code>T100: {M,O,N,K,E,Y}</code>, <code>T200: {D,O,N,K,E,Y}</code>, <code>T300: {M,A,K,E}</code>, <code>T400: {M,U,C,K,Y}</code>, <code>T500: {C,O,O,K,I,E}</code> (as distinct item set: <code>{C,O,K,I,E}</code>). (a) Find all frequent itemsets via Apriori &amp; FP-growth and compare efficiency. (b) List all strong rules matching $\forall x \in \text{transaction},\; \text{buys}(X, \text{item}_1) \land \text{buys}(X, \text{item}_2) \Rightarrow \text{buys}(X, \text{item}_3)\; [s, c]$.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a1) Apriori (3 DB scans):</strong></p>
+                <p>&bull; $L_1$ (count $\ge 3$): <code>{E}:4, {K}:5, {M}:3, {O}:3, {Y}:3</code> (dropped: A:1, C:2, D:1, I:1, N:2, U:1).</p>
+                <p>&bull; $C_2 \to L_2$ (5 of 10 pairs pass): <code>{E,K}:4, {E,O}:3, {K,M}:3, {K,O}:3, {K,Y}:3</code>.</p>
+                <p>&bull; $C_3$ after Apriori prune: <code>{K,M,O}, {K,M,Y}, {K,O,Y}</code> pruned (2-subsets missing in $L_2$); only <code>{E,K,O}</code> remains &rarr; $L_3 = \{\{E,K,O\}:3\}$. (Total: <strong>11 frequent itemsets</strong>.)</p>
+                <p><strong>(a2) FP-Growth (2 DB scans, zero candidates):</strong> F-list <code>K:5, E:4, M:3, O:3, Y:3</code>.</p>
+                <p>&bull; Ordered DB: <code>KEMOY, KEOY, KEM, KMY, KEO</code> &rarr; Root branches via shared prefix <code>K:5 &rarr; E:4</code>.</p>
+                <p>&bull; Mining suffix <code>Y</code>: prefix base <code>{KEMO:1, KEO:1, KM:1}</code> &rarr; cond tree <code>K:3</code> &rarr; <code>{Y}:3, {K,Y}:3</code>. Suffix <code>O</code>: <code>{KEM:1, KE:2}</code> &rarr; <code>K:3, E:3</code> &rarr; <code>{O}:3, {K,O}:3, {E,O}:3, {E,K,O}:3</code>. Suffix <code>M</code>: <code>{K,M}:3</code>. Suffix <code>E</code>: <code>{K,E}:4</code>. Suffix <code>K</code>: <code>{K}:5</code>.</p>
+                <p>&bull; <strong>Efficiency:</strong> FP-growth needs 2 scans (vs 3) and generates 0 candidates (vs 22 tested + 3 pruned).</p>
+                <p><strong>(b) Strong Metarules (from $L_3 = \{E, K, O\}$, $s = 3/5 = 60\%$):</strong></p>
+                <p>&bull; $E \land K \Rightarrow O$: conf $= 3/4 = 75\%$ (Fail $&lt; 80\%$).</p>
+                <p>&bull; $\mathbf{E \land O \Rightarrow K}$: $\text{sup}=60\%, \text{conf}=3/3=\mathbf{100\%}$ (Strong!).</p>
+                <p>&bull; $\mathbf{K \land O \Rightarrow E}$: $\text{sup}=60\%, \text{conf}=3/3=\mathbf{100\%}$ (Strong!).</p>
               </div>
             </div>
           </details>
@@ -845,23 +888,17 @@
           <!-- Ex 4.10 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 4.10: Lift vs Kulczynski vs Imbalance Ratio</span>
+              <span>Exercise 4.10 (Book p. 172 / PDF p. 203): Incremental Association Rule Mining on $DB \cup \Delta DB$</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> In a database of 10,000 transactions, 1,000 buy Coffee, 2,000 buy Tea, and 800 buy both. Compute Lift, Kulczynski ($Kulc$), and Imbalance Ratio ($IR$).</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                &bull; $P(Coffee) = \frac{1000}{10000} = 0.10$<br/>
-                &bull; $P(Tea) = \frac{2000}{10000} = 0.20$<br/>
-                &bull; $P(Coffee \cap Tea) = \frac{800}{10000} = 0.08$<br/><br/>
-                1. Lift:<br/>
-                $$\text{Lift}(Coffee \implies Tea) = \frac{P(Coffee \cap Tea)}{P(Coffee)P(Tea)} = \frac{0.08}{0.10 \times 0.20} = \frac{0.08}{0.02} = \mathbf{4.0}$$
-                Lift $= 4.0 > 1 \implies$ Coffee and Tea are strongly positively correlated!<br/><br/>
-                2. Kulczynski Measure (Null-Invariant):<br/>
-                $$P(Tea|Coffee) = \frac{800}{1000} = 0.80, \quad P(Coffee|Tea) = \frac{800}{2000} = 0.40$$
-                $$\text{Kulc} = \frac{1}{2}(0.80 + 0.40) = \mathbf{0.60}$$
-                3. Imbalance Ratio ($IR$):<br/>
-                $$IR = \frac{|P(Coffee) - P(Tea)|}{P(Coffee) + P(Tea) - P(Coffee \cap Tea)} = \frac{|0.10 - 0.20|}{0.10 + 0.20 - 0.08} = \frac{0.10}{0.22} \approx \mathbf{0.4545}$$
+              <p><strong>Verbatim Question:</strong> Suppose that frequent itemsets are saved for a large transactional database, $DB$. Discuss how to efficiently mine the (global) association rules under the same minimum support threshold, if a set of new transactions, denoted as $\Delta DB$, is (incrementally) added in?</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p>Threshold becomes $\sigma(|DB| + |\Delta DB|)$. By the partition property (Ex. 4.3d), any globally frequent itemset in $DB' = DB \cup \Delta DB$ must be frequent in $DB$ or $\Delta DB$ (or both), giving the <strong>FUP Incremental Mining Strategy</strong>:</p>
+                <p>&bull; <strong>Case 1 ($X \in L^{DB}, X \in L^{\Delta DB}$):</strong> Automatically frequent in $DB'$; simply add counts ($\text{no } DB \text{ scan}$).</p>
+                <p>&bull; <strong>Case 2 ($X \in L^{DB}, X \notin L^{\Delta DB}$):</strong> Count $X$ in small $\Delta DB$ only. If sum $&lt; \sigma(|DB|+|\Delta DB|)$, discard "loser" + its supersets ($\text{no } DB \text{ scan}$).</p>
+                <p>&bull; <strong>Case 3 ($X \notin L^{DB}, X \in L^{\Delta DB}$):</strong> Candidate new "winner"; scan original $DB$ <em>only</em> for these surviving candidates (whose $(k-1)$-subsets are globally frequent).</p>
+                <p>&bull; <strong>Case 4 ($X \notin L^{DB}, X \notin L^{\Delta DB}$):</strong> Impossible to be globally frequent; prune immediately. Finally generate strong rules directly from updated $L^{DB'}$ in memory.</p>
               </div>
             </div>
           </details>
@@ -1103,35 +1140,44 @@
         <!-- 6.4 MANDATED TEXTBOOK EXERCISES CHAPTER 6 -->
         <div class="surface-elevated p-5 space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Chapter 6)</h3>
+            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Han 4th Ed. Chapter 6)</h3>
             <span class="text-xs font-mono text-amber-400">Ex 6.7, 6.19</span>
           </div>
 
           <!-- Ex 6.7 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 6.7: Information Gain vs Gini Index Calculation Walkthrough</span>
+              <span>Exercise 6.7 (Book pp. 299–300 / PDF pp. 330–331): Count-Weighted Decision Tree &amp; Naive Bayes</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given a dataset of 14 credit applicants: 9 Approved ($C_1$), 5 Rejected ($C_2$). Attribute <code>Income</code> has 3 values: Low (4 tuples: 1 Approved, 3 Rejected), Medium (6 tuples: 4 Approved, 2 Rejected), High (4 tuples: 4 Approved, 0 Rejected). Compute Information Gain and Gini Index split for Income.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                1. Base Entropy $\text{Info}(D)$:<br/>
-                $$\text{Info}(D) = -\left(\frac{9}{14}\log_2\frac{9}{14} + \frac{5}{14}\log_2\frac{5}{14}\right) = -(0.6429 \times (-0.6374) + 0.3571 \times (-1.4854)) = 0.4098 + 0.5305 = \mathbf{0.9403} \text{ bits}$$
-                2. Conditional Entropy $\text{Info}_{\text{Income}}(D)$:<br/>
-                &bull; Low (1A, 3R): $\text{Info}(D_{\text{Low}}) = -\left(\frac{1}{4}\log_2\frac{1}{4} + \frac{3}{4}\log_2\frac{3}{4}\right) = -(0.25(-2) + 0.75(-0.415)) = 0.5 + 0.3113 = 0.8113$<br/>
-                &bull; Medium (4A, 2R): $\text{Info}(D_{\text{Med}}) = -\left(\frac{4}{6}\log_2\frac{4}{6} + \frac{2}{6}\log_2\frac{2}{6}\right) = -(0.667(-0.585) + 0.333(-1.585)) = 0.390 + 0.528 = 0.9183$<br/>
-                &bull; High (4A, 0R): Pure node! $\text{Info}(D_{\text{High}}) = 0$<br/>
-                $$\text{Info}_{\text{Income}}(D) = \frac{4}{14}(0.8113) + \frac{6}{14}(0.9183) + \frac{4}{14}(0) = 0.2318 + 0.3936 + 0 = \mathbf{0.6254} \text{ bits}$$
-                3. Information Gain:<br/>
-                $$\text{Gain}(D, \text{Income}) = \text{Info}(D) - \text{Info}_{\text{Income}}(D) = 0.9403 - 0.6254 = \mathbf{0.3149} \text{ bits}$$
-                4. Base Gini Index $\text{Gini}(D)$:<br/>
-                $$\text{Gini}(D) = 1 - \left[\left(\frac{9}{14}\right)^2 + \left(\frac{5}{14}\right)^2\right] = 1 - [0.4133 + 0.1276] = \mathbf{0.4592}$$
-                5. Binary Split Gini on \{Low\} vs \{Med, High\}:<br/>
-                &bull; Low (1A, 3R): $\text{Gini}(D_1) = 1 - [(1/4)^2 + (3/4)^2] = 1 - [0.0625 + 0.5625] = 0.375$<br/>
-                &bull; Med, High (8A, 2R): $\text{Gini}(D_2) = 1 - [(8/10)^2 + (2/10)^2] = 1 - [0.64 + 0.04] = 0.320$<br/>
-                $$\text{Gini}_{\{\text{Low}\}}(D) = \frac{4}{14}(0.375) + \frac{10}{14}(0.320) = 0.1071 + 0.2286 = \mathbf{0.3357}$$
-                $$\Delta \text{Gini} = 0.4592 - 0.3357 = \mathbf{0.1235}$$
+              <p><strong>Verbatim Question:</strong> Generalized employee training data with <code>count</code> tuples (class label: <code>status</code> $\in \{\text{senior}, \text{junior}\}$). (a) Explain how to modify basic decision tree induction (Fig. 6.3) to handle <code>count</code>. (b) Construct a decision tree using that algorithm. (c) Classify unseen tuple $X = (\text{department}=\text{systems}, \text{age}=26\dots 30, \text{salary}=46\text{K}\dots 50\text{K})$ via naive Bayes.</p>
+              <div class="overflow-x-auto my-1">
+                <table class="w-full text-[11px] font-mono text-left border border-white/10">
+                  <tr class="bg-slate-950 text-amber-300"><th class="p-1.5">department</th><th class="p-1.5">status</th><th class="p-1.5">age</th><th class="p-1.5">salary</th><th class="p-1.5 text-right">count</th></tr>
+                  <tr><td class="p-1.5">sales</td><td>senior</td><td>31...35</td><td>46K...50K</td><td class="text-right pr-2">30</td></tr>
+                  <tr><td class="p-1.5">sales</td><td>junior</td><td>26...30</td><td>26K...30K</td><td class="text-right pr-2">40</td></tr>
+                  <tr><td class="p-1.5">sales</td><td>junior</td><td>31...35</td><td>31K...35K</td><td class="text-right pr-2">40</td></tr>
+                  <tr><td class="p-1.5">systems</td><td>junior</td><td>21...25</td><td>46K...50K</td><td class="text-right pr-2">20</td></tr>
+                  <tr><td class="p-1.5">systems</td><td>senior</td><td>31...35</td><td>66K...70K</td><td class="text-right pr-2">5</td></tr>
+                  <tr><td class="p-1.5">systems</td><td>junior</td><td>26...30</td><td>46K...50K</td><td class="text-right pr-2">3</td></tr>
+                  <tr><td class="p-1.5">systems</td><td>senior</td><td>41...45</td><td>66K...70K</td><td class="text-right pr-2">3</td></tr>
+                  <tr><td class="p-1.5">marketing</td><td>senior</td><td>36...40</td><td>46K...50K</td><td class="text-right pr-2">10</td></tr>
+                  <tr><td class="p-1.5">marketing</td><td>junior</td><td>31...35</td><td>41K...45K</td><td class="text-right pr-2">4</td></tr>
+                  <tr><td class="p-1.5">secretary</td><td>senior</td><td>46...50</td><td>36K...40K</td><td class="text-right pr-2">4</td></tr>
+                  <tr><td class="p-1.5">secretary</td><td>junior</td><td>26...30</td><td>26K...30K</td><td class="text-right pr-2">6</td></tr>
+                </table>
+              </div>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Algorithm Modification:</strong> Use <code>count</code> as row weight: $|D| = \sum \text{count}_r$, $|C_{i,D}| = \sum_{r \in C_i} \text{count}_r$, weighted entropy/gain fractions $|D_j|/|D|$, and majority voting by highest summed <code>count</code>.</p>
+                <p><strong>(b) Decision Tree ($|D| = 165$: $52$ senior, $113$ junior):</strong></p>
+                <p>&bull; Root $\text{Info}(D) = -\frac{52}{165}\log_2\frac{52}{165} - \frac{113}{165}\log_2\frac{113}{165} = \mathbf{0.8990}$ bits.</p>
+                <p>&bull; $\text{Gain}(\text{department}) = 0.8990 - 0.8504 = \mathbf{0.0486}$; $\text{Gain}(\text{age}) = 0.8990 - \frac{79}{165}(0.9906) = \mathbf{0.4247}$; $\text{Gain}(\text{salary}) = 0.8990 - \frac{63}{165}(0.9468) = \mathbf{0.5375}$ &rarr; <strong>Split root on <code>salary</code></strong>.</p>
+                <p>&bull; Pure leaves under <code>salary</code>: <code>26K...30K</code> (46 junior), <code>31K...35K</code> (40 junior), <code>36K...40K</code> (4 senior), <code>41K...45K</code> (4 junior), <code>66K...70K</code> (8 senior).</p>
+                <p>&bull; Impure branch <code>46K...50K</code> ($40$ senior, $23$ junior): both <code>department</code> and <code>age</code> achieve pure split ($\text{Gain}=0.9468$; <code>department</code> wins GainRatio tie-break: <code>sales</code> &rarr; senior, <code>systems</code> &rarr; junior, <code>marketing</code> &rarr; senior).</p>
+                <p><strong>(c) Naive Bayes for $X = (\text{systems}, 26\dots 30, 46\text{K}\dots 50\text{K})$:</strong></p>
+                <p>&bull; Raw counts: $P(\text{age}=26\dots 30 \mid \text{senior}) = 0/52 = 0 \implies P(X|\text{senior})P(\text{senior}) = 0$; $P(X|\text{junior})P(\text{junior}) = \left(\frac{23}{113}\cdot\frac{49}{113}\cdot\frac{23}{113}\right)\frac{113}{165} = \mathbf{0.012303}$.</p>
+                <p>&bull; With Laplace correction ($q_{\text{dept}}=4, q_{\text{age}}=6, q_{\text{sal}}=6$): $P_{\text{Lap}}(X|\text{senior})P(\text{senior}) = \left(\frac{9}{56}\cdot\frac{1}{58}\cdot\frac{41}{58}\right)\frac{52}{165} = \mathbf{0.000617}$ vs $P_{\text{Lap}}(X|\text{junior})P(\text{junior}) = \left(\frac{24}{117}\cdot\frac{50}{119}\cdot\frac{24}{119}\right)\frac{113}{165} = \mathbf{0.011904}$ &rarr; <strong>Predict <code>status = junior</code></strong> ($95.07\%$ posterior).</p>
               </div>
             </div>
           </details>
@@ -1139,20 +1185,17 @@
           <!-- Ex 6.19 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 6.19: Naive Bayes Classification & Laplace Correction</span>
+              <span>Exercise 6.19 (Book p. 302 / PDF p. 333): 10-Fold Cross-Validation Paired t-Test (M1 vs M2)</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given a training set where attribute $A$ has 3 values $\{a_1, a_2, a_3\}$. In class $C_1$ (70 samples), counts are $a_1=50, a_2=20, a_3=0$. Show how Laplace correction avoids zero probability when classifying a sample with $A=a_3$.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                1. Without Laplace correction:<br/>
-                $$P(a_3|C_1) = \frac{0}{70} = 0 \implies P(\mathbf{x}|C_1) = 0 \times \prod_{k \ne A} P(x_k|C_1) = 0$$
-                A single unseen value destroys all evidence from all other attributes!<br/><br/>
-                2. With Laplace correction ($+1$ to numerator, $+q=3$ to denominator):<br/>
-                $$P_{\text{Laplace}}(a_1|C_1) = \frac{50 + 1}{70 + 3} = \frac{51}{73} \approx 0.6986$$
-                $$P_{\text{Laplace}}(a_2|C_1) = \frac{20 + 1}{70 + 3} = \frac{21}{73} \approx 0.2877$$
-                $$P_{\text{Laplace}}(a_3|C_1) = \frac{0 + 1}{70 + 3} = \frac{\mathbf{1}}{\mathbf{73}} \approx \mathbf{0.0137}$$
-                Sum check: $\frac{51+21+1}{73} = \frac{73}{73} = 1.0$. The zero trap is completely avoided while preserving valid probability axioms.
+              <p><strong>Verbatim Question:</strong> Comparing prediction models $M_1$ and $M_2$ over 10 rounds of 10-fold CV: $M_1$ error rates = <code>30.5, 32.2, 20.7, 20.6, 31.0, 41.0, 27.7, 26.0, 21.5, 26.0</code>; $M_2$ error rates = <code>22.4, 14.5, 22.4, 19.6, 20.7, 20.4, 22.1, 19.4, 16.2, 35.0</code>. Is one model significantly better at significance level $1\%$ ($\alpha = 0.01$)?</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p>1. Paired differences $d_i = \text{err}(M_1)_i - \text{err}(M_2)_i$: $[+8.1, +17.7, -1.7, +1.0, +10.3, +20.6, +5.6, +6.6, +5.3, -9.0]$.</p>
+                <p>2. Means: $\overline{\text{err}}(M_1) = 27.72$, $\overline{\text{err}}(M_2) = 21.27 \implies \bar{d} = \frac{64.5}{10} = \mathbf{6.45}$.</p>
+                <p>3. Variance (Han Eq. 6.32 uses $\div k$): $\sum (d_i - \bar{d})^2 = 681.225 \implies \text{var}(M_1 - M_2) = \frac{681.225}{10} = 68.1225$.</p>
+                <p>4. $t$-statistic (Han Eq. 6.31): $t = \frac{6.45}{\sqrt{68.1225 / 10}} = \frac{6.45}{2.6100} \approx \mathbf{2.4712}$ ($p = 0.0355$; standard $\div (k-1)$ sample variance gives $t \approx 2.3444$).</p>
+                <p>5. Decision ($\text{df} = 9$, two-tailed $\alpha = 0.01 \implies t_{0.005,\,9} = \mathbf{3.250}$): Since $|t| = 2.4712 \lt 3.250$, <strong>fail to reject $H_0$</strong>. Not statistically significant at $1\%$ (though significant at $5\%$ where $t_{0.025,9} = 2.262$).</p>
               </div>
             </div>
           </details>
@@ -1499,33 +1542,33 @@
         <!-- 9.4 TEXTBOOK WORKED EXAMPLE §10.1 -->
         <div class="surface-elevated p-5 space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-bold text-amber-300">Mandated Textbook Worked Numerical Walkthrough (Han §10.1)</h3>
+            <h3 class="text-base font-bold text-amber-300">Mandated Textbook Worked Example 10.1 (Han §10.1, Book pp. 495–496 / PDF pp. 526–527)</h3>
             <span class="text-xs font-mono text-amber-400">"Practice the example"</span>
           </div>
 
           <div class="p-4 rounded bg-slate-900 border border-white/10 space-y-3 text-xs">
             <p class="text-slate-200">
-              <strong>Given:</strong> 2 inputs ($x_1=0.05, x_2=0.10$), biases $b_1=0.35, b_2=0.60$. Target outputs $t_1=0.01, t_2=0.99$. Learning rate $\eta=0.5$. Initial weights: $w_1=0.15, w_2=0.20, w_3=0.25, w_4=0.30, w_5=0.40, w_6=0.45, w_7=0.50, w_8=0.55$.
+              <strong>Given (Fig. 10.7 &amp; Table 10.1):</strong> 3 input nodes ($x_1=1, x_2=0, x_3=1$), 2 hidden nodes (Units 4, 5), 1 output node (Unit 6), target class label $T=1$, learning rate $\eta=0.9$. Initial weights &amp; biases: $w_{14}=0.2, w_{15}=-0.3, w_{24}=0.4, w_{25}=0.1, w_{34}=-0.5, w_{35}=0.2, w_{46}=-0.3, w_{56}=-0.2, b_4=-0.4, b_5=0.2, b_6=0.1$.
             </p>
 
             <div class="font-mono text-slate-300 space-y-1.5 bg-slate-950 p-3 rounded">
-              <strong class="text-indigo-400 block mb-1">Step 1: Forward Propagation</strong>
-              &bull; $z_{h1} = 0.15(0.05) + 0.20(0.10) + 0.35 = 0.3775 \implies a_{h1} = \frac{1}{1 + e^{-0.3775}} \approx \mathbf{0.59327}$<br/>
-              &bull; $z_{h2} = 0.25(0.05) + 0.30(0.10) + 0.35 = 0.3925 \implies a_{h2} = \frac{1}{1 + e^{-0.3925}} \approx \mathbf{0.59688}$<br/>
-              &bull; $z_{o1} = 0.40(0.59327) + 0.45(0.59688) + 0.60 = 1.1059 \implies a_{o1} = \frac{1}{1 + e^{-1.1059}} \approx \mathbf{0.75137}$<br/>
-              &bull; $z_{o2} = 0.50(0.59327) + 0.55(0.59688) + 0.60 = 1.2249 \implies a_{o2} = \frac{1}{1 + e^{-1.2249}} \approx \mathbf{0.77293}$<br/>
-              &bull; Total Squared Error: $E = \frac{1}{2}(0.01 - 0.75137)^2 + \frac{1}{2}(0.99 - 0.77293)^2 = 0.27481 + 0.02356 = \mathbf{0.29837}$<br/><br/>
+              <p><strong class="text-indigo-400 block mb-1">Step 1: Forward Propagation (Table 10.2)</strong></p>
+              <p>&bull; Unit 4: $I_4 = 0.2(1) + 0.4(0) - 0.5(1) - 0.4 = -0.7 \implies O_4 = \frac{1}{1 + e^{0.7}} \approx \mathbf{0.332}$ (exact $0.3318$)</p>
+              <p>&bull; Unit 5: $I_5 = -0.3(1) + 0.1(0) + 0.2(1) + 0.2 = +0.1 \implies O_5 = \frac{1}{1 + e^{-0.1}} \approx \mathbf{0.525}$ (exact $0.5250$)</p>
+              <p>&bull; Unit 6: $I_6 = (-0.3)(0.332) + (-0.2)(0.525) + 0.1 = -0.105 \implies O_6 = \frac{1}{1 + e^{0.105}} \approx \mathbf{0.474}$ (exact $0.4739$)</p>
 
-              <strong class="text-sky-400 block mb-1">Step 2: Backward Pass for Output Weight $w_5$</strong>
-              &bull; $\delta_{o1} = (a_{o1} - t_1) \cdot a_{o1}(1 - a_{o1}) = (0.75137 - 0.01) \cdot 0.75137(0.24863) \approx \mathbf{0.13850}$<br/>
-              &bull; $\frac{\partial E}{\partial w_5} = \delta_{o1} \cdot a_{h1} = 0.13850 \times 0.59327 \approx \mathbf{0.08217}$<br/>
-              &bull; Updated $w_5^+ = w_5 - \eta \frac{\partial E}{\partial w_5} = 0.40 - 0.5(0.08217) = \mathbf{0.35892}$<br/><br/>
+              <p><strong class="text-sky-400 block mt-2 mb-1">Step 2: Error Backpropagation (Table 10.3 — Exact Textbook Values)</strong></p>
+              <p>&bull; Unit 6: $\delta_6 = O_6(1 - O_6)(T - O_6) = (0.474)(1 - 0.474)(1 - 0.474) = \mathbf{0.1311}$</p>
+              <p>&bull; Unit 5: $\delta_5 = O_5(1 - O_5)\delta_6 w_{56} = (0.525)(1 - 0.525)(0.1311)(-0.2) = \mathbf{-0.0065}$</p>
+              <p>&bull; Unit 4: $\delta_4 = O_4(1 - O_4)\delta_6 w_{46} = (0.332)(1 - 0.332)(0.1311)(-0.3) = \mathbf{-0.0087}$</p>
 
-              <strong class="text-emerald-400 block mb-1">Step 3: Backward Pass for Hidden Weight $w_1$</strong>
-              &bull; $\delta_{o2} = (a_{o2} - t_2) \cdot a_{o2}(1 - a_{o2}) = (0.77293 - 0.99) \cdot 0.77293(0.22707) \approx \mathbf{-0.03810}$<br/>
-              &bull; $\delta_{h1} = (\delta_{o1} w_5 + \delta_{o2} w_7) \cdot a_{h1}(1 - a_{h1}) = (0.13850(0.40) + (-0.03810)(0.50)) \cdot 0.59327(0.40673) \approx \mathbf{0.00877}$<br/>
-              &bull; $\frac{\partial E}{\partial w_1} = \delta_{h1} \cdot x_1 = 0.00877 \times 0.05 \approx \mathbf{0.000439}$<br/>
-              &bull; Updated $w_1^+ = w_1 - \eta \frac{\partial E}{\partial w_1} = 0.15 - 0.5(0.000439) = \mathbf{0.14978}$
+              <p><strong class="text-emerald-400 block mt-2 mb-1">Step 3: Weight &amp; Bias Updates (Table 10.4)</strong></p>
+              <p>&bull; $w_{46}^{\text{new}} = -0.3 - (0.9)(0.1311)(0.332) = \mathbf{-0.339}$; &nbsp; $w_{56}^{\text{new}} = -0.2 - (0.9)(0.1311)(0.525) = \mathbf{-0.262}$</p>
+              <p>&bull; $w_{14}^{\text{new}} = 0.2 - (0.9)(-0.0087)(1) = \mathbf{0.208}$; &nbsp; $w_{15}^{\text{new}} = -0.3 - (0.9)(-0.0065)(1) = \mathbf{-0.294}$</p>
+              <p>&bull; $w_{24}^{\text{new}} = 0.4 - 0 = \mathbf{0.4}$; &nbsp; $w_{25}^{\text{new}} = 0.1 - 0 = \mathbf{0.1}$ (since $x_2 = 0$)</p>
+              <p>&bull; $w_{34}^{\text{new}} = -0.5 - (0.9)(-0.0087)(1) = \mathbf{-0.492}$; &nbsp; $w_{35}^{\text{new}} = 0.2 - (0.9)(-0.0065)(1) = \mathbf{0.206}$</p>
+              <p>&bull; $b_6^{\text{new}} = 0.1 - (0.9)(0.1311) = -0.0180$ (book misprints $-0.180$); &nbsp; $b_5^{\text{new}} = \mathbf{0.206}$; &nbsp; $b_4^{\text{new}} = \mathbf{-0.392}$.</p>
+              <p class="text-amber-300 pt-1"><em>Book Errata Note:</em> Han 4th Ed. Table 10.3 computes $\delta_6 = +0.1311$ using $(T - O_6)$ while Table 10.4 subtracts $\eta \delta_j O_i$ (using Eq. 10.4 sign $\delta_6 = (O_6 - T)O_6(1-O_6) = -0.1311$ gives $w_{46}^{\text{new}} = -0.261$, moving $O_6$ closer to $T=1$).</p>
             </div>
           </div>
         </div>

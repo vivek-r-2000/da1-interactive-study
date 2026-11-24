@@ -81,23 +81,31 @@ part3_html = r"""
         <!-- 3.4 MANDATED TEXTBOOK EXERCISES CHAPTER 3 -->
         <div class="surface-elevated p-5 space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Chapter 3)</h3>
+            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Han 4th Ed. Chapter 3)</h3>
             <span class="text-xs font-mono text-amber-400">Ex 3.15, 3.17, 3.18, 3.22</span>
           </div>
 
           <!-- Ex 3.15 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 3.15: Star Schema vs Snowflake Schema Design</span>
+              <span>Exercise 3.15 (Book pp. 137–138 / PDF pp. 168–169): ROLAP, MOLAP &amp; HOLAP Implementations</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Design a Star Schema and Snowflake Schema for a University hospital tracking Patient Visits across Dimensions (Patient, Doctor, Department, Time). Compare their query trade-offs.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                &bull; Fact Table: Patient_Visits_Fact(patient_id, doctor_id, dept_id, time_id, charge, length_of_stay)<br/>
-                &bull; Star Schema: Dimensions patient_dim, doctor_dim, dept_dim, time_dim are denormalized.<br/>
-                &bull; Snowflake Schema: dept_dim normalized into (dept_dim &rarr; hospital_branch_dim); time_dim normalized into (day &rarr; month &rarr; quarter &rarr; year).<br/>
-                &bull; Trade-off: Snowflake saves disk space by removing redundant department descriptions, but Star schema answers aggregations ~3&times; faster due to zero dimension joins.
+              <p><strong>Verbatim Question:</strong> A multidimensional view can be implemented by a relational technique (<em>ROLAP</em>), a multidimensional technique (<em>MOLAP</em>), or a hybrid technique (<em>HOLAP</em>). (a) Briefly describe each. (b) Explain how each implements: (i) warehouse generation (incl. aggregation), (ii) roll-up, (iii) drill-down, (iv) incremental updating. (c) Which do you prefer, and why?</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Descriptions:</strong> <strong>ROLAP</strong> uses relational tables (star/snowflake) + OLAP middleware generating SQL. <strong>MOLAP</strong> stores cuboids directly in compressed array-based multidimensional structures. <strong>HOLAP</strong> combines both: atomic base data in ROLAP + high-level summary cubes in MOLAP.</p>
+                <p><strong>(b) Operations Matrix:</strong></p>
+                <div class="overflow-x-auto my-1">
+                  <table class="w-full text-[10px] text-left border border-white/10">
+                    <tr class="bg-slate-900 text-amber-300"><th class="p-1.5">Operation</th><th class="p-1.5">ROLAP</th><th class="p-1.5">MOLAP</th><th class="p-1.5">HOLAP</th></tr>
+                    <tr><td class="p-1.5 font-bold">i. Generation</td><td class="p-1.5">Load fact/dim tables; compute SQL GROUP BY / CUBE summary tables.</td><td class="p-1.5">Map dims to array indices; MultiWay array cubing with sparse compression.</td><td class="p-1.5">Load base rows to ROLAP; materialize upper summary cuboids in MOLAP.</td></tr>
+                    <tr><td class="p-1.5 font-bold">ii. Roll-up</td><td class="p-1.5">Join dims to parent level + SQL GROUP BY (or redirect to coarser table).</td><td class="p-1.5">Index directly into coarser cuboid array or sum along axis.</td><td class="p-1.5">Read precomputed MOLAP array; fall back to ROLAP if not materialized.</td></tr>
+                    <tr><td class="p-1.5 font-bold">iii. Drill-down</td><td class="p-1.5">SQL query with WHERE on parent + GROUP BY finer dim attribute.</td><td class="p-1.5">Index lower-level array chunk along refined dim coordinates.</td><td class="p-1.5">Traverse MOLAP arrays; switch to ROLAP SQL for raw drill-through.</td></tr>
+                    <tr><td class="p-1.5 font-bold">iv. Incremental Update</td><td class="p-1.5">Append deltas to fact table; update affected summary rows via MERGE.</td><td class="p-1.5">Insert into chunks; expand/re-chunk arrays for new members; propagate ancestors.</td><td class="p-1.5">Append raw deltas to ROLAP, then propagate delta aggregates to MOLAP.</td></tr>
+                  </table>
+                </div>
+                <p><strong>(c) Preference:</strong> <strong>HOLAP</strong> is best overall for large enterprise warehouses: massive sparse atomic data scales cleanly in ROLAP while frequent summary analytics run at MOLAP array speed.</p>
               </div>
             </div>
           </details>
@@ -105,50 +113,51 @@ part3_html = r"""
           <!-- Ex 3.17 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 3.17: OLAP Operations Sequence Walkthrough</span>
+              <span>Exercise 3.17 (Book p. 138 / PDF p. 169): Max &amp; Min Cells in an n-D Data Cube (p Distinct Values)</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Starting from total annual sales by country: <code>Sales(Country, Year)</code>, give the exact OLAP sequence to view quarterly sales of laptops in India for 2026.</p>
-              <ol class="list-decimal ml-5 space-y-1 font-mono text-slate-200">
-                <li><strong>Slice:</strong> Fix <code>Country = 'India'</code> and <code>Year = '2026'</code>.</li>
-                <li><strong>Drill-Down:</strong> Descend on Time hierarchy from <code>Year</code> &rarr; <code>Quarter</code> (Q1, Q2, Q3, Q4).</li>
-                <li><strong>Drill-Down (Dimension addition):</strong> Introduce the Item dimension hierarchy.</li>
-                <li><strong>Slice:</strong> Filter <code>Item_Category = 'Laptops'</code>.</li>
-              </ol>
+              <p><strong>Verbatim Question:</strong> A data cube $C$ has $n$ dimensions, each with exactly $p$ distinct values in the base cuboid (no concept hierarchies). Find: (a) max cells in base cuboid, (b) min cells in base cuboid, (c) max cells in $C$ (base + aggregate), (d) min cells in $C$.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Max base cells:</strong> All Cartesian tuples present $\implies \mathbf{p^n}$.</p>
+                <p><strong>(b) Min base cells:</strong> Every dimension still exhibits all $p$ distinct values; placing values diagonally $(v_{1,i}, \dots, v_{n,i})$ requires at least $\mathbf{p}$ cells.</p>
+                <p><strong>(c) Max total cells in $C$:</strong> Each coordinate takes $p$ values or $*$ (<code>all</code>): $\sum_{k=0}^n \binom{n}{k} p^k = \mathbf{(p + 1)^n}$.</p>
+                <p><strong>(d) Min total cells in $C$:</strong> Out of $2^n$ cuboids, the $0$-D apex has $1$ cell, and all $2^n - 1$ non-apex cuboids retain $\ge 1$ dimension with $p$ distinct values ($\ge p$ cells each; achieved by $p$ diagonal base cells) $\implies \mathbf{p(2^n - 1) + 1 = p \cdot 2^n - p + 1}$.</p>
+              </div>
             </div>
           </details>
 
           <!-- Ex 3.18 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 3.18: Distributive vs Algebraic vs Holistic Classification</span>
+              <span>Exercise 3.18 (Book p. 138 / PDF p. 169): 10-D Base Cuboid (3 Cells) — Full, Iceberg &amp; Closed Cells</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Classify the following aggregate functions and prove why <code>Median</code> is holistic:</p>
-              <ul class="space-y-1 font-mono text-slate-200">
-                <li>&bull; <code>SUM</code>, <code>MIN</code>, <code>MAX</code>, <code>COUNT</code> &rarr; <strong>Distributive</strong>: $SUM(D) = \sum_{k} SUM(D_k)$.</li>
-                <li>&bull; <code>AVG</code>, <code>Standard Deviation</code> &rarr; <strong>Algebraic</strong>: $AVG(D) = \frac{\sum SUM(D_k)}{\sum COUNT(D_k)}$. Requires exactly 2 distributive tracking values.</li>
-                <li>&bull; <code>MEDIAN</code> &rarr; <strong>Holistic</strong>: Given $Median(D_1) = 50$ and $Median(D_2) = 70$, the true median of $D_1 \cup D_2$ cannot be determined without knowing the full distribution of all individual raw elements!</li>
-              </ul>
+              <p><strong>Verbatim Question:</strong> A 10-D base cuboid has 3 base cells: (1) $(a_1, d_2, d_3, d_4, \dots, d_{10})$, (2) $(d_1, b_2, d_3, d_4, \dots, d_{10})$, (3) $(d_1, d_2, c_3, d_4, \dots, d_{10})$, with $a_1 \ne d_1, b_2 \ne d_2, c_3 \ne d_3$ and measure <code>count()</code>. Find: (a) nonempty cuboids, (b) nonempty aggregate (nonbase) cells, (c) nonempty aggregate cells with <code>count >= 2</code>, (d) closed cells in the full cube.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p>Let dims $\{4,\dots,10\}$ have $2^7 = 128$ keep/$*$ subsets (values never differ there).</p>
+                <p><strong>(a) Nonempty cuboids:</strong> Every projection of 3 base cells is nonempty $\implies 2^{10} = \mathbf{1024}$.</p>
+                <p><strong>(b) Nonempty aggregate cells:</strong> Over dims $\{1,2,3\}$: $\emptyset$ gives $1$ cell (count 3); 1 kept dim ($3$ choices) gives $2$ cells each (count 2 and 1); 2 kept dims ($3$ choices) give $3$ cells each; all 3 kept dims give $3$ cells in $128 - 1 = 127$ nonbase cuboids. Sum $= (1 + 6 + 9) \times 128 + 3 \times 127 = \mathbf{2429}$ (total $2432 - 3$ base).</p>
+                <p><strong>(c) Iceberg aggregate cells ($\text{count} \ge 2$):</strong> Only $\emptyset$ on $\{1,2,3\}$ ($1$ cell, count 3) and single kept dim on $\{1,2,3\}$ ($3 \times 1$ cells with $d_i$, count 2) pass $\implies (1 + 3) \times 128 = \mathbf{512}$.</p>
+                <p><strong>(d) Closed cells:</strong> Closed cells must fix $d_4,\dots,d_{10}$. Over $\{1,2,3\}$: count 3 gives $(*, *, *, d_4\dots)$ ($1$ cell); count 2 gives $(d_1,*,*)$, $(*,d_2,*)$, $(*,*,d_3)$ ($3$ cells); count 1 gives the $3$ base cells $\implies 1 + 3 + 3 = \mathbf{7}$.</p>
+              </div>
             </div>
           </details>
 
           <!-- Ex 3.22 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 3.22: BUC Recursive Bottom-Up Iceberg Pruning Trace</span>
+              <span>Exercise 3.22 (Book p. 139 / PDF p. 170): Curse of Dimensionality in 100-D Full, Iceberg &amp; Closed Cubes</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given 3 dimensions $A, B, C$ and threshold $\text{min\_sup} = 3$. Trace how BUC prunes when counting partition $A = a_1$.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                1. BUC sorts dimensions by decreasing cardinality: say $A (10 \text{ vals}) > B (5 \text{ vals}) > C (2 \text{ vals})$.<br/>
-                2. Base partition $(a_1, *, *)$ has count $= 2$.<br/>
-                3. BUC tests: Is count $\ge \text{min\_sup}$? $2 < 3 \implies$ <strong>FAIL</strong>.<br/>
-                4. Prune: BUC immediately skips evaluating $(a_1, b_1, *), (a_1, b_2, *), \dots, (a_1, b_k, c_j)$!<br/>
-                5. Total savings: BUC avoids scanning all subcuboids under $a_1$, cutting recursion depth by 75%.
+              <p><strong>Verbatim Question:</strong> Consider 100-D base cells $(a_1, a_2, a_3, \dots, a_{100})$ and $(a_1, a_2, b_3, \dots, b_{100})$. (a) Find number of nonempty aggregate cells + storage/time comment. (b) If iceberg condition is $\text{count} \ge 2$, how many aggregate cells and which? (c) If 20 tuples map to those two base cells with count 10 each and $\text{min\_sup}=10$: (i) how many aggregate cells appear, (ii) ignoring redundant constant-to-$*$ generalizations with same measure, how many distinct (closed) cells remain?</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Nonempty aggregate cells:</strong> Each cell produces $2^{100}-1$ aggregate cells, overlapping only when dims $3\dots 100$ are all $*$ ($2^2 = 4$ cells) $\implies 2(2^{100}-1) - 4 = \mathbf{2^{101} - 6} \approx 2.535 \times 10^{30}$ cells. Completely intractable in time and space ($O(2^D)$).</p>
+                <p><strong>(b) Iceberg ($\text{min\_sup}=2$ from count-1 cells):</strong> Only the $\mathbf{4}$ overlapping aggregate cells pass: $(a_1,a_2,*,\dots,*)$, $(a_1,*,*,\dots,*)$, $(*,a_2,*,\dots,*)$, $(*,*,*,\dots,*)$.</p>
+                <p><strong>(c)(i) Iceberg ($\text{min\_sup}=10$ on count-10 base cells):</strong> Every cell has count $10$ or $20 \ge 10$, so all $\mathbf{2^{101} - 6}$ aggregate cells survive ($2^{101}-10$ with count $10$, and $4$ with count $20$)!</p>
+                <p><strong>(c)(ii) Closed cells remaining:</strong> $\mathbf{3}$ cells: $(a_1, a_2, a_3, \dots, a_{100}):10$, $(a_1, a_2, b_3, \dots, b_{100}):10$, and $(a_1, a_2, *, \dots, *):20$.</p>
               </div>
             </div>
           </details>
@@ -216,27 +225,38 @@ part3_html = r"""
         <!-- 4.3 MANDATED TEXTBOOK EXERCISES CHAPTER 4 -->
         <div class="surface-elevated p-5 space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Chapter 4)</h3>
-            <span class="text-xs font-mono text-amber-400">Ex 4.3, 4.6, 4.10</span>
+            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Han 4th Ed. Chapter 4)</h3>
+            <span class="text-xs font-mono text-amber-400">Ex 4.3, 4.6, 4.10 (plus 4.1)</span>
           </div>
+
+          <!-- Ex 4.1 -->
+          <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
+            <summary class="font-bold text-slate-200 flex items-center justify-between">
+              <span>Exercise 4.1 (Book p. 170 / PDF p. 201 — Included for Moodle "4.1Chapter 5" Check): Frequent Check from Closed Itemsets $\mathcal{C}$</span>
+              <span class="toggle-icon text-indigo-400">&rarr;</span>
+            </summary>
+            <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
+              <p><strong>Verbatim Question:</strong> Suppose you have the set $\mathcal{C}$ of all frequent closed itemsets on a data set $D$, as well as the support count for each frequent closed itemset. Describe an algorithm to determine whether a given itemset $X$ is frequent or not, and the support of $X$ if it is frequent.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p>1. Find all frequent closed supersets: $S = \{ Y \in \mathcal{C} \mid X \subseteq Y \}$.</p>
+                <p>2. If $S = \emptyset$: return <strong>not frequent</strong> (no closed frequent superset covers $X$, so $\text{closure}(X)$ cannot be frequent).</p>
+                <p>3. Otherwise ($S \ne \emptyset$): return <strong>frequent</strong> with exact support count $\text{support\_count}(X) = \max_{Y \in S} \text{support\_count}(Y)$ (because $\text{closure}(X) \in S$ has $\text{support}(X) = \text{support}(\text{closure}(X)) \ge \text{support}(Y)$ for every superset $Y \supseteq \text{closure}(X)$).</p>
+              </div>
+            </div>
+          </details>
 
           <!-- Ex 4.3 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 4.3: Apriori Candidate Join & Prune Step Trace</span>
+              <span>Exercise 4.3 (Book p. 170 / PDF p. 201): Proofs of Apriori Subset Support, Confidence &amp; Partition Properties</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given $L_3 = \{\{a, b, c\}, \{a, b, d\}, \{a, c, d\}, \{a, c, e\}, \{b, c, d\}\}$. Trace the join step and prune step to find $C_4$.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                1. Join Step ($L_3 \bowtie L_3$ on first 2 items):<br/>
-                &bull; $\{a, b, c\} \bowtie \{a, b, d\} \implies \mathbf{\{a, b, c, d\}}$<br/>
-                &bull; $\{a, c, d\} \bowtie \{a, c, e\} \implies \mathbf{\{a, c, d, e\}}$<br/>
-                Candidate set after join: $C_4 = \{\{a, b, c, d\}, \{a, c, d, e\}\}$.<br/><br/>
-                2. Prune Step (Check if all 3-subsets belong to $L_3$):<br/>
-                &bull; For $\{a, b, c, d\}$: Subsets are $\{a, b, c\} \in L_3$, $\{a, b, d\} \in L_3$, $\{a, c, d\} \in L_3$, $\{b, c, d\} \in L_3$. All present! &rarr; <strong>KEPT</strong>.<br/>
-                &bull; For $\{a, c, d, e\}$: Subsets include $\{a, d, e\}$. Is $\{a, d, e\} \in L_3$? <strong>NO!</strong> &rarr; <strong>PRUNED</strong>.<br/><br/>
-                Final Valid Candidate Set: $C_4 = \mathbf{\{\{a, b, c, d\}\}}$.
+              <p><strong>Verbatim Question:</strong> The Apriori algorithm uses prior knowledge of subset support properties. (a) Prove all nonempty subsets of a frequent itemset must be frequent. (b) Prove $\text{support}(s') \ge \text{support}(s)$ for any nonempty subset $s' \subseteq s$. (c) Given frequent itemset $l$ and $s \subset l, s' \subseteq s$, prove $\text{conf}(s' \Rightarrow (l-s')) \le \text{conf}(s \Rightarrow (l-s))$. (d) If $D$ is divided into $n$ nonoverlapping partitions, prove any globally frequent itemset in $D$ is frequent in at least one partition.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) &amp; (b):</strong> Every transaction $T \in D$ containing $s$ also contains any subset $s' \subseteq s$, so $\{T \mid s \subseteq T\} \subseteq \{T \mid s' \subseteq T\} \implies \text{sup\_count}(s') \ge \text{sup\_count}(s)$. Dividing by $|D|$ gives $\text{support}(s') \ge \text{support}(s)$. Hence if $s$ is frequent ($\ge \text{min\_sup}$), every nonempty subset $s'$ is also frequent.</p>
+                <p><strong>(c):</strong> $\text{conf}(s' \Rightarrow (l-s')) = \frac{\text{sup}(l)}{\text{sup}(s')}$ and $\text{conf}(s \Rightarrow (l-s)) = \frac{\text{sup}(l)}{\text{sup}(s)}$. By (b), $\text{sup}(s') \ge \text{sup}(s) \gt 0 \implies \frac{\text{sup}(l)}{\text{sup}(s')} \le \frac{\text{sup}(l)}{\text{sup}(s)}$.</p>
+                <p><strong>(d) Proof by contradiction:</strong> Suppose $X$ is infrequent in all partitions $D_1,\dots,D_n$: $\text{sup\_count}_{D_i}(X) \lt \sigma |D_i|$ for all $i$. Summing over $i=1\dots n$ yields $\text{sup\_count}_D(X) \lt \sigma \sum |D_i| = \sigma |D|$, contradicting that $X$ is frequent in $D$.</p>
               </div>
             </div>
           </details>
@@ -244,16 +264,24 @@ part3_html = r"""
           <!-- Ex 4.6 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 4.6: FP-Tree Construction & Conditional Pattern Base</span>
+              <span>Exercise 4.6 (Book p. 171 / PDF p. 202): MONKEY 5-Transaction Database — Apriori, FP-Growth &amp; Metarules</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given 5 transactions: $T_1: \{I1, I2, I5\}$, $T_2: \{I2, I4\}$, $T_3: \{I2, I3\}$, $T_4: \{I1, I2, I4\}$, $T_5: \{I1, I3\}$. Let $\text{min\_sup} = 2$. Find frequent patterns containing $I5$.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                1. Support counts: $I2: 4, I1: 3, I3: 2, I4: 2, I5: 1$.<br/>
-                2. Filter frequent items ($\text{min\_sup} \ge 2$): $I2, I1, I3, I4$. ($I5$ has count 1 &lt; 2, so $I5$ is infrequent overall).<br/>
-                3. If $\text{min\_sup}=1$, $I5$ appears in $T_1$ with prefix path: <code>(I2:1, I1:1)</code>.<br/>
-                4. Conditional pattern base for $I5$: $\{\{I2, I1\}: 1\}$. Conditional FP-tree for $I5$ has no nodes with support &ge; 2.
+              <p><strong>Verbatim Question:</strong> A database has 5 transactions ($\text{min\_sup} = 60\% \implies 3$, $\text{min\_conf} = 80\%$): <code>T100: {M,O,N,K,E,Y}</code>, <code>T200: {D,O,N,K,E,Y}</code>, <code>T300: {M,A,K,E}</code>, <code>T400: {M,U,C,K,Y}</code>, <code>T500: {C,O,O,K,I,E}</code> (as distinct item set: <code>{C,O,K,I,E}</code>). (a) Find all frequent itemsets via Apriori &amp; FP-growth and compare efficiency. (b) List all strong rules matching $\forall x \in \text{transaction},\; \text{buys}(X, \text{item}_1) \land \text{buys}(X, \text{item}_2) \Rightarrow \text{buys}(X, \text{item}_3)\; [s, c]$.</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a1) Apriori (3 DB scans):</strong></p>
+                <p>&bull; $L_1$ (count $\ge 3$): <code>{E}:4, {K}:5, {M}:3, {O}:3, {Y}:3</code> (dropped: A:1, C:2, D:1, I:1, N:2, U:1).</p>
+                <p>&bull; $C_2 \to L_2$ (5 of 10 pairs pass): <code>{E,K}:4, {E,O}:3, {K,M}:3, {K,O}:3, {K,Y}:3</code>.</p>
+                <p>&bull; $C_3$ after Apriori prune: <code>{K,M,O}, {K,M,Y}, {K,O,Y}</code> pruned (2-subsets missing in $L_2$); only <code>{E,K,O}</code> remains &rarr; $L_3 = \{\{E,K,O\}:3\}$. (Total: <strong>11 frequent itemsets</strong>.)</p>
+                <p><strong>(a2) FP-Growth (2 DB scans, zero candidates):</strong> F-list <code>K:5, E:4, M:3, O:3, Y:3</code>.</p>
+                <p>&bull; Ordered DB: <code>KEMOY, KEOY, KEM, KMY, KEO</code> &rarr; Root branches via shared prefix <code>K:5 &rarr; E:4</code>.</p>
+                <p>&bull; Mining suffix <code>Y</code>: prefix base <code>{KEMO:1, KEO:1, KM:1}</code> &rarr; cond tree <code>K:3</code> &rarr; <code>{Y}:3, {K,Y}:3</code>. Suffix <code>O</code>: <code>{KEM:1, KE:2}</code> &rarr; <code>K:3, E:3</code> &rarr; <code>{O}:3, {K,O}:3, {E,O}:3, {E,K,O}:3</code>. Suffix <code>M</code>: <code>{K,M}:3</code>. Suffix <code>E</code>: <code>{K,E}:4</code>. Suffix <code>K</code>: <code>{K}:5</code>.</p>
+                <p>&bull; <strong>Efficiency:</strong> FP-growth needs 2 scans (vs 3) and generates 0 candidates (vs 22 tested + 3 pruned).</p>
+                <p><strong>(b) Strong Metarules (from $L_3 = \{E, K, O\}$, $s = 3/5 = 60\%$):</strong></p>
+                <p>&bull; $E \land K \Rightarrow O$: conf $= 3/4 = 75\%$ (Fail $&lt; 80\%$).</p>
+                <p>&bull; $\mathbf{E \land O \Rightarrow K}$: $\text{sup}=60\%, \text{conf}=3/3=\mathbf{100\%}$ (Strong!).</p>
+                <p>&bull; $\mathbf{K \land O \Rightarrow E}$: $\text{sup}=60\%, \text{conf}=3/3=\mathbf{100\%}$ (Strong!).</p>
               </div>
             </div>
           </details>
@@ -261,23 +289,17 @@ part3_html = r"""
           <!-- Ex 4.10 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 4.10: Lift vs Kulczynski vs Imbalance Ratio</span>
+              <span>Exercise 4.10 (Book p. 172 / PDF p. 203): Incremental Association Rule Mining on $DB \cup \Delta DB$</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> In a database of 10,000 transactions, 1,000 buy Coffee, 2,000 buy Tea, and 800 buy both. Compute Lift, Kulczynski ($Kulc$), and Imbalance Ratio ($IR$).</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                &bull; $P(Coffee) = \frac{1000}{10000} = 0.10$<br/>
-                &bull; $P(Tea) = \frac{2000}{10000} = 0.20$<br/>
-                &bull; $P(Coffee \cap Tea) = \frac{800}{10000} = 0.08$<br/><br/>
-                1. Lift:<br/>
-                $$\text{Lift}(Coffee \implies Tea) = \frac{P(Coffee \cap Tea)}{P(Coffee)P(Tea)} = \frac{0.08}{0.10 \times 0.20} = \frac{0.08}{0.02} = \mathbf{4.0}$$
-                Lift $= 4.0 > 1 \implies$ Coffee and Tea are strongly positively correlated!<br/><br/>
-                2. Kulczynski Measure (Null-Invariant):<br/>
-                $$P(Tea|Coffee) = \frac{800}{1000} = 0.80, \quad P(Coffee|Tea) = \frac{800}{2000} = 0.40$$
-                $$\text{Kulc} = \frac{1}{2}(0.80 + 0.40) = \mathbf{0.60}$$
-                3. Imbalance Ratio ($IR$):<br/>
-                $$IR = \frac{|P(Coffee) - P(Tea)|}{P(Coffee) + P(Tea) - P(Coffee \cap Tea)} = \frac{|0.10 - 0.20|}{0.10 + 0.20 - 0.08} = \frac{0.10}{0.22} \approx \mathbf{0.4545}$$
+              <p><strong>Verbatim Question:</strong> Suppose that frequent itemsets are saved for a large transactional database, $DB$. Discuss how to efficiently mine the (global) association rules under the same minimum support threshold, if a set of new transactions, denoted as $\Delta DB$, is (incrementally) added in?</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p>Threshold becomes $\sigma(|DB| + |\Delta DB|)$. By the partition property (Ex. 4.3d), any globally frequent itemset in $DB' = DB \cup \Delta DB$ must be frequent in $DB$ or $\Delta DB$ (or both), giving the <strong>FUP Incremental Mining Strategy</strong>:</p>
+                <p>&bull; <strong>Case 1 ($X \in L^{DB}, X \in L^{\Delta DB}$):</strong> Automatically frequent in $DB'$; simply add counts ($\text{no } DB \text{ scan}$).</p>
+                <p>&bull; <strong>Case 2 ($X \in L^{DB}, X \notin L^{\Delta DB}$):</strong> Count $X$ in small $\Delta DB$ only. If sum $&lt; \sigma(|DB|+|\Delta DB|)$, discard "loser" + its supersets ($\text{no } DB \text{ scan}$).</p>
+                <p>&bull; <strong>Case 3 ($X \notin L^{DB}, X \in L^{\Delta DB}$):</strong> Candidate new "winner"; scan original $DB$ <em>only</em> for these surviving candidates (whose $(k-1)$-subsets are globally frequent).</p>
+                <p>&bull; <strong>Case 4 ($X \notin L^{DB}, X \notin L^{\Delta DB}$):</strong> Impossible to be globally frequent; prune immediately. Finally generate strong rules directly from updated $L^{DB'}$ in memory.</p>
               </div>
             </div>
           </details>

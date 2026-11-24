@@ -96,35 +96,44 @@ part5_html = r"""
         <!-- 6.4 MANDATED TEXTBOOK EXERCISES CHAPTER 6 -->
         <div class="surface-elevated p-5 space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Chapter 6)</h3>
+            <h3 class="text-base font-bold text-amber-300">Mandated Solved Textbook Exercises (Han 4th Ed. Chapter 6)</h3>
             <span class="text-xs font-mono text-amber-400">Ex 6.7, 6.19</span>
           </div>
 
           <!-- Ex 6.7 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 6.7: Information Gain vs Gini Index Calculation Walkthrough</span>
+              <span>Exercise 6.7 (Book pp. 299–300 / PDF pp. 330–331): Count-Weighted Decision Tree &amp; Naive Bayes</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given a dataset of 14 credit applicants: 9 Approved ($C_1$), 5 Rejected ($C_2$). Attribute <code>Income</code> has 3 values: Low (4 tuples: 1 Approved, 3 Rejected), Medium (6 tuples: 4 Approved, 2 Rejected), High (4 tuples: 4 Approved, 0 Rejected). Compute Information Gain and Gini Index split for Income.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                1. Base Entropy $\text{Info}(D)$:<br/>
-                $$\text{Info}(D) = -\left(\frac{9}{14}\log_2\frac{9}{14} + \frac{5}{14}\log_2\frac{5}{14}\right) = -(0.6429 \times (-0.6374) + 0.3571 \times (-1.4854)) = 0.4098 + 0.5305 = \mathbf{0.9403} \text{ bits}$$
-                2. Conditional Entropy $\text{Info}_{\text{Income}}(D)$:<br/>
-                &bull; Low (1A, 3R): $\text{Info}(D_{\text{Low}}) = -\left(\frac{1}{4}\log_2\frac{1}{4} + \frac{3}{4}\log_2\frac{3}{4}\right) = -(0.25(-2) + 0.75(-0.415)) = 0.5 + 0.3113 = 0.8113$<br/>
-                &bull; Medium (4A, 2R): $\text{Info}(D_{\text{Med}}) = -\left(\frac{4}{6}\log_2\frac{4}{6} + \frac{2}{6}\log_2\frac{2}{6}\right) = -(0.667(-0.585) + 0.333(-1.585)) = 0.390 + 0.528 = 0.9183$<br/>
-                &bull; High (4A, 0R): Pure node! $\text{Info}(D_{\text{High}}) = 0$<br/>
-                $$\text{Info}_{\text{Income}}(D) = \frac{4}{14}(0.8113) + \frac{6}{14}(0.9183) + \frac{4}{14}(0) = 0.2318 + 0.3936 + 0 = \mathbf{0.6254} \text{ bits}$$
-                3. Information Gain:<br/>
-                $$\text{Gain}(D, \text{Income}) = \text{Info}(D) - \text{Info}_{\text{Income}}(D) = 0.9403 - 0.6254 = \mathbf{0.3149} \text{ bits}$$
-                4. Base Gini Index $\text{Gini}(D)$:<br/>
-                $$\text{Gini}(D) = 1 - \left[\left(\frac{9}{14}\right)^2 + \left(\frac{5}{14}\right)^2\right] = 1 - [0.4133 + 0.1276] = \mathbf{0.4592}$$
-                5. Binary Split Gini on \{Low\} vs \{Med, High\}:<br/>
-                &bull; Low (1A, 3R): $\text{Gini}(D_1) = 1 - [(1/4)^2 + (3/4)^2] = 1 - [0.0625 + 0.5625] = 0.375$<br/>
-                &bull; Med, High (8A, 2R): $\text{Gini}(D_2) = 1 - [(8/10)^2 + (2/10)^2] = 1 - [0.64 + 0.04] = 0.320$<br/>
-                $$\text{Gini}_{\{\text{Low}\}}(D) = \frac{4}{14}(0.375) + \frac{10}{14}(0.320) = 0.1071 + 0.2286 = \mathbf{0.3357}$$
-                $$\Delta \text{Gini} = 0.4592 - 0.3357 = \mathbf{0.1235}$$
+              <p><strong>Verbatim Question:</strong> Generalized employee training data with <code>count</code> tuples (class label: <code>status</code> $\in \{\text{senior}, \text{junior}\}$). (a) Explain how to modify basic decision tree induction (Fig. 6.3) to handle <code>count</code>. (b) Construct a decision tree using that algorithm. (c) Classify unseen tuple $X = (\text{department}=\text{systems}, \text{age}=26\dots 30, \text{salary}=46\text{K}\dots 50\text{K})$ via naive Bayes.</p>
+              <div class="overflow-x-auto my-1">
+                <table class="w-full text-[11px] font-mono text-left border border-white/10">
+                  <tr class="bg-slate-950 text-amber-300"><th class="p-1.5">department</th><th class="p-1.5">status</th><th class="p-1.5">age</th><th class="p-1.5">salary</th><th class="p-1.5 text-right">count</th></tr>
+                  <tr><td class="p-1.5">sales</td><td>senior</td><td>31...35</td><td>46K...50K</td><td class="text-right pr-2">30</td></tr>
+                  <tr><td class="p-1.5">sales</td><td>junior</td><td>26...30</td><td>26K...30K</td><td class="text-right pr-2">40</td></tr>
+                  <tr><td class="p-1.5">sales</td><td>junior</td><td>31...35</td><td>31K...35K</td><td class="text-right pr-2">40</td></tr>
+                  <tr><td class="p-1.5">systems</td><td>junior</td><td>21...25</td><td>46K...50K</td><td class="text-right pr-2">20</td></tr>
+                  <tr><td class="p-1.5">systems</td><td>senior</td><td>31...35</td><td>66K...70K</td><td class="text-right pr-2">5</td></tr>
+                  <tr><td class="p-1.5">systems</td><td>junior</td><td>26...30</td><td>46K...50K</td><td class="text-right pr-2">3</td></tr>
+                  <tr><td class="p-1.5">systems</td><td>senior</td><td>41...45</td><td>66K...70K</td><td class="text-right pr-2">3</td></tr>
+                  <tr><td class="p-1.5">marketing</td><td>senior</td><td>36...40</td><td>46K...50K</td><td class="text-right pr-2">10</td></tr>
+                  <tr><td class="p-1.5">marketing</td><td>junior</td><td>31...35</td><td>41K...45K</td><td class="text-right pr-2">4</td></tr>
+                  <tr><td class="p-1.5">secretary</td><td>senior</td><td>46...50</td><td>36K...40K</td><td class="text-right pr-2">4</td></tr>
+                  <tr><td class="p-1.5">secretary</td><td>junior</td><td>26...30</td><td>26K...30K</td><td class="text-right pr-2">6</td></tr>
+                </table>
+              </div>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p><strong>(a) Algorithm Modification:</strong> Use <code>count</code> as row weight: $|D| = \sum \text{count}_r$, $|C_{i,D}| = \sum_{r \in C_i} \text{count}_r$, weighted entropy/gain fractions $|D_j|/|D|$, and majority voting by highest summed <code>count</code>.</p>
+                <p><strong>(b) Decision Tree ($|D| = 165$: $52$ senior, $113$ junior):</strong></p>
+                <p>&bull; Root $\text{Info}(D) = -\frac{52}{165}\log_2\frac{52}{165} - \frac{113}{165}\log_2\frac{113}{165} = \mathbf{0.8990}$ bits.</p>
+                <p>&bull; $\text{Gain}(\text{department}) = 0.8990 - 0.8504 = \mathbf{0.0486}$; $\text{Gain}(\text{age}) = 0.8990 - \frac{79}{165}(0.9906) = \mathbf{0.4247}$; $\text{Gain}(\text{salary}) = 0.8990 - \frac{63}{165}(0.9468) = \mathbf{0.5375}$ &rarr; <strong>Split root on <code>salary</code></strong>.</p>
+                <p>&bull; Pure leaves under <code>salary</code>: <code>26K...30K</code> (46 junior), <code>31K...35K</code> (40 junior), <code>36K...40K</code> (4 senior), <code>41K...45K</code> (4 junior), <code>66K...70K</code> (8 senior).</p>
+                <p>&bull; Impure branch <code>46K...50K</code> ($40$ senior, $23$ junior): both <code>department</code> and <code>age</code> achieve pure split ($\text{Gain}=0.9468$; <code>department</code> wins GainRatio tie-break: <code>sales</code> &rarr; senior, <code>systems</code> &rarr; junior, <code>marketing</code> &rarr; senior).</p>
+                <p><strong>(c) Naive Bayes for $X = (\text{systems}, 26\dots 30, 46\text{K}\dots 50\text{K})$:</strong></p>
+                <p>&bull; Raw counts: $P(\text{age}=26\dots 30 \mid \text{senior}) = 0/52 = 0 \implies P(X|\text{senior})P(\text{senior}) = 0$; $P(X|\text{junior})P(\text{junior}) = \left(\frac{23}{113}\cdot\frac{49}{113}\cdot\frac{23}{113}\right)\frac{113}{165} = \mathbf{0.012303}$.</p>
+                <p>&bull; With Laplace correction ($q_{\text{dept}}=4, q_{\text{age}}=6, q_{\text{sal}}=6$): $P_{\text{Lap}}(X|\text{senior})P(\text{senior}) = \left(\frac{9}{56}\cdot\frac{1}{58}\cdot\frac{41}{58}\right)\frac{52}{165} = \mathbf{0.000617}$ vs $P_{\text{Lap}}(X|\text{junior})P(\text{junior}) = \left(\frac{24}{117}\cdot\frac{50}{119}\cdot\frac{24}{119}\right)\frac{113}{165} = \mathbf{0.011904}$ &rarr; <strong>Predict <code>status = junior</code></strong> ($95.07\%$ posterior).</p>
               </div>
             </div>
           </details>
@@ -132,20 +141,17 @@ part5_html = r"""
           <!-- Ex 6.19 -->
           <details class="p-3 rounded bg-slate-900 border border-white/5 text-xs">
             <summary class="font-bold text-slate-200 flex items-center justify-between">
-              <span>Exercise 6.19: Naive Bayes Classification & Laplace Correction</span>
+              <span>Exercise 6.19 (Book p. 302 / PDF p. 333): 10-Fold Cross-Validation Paired t-Test (M1 vs M2)</span>
               <span class="toggle-icon text-indigo-400">&rarr;</span>
             </summary>
             <div class="mt-3 space-y-2 text-slate-300 border-t border-white/5 pt-2">
-              <p><strong>Problem:</strong> Given a training set where attribute $A$ has 3 values $\{a_1, a_2, a_3\}$. In class $C_1$ (70 samples), counts are $a_1=50, a_2=20, a_3=0$. Show how Laplace correction avoids zero probability when classifying a sample with $A=a_3$.</p>
-              <div class="font-mono text-slate-200 space-y-1 bg-slate-950 p-2.5 rounded">
-                1. Without Laplace correction:<br/>
-                $$P(a_3|C_1) = \frac{0}{70} = 0 \implies P(\mathbf{x}|C_1) = 0 \times \prod_{k \ne A} P(x_k|C_1) = 0$$
-                A single unseen value destroys all evidence from all other attributes!<br/><br/>
-                2. With Laplace correction ($+1$ to numerator, $+q=3$ to denominator):<br/>
-                $$P_{\text{Laplace}}(a_1|C_1) = \frac{50 + 1}{70 + 3} = \frac{51}{73} \approx 0.6986$$
-                $$P_{\text{Laplace}}(a_2|C_1) = \frac{20 + 1}{70 + 3} = \frac{21}{73} \approx 0.2877$$
-                $$P_{\text{Laplace}}(a_3|C_1) = \frac{0 + 1}{70 + 3} = \frac{\mathbf{1}}{\mathbf{73}} \approx \mathbf{0.0137}$$
-                Sum check: $\frac{51+21+1}{73} = \frac{73}{73} = 1.0$. The zero trap is completely avoided while preserving valid probability axioms.
+              <p><strong>Verbatim Question:</strong> Comparing prediction models $M_1$ and $M_2$ over 10 rounds of 10-fold CV: $M_1$ error rates = <code>30.5, 32.2, 20.7, 20.6, 31.0, 41.0, 27.7, 26.0, 21.5, 26.0</code>; $M_2$ error rates = <code>22.4, 14.5, 22.4, 19.6, 20.7, 20.4, 22.1, 19.4, 16.2, 35.0</code>. Is one model significantly better at significance level $1\%$ ($\alpha = 0.01$)?</p>
+              <div class="font-mono text-slate-200 space-y-1.5 bg-slate-950 p-2.5 rounded">
+                <p>1. Paired differences $d_i = \text{err}(M_1)_i - \text{err}(M_2)_i$: $[+8.1, +17.7, -1.7, +1.0, +10.3, +20.6, +5.6, +6.6, +5.3, -9.0]$.</p>
+                <p>2. Means: $\overline{\text{err}}(M_1) = 27.72$, $\overline{\text{err}}(M_2) = 21.27 \implies \bar{d} = \frac{64.5}{10} = \mathbf{6.45}$.</p>
+                <p>3. Variance (Han Eq. 6.32 uses $\div k$): $\sum (d_i - \bar{d})^2 = 681.225 \implies \text{var}(M_1 - M_2) = \frac{681.225}{10} = 68.1225$.</p>
+                <p>4. $t$-statistic (Han Eq. 6.31): $t = \frac{6.45}{\sqrt{68.1225 / 10}} = \frac{6.45}{2.6100} \approx \mathbf{2.4712}$ ($p = 0.0355$; standard $\div (k-1)$ sample variance gives $t \approx 2.3444$).</p>
+                <p>5. Decision ($\text{df} = 9$, two-tailed $\alpha = 0.01 \implies t_{0.005,\,9} = \mathbf{3.250}$): Since $|t| = 2.4712 \lt 3.250$, <strong>fail to reject $H_0$</strong>. Not statistically significant at $1\%$ (though significant at $5\%$ where $t_{0.025,9} = 2.262$).</p>
               </div>
             </div>
           </details>

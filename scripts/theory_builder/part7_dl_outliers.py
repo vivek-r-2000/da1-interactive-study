@@ -85,33 +85,33 @@ part7_html = r"""
         <!-- 9.4 TEXTBOOK WORKED EXAMPLE §10.1 -->
         <div class="surface-elevated p-5 space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-bold text-amber-300">Mandated Textbook Worked Numerical Walkthrough (Han §10.1)</h3>
+            <h3 class="text-base font-bold text-amber-300">Mandated Textbook Worked Example 10.1 (Han §10.1, Book pp. 495–496 / PDF pp. 526–527)</h3>
             <span class="text-xs font-mono text-amber-400">"Practice the example"</span>
           </div>
 
           <div class="p-4 rounded bg-slate-900 border border-white/10 space-y-3 text-xs">
             <p class="text-slate-200">
-              <strong>Given:</strong> 2 inputs ($x_1=0.05, x_2=0.10$), biases $b_1=0.35, b_2=0.60$. Target outputs $t_1=0.01, t_2=0.99$. Learning rate $\eta=0.5$. Initial weights: $w_1=0.15, w_2=0.20, w_3=0.25, w_4=0.30, w_5=0.40, w_6=0.45, w_7=0.50, w_8=0.55$.
+              <strong>Given (Fig. 10.7 &amp; Table 10.1):</strong> 3 input nodes ($x_1=1, x_2=0, x_3=1$), 2 hidden nodes (Units 4, 5), 1 output node (Unit 6), target class label $T=1$, learning rate $\eta=0.9$. Initial weights &amp; biases: $w_{14}=0.2, w_{15}=-0.3, w_{24}=0.4, w_{25}=0.1, w_{34}=-0.5, w_{35}=0.2, w_{46}=-0.3, w_{56}=-0.2, b_4=-0.4, b_5=0.2, b_6=0.1$.
             </p>
 
             <div class="font-mono text-slate-300 space-y-1.5 bg-slate-950 p-3 rounded">
-              <strong class="text-indigo-400 block mb-1">Step 1: Forward Propagation</strong>
-              &bull; $z_{h1} = 0.15(0.05) + 0.20(0.10) + 0.35 = 0.3775 \implies a_{h1} = \frac{1}{1 + e^{-0.3775}} \approx \mathbf{0.59327}$<br/>
-              &bull; $z_{h2} = 0.25(0.05) + 0.30(0.10) + 0.35 = 0.3925 \implies a_{h2} = \frac{1}{1 + e^{-0.3925}} \approx \mathbf{0.59688}$<br/>
-              &bull; $z_{o1} = 0.40(0.59327) + 0.45(0.59688) + 0.60 = 1.1059 \implies a_{o1} = \frac{1}{1 + e^{-1.1059}} \approx \mathbf{0.75137}$<br/>
-              &bull; $z_{o2} = 0.50(0.59327) + 0.55(0.59688) + 0.60 = 1.2249 \implies a_{o2} = \frac{1}{1 + e^{-1.2249}} \approx \mathbf{0.77293}$<br/>
-              &bull; Total Squared Error: $E = \frac{1}{2}(0.01 - 0.75137)^2 + \frac{1}{2}(0.99 - 0.77293)^2 = 0.27481 + 0.02356 = \mathbf{0.29837}$<br/><br/>
+              <p><strong class="text-indigo-400 block mb-1">Step 1: Forward Propagation (Table 10.2)</strong></p>
+              <p>&bull; Unit 4: $I_4 = 0.2(1) + 0.4(0) - 0.5(1) - 0.4 = -0.7 \implies O_4 = \frac{1}{1 + e^{0.7}} \approx \mathbf{0.332}$ (exact $0.3318$)</p>
+              <p>&bull; Unit 5: $I_5 = -0.3(1) + 0.1(0) + 0.2(1) + 0.2 = +0.1 \implies O_5 = \frac{1}{1 + e^{-0.1}} \approx \mathbf{0.525}$ (exact $0.5250$)</p>
+              <p>&bull; Unit 6: $I_6 = (-0.3)(0.332) + (-0.2)(0.525) + 0.1 = -0.105 \implies O_6 = \frac{1}{1 + e^{0.105}} \approx \mathbf{0.474}$ (exact $0.4739$)</p>
 
-              <strong class="text-sky-400 block mb-1">Step 2: Backward Pass for Output Weight $w_5$</strong>
-              &bull; $\delta_{o1} = (a_{o1} - t_1) \cdot a_{o1}(1 - a_{o1}) = (0.75137 - 0.01) \cdot 0.75137(0.24863) \approx \mathbf{0.13850}$<br/>
-              &bull; $\frac{\partial E}{\partial w_5} = \delta_{o1} \cdot a_{h1} = 0.13850 \times 0.59327 \approx \mathbf{0.08217}$<br/>
-              &bull; Updated $w_5^+ = w_5 - \eta \frac{\partial E}{\partial w_5} = 0.40 - 0.5(0.08217) = \mathbf{0.35892}$<br/><br/>
+              <p><strong class="text-sky-400 block mt-2 mb-1">Step 2: Error Backpropagation (Table 10.3 — Exact Textbook Values)</strong></p>
+              <p>&bull; Unit 6: $\delta_6 = O_6(1 - O_6)(T - O_6) = (0.474)(1 - 0.474)(1 - 0.474) = \mathbf{0.1311}$</p>
+              <p>&bull; Unit 5: $\delta_5 = O_5(1 - O_5)\delta_6 w_{56} = (0.525)(1 - 0.525)(0.1311)(-0.2) = \mathbf{-0.0065}$</p>
+              <p>&bull; Unit 4: $\delta_4 = O_4(1 - O_4)\delta_6 w_{46} = (0.332)(1 - 0.332)(0.1311)(-0.3) = \mathbf{-0.0087}$</p>
 
-              <strong class="text-emerald-400 block mb-1">Step 3: Backward Pass for Hidden Weight $w_1$</strong>
-              &bull; $\delta_{o2} = (a_{o2} - t_2) \cdot a_{o2}(1 - a_{o2}) = (0.77293 - 0.99) \cdot 0.77293(0.22707) \approx \mathbf{-0.03810}$<br/>
-              &bull; $\delta_{h1} = (\delta_{o1} w_5 + \delta_{o2} w_7) \cdot a_{h1}(1 - a_{h1}) = (0.13850(0.40) + (-0.03810)(0.50)) \cdot 0.59327(0.40673) \approx \mathbf{0.00877}$<br/>
-              &bull; $\frac{\partial E}{\partial w_1} = \delta_{h1} \cdot x_1 = 0.00877 \times 0.05 \approx \mathbf{0.000439}$<br/>
-              &bull; Updated $w_1^+ = w_1 - \eta \frac{\partial E}{\partial w_1} = 0.15 - 0.5(0.000439) = \mathbf{0.14978}$
+              <p><strong class="text-emerald-400 block mt-2 mb-1">Step 3: Weight &amp; Bias Updates (Table 10.4)</strong></p>
+              <p>&bull; $w_{46}^{\text{new}} = -0.3 - (0.9)(0.1311)(0.332) = \mathbf{-0.339}$; &nbsp; $w_{56}^{\text{new}} = -0.2 - (0.9)(0.1311)(0.525) = \mathbf{-0.262}$</p>
+              <p>&bull; $w_{14}^{\text{new}} = 0.2 - (0.9)(-0.0087)(1) = \mathbf{0.208}$; &nbsp; $w_{15}^{\text{new}} = -0.3 - (0.9)(-0.0065)(1) = \mathbf{-0.294}$</p>
+              <p>&bull; $w_{24}^{\text{new}} = 0.4 - 0 = \mathbf{0.4}$; &nbsp; $w_{25}^{\text{new}} = 0.1 - 0 = \mathbf{0.1}$ (since $x_2 = 0$)</p>
+              <p>&bull; $w_{34}^{\text{new}} = -0.5 - (0.9)(-0.0087)(1) = \mathbf{-0.492}$; &nbsp; $w_{35}^{\text{new}} = 0.2 - (0.9)(-0.0065)(1) = \mathbf{0.206}$</p>
+              <p>&bull; $b_6^{\text{new}} = 0.1 - (0.9)(0.1311) = -0.0180$ (book misprints $-0.180$); &nbsp; $b_5^{\text{new}} = \mathbf{0.206}$; &nbsp; $b_4^{\text{new}} = \mathbf{-0.392}$.</p>
+              <p class="text-amber-300 pt-1"><em>Book Errata Note:</em> Han 4th Ed. Table 10.3 computes $\delta_6 = +0.1311$ using $(T - O_6)$ while Table 10.4 subtracts $\eta \delta_j O_i$ (using Eq. 10.4 sign $\delta_6 = (O_6 - T)O_6(1-O_6) = -0.1311$ gives $w_{46}^{\text{new}} = -0.261$, moving $O_6$ closer to $T=1$).</p>
             </div>
           </div>
         </div>

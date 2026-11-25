@@ -359,9 +359,15 @@
               </div>
             </div>
 
-            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-2 text-xs">
-              <strong class="text-indigo-400 block mb-1">COP-KMeans Algorithm (Wagstaff et al. 2001):</strong>
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-2 text-xs space-y-2">
+              <strong class="text-indigo-400 block mb-1">COP-KMeans &amp; Hard vs. Soft Constraints (Topic 11 PPT):</strong>
               <p class="text-slate-300">Modifies standard K-Means assignment step: An object $d_i$ is assigned to its nearest centroid $C_k$ <em>only if</em> assigning $d_i$ to $C_k$ does not violate any Must-Link or Cannot-Link constraints with previously assigned points. If all $k$ clusters violate a constraint, the algorithm fails and reports infeasibility.</p>
+              <p class="text-slate-300"><strong>Hard vs. Soft Constraints:</strong> Hard constraints must be strictly satisfied (infeasible if violated). Soft constraints treat violations as penalties in an optimization objective, trading off cluster quality against constraint satisfaction. <strong>Clustering with Obstacle Objects</strong> models physical barriers (rivers, highways) using visibility graphs so distance paths detour around obstacles rather than cutting straight through.</p>
+            </div>
+
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl my-2 text-xs space-y-1.5">
+              <strong class="text-sky-400 block">Fuzzy Sets &amp; Fuzzy Clustering (Topic 11 PPT):</strong>
+              <p class="text-slate-300">Unlike classical (hard) sets where an object either belongs ($1$) or does not belong ($0$) to a cluster, <strong>fuzzy sets</strong> allow partial membership $\mu_{ij} \in [0, 1]$ across multiple clusters simultaneously ($\sum_j \mu_{ij} = 1$). Fuzzy $c$-Means iteratively updates cluster centroids and membership weights, ideal for overlapping boundaries.</p>
             </div>
           </div>
         </div>
@@ -384,11 +390,27 @@
 
             <h3 class="font-bold text-slate-200 mt-4 mb-2">High-Stakes Real-World Applications</h3>
             <ul class="text-xs space-y-1.5 text-slate-300">
-              <li>• <strong>Credit Card Fraud:</strong> An abnormal transaction pattern (e.g., sudden overseas luxury jewelry purchase) amid routine domestic grocery spending.</li>
+              <li>• <strong>Credit Card Fraud:</strong> An abnormal transaction pattern (e.g., sudden overseas luxury jewelry purchase or amount much larger &amp; far from owner's residential city) amid routine domestic spending.</li>
               <li>• <strong>Cybersecurity Intrusion:</strong> A surge in outbound network socket traffic on unusual ports indicating data exfiltration or botnet compromise.</li>
               <li>• <strong>Healthcare Diagnostics:</strong> A sudden spike in intracranial pressure or arrhythmia deviating from patient baseline vital signs.</li>
               <li>• <strong>Industrial IoT Fault Detection:</strong> Vibration harmonics in aircraft turbines signaling micro-fractures prior to catastrophic failure.</li>
             </ul>
+
+            <h3 class="font-bold text-slate-200 mt-4 mb-2">Label-Based Categorization (Topic 12 PPT)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-emerald-400 block mb-0.5">Supervised</strong>
+                <p class="text-slate-400">Uses labeled normal &amp; outlier examples; faces severe class imbalance and unseen outlier types.</p>
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-sky-400 block mb-0.5">Unsupervised</strong>
+                <p class="text-slate-400">No labels; assumes normal objects cluster densely while outliers are isolated or in tiny clusters.</p>
+              </div>
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg">
+                <strong class="text-amber-400 block mb-0.5">Semi-Supervised</strong>
+                <p class="text-slate-400">Small set of labeled examples (normal-only, outlier-only, or both) guides detection on unlabeled data.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -637,20 +659,18 @@
 
             <div class="space-y-3 my-3 text-xs">
               <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
-                <strong class="text-indigo-400 block mb-0.5">1. Frequent Subgraph Mining (gSpan, FSG)</strong>
-                <p class="text-slate-300">Finds subgraphs appearing in at least $\text{min\_sup}$ graph transactions. Challenges: Subgraph isomorphism testing is NP-Complete! Solved using canonical DFS code lexicographical ordering.</p>
+                <strong class="text-indigo-400 block mb-0.5">1. Frequent Subgraph Mining (gSpan vs. CloseGraph)</strong>
+                <p class="text-slate-300">Finds subgraphs appearing in at least $\text{min\_sup}$ graph transactions. Subgraph isomorphism is NP-Complete; solved via canonical DFS code lexicographical ordering. <strong>CloseGraph</strong> mines only closed frequent subgraphs to eliminate redundancy.</p>
               </div>
 
               <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
-                <strong class="text-sky-400 block mb-0.5">2. PageRank (Brin & Page 1998)</strong>
-                <p class="text-slate-300">Models a random web surfer with damping factor $d \approx 0.85$:</p>
-                <div class="font-mono text-slate-300 my-1">$$PR(u) = \frac{1-d}{N} + d \sum_{v \in B(u)} \frac{PR(v)}{L(v)}$$</div>
-                <p class="text-slate-400">Converges via power iteration to the stationary distribution of the Markov transition matrix.</p>
+                <strong class="text-sky-400 block mb-0.5">2. Graph &amp; Network Clustering (Topic 11 PPT)</strong>
+                <p class="text-slate-300"><strong>Geodesic Distance:</strong> Shortest-path edge count between nodes. <strong>SimRank:</strong> Similarity based on random walks and structural context (two objects are similar if referenced by similar objects). <strong>Sparsest Cut:</strong> Partitions $G=(V,E)$ minimizing cut edges relative to partition size (NP-hard; solved via spectral/approximation methods).</p>
               </div>
 
               <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg">
-                <strong class="text-emerald-400 block mb-0.5">3. Community Detection & Modularity</strong>
-                <p class="text-slate-300">Partitions graph into dense subgraphs with high internal connectivity and sparse external inter-community edges using Newman-Girvan Modularity $Q$.</p>
+                <strong class="text-emerald-400 block mb-0.5">3. Bi-Clustering &amp; Spectral Clustering (Topic 11 PPT)</strong>
+                <p class="text-slate-300"><strong>Bi-Clustering:</strong> Simultaneously clusters both objects (rows) and attributes (columns) to find coherent submatrices (e.g. gene expression). <strong>Spectral Clustering:</strong> Uses eigenvectors of the graph Laplacian for dimensionality reduction before clustering, effective on non-convex shapes and images.</p>
               </div>
             </div>
           </div>
@@ -679,6 +699,13 @@
                 <div class="font-mono text-amber-200">$$\frac{\text{Vol}(S^d)}{\text{Vol}(C^d)} = \frac{\pi^{d/2}}{2^d \Gamma(d/2 + 1)} \xrightarrow{d \to \infty} 0$$</div>
                 <p class="text-slate-400 mt-1">Almost 100% of the volume of high-dimensional space is concentrated in the corners! Datasets become extremely sparse.</p>
               </div>
+            </div>
+
+            <div class="p-3.5 bg-slate-900 border border-slate-800 rounded-xl text-xs space-y-1.5 mt-3">
+              <strong class="text-indigo-400 block">Topic 13 PPT: Methodologies, Foundations &amp; Applications</strong>
+              <p class="text-slate-300">• <strong>Statistical DM:</strong> Regression, Generalized Linear Models (GLM), Mixed-Effect Models, Regression Trees, Factor Analysis, ARIMA time series, and Survival Analysis (patient life-span probability).</p>
+              <p class="text-slate-300">• <strong>Foundations &amp; Visual/Audio DM:</strong> Data Reduction, Data Compression, and the <em>Microeconomic View</em> (patterns are interesting only if they provide utility in decision-making). Result, Process, and Interactive Visual Mining (Perception-Based Classification / PBC) plus Audio Data Mining.</p>
+              <p class="text-slate-300">• <strong>Applications &amp; Frontiers:</strong> Intrusion Detection (signature-based vs. anomaly-based), Recommender Systems (content-based vs. collaborative filtering), Ubiquitous/Invisible Data Mining, and Privacy &amp; Security.</p>
             </div>
           </div>
         </div>

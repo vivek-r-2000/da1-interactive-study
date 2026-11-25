@@ -451,7 +451,7 @@
 
               <p class="text-slate-400 leading-relaxed">
 
-                Perceptron model, Multi-Layer Perceptrons (MLP), forward pass, backpropagation gradient descent, activation functions (Sigmoid, ReLU). Slides: Advances in Cluster Analysis, Introduction to Outlier Analysis (statistical, proximity, density, clustering-based), and Trends in Data Mining.
+                Perceptron model, Multi-Layer Perceptrons (MLP), forward pass, backpropagation gradient descent, activation functions (Sigmoid, ReLU). Slides: Advances in Cluster Analysis (Fuzzy clustering, Bi-clustering, Spectral clustering, Graph clustering via Geodesic/SimRank/Sparsest Cut, Hard/Soft constraints &amp; Obstacle clustering), Introduction to Outlier Analysis (Global/Contextual/Collective; Supervised/Unsupervised/Semi-supervised; statistical, proximity, density LOF, clustering-based), and Trends in Data Mining (gSpan vs CloseGraph, Statistical DM, Microeconomic view, Visual/Audio DM, Recommender Systems, Intrusion Detection, Ubiquitous DM).
 
               </p>
 
@@ -2642,6 +2642,126 @@ BCD</textarea>
 
           </div>
 
+          <!-- Q11 -->
+          <div id="mock-q11" class="p-4 rounded-lg bg-slate-900/70 border border-white/10 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs text-slate-400">Question 11 (Topic 11 PPT / Advanced Clustering)</span>
+              <span class="text-xs text-brand-400 font-mono">2 Marks</span>
+            </div>
+            <p class="text-xs text-slate-200">
+              In graph &amp; network clustering, which similarity measure computes structural similarity between two nodes based on random walks ("two objects are similar if they are referenced by similar objects")?
+            </p>
+            <div class="space-y-1.5 text-xs">
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-11" value="A" class="text-brand-600">
+                <span>A) Geodesic Distance</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-11" value="B" class="text-brand-600">
+                <span>B) SimRank</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-11" value="C" class="text-brand-600">
+                <span>C) Sparsest Cut</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-11" value="D" class="text-brand-600">
+                <span>D) Minkowski $L_2$</span>
+              </label>
+            </div>
+            <div class="q-explanation hidden p-2.5 rounded bg-slate-800 border border-white/10 text-[11px] text-slate-300 mt-2"></div>
+          </div>
+
+          <!-- Q12 -->
+          <div id="mock-q12" class="p-4 rounded-lg bg-slate-900/70 border border-white/10 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs text-slate-400">Question 12 (Topic 11 PPT / High-D Clustering)</span>
+              <span class="text-xs text-brand-400 font-mono">2 Marks</span>
+            </div>
+            <p class="text-xs text-slate-200">
+              What distinguishes <strong>Bi-Clustering</strong> from standard clustering on high-dimensional data?
+            </p>
+            <div class="space-y-1.5 text-xs">
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-12" value="A" class="text-brand-600">
+                <span>A) It simultaneously clusters both objects (rows) and attributes (columns) to discover coherent submatrices.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-12" value="B" class="text-brand-600">
+                <span>B) It restricts every dataset to exactly $k=2$ clusters.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-12" value="C" class="text-brand-600">
+                <span>C) It only works on binary attributes using Jaccard similarity.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-12" value="D" class="text-brand-600">
+                <span>D) It replaces Euclidean distance with visibility graphs around physical obstacles.</span>
+              </label>
+            </div>
+            <div class="q-explanation hidden p-2.5 rounded bg-slate-800 border border-white/10 text-[11px] text-slate-300 mt-2"></div>
+          </div>
+
+          <!-- Q13 -->
+          <div id="mock-q13" class="p-4 rounded-lg bg-slate-900/70 border border-white/10 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs text-slate-400">Question 13 (Topic 12 PPT / Outlier Detection)</span>
+              <span class="text-xs text-brand-400 font-mono">2 Marks</span>
+            </div>
+            <p class="text-xs text-slate-200">
+              In <strong>clustering-based outlier detection</strong> (Topic 12 PPT), how are outliers characterized?
+            </p>
+            <div class="space-y-1.5 text-xs">
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-13" value="A" class="text-brand-600">
+                <span>A) Objects that always lie at the exact centroid of the largest cluster.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-13" value="B" class="text-brand-600">
+                <span>B) Objects that belong to small/sparse clusters or do not belong to any cluster, whereas normal data belong to large, dense clusters.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-13" value="C" class="text-brand-600">
+                <span>C) Objects with the smallest $k$-NN distance in the dataset.</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-13" value="D" class="text-brand-600">
+                <span>D) Objects that must-link with every other point in COP-KMeans.</span>
+              </label>
+            </div>
+            <div class="q-explanation hidden p-2.5 rounded bg-slate-800 border border-white/10 text-[11px] text-slate-300 mt-2"></div>
+          </div>
+
+          <!-- Q14 -->
+          <div id="mock-q14" class="p-4 rounded-lg bg-slate-900/70 border border-white/10 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs text-slate-400">Question 14 (Topic 13 PPT / Data Mining Trends)</span>
+              <span class="text-xs text-brand-400 font-mono">2 Marks</span>
+            </div>
+            <p class="text-xs text-slate-200">
+              Which view on data mining foundations (Topic 13 PPT) argues that patterns are interesting <em>only to the extent they provide utility in decision-making</em>?
+            </p>
+            <div class="space-y-1.5 text-xs">
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-14" value="A" class="text-brand-600">
+                <span>A) Data Compression View</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-14" value="B" class="text-brand-600">
+                <span>B) Data Reduction View</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-14" value="C" class="text-brand-600">
+                <span>C) Microeconomic View</span>
+              </label>
+              <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                <input type="radio" name="mock-ans-14" value="D" class="text-brand-600">
+                <span>D) Inductive Database View</span>
+              </label>
+            </div>
+            <div class="q-explanation hidden p-2.5 rounded bg-slate-800 border border-white/10 text-[11px] text-slate-300 mt-2"></div>
+          </div>
+
         </div>
 
         <div class="pt-4 border-t border-white/10 flex items-center justify-between">
@@ -3364,7 +3484,11 @@ BCD</textarea>
 
         'mock-ans-9': { ans: 'A', expl: 'DBSCAN defines Core points as having at least MinPts points in their epsilon-neighborhood: |N_eps(p)| >= MinPts.' },
 
-        'mock-ans-10': { ans: 'A', expl: 'SVM quadratic optimization is convex (single global minimum), whereas deep neural network backpropagation is non-convex with saddle points.' }
+        'mock-ans-10': { ans: 'A', expl: 'SVM quadratic optimization is convex (single global minimum), whereas deep neural network backpropagation is non-convex with saddle points.' },
+        'mock-ans-11': { ans: 'B', expl: 'SimRank (Topic 11 PPT) measures structural similarity via random walks: two nodes are similar if referenced by similar nodes. Geodesic distance is shortest-path edge count.' },
+        'mock-ans-12': { ans: 'A', expl: 'Bi-clustering (Topic 11 PPT) simultaneously clusters objects (rows) and attributes (columns) to find coherent submatrices in high-dimensional data.' },
+        'mock-ans-13': { ans: 'B', expl: 'Clustering-based outlier detection (Topic 12 PPT) assumes normal data belong to large, dense clusters while outliers belong to small/sparse clusters or no cluster.' },
+        'mock-ans-14': { ans: 'C', expl: 'The Microeconomic View (Topic 13 PPT) defines pattern interestingness by its utility in an agent/organization decision-making process.' }
 
       };
 

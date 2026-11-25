@@ -1780,6 +1780,20 @@
               <p>Models data using non-parametric Gaussian influence kernels. Finds local density peaks (density attractors) using gradient hill climbing. Highly resilient to noise.</p>
             </div>
           </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
+            <div class="p-3 rounded bg-slate-900 border border-white/5 space-y-1">
+              <strong class="text-amber-300 block mb-1">4. Fuzzy Sets, Bi-Clustering &amp; Spectral (Topic 11 PPT):</strong>
+              <p>&bull; <strong>Fuzzy Clustering:</strong> Partial membership $\mu_{ij} \in [0,1]$ across clusters ($\sum_j \mu_{ij}=1$), unlike crisp $0/1$ sets.</p>
+              <p>&bull; <strong>Bi-Clustering:</strong> Clusters objects (rows) and attributes (columns) simultaneously to find coherent submatrices.</p>
+              <p>&bull; <strong>Spectral Clustering:</strong> Uses eigenvectors of the graph Laplacian for dimensionality reduction before clustering.</p>
+            </div>
+            <div class="p-3 rounded bg-slate-900 border border-white/5 space-y-1">
+              <strong class="text-pink-300 block mb-1">5. Graph &amp; Constraint Clustering (Topic 11 PPT):</strong>
+              <p>&bull; <strong>Graph Similarity:</strong> <em>Geodesic Distance</em> (shortest-path edges), <em>SimRank</em> (random walk &amp; structural context), and <em>Sparsest Cut</em> partitioning.</p>
+              <p>&bull; <strong>Constraints &amp; Obstacles:</strong> Hard vs. Soft constraints (Must-Link / Cannot-Link) and <em>Clustering with Obstacle Objects</em> (visibility graphs detouring physical barriers).</p>
+            </div>
+          </div>
         </div>
 
         <!-- 10.2 Outlier Analysis Foundations -->
@@ -1802,6 +1816,21 @@
             <div class="p-3 rounded bg-slate-900 border border-white/5">
               <strong class="text-pink-400 block mb-0.5">3. Collective Outlier:</strong>
               A sequence of points that collectively deviate (e.g. flatline cardiac ECG for 3 seconds, where voltage values are normal individually).
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
+            <div class="p-2.5 rounded bg-slate-900 border border-white/5">
+              <strong class="text-emerald-400 block mb-0.5">Supervised Detection (Topic 12 PPT):</strong>
+              Uses labeled normal &amp; outlier examples; faces severe class imbalance and unseen outlier types.
+            </div>
+            <div class="p-2.5 rounded bg-slate-900 border border-white/5">
+              <strong class="text-sky-400 block mb-0.5">Unsupervised Detection:</strong>
+              No labels; assumes normal objects form dense clusters while outliers lie in tiny clusters or isolation.
+            </div>
+            <div class="p-2.5 rounded bg-slate-900 border border-white/5">
+              <strong class="text-amber-400 block mb-0.5">Semi-Supervised Detection:</strong>
+              Small set of labeled examples (outliers only, normal only, or both) guides detection on unlabeled data.
             </div>
           </div>
         </div>
@@ -1856,6 +1885,14 @@
               <strong class="text-sky-400 block mb-0.5">2. High-Dimensional Empty Space Phenomenon:</strong>
               <p class="text-slate-300">&bull; <strong>Distance Concentration (Beyer et al. 1999):</strong> $\lim_{d\to\infty} \frac{d_{\max} - d_{\min}}{d_{\min}} = 0$. In high dimensions, every point becomes virtually equidistant from every other point!</p>
               <p class="text-slate-300">&bull; <strong>Empty Space:</strong> The volume of a hypersphere of radius $r$ inside a hypercube approaches 0 as $d \to \infty$. All mass concentrates in outer corners.</p>
+            </div>
+
+            <div class="p-3 rounded bg-slate-900 border border-white/5 space-y-1">
+              <strong class="text-emerald-400 block mb-0.5">3. Statistical DM, Foundations &amp; Applications (Topic 13 PPT):</strong>
+              <p class="text-slate-300">&bull; <strong>Graph Pattern Mining:</strong> <em>gSpan</em> vs. <em>CloseGraph</em> (closed frequent subgraphs) &amp; small-world network modeling.</p>
+              <p class="text-slate-300">&bull; <strong>Statistical DM:</strong> Regression, GLM, Mixed-Effect Models, Regression Trees, Factor Analysis, ARIMA time series, and Survival Analysis.</p>
+              <p class="text-slate-300">&bull; <strong>Foundations &amp; Visual/Audio DM:</strong> Data Reduction, Compression, <em>Microeconomic View</em> (decision utility), Perception-Based Classification (PBC), and Audio DM.</p>
+              <p class="text-slate-300">&bull; <strong>Applications &amp; Frontiers:</strong> Intrusion Detection (signature vs. anomaly), Recommender Systems (content-based vs. collaborative filtering), Ubiquitous/Invisible DM, and Privacy/Security.</p>
             </div>
           </div>
         </div>
